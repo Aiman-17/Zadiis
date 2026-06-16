@@ -33,29 +33,35 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
-    const order_number = await generateOrderNumber()
+    let order = null
+    let insertError = null
+    for (let attempt = 0; attempt < 3; attempt++) {
+      const order_number = await generateOrderNumber()
+      const { data, error } = await supabaseAdmin
+        .from('orders')
+        .insert([{
+          order_number,
+          customer_name,
+          customer_phone,
+          customer_email: customer_email ?? null,
+          address,
+          city,
+          items,
+          subtotal: subtotal ?? total,
+          delivery_charge: delivery_charge ?? 0,
+          total,
+          payment_method,
+        }])
+        .select()
+        .single()
+      if (!error) { order = data; break }
+      if (!error?.message?.includes('unique')) { insertError = error; break }
+      insertError = error
+    }
 
-    const { data: order, error } = await supabaseAdmin
-      .from('orders')
-      .insert([{
-        order_number,
-        customer_name,
-        customer_phone,
-        customer_email: customer_email ?? null,
-        address,
-        city,
-        items,
-        subtotal: subtotal ?? total,
-        delivery_charge: delivery_charge ?? 0,
-        total,
-        payment_method,
-      }])
-      .select()
-      .single()
-
-    if (error) {
-      console.error('DB insert error:', error)
-      return NextResponse.json({ error: error.message }, { status: 500 })
+    if (!order) {
+      console.error('DB insert error:', insertError)
+      return NextResponse.json({ error: insertError?.message ?? 'Failed to create order' }, { status: 500 })
     }
 
     try {

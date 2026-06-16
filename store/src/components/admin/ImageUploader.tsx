@@ -58,7 +58,9 @@ export default function ImageUploader({ images, onChange }: Props) {
 
   const handleFiles = async (files: FileList) => {
     const newPreviews: Preview[] = []
-    for (const file of Array.from(files)) {
+    const currentTotal = images.length + previews.filter(p => !p.uploaded).length
+    const remaining = Math.max(0, 8 - currentTotal)
+    for (const file of Array.from(files).slice(0, remaining)) {
       const objectUrl = URL.createObjectURL(file)
       const img = new window.Image()
       await new Promise<void>(res => { img.onload = () => res(); img.src = objectUrl })
@@ -68,6 +70,7 @@ export default function ImageUploader({ images, onChange }: Props) {
         width: img.width,
         height: img.height,
         originalSize: file.size,
+        warning: img.width < 800 ? 'Image too small — may look blurry on product page' : undefined,
       })
     }
     setPreviews(prev => [...prev, ...newPreviews])
@@ -169,7 +172,7 @@ export default function ImageUploader({ images, onChange }: Props) {
       ))}
 
       {/* Upload button */}
-      {images.length < 8 && (
+      {images.length + previews.filter(p => !p.uploaded).length < 8 && (
         <button
           type="button"
           onClick={() => inputRef.current?.click()}
