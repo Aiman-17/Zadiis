@@ -20,7 +20,7 @@ export default function Header() {
     <header className="sticky top-0 z-50 backdrop-blur border-b" style={{ backgroundColor: 'rgba(250,248,245,0.95)', borderColor: '#E8DDD4' }}>
       <div className="max-w-6xl mx-auto px-4 h-16 flex items-center justify-between">
         <Link href="/" className="text-xl font-bold tracking-widest uppercase" style={{ fontFamily: 'Playfair Display, serif' }}>
-          ZADIIS
+          ZADII'S
         </Link>
 
         {/* Desktop Nav */}

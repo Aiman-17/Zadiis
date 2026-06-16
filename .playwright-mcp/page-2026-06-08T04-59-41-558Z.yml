@@ -1,0 +1,474 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - link [ref=e6] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/
+      - img [ref=e7]
+    - generic [ref=e8]:
+      - generic [ref=e9]:
+        - generic [ref=e12]:
+          - textbox "Find Now" [ref=e14]:
+            - /placeholder: Check domain name availability
+          - button "" [ref=e15] [cursor=pointer]:
+            - generic [ref=e16]: 
+        - list [ref=e18]:
+          - listitem [ref=e19]:
+            - generic [ref=e20]: 
+            - text: 0311 4042 577
+          - listitem [ref=e21]:
+            - generic [ref=e22]: 
+            - text: 0311 4042 577
+          - listitem [ref=e23]:
+            - generic [ref=e24]: 
+            - text: +92 42 358 17077
+          - listitem [ref=e25]:
+            - link " Client Login" [ref=e26] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/billing/clientarea.php
+              - generic [ref=e27]: 
+              - text: Client Login
+      - list [ref=e30]:
+        - listitem [ref=e31]:
+          - link "Home" [ref=e32] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/
+        - listitem [ref=e33]:
+          - link "PK Domain Price " [ref=e34] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/prices.html
+            - text: PK Domain Price
+            - generic [ref=e35]: 
+        - listitem [ref=e36]:
+          - link "Cheap Domains " [ref=e37] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/registration.html
+            - text: Cheap Domains
+            - generic [ref=e38]: 
+        - listitem [ref=e39]:
+          - link "Web Hosting" [ref=e40] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/shared-hosting.html
+        - listitem [ref=e41]:
+          - link "PK Domain Whois " [ref=e42] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/whois.html
+            - text: PK Domain Whois
+            - generic [ref=e43]: 
+        - listitem [ref=e44]:
+          - link "PKNIC Card" [ref=e45] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/pknic-card.html
+        - listitem [ref=e46]:
+          - link "Contact" [ref=e47] [cursor=pointer]:
+            - /url: https://pkdomain.com.pk/contact-us.html
+      - generic [ref=e48]:
+        - list
+  - generic [ref=e51]:
+    - generic [ref=e53]:
+      - img [ref=e55]
+      - heading "PK Domain Registration" [level=1] [ref=e56]
+      - heading "Complete Ownership, Fast Registration Process Free DNS Management" [level=4] [ref=e57]:
+        - text: Complete Ownership, Fast Registration Process
+        - text: Free DNS Management
+      - paragraph [ref=e58]: From above domain search bar, check availability of your required website name. We are Gold Channel Partner of PKNIC and from our company you can buy web name in all available Pakistani dot PK country code top-level domain extensions at cheapest price in the market. Register your company name from top rated .pk Registrar and have benefit of free DNS management services along with lowest renewal cost and 24/7/365 technical assistance from competent & experienced professional customer support team.
+    - generic [ref=e60]:
+      - paragraph [ref=e61]: Starting at Rs.3350/2Years
+      - generic [ref=e62]: Rs.2949/2Yrs
+      - link "Check Prices" [ref=e63] [cursor=pointer]:
+        - /url: "#prices"
+    - link "PK Domain Registration" [ref=e66] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/web-designing.html
+      - img "PK Domain Registration" [ref=e67]
+  - generic [ref=e70]:
+    - link "Hosting Pakistani Datacenter" [ref=e72] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/pakistani-hosting.html
+      - img "Hosting Pakistani Datacenter" [ref=e73]
+    - link "VPS Pakistan" [ref=e75] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/vps.html
+      - img "VPS Pakistan" [ref=e76]
+    - link "free pk domain" [ref=e78] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/free.html
+      - img "free pk domain" [ref=e79]
+    - link "domain registration Pakistan" [ref=e81] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/registration.html
+      - img "domain registration Pakistan" [ref=e82]
+  - generic [ref=e86]:
+    - heading "Plans and Pricing" [level=2] [ref=e88]
+    - generic [ref=e89]:
+      - link [ref=e91] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/billing/store/only-web-hosting/basic-plan
+      - link [ref=e93] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/billing/store/only-web-hosting/experts-plan-1
+      - link [ref=e95] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/billing/store/only-web-hosting/professional-plan-1
+      - link [ref=e97] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/billing/store/only-web-hosting/economical-plan-1
+      - link [ref=e99] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/billing/store/only-web-hosting/business-plan-1
+    - list [ref=e100]:
+      - listitem [ref=e101]: "* Any kind of spamming not allowed."
+      - listitem [ref=e102]: "* All Users must read the terms and conditions page."
+  - generic [ref=e104]:
+    - generic [ref=e107]:
+      - heading "How it Works" [level=3] [ref=e108]
+      - paragraph [ref=e109]: The procedure to register domain name or to get any other service from our company is very simple, easy and quick. It will just take a few steps and your order will be processed on a top priority basis.
+    - generic [ref=e110]:
+      - generic [ref=e112]:
+        - generic [ref=e114]: Step 1
+        - generic [ref=e115]: Check domain name availability through above search bar and once you find your required name place the order. At the end of first step you will get your invoice with products and services details on it and total amount that you have to pay.
+      - generic [ref=e117]:
+        - generic [ref=e119]: Step 2
+        - generic [ref=e120]: We offer several convenient payment methods, you can choose one which suits you best. Make the payment of your invoice. Take screenshot of your transaction. Now send this screenshot of payment proof along with your order number to our WhatsApp or Email.
+      - generic [ref=e122]:
+        - generic [ref=e124]: Step 3
+        - generic [ref=e125]: As soon as we receive your order. Our sales representative will contact you on your number to confirm the order and will guide you and assist you if you need any help. Once your payment is confirmed your order will be processed shortly.
+  - generic [ref=e129]:
+    - generic [ref=e130]:
+      - heading ".PK Domain Name Registration" [level=2] [ref=e131]
+      - paragraph [ref=e132]: Buy Cheap Dot PK website identity from PKNIC gold channel partner, our company is among top resellers and we are officially part of PKNIC SRS (shared registry system). Here you can search and register .COM.PK internet namespace at cheapest rates. Check Domain availability and prices for different .PK extensions. .COM, .NET, .ORG, .INFO Domain Registration, Renewal, Transfer at low cost in Pakistan. Being PKNIC SRS Member we also provide PKNIC prepaid cards. Kindly check .Gov and .Edu domain requirements before placing order. Free DNS management, easy domain forwarding, fast domain registration, whois privacy protection (ID Shield), domain redirection, Zones, CName, A Records, MS Entries editing and instant activation are some of the pearls which you get when you purchase domain from our company at economical rates.
+    - table [ref=e134]:
+      - rowgroup [ref=e135]:
+        - row "Domain Price in Pakistan" [ref=e136]:
+          - cell "Domain Price in Pakistan" [ref=e137]:
+            - heading "Domain Price in Pakistan" [level=3] [ref=e138]
+        - row "Domain Extension Registration Price Validity Period Category More Info" [ref=e139]:
+          - cell "Domain Extension" [ref=e140]
+          - cell "Registration Price" [ref=e141]
+          - cell "Validity Period" [ref=e142]
+          - cell "Category" [ref=e143]
+          - cell "More Info" [ref=e144]
+        - row ".COM Rs.2849 1 Year Most Popular International World Wide Web Suffix Register .Com" [ref=e145]:
+          - cell ".COM" [ref=e146]
+          - cell "Rs.2849" [ref=e147]
+          - cell "1 Year" [ref=e148]
+          - cell "Most Popular International World Wide Web Suffix" [ref=e149]
+          - cell "Register .Com" [ref=e150]:
+            - link "Register .Com" [ref=e151] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".PK Rs.2949 2 Years Pakistani TLD Available to Anyone, Local or Overseas Individuals or Entities Buy .pk" [ref=e152]:
+          - cell ".PK" [ref=e153]
+          - cell "Rs.2949" [ref=e154]
+          - cell "2 Years" [ref=e155]
+          - cell "Pakistani TLD Available to Anyone, Local or Overseas Individuals or Entities" [ref=e156]
+          - cell "Buy .pk" [ref=e157]:
+            - link "Buy .pk" [ref=e158] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/domains.html
+        - row ".COM.PK Rs.2949 2 Years For Entities, Businesses, Companies and Individuals Search .com.pk" [ref=e159]:
+          - cell ".COM.PK" [ref=e160]
+          - cell "Rs.2949" [ref=e161]
+          - cell "2 Years" [ref=e162]
+          - cell "For Entities, Businesses, Companies and Individuals" [ref=e163]
+          - cell "Search .com.pk" [ref=e164]:
+            - link "Search .com.pk" [ref=e165] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/com.pk.html
+        - row ".NET Rs.3699 1 Year Common Purpose Networking Business .net Register" [ref=e166]:
+          - cell ".NET" [ref=e167]
+          - cell "Rs.3699" [ref=e168]
+          - cell "1 Year" [ref=e169]
+          - cell "Common Purpose Networking Business" [ref=e170]
+          - cell ".net Register" [ref=e171]:
+            - link ".net Register" [ref=e172] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".ORG Rs.3699 1 Year International Non-Profit Organizations Find .org" [ref=e173]:
+          - cell ".ORG" [ref=e174]
+          - cell "Rs.3699" [ref=e175]
+          - cell "1 Year" [ref=e176]
+          - cell "International Non-Profit Organizations" [ref=e177]
+          - cell "Find .org" [ref=e178]:
+            - link "Find .org" [ref=e179] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".BIZ Rs.2999 1 Year Perfect for Business Websites .biz Checker" [ref=e180]:
+          - cell ".BIZ" [ref=e181]
+          - cell "Rs.2999" [ref=e182]
+          - cell "1 Year" [ref=e183]
+          - cell "Perfect for Business Websites" [ref=e184]
+          - cell ".biz Checker" [ref=e185]:
+            - link ".biz Checker" [ref=e186] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".INFO Rs.1494 1 Year Informational Websites, Used for General Purposes Register .info" [ref=e187]:
+          - cell ".INFO" [ref=e188]
+          - cell "Rs.1494" [ref=e189]
+          - cell "1 Year" [ref=e190]
+          - cell "Informational Websites, Used for General Purposes" [ref=e191]
+          - cell "Register .info" [ref=e192]:
+            - link "Register .info" [ref=e193] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".TV Rs.8499 1 Year For Television, News Channels, Videos, Newspapers Lookup .tv" [ref=e194]:
+          - cell ".TV" [ref=e195]
+          - cell "Rs.8499" [ref=e196]
+          - cell "1 Year" [ref=e197]
+          - cell "For Television, News Channels, Videos, Newspapers" [ref=e198]
+          - cell "Lookup .tv" [ref=e199]:
+            - link "Lookup .tv" [ref=e200] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/registration.html
+        - row ".CO Rs.2999 1 Year Colombia top Level Domain Replacement of .Com Finder .co" [ref=e201]:
+          - cell ".CO" [ref=e202]
+          - cell "Rs.2999" [ref=e203]
+          - cell "1 Year" [ref=e204]
+          - cell "Colombia top Level Domain Replacement of .Com" [ref=e205]
+          - cell "Finder .co" [ref=e206]:
+            - link "Finder .co" [ref=e207] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/country-domains.html
+        - row ".AE Rs.12499 1 Year United Arab Emirates Commonly Used Domain Name Search .ae" [ref=e208]:
+          - cell ".AE" [ref=e209]
+          - cell "Rs.12499" [ref=e210]
+          - cell "1 Year" [ref=e211]
+          - cell "United Arab Emirates Commonly Used Domain Name" [ref=e212]
+          - cell "Search .ae" [ref=e213]:
+            - link "Search .ae" [ref=e214] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/country-domains.html
+        - row ".JP Rs.9999 1 Year Country Code Top Level Domain of Japan .jp Registration" [ref=e215]:
+          - cell ".JP" [ref=e216]
+          - cell "Rs.9999" [ref=e217]
+          - cell "1 Year" [ref=e218]
+          - cell "Country Code Top Level Domain of Japan" [ref=e219]
+          - cell ".jp Registration" [ref=e220]:
+            - link ".jp Registration" [ref=e221] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/country-domains.html
+        - row ".CO.UK Rs.2799 1 Year Commonly Used Website Suffix in United Kingdom .co.uk Find" [ref=e222]:
+          - cell ".CO.UK" [ref=e223]
+          - cell "Rs.2799" [ref=e224]
+          - cell "1 Year" [ref=e225]
+          - cell "Commonly Used Website Suffix in United Kingdom" [ref=e226]
+          - cell ".co.uk Find" [ref=e227]:
+            - link ".co.uk Find" [ref=e228] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/country-domains.html
+        - row ".EDU.PK Rs.3449 2 Years Only Pakistani Registered Educational Institutions Book .EDU.PK" [ref=e229]:
+          - cell ".EDU.PK" [ref=e230]
+          - cell "Rs.3449" [ref=e231]
+          - cell "2 Years" [ref=e232]
+          - cell "Only Pakistani Registered Educational Institutions" [ref=e233]
+          - cell "Book .EDU.PK" [ref=e234]:
+            - link "Book .EDU.PK" [ref=e235] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/edu.pk.html
+        - row ".NET.PK Rs.3149 2 Years Network Service Providers Check .net.pk" [ref=e236]:
+          - cell ".NET.PK" [ref=e237]
+          - cell "Rs.3149" [ref=e238]
+          - cell "2 Years" [ref=e239]
+          - cell "Network Service Providers" [ref=e240]
+          - cell "Check .net.pk" [ref=e241]:
+            - link "Check .net.pk" [ref=e242] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/net.pk.html
+        - row ".ORG.PK Rs.3149 2 Years Local Non-Profit Organisations .org.pk Finder" [ref=e243]:
+          - cell ".ORG.PK" [ref=e244]
+          - cell "Rs.3149" [ref=e245]
+          - cell "2 Years" [ref=e246]
+          - cell "Local Non-Profit Organisations" [ref=e247]
+          - cell ".org.pk Finder" [ref=e248]:
+            - link ".org.pk Finder" [ref=e249] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/org.pk.html
+        - row ".WEB.PK Rs.3149 2 Years Individual Websites .web.pk Availability" [ref=e250]:
+          - cell ".WEB.PK" [ref=e251]
+          - cell "Rs.3149" [ref=e252]
+          - cell "2 Years" [ref=e253]
+          - cell "Individual Websites" [ref=e254]
+          - cell ".web.pk Availability" [ref=e255]:
+            - link ".web.pk Availability" [ref=e256] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/web.pk.html
+        - row ".BIZ.PK Rs.3149 2 Years General Business, Promotional .biz.pk Company" [ref=e257]:
+          - cell ".BIZ.PK" [ref=e258]
+          - cell "Rs.3149" [ref=e259]
+          - cell "2 Years" [ref=e260]
+          - cell "General Business, Promotional" [ref=e261]
+          - cell ".biz.pk Company" [ref=e262]:
+            - link ".biz.pk Company" [ref=e263] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/biz.pk.html
+        - row ".FAM.PK Rs.3149 2 Years Fame, Family and Individuals .fam.pk Search" [ref=e264]:
+          - cell ".FAM.PK" [ref=e265]
+          - cell "Rs.3149" [ref=e266]
+          - cell "2 Years" [ref=e267]
+          - cell "Fame, Family and Individuals" [ref=e268]
+          - cell ".fam.pk Search" [ref=e269]:
+            - link ".fam.pk Search" [ref=e270] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/fam.pk.html
+        - row ".GOV.PK Rs.3949 2 Years Federal Ministries of the Government Gov Domains" [ref=e271]:
+          - cell ".GOV.PK" [ref=e272]
+          - cell "Rs.3949" [ref=e273]
+          - cell "2 Years" [ref=e274]
+          - cell "Federal Ministries of the Government" [ref=e275]
+          - cell "Gov Domains" [ref=e276]:
+            - link "Gov Domains" [ref=e277] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gov.pk.html
+        - row ".GOP.PK Rs.3949 2 Years Departments of the Government of Punjab .gop.pk Purchase" [ref=e278]:
+          - cell ".GOP.PK" [ref=e279]
+          - cell "Rs.3949" [ref=e280]
+          - cell "2 Years" [ref=e281]
+          - cell "Departments of the Government of Punjab" [ref=e282]
+          - cell ".gop.pk Purchase" [ref=e283]:
+            - link ".gop.pk Purchase" [ref=e284] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gop.pk.html
+        - row ".GOS.PK Rs.3949 2 Years Sindh Provincial Government .gos.pk Registry" [ref=e285]:
+          - cell ".GOS.PK" [ref=e286]
+          - cell "Rs.3949" [ref=e287]
+          - cell "2 Years" [ref=e288]
+          - cell "Sindh Provincial Government" [ref=e289]
+          - cell ".gos.pk Registry" [ref=e290]:
+            - link ".gos.pk Registry" [ref=e291] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gos.pk.html
+        - row ".GOB.PK Rs.3949 2 Years Balochistan Government Departments Register .gob.pk" [ref=e292]:
+          - cell ".GOB.PK" [ref=e293]
+          - cell "Rs.3949" [ref=e294]
+          - cell "2 Years" [ref=e295]
+          - cell "Balochistan Government Departments" [ref=e296]
+          - cell "Register .gob.pk" [ref=e297]:
+            - link "Register .gob.pk" [ref=e298] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gob.pk.html
+        - row ".GOK.PK Rs.3949 2 Years State Government of Azad Jammu and Kashmir .gok.pk Check" [ref=e299]:
+          - cell ".GOK.PK" [ref=e300]
+          - cell "Rs.3949" [ref=e301]
+          - cell "2 Years" [ref=e302]
+          - cell "State Government of Azad Jammu and Kashmir" [ref=e303]
+          - cell ".gok.pk Check" [ref=e304]:
+            - link ".gok.pk Check" [ref=e305] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gok.pk.html
+        - row ".GKP.PK Rs.3949 2 Years Khyber Pakhtunkhwa Government Find .gkp.pk" [ref=e306]:
+          - cell ".GKP.PK" [ref=e307]
+          - cell "Rs.3949" [ref=e308]
+          - cell "2 Years" [ref=e309]
+          - cell "Khyber Pakhtunkhwa Government" [ref=e310]
+          - cell "Find .gkp.pk" [ref=e311]:
+            - link "Find .gkp.pk" [ref=e312] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gkp.pk.html
+        - row ".GOG.PK Rs.3949 2 Years Government Departments of Gilgit-Baltistan .gog.pk Provider" [ref=e313]:
+          - cell ".GOG.PK" [ref=e314]
+          - cell "Rs.3949" [ref=e315]
+          - cell "2 Years" [ref=e316]
+          - cell "Government Departments of Gilgit-Baltistan" [ref=e317]
+          - cell ".gog.pk Provider" [ref=e318]:
+            - link ".gog.pk Provider" [ref=e319] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/gog.pk.html
+  - generic [ref=e324]:
+    - heading "How to Register Domain Name?" [level=3] [ref=e325]
+    - paragraph [ref=e326]: To register a domain, search your domain name in the above domain search bar, and complete the order, and select your convenient payment method from multiple payment options. Once we receive your order, our sales representative will contact you and will confirm the order, once the order is confirmed and you have sent us the payment proof on our whatsapp number or email address, then your domain will be registered instantly. We are providing fast DNS pointing and quick management of DNS Zones & Records. All our services are also low cost and reliable and trusted worldwide, we also provide free .com and .pk, .com.pk names with packages. When you buy a name from our company it is registered as your own property on your given name. So give your correct name, email account and phone number while submitting your order to keep your domain protected from any kind of theft. PKNIC provides it's default privacy protection on all .pk names on your purchase, whereas in case of .com, .net, .org, .info and other international domains, you can protect your privacy or domain identity by placing ID shield on registrant information.
+    - paragraph [ref=e327]:
+      - text: .PK is very popular country code top-level domain. It is designated to Islamic Republic of Pakistan and it's intended use is for entities connected to this country. Mostly domain and subdomains with this suffix have no restrictions and can be used by anyone. But some have restrictions and need verification through proper documentations. PKNIC is the main registry which is empowered with all the rights to register, renew and transfer these .pk cctlds and we are one of the top
+      - link "PK Domain Registrar" [ref=e328] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/
+      - text: in Pakistan. Each country has it's own Tlds. In case of Pakistan the .PK is the country code top level domain name (ccTLDs). In addition of .PK, PKNIC Registry has many other ccTlds some of which can be registered by anyone from within or outside the Pakistan, without any paper work or documentation while some of the ccTlds require proper documentation and you cannot buy the legal domains if you don't fulfill all the terms and conditions stated by PKNIC. Usually their are different documents and terms for each Tlds, which we will describe in detail later on. We will discuss all the Tlds which are offered by PKNIC Registry on our website in detail and you can buy any top level of second level Pakistani country code name from our website at cheap price.
+    - paragraph [ref=e329]: In Pakistan the IT industry has developed significantly and software houses, freelancers, developers, designers and bloggers are playing their roles to send a better image of Pakistan to the whole world. With the export of softwares and other IT services, this sector is earning billions of dollars each year to improve the economy of the country. So in this era of technology, when the competition is at it's peak and will definitely increase with time, you can compete with your competitor if you do not have your online presence. So here we are to provide you quality and hassle free services of Domain Registration. If you live in Pakistan and your business is at local, domestic level then we suggest you, you must need to bring your business online and make it a brand. As you know there are millions of people surfing the internet each second, so if your business is online then you will have more audience and customers and you will have bright chances to make your business successful.
+  - generic [ref=e333]:
+    - heading ".PK Domain Register" [level=2] [ref=e334]
+    - paragraph [ref=e335]:
+      - text: We are providing .pk ccTLD
+      - strong [ref=e336]: Domain Name Registration in Pakistan
+      - text: and all across the world at Cheap Rates and lowest prices. Order your Name today, and start enjoying our quality services and give your business an online presence. Get .PK registration services in all cities of Punjab, Sindh, KPK, Balochistan and around the globe at best prices in the market. Feel free to call us at 0311-4042577 to place your order or talk with our sales representative. You can also contact us through email at info@pkdomain.com.pk to collect any information about name registration, website or apps designing development and ssl certificate etc. Being top rated registrar of PKNIC we can provide you special discounts on buying bulk domain names. We also deal in expired domain names, PKNIC reserves important high value domain names when they get expired and owner does not renew it in due time. After reservation period such names go for auction, and only that person can become the owner of this expired domain who with it through top bid in the auction. If you have lost your .pk name and currently it is reserved by PKNIC or in list of upcoming auction domains. Just contact us, with a minimal fee our experts can try their best to bring back you your expired domain name. We deal in all available domain extensions, you can even purchase a name in that extension which we have not mentioned on our homepage. Just visit the Cheap Domains section of our website, there you can see a huge list of local and international tlds in which our company deal.
+    - heading ".COM.PK Domain Name Registration" [level=2] [ref=e337]
+    - paragraph [ref=e338]: .COM.PK is second most widely used Pakistani domain extension. It is a mixture of .COM and .PK tlds and is suitable for all business related to Pakistan. It can be registered and renew for minimum two year and maximum 10 years at once. PKNIC is the main registrar which deals with all local domain extensions registration, renewal and transfer process. We being top rated reseller of PKNIC can register domains in this extension for you. It is your preference and choice you can either go with .PK or COM.PK PKNIC domain name extension. But most of the people go with the first option, and choose the 2nd one in case they are unable to find a domain name in DOT PK country code top level domain. But lot of multinational companies and international brands have also built their online presence using .COM.Pk extension. On our website you can search and check availability of domain names in all available Pakistani ccTLDs. We are providing .COM.PK internet identity to all our local as well as international clients. You can use this easy to remember domain extension to build your company website, eCommerce shopping store, web designing and development website, IT firm, or for any other purpose you like. Like .PK extension, this domain ccTLD is also fit and best for targeting internet audience of Pakistan. Even the internet giant Google is using the domain name in .COM.PK extension to serve the internet surfers of this region. If you have any questions about domain extensions or need an expert opinion to select a domain name for your business or company. Feel free to talk with our excellent and competent customer support.
+    - heading "Domain Registration in Pakistan" [level=3] [ref=e339]
+    - paragraph [ref=e340]:
+      - text: In our country there are limited number of companies which are providing
+      - link "Domain Registration in Pakistan" [ref=e341] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/registration.html
+      - text: . We are happy to tell you that we are one of the leading pk Registrar and we sell all types of .pk names. As we are top reseller of PKNIC we can provide you all the top and second level Pakistani Names at cheap prices which will have no market match. You can compare our prices with rest of the companies and you will know that we are the only company which is providing the customers with cheapest .pk names and best customer support along with technical assistance. From our website you can buy names in all the second level extensions which are .COM.PK, .NET.PK, .EDU.PK, .ORG.PK, .BIZ.PK, .FAM.PK and we also deal in other Government names i.e .GOP.PK, .GOV.PK .GOS.PK, .GOB.PK, .GKP.PK and GOK.PK. We also deal in International Tlds which are .COM, .NET and .INFO etc. So just tell us which name you want, and we will provide it to you in no time.
+  - generic [ref=e347]:
+    - heading "Hosting in Pakistan" [level=2] [ref=e348]
+    - heading "Fast, Reliable & Affordable Plans starting at PKR.1299/1Year" [level=3] [ref=e349]
+    - paragraph [ref=e350]: We are offering best quality fast speed services to our valuable clients. While choosing your plan, you can select from options whether you want cPanel based (Linux) or Windows based depending on your requirements. Linux is perfect for Wordpress and Php language based websites, whereas Windows is used to host ASP.net sites and applications. Our plans are very economical and Cheap, and for the convenience of our clients we are offering both Linux & Windows packages at same rate, and you can even switch between Linux and Windows in future if you change your website technology with minimal charges. Due to high renewal prices lot of people are moving their domains to our company, and we are providing Free Website Migration to all our clients. So if you are fed up of High renewal charges of domains then we suggest you to Transfer Your Website to our company and enjoy the perfect combination of low domain prices with best services, and take your business to next level.
+    - link "Purchase Hosting" [ref=e351] [cursor=pointer]:
+      - /url: https://pkdomain.com.pk/shared-hosting.html
+  - generic [ref=e355]:
+    - heading "Book Websites in Bulk to Protect Your Brand Name" [level=2] [ref=e356]
+    - paragraph [ref=e357]: Every country have unique country based top level domain and in every country there is present an official registry to look after all the matters related to websites names purchase, renew and transfer. Registrars also control and manage the DNS entries. In Pakistan few years back the PKNIC registry has changed its policy regarding the control of expired domains. Since then it has implemented its new policy on names and is exercising its powers on the expired domains. As a result the company holds those domains which it think are valuable and large number of people will be interested in. So these high value websites labels are sold out to PKNIC users through auction. Every year several thousands IT experts join the industry, and international sellers and multinational companies are also taking keen interest in Pak based country code due to several reasons. Pakistani internet audience is more competent and much educated and have huge potential to be converted into customer. People have huge tendencies to shop things online. As a result all shopping giant from around the world are interested in building their brand in Pakistan with local .PK website name, to gain more popularity and success with local touch.
+    - paragraph [ref=e358]: Few years back lot of good, single words names were also available but due to boom in the computer science industry in 2021 it is almost impossible to find a domain name with single word. But still there are lot of good names available and still you have time to purchase your company name or business name. So If you have any business or even business plan to create your own company online in near future then our experts team highly encourage you to book your company name or business brand name today in all the available commonly used domain extensions. Because as you see PKNIC is holding the expired good names which belongs to several companies, and selling it through auction. So later own these website labels become more expensive and sometimes impossible to purchase due to really heavy cost. So it is a good idea to secure the brand name with atleast .com, .pk, .net, .org, .info and .com.pk suffixes. International companies have started protecting their online identity by securing there names in all available country code domain extensions, so we advise our local domain holders to also use this best practice to protect your brand names. On the other hand if you are an investor, and want to earn more money, then you can also do investment by purchasing those domains which you think internet users will be interested in buying in near future, so later on you can sell them to potential buyers at high price to earn profit.
+    - heading "Who Purchase Domains in Pakistan?" [level=2] [ref=e359]
+    - paragraph [ref=e360]: Anyone can buy domain name in Pakistan there are no as such any restrictions. But these domains can only be used for legal purposes. We do not allow a domain name for any illegal or immoral activity. The process is simple, the price is very affordable. So if you are an individual, teacher, student, doctor, engineer, artist, blogger, creative writer, programmer, model, professional or group of people, freelancers, web designers, developers, scientists, researchers or you have a brand, or company or firm, it does not matter local or international. Then domain name can be really beneficial for you. Domain is basically a name which you give to your business online and host is the place or space where all your files or products are stored and served through internet to users and readers all across the world. If you are a student then we highly recommend you to purchase your domain name and start blogging, you can make a blog about anything, it is preferred to blog about your hobbies, interests and passions. This way you can save your memories, can make your online community, can have more friends, will learn a lot about new stuff related to your interest. All travel agencies, schools, educational institutions, colleges, universities, hospitals, fashion and clothing brands, IT companies have their official website online to live in contact with their clients and customers. It is a great way to increase your sales as there are millions of Pakistani internet surfers available at social media and using google everyday. It is very simple all you need is a domain name and web space package to make your website online. Then you can start building your brand and promote your business online at social media platforms such as Facebook, Twitter, Pinterest and Instagram. Travel agencies, photographers, logo designers, web designers etc can build their online portfolio to showcase your work, products and services. This way you can build more worth to your brand and can provide instant updates about sales and promotions to your customers.
+  - generic [ref=e364]:
+    - heading "Which domain name can I choose?" [level=3] [ref=e365]
+    - paragraph [ref=e366]: Principally you have complete freedom and right to choose any domain name. But you cannot select names which are already in use by other organizations, or the names which are reserved or prohibited due to ethical, technical and national considerations. It is your duty that your registered name shall not infringe the copyrights of others. Remember it is solely your responsibility. Our company is not liable for anything if your selected name infringe another party's right.
+    - heading "Can I change the domain name?" [level=3] [ref=e367]
+    - paragraph [ref=e368]: Think patiently and wisely before registering a name, once it has been registered it cannot be changed, replaced, returned, refund or modified.
+    - heading "Do you provide hosting services?" [level=3] [ref=e369]
+    - paragraph [ref=e370]: Yes we provide Linux and Windows based services from secured and reliable servers. From our company you can get Shared, VPS, Dedicated Fast loading website space at best prices in the market. We are providing free one year SSL certificate installation and activation with all our plans.
+    - heading "How do I find out if a .pk name is available?" [level=3] [ref=e371]
+    - paragraph [ref=e372]: Navigate to the top of this webpage, there you can enter your required name, words, phrases or keywords in the search bar and press Search button. This way you can find the availability of your desired names. Once you find it you can proceed with the order to get it registered.
+    - heading "How much does a domain name cost?" [level=3] [ref=e373]
+    - paragraph [ref=e374]: Currently we are selling .COM at Rs.1494/year and .pk and COM.PK at Rs.2349/2 years. The cost of renewal of domain names will be little higher. Because first you get it at the discounted price. We are selling all website names at sale price and charge little higher price on renewals.
+    - heading "How can I get a free domain?" [level=3] [ref=e375]
+    - paragraph [ref=e376]: To bring your business online, or to make your website live on the internet. In addition of a domain name, you will also need website space to host files online, to host your data on the world wide web and to make it publicly available across the world, 24/7 365 days of year. Generic domain names such as .COM, .NET, .ORG, .INFO etc. can be registered even for one year, whereas .PK Domain Names can be registered for a minimum time period of two years. If you signUp for Free Domain plan with us then you will get a free domain.
+    - heading "How soon can I start using my domain name?" [level=3] [ref=e377]
+    - paragraph [ref=e378]: Once you provide us with your Name Servers (DNS) we will update the information in the registry system. This information is shared with the internet's zone files around the world. This process is called propagation. It takes some time to spread the new domain names information across the internet. Every few hours the information of updated NS in our database is propagated across the world wide web. It will take some time to get your website visible on the internet in different countries, as there are millions of servers of different countries available online, on which frequently zone files information updating takes place. But in spite of all this complicated phenomenon, your domain is expected to be available online on the internet to your users within very short period of time.
+  - generic [ref=e382]:
+    - heading "Updates:" [level=2] [ref=e384]
+    - heading "Domain Pricing Change Schedule" [level=3] [ref=e385]
+    - paragraph [ref=e386]:
+      - text: Due to continuous depreciation in the value of Pakistani Rupee, there is a huge wave of inflation in recent years. But we remain committed to make any changes in the pricing as gradually as possible. While keeping the .PK cTLD price much lower than other international domain types. As per the program,
+      - strong [ref=e387]: on September 4, 2023, the .PK pricing will increase by Rs. 300 per domain per year.
+      - text: As PK cTLDs can only be purchased for minimum time period of 2 years, so an icrease of PKR. 600 will go into effect on September 4. Get maximum benefit from current low pricing and buy and renew as many of .pk names as possible. This price update is directly from the main registry PKNIC, so all companies and registrars will soon follow the same instructions and will take necessary steps to update the price. We are not alone, doing it.
+  - contentinfo [ref=e388]:
+    - generic [ref=e390]:
+      - generic [ref=e391]:
+        - heading "Contact Us" [level=4] [ref=e392]
+        - list [ref=e393]:
+          - listitem [ref=e394]:
+            - link "Payment Methods" [ref=e395] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/payment-methods.html
+          - listitem [ref=e396]:
+            - link "Contact Us" [ref=e397] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/contact-us.html
+          - listitem [ref=e398]:
+            - link "Submit a Ticket" [ref=e399] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/billing/submitticket.php
+      - generic [ref=e400]:
+        - heading "Our Services" [level=4] [ref=e401]
+        - list [ref=e402]:
+          - listitem [ref=e403]:
+            - link "PK Domain Price" [ref=e404] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/prices.html
+          - listitem [ref=e405]:
+            - link "PK Domain Transfer" [ref=e406] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/transfer.html
+          - listitem [ref=e407]:
+            - link "PK Domain Renew" [ref=e408] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/renew.html
+          - listitem [ref=e409]:
+            - link "PK Domain Whois" [ref=e410] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/whois.html
+          - listitem [ref=e411]:
+            - link "PKNIC Prepaid Cards" [ref=e412] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/pknic-card.html
+          - listitem [ref=e413]:
+            - link "Digital Marketing" [ref=e414] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/digital-marketing.html
+      - generic [ref=e415]:
+        - heading "Hosting and Servers" [level=4] [ref=e416]
+        - list [ref=e417]:
+          - listitem [ref=e418]:
+            - link "Web Hosting" [ref=e419] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/web-hosting/
+          - listitem [ref=e420]:
+            - link "Pakistani Web Hosting" [ref=e421] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/pakistani-hosting.html
+          - listitem [ref=e422]:
+            - link "Wordpress Hosting" [ref=e423] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/wp-host.html
+          - listitem [ref=e424]:
+            - link "VPS Hosting" [ref=e425] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/vps.html
+          - listitem [ref=e426]:
+            - link "VPS Pakistan" [ref=e427] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/pakistan-vps.html
+          - listitem [ref=e428]:
+            - link "Free PK Domain Hosting" [ref=e429] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/free.html
+          - listitem [ref=e430]:
+            - link "Dedicated Servers" [ref=e431] [cursor=pointer]:
+              - /url: https://pkdomain.com.pk/dedicated-server-hosting.html
+      - generic [ref=e432]:
+        - heading "Find Us" [level=4] [ref=e433]
+        - list [ref=e434]:
+          - listitem [ref=e435]: PL-67 Siddiq Trade Center, Gulberg, Lahore
+          - listitem [ref=e436]: Block H Gulberg 2 Lahore, 54660
+          - listitem [ref=e437]: +92 311 4042577 - +92 42 35817077
+          - listitem [ref=e438]:
+            - link "Twitter" [ref=e439] [cursor=pointer]:
+              - /url: https://twitter.com/pk_domain
+          - listitem [ref=e440]:
+            - link "Facebook" [ref=e441] [cursor=pointer]:
+              - /url: https://www.facebook.com/buypkdomain/
+          - listitem [ref=e442]:
+            - link "Linkedin" [ref=e443] [cursor=pointer]:
+              - /url: https://www.linkedin.com/company/pkdomain
+  - list [ref=e448]:
+    - listitem [ref=e449]:
+      - heading "Payment Options:" [level=4] [ref=e450]
+    - listitem [ref=e451]:
+      - img [ref=e452]
+  - generic [ref=e455]:
+    - generic [ref=e456]: Copyright 2021 pkdomain.com.pk. All rights reserved.
+    - generic [ref=e457]:
+      - link "Privacy Policy" [ref=e458] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/privacy.html
+      - link "Terms, Refund & Delivery" [ref=e459] [cursor=pointer]:
+        - /url: https://pkdomain.com.pk/terms.html

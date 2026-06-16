@@ -1,0 +1,268 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - link "who.is" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "who.is" [ref=e8]
+          - generic [ref=e9]:
+            - link "WHOIS" [ref=e10] [cursor=pointer]:
+              - /url: /whois
+            - link "RDAP" [ref=e11] [cursor=pointer]:
+              - /url: /rdap
+            - link "DNS" [ref=e12] [cursor=pointer]:
+              - /url: /dns
+            - link "Uptime" [ref=e13] [cursor=pointer]:
+              - /url: /uptime
+            - link "Domain Events" [ref=e14] [cursor=pointer]:
+              - /url: /domains/events
+            - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+              - /url: /website-monitoring
+            - link "Login" [ref=e16] [cursor=pointer]:
+              - /url: /account/login
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: Enter a domain name...
+              - textbox "Enter a domain name..." [ref=e28]
+            - button "Search" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - heading "zeins.com" [level=1] [ref=e31]
+          - paragraph [ref=e32]: WHOIS Information
+          - paragraph [ref=e33]:
+            - text: "IP Address:"
+            - link "157.230.161.221" [ref=e34] [cursor=pointer]:
+              - /url: /whois-ip/ip-address/157.230.161.221
+          - generic [ref=e35]:
+            - link "Whois" [ref=e36] [cursor=pointer]:
+              - /url: /whois/zeins.com
+            - link "RDAP" [ref=e37] [cursor=pointer]:
+              - /url: /rdap/zeins.com
+            - link "DNS Records" [ref=e38] [cursor=pointer]:
+              - /url: /dns/zeins.com
+            - link "Uptime" [ref=e39] [cursor=pointer]:
+              - /url: /uptime/zeins.com
+            - link "Diagnostics" [ref=e40] [cursor=pointer]:
+              - /url: /tools/zeins.com
+            - link "History" [ref=e41] [cursor=pointer]:
+              - /url: /history/zeins.com
+            - link "Hide Contact Info" [ref=e42] [cursor=pointer]:
+              - /url: /privacy/zeins.com
+              - img [ref=e43]
+              - text: Hide Contact Info
+            - button "Refresh Data" [ref=e46] [cursor=pointer]
+        - insertion [ref=e49]:
+          - generic [ref=e51]:
+            - generic "These are topics related to the article that might interest you" [ref=e52]: Discover more
+            - link "Uptime Monitoring Service" [ref=e53] [cursor=pointer]:
+              - img [ref=e55]
+              - text: Uptime Monitoring Service
+            - link "RDAP Lookup Tool" [ref=e57] [cursor=pointer]:
+              - img [ref=e59]
+              - text: RDAP Lookup Tool
+            - link "Domain Registration Service" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+              - text: Domain Registration Service
+            - link "WHOIS Lookup Service" [ref=e65] [cursor=pointer]:
+              - img [ref=e67]
+              - text: WHOIS Lookup Service
+            - link "Domain Availability Check" [ref=e69] [cursor=pointer]:
+              - img [ref=e71]
+              - text: Domain Availability Check
+            - link "Domain Registrar Comparison" [ref=e73] [cursor=pointer]:
+              - img [ref=e75]
+              - text: Domain Registrar Comparison
+        - paragraph [ref=e78]:
+          - text: The domain zeins.com is registered. You can still try to buy it
+          - link "here" [ref=e79] [cursor=pointer]:
+            - /url: https://domainagents.com/zeins.com-whodotis
+          - text: .
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - heading "Contact Information" [level=2] [ref=e82]
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - heading "Registrant Contact" [level=3] [ref=e85]
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - term [ref=e88]: Name
+                    - definition [ref=e89]: Jewella Privacy - 00a3b
+                  - generic [ref=e90]:
+                    - term [ref=e91]: Organization
+                    - definition [ref=e92]: Jewella Privacy LLC Privacy ID# 1131033
+                  - generic [ref=e93]:
+                    - term [ref=e94]: Address
+                    - definition [ref=e95]:
+                      - generic [ref=e96]: "5860 Citrus Blvd, Suite D, #172"
+                      - generic [ref=e97]: Harahan, LA, 70123
+                      - generic [ref=e98]: US
+                  - generic [ref=e99]:
+                    - term [ref=e100]: Phone
+                    - definition [ref=e101]: "+1.5043550545"
+                  - generic [ref=e102]:
+                    - term [ref=e103]: Email
+                    - definition [ref=e104]: zeins [dot] com [at] fab [dot] JewellaPrivacy [dot] com
+              - generic [ref=e105]:
+                - heading "Admin Contact" [level=3] [ref=e106]
+                - generic [ref=e107]:
+                  - generic [ref=e108]:
+                    - term [ref=e109]: Name
+                    - definition [ref=e110]: Jewella Privacy
+                  - generic [ref=e111]:
+                    - term [ref=e112]: Organization
+                    - definition [ref=e113]: Jewella Privacy LLC Privacy ID# 1131033
+                  - generic [ref=e114]:
+                    - term [ref=e115]: Address
+                    - definition [ref=e116]:
+                      - generic [ref=e117]: "5860 Citrus Blvd, Suite D, #172"
+                      - generic [ref=e118]: Harahan, LA, 70123
+                      - generic [ref=e119]: US
+                  - generic [ref=e120]:
+                    - term [ref=e121]: Phone
+                    - definition [ref=e122]: "+1.5043550545"
+                  - generic [ref=e123]:
+                    - term [ref=e124]: Email
+                    - definition [ref=e125]: zeins [dot] com [at] fab [dot] JewellaPrivacy [dot] com
+              - generic [ref=e126]:
+                - heading "Tech Contact" [level=3] [ref=e127]
+                - generic [ref=e128]:
+                  - generic [ref=e129]:
+                    - term [ref=e130]: Name
+                    - definition [ref=e131]: Jewella Privacy
+                  - generic [ref=e132]:
+                    - term [ref=e133]: Organization
+                    - definition [ref=e134]: Jewella Privacy LLC Privacy ID# 1131033
+                  - generic [ref=e135]:
+                    - term [ref=e136]: Address
+                    - definition [ref=e137]:
+                      - generic [ref=e138]: "5860 Citrus Blvd, Suite D, #172"
+                      - generic [ref=e139]: Harahan, LA, 70123
+                      - generic [ref=e140]: US
+                  - generic [ref=e141]:
+                    - term [ref=e142]: Phone
+                    - definition [ref=e143]: "+1.5043550545"
+                  - generic [ref=e144]:
+                    - term [ref=e145]: Email
+                    - definition [ref=e146]: zeins [dot] com [at] fab [dot] JewellaPrivacy [dot] com
+          - generic [ref=e147]:
+            - heading "Registrar Information" [level=2] [ref=e148]
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - term [ref=e151]: Registrar
+                - definition [ref=e152]: Sea Wasp, LLC
+              - generic [ref=e153]:
+                - term [ref=e154]: WHOIS Server
+                - definition [ref=e155]: whois.fabulous.com
+              - generic [ref=e156]:
+                - term [ref=e157]: Referral URL
+                - definition [ref=e158]:
+                  - link "http://www.fabulous.com" [ref=e159] [cursor=pointer]:
+                    - /url: http://www.fabulous.com
+          - generic [ref=e160]:
+            - heading "Important Dates" [level=2] [ref=e161]
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - term [ref=e164]: Created
+                - definition [ref=e165]:
+                  - time [ref=e166]: October 20, 2006
+              - generic [ref=e167]:
+                - term [ref=e168]: Updated
+                - definition [ref=e169]:
+                  - time [ref=e170]: September 23, 2025
+              - generic [ref=e171]:
+                - term [ref=e172]: Expires
+                - definition [ref=e173]:
+                  - time [ref=e174]: October 20, 2026
+            - paragraph [ref=e175]:
+              - text: WHOIS data last fetched
+              - time [ref=e176]: June 8, 2026
+          - generic [ref=e177]:
+            - heading "Nameservers" [level=2] [ref=e178]
+            - table [ref=e180]:
+              - rowgroup [ref=e181]:
+                - row "Hostname IP Address" [ref=e182]:
+                  - columnheader "Hostname" [ref=e183]
+                  - columnheader "IP Address" [ref=e184]
+              - rowgroup [ref=e185]:
+                - row "ns1.fabulous.com 104.143.9.44" [ref=e186]:
+                  - cell "ns1.fabulous.com" [ref=e187]:
+                    - link "ns1.fabulous.com" [ref=e188] [cursor=pointer]:
+                      - /url: /nameserver/ns1.fabulous.com
+                  - cell "104.143.9.44" [ref=e189]:
+                    - link "104.143.9.44" [ref=e190] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/104.143.9.44
+                - row "ns2.fabulous.com 45.33.63.205" [ref=e191]:
+                  - cell "ns2.fabulous.com" [ref=e192]:
+                    - link "ns2.fabulous.com" [ref=e193] [cursor=pointer]:
+                      - /url: /nameserver/ns2.fabulous.com
+                  - cell "45.33.63.205" [ref=e194]:
+                    - link "45.33.63.205" [ref=e195] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/45.33.63.205
+          - generic [ref=e196]:
+            - heading "Domain Status" [level=2] [ref=e197]
+            - list [ref=e199]:
+              - listitem [ref=e200]: clientDeleteProhibited https://icann.org/epp#clientDeleteProhibited
+              - listitem [ref=e201]: clientTransferProhibited https://icann.org/epp#clientTransferProhibited
+              - listitem [ref=e202]: clientUpdateProhibited https://icann.org/epp#clientUpdateProhibited
+              - listitem [ref=e203]: clientDeleteProhibited (https://www.icann.org/epp#clientDeleteProhibited)
+              - listitem [ref=e204]: clientTransferProhibited (https://www.icann.org/epp#clientTransferProhibited)
+              - listitem [ref=e205]: clientUpdateProhibited (https://www.icann.org/epp#clientUpdateProhibited)
+          - insertion [ref=e208]
+          - generic [ref=e210]:
+            - heading "Similar Domains" [level=2] [ref=e211]
+            - list [ref=e212]:
+              - listitem [ref=e213]:
+                - link "zeinsainfraestructura.com" [ref=e214] [cursor=pointer]:
+                  - /url: /whois/zeinsainfraestructura.com
+              - listitem [ref=e215]:
+                - link "zein.se" [ref=e216] [cursor=pointer]:
+                  - /url: /whois/zein.se
+              - listitem [ref=e217]:
+                - link "zeinsecuritycompany.com" [ref=e218] [cursor=pointer]:
+                  - /url: /whois/zeinsecuritycompany.com
+              - listitem [ref=e219]:
+                - link "zeinsecurity.net" [ref=e220] [cursor=pointer]:
+                  - /url: /whois/zeinsecurity.net
+              - listitem [ref=e221]:
+                - link "zeins.net" [ref=e222] [cursor=pointer]:
+                  - /url: /whois/zeins.net
+              - listitem [ref=e223]:
+                - link "zeinstraboomverzorging.nl" [ref=e224] [cursor=pointer]:
+                  - /url: /whois/zeinstraboomverzorging.nl
+              - listitem [ref=e225]:
+                - link "zein.systems" [ref=e226] [cursor=pointer]:
+                  - /url: /whois/zein.systems
+          - generic [ref=e227]:
+            - heading "Raw WHOIS Data" [level=2] [ref=e229]
+            - paragraph [ref=e230]: Raw WHOIS responses from registry and registrar servers.
+            - generic [ref=e231]:
+              - button "Raw Registry WHOIS Data" [ref=e233] [cursor=pointer]:
+                - generic [ref=e234]: Raw Registry WHOIS Data
+                - img [ref=e235]
+              - button "Raw Registrar WHOIS Data" [ref=e238] [cursor=pointer]:
+                - generic [ref=e239]: Raw Registrar WHOIS Data
+                - img [ref=e240]
+          - insertion [ref=e244]
+          - generic [ref=e246]:
+            - heading "About WHOIS" [level=2] [ref=e247]
+            - generic [ref=e248]:
+              - paragraph [ref=e249]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+              - paragraph [ref=e250]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+    - contentinfo [ref=e251]:
+      - generic [ref=e253]:
+        - generic [ref=e254]:
+          - link "Overview" [ref=e255] [cursor=pointer]:
+            - /url: /overview
+          - link "FAQ" [ref=e256] [cursor=pointer]:
+            - /url: /faq
+          - link "Terms" [ref=e257] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e258] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e259]: © 2026 who.is All rights reserved.
+  - alert [ref=e260]

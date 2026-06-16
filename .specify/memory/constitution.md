@@ -1,55 +1,121 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+SYNC IMPACT REPORT
+==================
+Version change: N/A (placeholder) → 1.0.0 (initial ratification)
+Modified principles: N/A — first-time population of all placeholders
+Added sections:
+  - Core Principles (6 principles)
+  - Technology Constraints
+  - Development Workflow
+  - Governance
+Templates reviewed:
+  - .specify/templates/plan-template.md ✅ compatible (Constitution Check section present)
+  - .specify/templates/spec-template.md ✅ compatible (no principle-specific refs)
+  - .specify/templates/tasks-template.md ✅ compatible (phase structure aligns)
+Deferred TODOs:
+  - TODO(PROJECT_NAME): Brand name not yet decided by owner — update when finalized
+-->
+
+# TODO(PROJECT_NAME): Pakistani Women's Fashion Store Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Customer Journey First
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+Every feature MUST serve the core purchase flow: browse → product detail →
+add to cart → checkout → payment → order confirmation. No feature may
+block, complicate, or slow down this journey. If a feature does not
+directly support or enhance the customer journey, it MUST be deferred.
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+**Rationale**: Paid ads (Instagram/Facebook) drive cold traffic directly
+to the store. A frictionless path to purchase is the single most
+important conversion factor.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+### II. Mobile-First Development
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+All UI components MUST be designed and tested on mobile viewports first
+(375px minimum). Desktop is a progressive enhancement. Performance
+budgets apply on mobile network conditions (3G/4G).
 
-### [PRINCIPLE_6_NAME]
+**Rationale**: Pakistan's ecommerce traffic is overwhelmingly mobile.
+Customers clicking ads on Instagram or Facebook land on mobile browsers.
 
+### III. Lean MVP — Scalable by Design
 
-[PRINCIPLE__DESCRIPTION]
+The initial release MUST cover women's clothing only. The codebase MUST
+be architected so that adding new categories (abayas, perfumes, etc.)
+requires only data/config changes, not structural rewrites. No feature
+for future categories should be built before it is needed (YAGNI).
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+**Rationale**: Owner wants first sales validated before expanding.
+Budget is limited; speculative features waste runway.
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+### IV. Secure & Local Payments
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+All payment integrations MUST support Pakistani gateways (JazzCash,
+Easypaisa) and/or card payments via a PCI-compliant provider. No payment
+credentials or tokens may be stored in application code or version
+control. COD (Cash on Delivery) MUST be supported as an option.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Pakistani customers expect local payment methods.
+COD remains the dominant payment mode in the market.
+
+### V. Performance for Conversions
+
+Every page MUST load in under 3 seconds on a 4G mobile connection.
+Core Web Vitals (LCP, CLS, FID) MUST meet Google's "Good" thresholds.
+Images MUST be optimized and served in modern formats (WebP). Product
+listing pages MUST not block on non-critical data.
+
+**Rationale**: Ad spend is wasted if the landing page is slow.
+Each second of load time directly reduces conversion rate.
+
+### VI. Brand Consistency
+
+All visual elements (colors, typography, spacing, tone of copy) MUST
+follow the brand identity once defined. No ad-hoc styling decisions may
+deviate from the design system. The brand name and visual identity MUST
+be finalized before any customer-facing UI is shipped.
+
+**Rationale**: Trust is built through consistency. Customers from social
+ads form brand impressions in seconds — inconsistency kills credibility.
+
+## Technology Constraints
+
+- **Framework**: Next.js (App Router) — full-stack, SSR/SSG for SEO
+- **Database**: Supabase (PostgreSQL) — free tier to start
+- **Hosting**: Vercel — free tier, scales on demand
+- **Email**: Resend.com — order notifications to store owner
+- **Payments**: JazzCash / Easypaisa / Stripe (Pakistan-compatible)
+- **Language**: TypeScript — type safety across frontend and backend
+- **Styling**: Tailwind CSS — utility-first, rapid UI development
+- **No secrets in code**: All credentials via `.env` files; never committed
+
+## Development Workflow
+
+1. **Spec before code** — every feature starts with a spec (`/sp.specify`)
+2. **Smallest viable diff** — implement the minimum to satisfy acceptance criteria
+3. **Test on mobile first** — verify every UI change on a 375px viewport
+4. **Commit atomically** — one logical change per commit with clear messages
+5. **Environment parity** — local dev MUST mirror production config (`.env.example` kept current)
+6. **No hardcoded data** — product catalog, categories, and config driven by database or env vars
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution is the authoritative source for all development decisions
+on this project. It MUST be consulted before beginning any new feature or
+making architectural decisions.
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+**Amendment procedure**: Propose change → document reasoning → update
+version → propagate to templates. All amendments require explicit owner
+approval.
+
+**Versioning policy** (semantic):
+- MAJOR: Backward-incompatible principle removal or redefinition
+- MINOR: New principle or section added
+- PATCH: Clarifications, wording fixes
+
+**Compliance**: All pull requests and implementation plans MUST include a
+Constitution Check confirming no principles are violated.
+
+**Version**: 1.0.0 | **Ratified**: 2026-06-07 | **Last Amended**: 2026-06-07

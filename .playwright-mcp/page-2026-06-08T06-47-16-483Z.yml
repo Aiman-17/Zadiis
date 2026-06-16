@@ -1,0 +1,173 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - link "who.is" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "who.is" [ref=e8]
+          - generic [ref=e9]:
+            - link "WHOIS" [ref=e10] [cursor=pointer]:
+              - /url: /whois
+            - link "RDAP" [ref=e11] [cursor=pointer]:
+              - /url: /rdap
+            - link "DNS" [ref=e12] [cursor=pointer]:
+              - /url: /dns
+            - link "Uptime" [ref=e13] [cursor=pointer]:
+              - /url: /uptime
+            - link "Domain Events" [ref=e14] [cursor=pointer]:
+              - /url: /domains/events
+            - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+              - /url: /website-monitoring
+            - link "Login" [ref=e16] [cursor=pointer]:
+              - /url: "#"
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: Enter a domain name...
+              - textbox "Enter a domain name..." [ref=e28]
+            - button "Search" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - heading "aevyn.com" [level=1] [ref=e31]
+          - paragraph [ref=e32]: WHOIS Information
+          - generic [ref=e33]:
+            - link "Whois" [ref=e34] [cursor=pointer]:
+              - /url: /whois/aevyn.com
+            - link "RDAP" [ref=e35] [cursor=pointer]:
+              - /url: /rdap/aevyn.com
+            - link "DNS Records" [ref=e36] [cursor=pointer]:
+              - /url: /dns/aevyn.com
+            - link "Uptime" [ref=e37] [cursor=pointer]:
+              - /url: /uptime/aevyn.com
+            - link "Diagnostics" [ref=e38] [cursor=pointer]:
+              - /url: /tools/aevyn.com
+            - link "History" [ref=e39] [cursor=pointer]:
+              - /url: /history/aevyn.com
+            - link "Hide Contact Info" [ref=e40] [cursor=pointer]:
+              - /url: /privacy/aevyn.com
+              - img [ref=e41]
+              - text: Hide Contact Info
+            - button "Refresh Data" [ref=e44] [cursor=pointer]
+        - insertion [ref=e47]
+        - paragraph [ref=e50]:
+          - text: The domain aevyn.com is registered. You can still try to buy it
+          - link "here" [ref=e51] [cursor=pointer]:
+            - /url: https://domainagents.com/aevyn.com-whodotis
+          - text: .
+        - generic [ref=e52]:
+          - generic [ref=e53]:
+            - heading "Contact Information" [level=2] [ref=e54]
+            - generic [ref=e56]:
+              - heading "Registrant Contact" [level=3] [ref=e57]
+              - generic [ref=e58]:
+                - generic [ref=e59]:
+                  - term [ref=e60]: Name
+                  - definition [ref=e61]: Contact Privacy Inc. Customer 0154965501
+                - generic [ref=e62]:
+                  - term [ref=e63]: Organization
+                  - definition [ref=e64]: Contact Privacy Inc. Customer 0154965501
+                - generic [ref=e65]:
+                  - term [ref=e66]: Address
+                  - definition [ref=e67]:
+                    - generic [ref=e68]: 96 Mowat Ave
+                    - generic [ref=e69]: Toronto, ON, M6K 3M1
+                    - generic [ref=e70]: CA
+                - generic [ref=e71]:
+                  - term [ref=e72]: Phone
+                  - definition [ref=e73]: "+1.4165385457"
+                - generic [ref=e74]:
+                  - term [ref=e75]: Email
+                  - definition [ref=e76]: aevyn [dot] com [at] contactprivacy [dot] com
+          - generic [ref=e77]:
+            - heading "Registrar Information" [level=2] [ref=e78]
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - term [ref=e81]: Registrar
+                - definition [ref=e82]: Tucows Domains Inc.
+              - generic [ref=e83]:
+                - term [ref=e84]: WHOIS Server
+                - definition [ref=e85]: whois.tucows.com
+              - generic [ref=e86]:
+                - term [ref=e87]: Referral URL
+                - definition [ref=e88]:
+                  - link "http://www.tucows.com" [ref=e89] [cursor=pointer]:
+                    - /url: http://www.tucows.com
+          - generic [ref=e90]:
+            - heading "Important Dates" [level=2] [ref=e91]
+            - generic [ref=e92]:
+              - generic [ref=e93]:
+                - term [ref=e94]: Created
+                - definition [ref=e95]:
+                  - time [ref=e96]: March 15, 2015
+              - generic [ref=e97]:
+                - term [ref=e98]: Updated
+                - definition [ref=e99]:
+                  - time [ref=e100]: March 14, 2026
+              - generic [ref=e101]:
+                - term [ref=e102]: Expires
+                - definition [ref=e103]:
+                  - time [ref=e104]: March 15, 2027
+            - paragraph [ref=e105]:
+              - text: WHOIS data last fetched
+              - time [ref=e106]: June 8, 2026
+          - generic [ref=e107]:
+            - heading "Nameservers" [level=2] [ref=e108]
+            - table [ref=e110]:
+              - rowgroup [ref=e111]:
+                - row "Hostname IP Address" [ref=e112]:
+                  - columnheader "Hostname" [ref=e113]
+                  - columnheader "IP Address" [ref=e114]
+              - rowgroup [ref=e115]:
+                - row "ns27.domaincontrol.com 97.74.103.14" [ref=e116]:
+                  - cell "ns27.domaincontrol.com" [ref=e117]:
+                    - link "ns27.domaincontrol.com" [ref=e118] [cursor=pointer]:
+                      - /url: /nameserver/ns27.domaincontrol.com
+                  - cell "97.74.103.14" [ref=e119]:
+                    - link "97.74.103.14" [ref=e120] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/97.74.103.14
+                - row "ns28.domaincontrol.com 173.201.71.14" [ref=e121]:
+                  - cell "ns28.domaincontrol.com" [ref=e122]:
+                    - link "ns28.domaincontrol.com" [ref=e123] [cursor=pointer]:
+                      - /url: /nameserver/ns28.domaincontrol.com
+                  - cell "173.201.71.14" [ref=e124]:
+                    - link "173.201.71.14" [ref=e125] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/173.201.71.14
+          - generic [ref=e126]:
+            - heading "Domain Status" [level=2] [ref=e127]
+            - list [ref=e129]:
+              - listitem [ref=e130]: clientTransferProhibited https://icann.org/epp#clientTransferProhibited
+              - listitem [ref=e131]: clientUpdateProhibited https://icann.org/epp#clientUpdateProhibited
+          - insertion [ref=e134]
+          - generic [ref=e136]:
+            - heading "Raw WHOIS Data" [level=2] [ref=e138]
+            - paragraph [ref=e139]: Raw WHOIS responses from registry and registrar servers.
+            - generic [ref=e140]:
+              - button "Raw Registry WHOIS Data" [ref=e142] [cursor=pointer]:
+                - generic [ref=e143]: Raw Registry WHOIS Data
+                - img [ref=e144]
+              - button "Raw Registrar WHOIS Data" [ref=e147] [cursor=pointer]:
+                - generic [ref=e148]: Raw Registrar WHOIS Data
+                - img [ref=e149]
+          - insertion [ref=e153]
+          - generic [ref=e155]:
+            - heading "About WHOIS" [level=2] [ref=e156]
+            - generic [ref=e157]:
+              - paragraph [ref=e158]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+              - paragraph [ref=e159]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+    - contentinfo [ref=e160]:
+      - generic [ref=e162]:
+        - generic [ref=e163]:
+          - link "Overview" [ref=e164] [cursor=pointer]:
+            - /url: /overview
+          - link "FAQ" [ref=e165] [cursor=pointer]:
+            - /url: /faq
+          - link "Terms" [ref=e166] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e167] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e168]: © 2026 who.is All rights reserved.
+  - alert [ref=e169]

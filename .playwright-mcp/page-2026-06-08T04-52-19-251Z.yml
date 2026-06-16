@@ -1,0 +1,221 @@
+- generic [ref=e2]:
+  - banner [ref=e3]:
+    - navigation [ref=e4]:
+      - generic [ref=e5]:
+        - link "who.is" [ref=e7] [cursor=pointer]:
+          - /url: /
+          - img "who.is" [ref=e8]
+        - generic [ref=e9]:
+          - link "WHOIS" [ref=e10] [cursor=pointer]:
+            - /url: /whois
+          - link "RDAP" [ref=e11] [cursor=pointer]:
+            - /url: /rdap
+          - link "DNS" [ref=e12] [cursor=pointer]:
+            - /url: /dns
+          - link "Uptime" [ref=e13] [cursor=pointer]:
+            - /url: /uptime
+          - link "Domain Events" [ref=e14] [cursor=pointer]:
+            - /url: /domains/events
+          - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+            - /url: /website-monitoring
+          - link "Login" [ref=e16] [cursor=pointer]:
+            - /url: "#"
+  - main [ref=e17]:
+    - generic [ref=e18]:
+      - generic [ref=e21]:
+        - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+        - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+        - generic [ref=e25]:
+          - generic [ref=e26]:
+            - generic [ref=e27]: Enter a domain name...
+            - textbox "Enter a domain name..." [ref=e28]
+          - button "Search" [ref=e29] [cursor=pointer]
+      - generic [ref=e30]:
+        - heading "zeyna.com" [level=1] [ref=e31]
+        - paragraph [ref=e32]: WHOIS Information
+        - paragraph [ref=e33]:
+          - text: "IP Address:"
+          - link "185.230.63.107" [ref=e34] [cursor=pointer]:
+            - /url: /whois-ip/ip-address/185.230.63.107
+        - generic [ref=e35]:
+          - link "Whois" [ref=e36] [cursor=pointer]:
+            - /url: /whois/zeyna.com
+          - link "RDAP" [ref=e37] [cursor=pointer]:
+            - /url: /rdap/zeyna.com
+          - link "DNS Records" [ref=e38] [cursor=pointer]:
+            - /url: /dns/zeyna.com
+          - link "Uptime" [ref=e39] [cursor=pointer]:
+            - /url: /uptime/zeyna.com
+          - link "Diagnostics" [ref=e40] [cursor=pointer]:
+            - /url: /tools/zeyna.com
+          - link "History" [ref=e41] [cursor=pointer]:
+            - /url: /history/zeyna.com
+          - link "Hide Contact Info" [ref=e42] [cursor=pointer]:
+            - /url: /privacy/zeyna.com
+            - img [ref=e43]
+            - text: Hide Contact Info
+          - button "Refresh Data" [ref=e46] [cursor=pointer]
+      - generic:
+        - generic:
+          - insertion
+      - paragraph [ref=e48]:
+        - text: The domain zeyna.com is registered. You can still try to buy it
+        - link "here" [ref=e49] [cursor=pointer]:
+          - /url: https://domainagents.com/zeyna.com-whodotis
+        - text: .
+      - generic [ref=e50]:
+        - generic [ref=e51]:
+          - heading "Contact Information" [level=2] [ref=e52]
+          - generic [ref=e53]:
+            - generic [ref=e54]:
+              - heading "Registrant Contact" [level=3] [ref=e55]
+              - generic [ref=e56]:
+                - generic [ref=e57]:
+                  - term [ref=e58]: Address
+                  - definition [ref=e59]:
+                    - generic [ref=e60]: DE
+                - generic [ref=e61]:
+                  - term [ref=e62]: Email
+                  - definition [ref=e63]: https://corehub [dot] net/whoiscontact/
+            - generic [ref=e64]:
+              - heading "Admin Contact" [level=3] [ref=e65]
+              - generic [ref=e67]:
+                - term [ref=e68]: Email
+                - definition [ref=e69]: https://corehub [dot] net/whoiscontact/
+            - generic [ref=e70]:
+              - heading "Tech Contact" [level=3] [ref=e71]
+              - generic [ref=e73]:
+                - term [ref=e74]: Email
+                - definition [ref=e75]: https://corehub [dot] net/whoiscontact/
+            - generic [ref=e76]:
+              - heading "Billing Contact" [level=3] [ref=e77]
+              - generic [ref=e79]:
+                - term [ref=e80]: Email
+                - definition [ref=e81]: https://corehub [dot] net/whoiscontact/
+        - generic [ref=e82]:
+          - heading "Registrar Information" [level=2] [ref=e83]
+          - generic [ref=e84]:
+            - generic [ref=e85]:
+              - term [ref=e86]: Registrar
+              - definition [ref=e87]: COREhub, S.R.L.
+            - generic [ref=e88]:
+              - term [ref=e89]: WHOIS Server
+              - definition [ref=e90]: whois.corehub.net
+            - generic [ref=e91]:
+              - term [ref=e92]: Referral URL
+              - definition [ref=e93]:
+                - link "http://corehub.net" [ref=e94] [cursor=pointer]:
+                  - /url: http://corehub.net
+        - generic [ref=e95]:
+          - heading "Important Dates" [level=2] [ref=e96]
+          - generic [ref=e97]:
+            - generic [ref=e98]:
+              - term [ref=e99]: Created
+              - definition [ref=e100]:
+                - time [ref=e101]: November 15, 2002
+            - generic [ref=e102]:
+              - term [ref=e103]: Updated
+              - definition [ref=e104]:
+                - time [ref=e105]: November 16, 2025
+            - generic [ref=e106]:
+              - term [ref=e107]: Expires
+              - definition [ref=e108]:
+                - time [ref=e109]: November 15, 2026
+          - paragraph [ref=e110]:
+            - text: WHOIS data last fetched
+            - time [ref=e111]: June 8, 2026
+        - generic [ref=e112]:
+          - heading "Nameservers" [level=2] [ref=e113]
+          - table [ref=e115]:
+            - rowgroup [ref=e116]:
+              - row "Hostname IP Address" [ref=e117]:
+                - columnheader "Hostname" [ref=e118]
+                - columnheader "IP Address" [ref=e119]
+            - rowgroup [ref=e120]:
+              - row "ns1.wix.com 216.239.32.100" [ref=e121]:
+                - cell "ns1.wix.com" [ref=e122]:
+                  - link "ns1.wix.com" [ref=e123] [cursor=pointer]:
+                    - /url: /nameserver/ns1.wix.com
+                - cell "216.239.32.100" [ref=e124]:
+                  - link "216.239.32.100" [ref=e125] [cursor=pointer]:
+                    - /url: /whois-ip/ip-address/216.239.32.100
+              - row "ns2.wix.com 216.239.32.100" [ref=e126]:
+                - cell "ns2.wix.com" [ref=e127]:
+                  - link "ns2.wix.com" [ref=e128] [cursor=pointer]:
+                    - /url: /nameserver/ns2.wix.com
+                - cell "216.239.32.100" [ref=e129]:
+                  - link "216.239.32.100" [ref=e130] [cursor=pointer]:
+                    - /url: /whois-ip/ip-address/216.239.32.100
+        - generic [ref=e131]:
+          - heading "Domain Status" [level=2] [ref=e132]
+          - list [ref=e134]:
+            - listitem [ref=e135]: ok https://icann.org/epp#ok
+        - generic:
+          - generic:
+            - insertion
+        - generic [ref=e136]:
+          - heading "Similar Domains" [level=2] [ref=e137]
+          - list [ref=e138]:
+            - listitem [ref=e139]:
+              - link "zeynaacademy.com" [ref=e140] [cursor=pointer]:
+                - /url: /whois/zeynaacademy.com
+            - listitem [ref=e141]:
+              - link "zeynaagency.com" [ref=e142] [cursor=pointer]:
+                - /url: /whois/zeynaagency.com
+            - listitem [ref=e143]:
+              - link "zeynabanalyst.com" [ref=e144] [cursor=pointer]:
+                - /url: /whois/zeynabanalyst.com
+            - listitem [ref=e145]:
+              - link "zeynabdesigns.com" [ref=e146] [cursor=pointer]:
+                - /url: /whois/zeynabdesigns.com
+            - listitem [ref=e147]:
+              - link "zeynabdokht.ir" [ref=e148] [cursor=pointer]:
+                - /url: /whois/zeynabdokht.ir
+            - listitem [ref=e149]:
+              - link "zeyna.be" [ref=e150] [cursor=pointer]:
+                - /url: /whois/zeyna.be
+            - listitem [ref=e151]:
+              - link "zeynabelhelw.com" [ref=e152] [cursor=pointer]:
+                - /url: /whois/zeynabelhelw.com
+            - listitem [ref=e153]:
+              - link "zeynab.eu" [ref=e154] [cursor=pointer]:
+                - /url: /whois/zeynab.eu
+            - listitem [ref=e155]:
+              - link "zeynabgamieldien.com" [ref=e156] [cursor=pointer]:
+                - /url: /whois/zeynabgamieldien.com
+            - listitem [ref=e157]:
+              - link "zeynabhemati.com" [ref=e158] [cursor=pointer]:
+                - /url: /whois/zeynabhemati.com
+            - listitem [ref=e159]:
+              - link "zeynab-keratin60.ir" [ref=e160] [cursor=pointer]:
+                - /url: /whois/zeynab-keratin60.ir
+        - generic [ref=e161]:
+          - heading "Raw WHOIS Data" [level=2] [ref=e163]
+          - paragraph [ref=e164]: Raw WHOIS responses from registry and registrar servers.
+          - generic [ref=e165]:
+            - button "Raw Registry WHOIS Data" [ref=e167] [cursor=pointer]:
+              - generic [ref=e168]: Raw Registry WHOIS Data
+              - img [ref=e169]
+            - button "Raw Registrar WHOIS Data" [ref=e172] [cursor=pointer]:
+              - generic [ref=e173]: Raw Registrar WHOIS Data
+              - img [ref=e174]
+        - generic:
+          - generic:
+            - insertion
+        - generic [ref=e176]:
+          - heading "About WHOIS" [level=2] [ref=e177]
+          - generic [ref=e178]:
+            - paragraph [ref=e179]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+            - paragraph [ref=e180]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+  - contentinfo [ref=e181]:
+    - generic [ref=e183]:
+      - generic [ref=e184]:
+        - link "Overview" [ref=e185] [cursor=pointer]:
+          - /url: /overview
+        - link "FAQ" [ref=e186] [cursor=pointer]:
+          - /url: /faq
+        - link "Terms" [ref=e187] [cursor=pointer]:
+          - /url: /terms
+        - link "Contact" [ref=e188] [cursor=pointer]:
+          - /url: /contact
+      - paragraph [ref=e189]: © 2026 who.is All rights reserved.

@@ -1,0 +1,252 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - link "who.is" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "who.is" [ref=e8]
+          - generic [ref=e9]:
+            - link "WHOIS" [ref=e10] [cursor=pointer]:
+              - /url: /whois
+            - link "RDAP" [ref=e11] [cursor=pointer]:
+              - /url: /rdap
+            - link "DNS" [ref=e12] [cursor=pointer]:
+              - /url: /dns
+            - link "Uptime" [ref=e13] [cursor=pointer]:
+              - /url: /uptime
+            - link "Domain Events" [ref=e14] [cursor=pointer]:
+              - /url: /domains/events
+            - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+              - /url: /website-monitoring
+            - link "Login" [ref=e16] [cursor=pointer]:
+              - /url: /account/login
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: Enter a domain name...
+              - textbox "Enter a domain name..." [ref=e28]
+            - button "Search" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - heading "zivora.com" [level=1] [ref=e31]
+          - paragraph [ref=e32]: WHOIS Information
+          - paragraph [ref=e33]:
+            - text: "IP Address:"
+            - link "13.223.25.84" [ref=e34] [cursor=pointer]:
+              - /url: /whois-ip/ip-address/13.223.25.84
+          - generic [ref=e35]:
+            - link "Whois" [ref=e36] [cursor=pointer]:
+              - /url: /whois/zivora.com
+            - link "RDAP" [ref=e37] [cursor=pointer]:
+              - /url: /rdap/zivora.com
+            - link "DNS Records" [ref=e38] [cursor=pointer]:
+              - /url: /dns/zivora.com
+            - link "Uptime" [ref=e39] [cursor=pointer]:
+              - /url: /uptime/zivora.com
+            - link "Diagnostics" [ref=e40] [cursor=pointer]:
+              - /url: /tools/zivora.com
+            - link "History" [ref=e41] [cursor=pointer]:
+              - /url: /history/zivora.com
+            - link "Hide Contact Info" [ref=e42] [cursor=pointer]:
+              - /url: /privacy/zivora.com
+              - img [ref=e43]
+              - text: Hide Contact Info
+            - button "Refresh Data" [ref=e46] [cursor=pointer]
+        - insertion [ref=e49]:
+          - generic [ref=e51]:
+            - generic "These are topics related to the article that might interest you" [ref=e52]: Discover more
+            - link "IP Geolocation Service" [ref=e53] [cursor=pointer]:
+              - img [ref=e55]
+              - text: IP Geolocation Service
+            - link "DNS Record Management" [ref=e57] [cursor=pointer]:
+              - img [ref=e59]
+              - text: DNS Record Management
+            - link "IP Address Lookup" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+              - text: IP Address Lookup
+            - link "Domain Registration Service" [ref=e65] [cursor=pointer]:
+              - img [ref=e67]
+              - text: Domain Registration Service
+            - link "Domain Registrar Comparison" [ref=e69] [cursor=pointer]:
+              - img [ref=e71]
+              - text: Domain Registrar Comparison
+            - link "Domain Name Search" [ref=e73] [cursor=pointer]:
+              - img [ref=e75]
+              - text: Domain Name Search
+        - paragraph [ref=e78]:
+          - text: The domain zivora.com is registered. You can still try to buy it
+          - link "here" [ref=e79] [cursor=pointer]:
+            - /url: https://domainagents.com/zivora.com-whodotis
+          - text: .
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - heading "Contact Information" [level=2] [ref=e82]
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - heading "Registrant Contact" [level=3] [ref=e85]
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - term [ref=e88]: Name
+                    - definition [ref=e89]: Domain Admin / This Domain is For Sale
+                  - generic [ref=e90]:
+                    - term [ref=e91]: Organization
+                    - definition [ref=e92]: HugeDomains.com
+                  - generic [ref=e93]:
+                    - term [ref=e94]: Address
+                    - definition [ref=e95]:
+                      - generic [ref=e96]: 2635 Walnut Street
+                      - generic [ref=e97]: Denver, CO, 80205
+                      - generic [ref=e98]: US
+                  - generic [ref=e99]:
+                    - term [ref=e100]: Phone
+                    - definition [ref=e101]: "+1.3038930552"
+                  - generic [ref=e102]:
+                    - term [ref=e103]: Email
+                    - definition [ref=e104]: domains [at] hugedomains [dot] com
+              - generic [ref=e105]:
+                - heading "Admin Contact" [level=3] [ref=e106]
+                - generic [ref=e107]:
+                  - generic [ref=e108]:
+                    - term [ref=e109]: Name
+                    - definition [ref=e110]: Domain Admin / This Domain is For Sale
+                  - generic [ref=e111]:
+                    - term [ref=e112]: Organization
+                    - definition [ref=e113]: HugeDomains.com
+                  - generic [ref=e114]:
+                    - term [ref=e115]: Address
+                    - definition [ref=e116]:
+                      - generic [ref=e117]: 2635 Walnut Street
+                      - generic [ref=e118]: Denver, CO, 80205
+                      - generic [ref=e119]: US
+                  - generic [ref=e120]:
+                    - term [ref=e121]: Phone
+                    - definition [ref=e122]: "+1.3038930552"
+                  - generic [ref=e123]:
+                    - term [ref=e124]: Email
+                    - definition [ref=e125]: domains [at] hugedomains [dot] com
+              - generic [ref=e126]:
+                - heading "Tech Contact" [level=3] [ref=e127]
+                - generic [ref=e128]:
+                  - generic [ref=e129]:
+                    - term [ref=e130]: Name
+                    - definition [ref=e131]: Domain Admin / This Domain is For Sale
+                  - generic [ref=e132]:
+                    - term [ref=e133]: Organization
+                    - definition [ref=e134]: HugeDomains.com
+                  - generic [ref=e135]:
+                    - term [ref=e136]: Address
+                    - definition [ref=e137]:
+                      - generic [ref=e138]: 2635 Walnut Street
+                      - generic [ref=e139]: Denver, CO, 80205
+                      - generic [ref=e140]: US
+                  - generic [ref=e141]:
+                    - term [ref=e142]: Phone
+                    - definition [ref=e143]: "+1.3038930552"
+                  - generic [ref=e144]:
+                    - term [ref=e145]: Email
+                    - definition [ref=e146]: domains [at] hugedomains [dot] com
+          - generic [ref=e147]:
+            - heading "Registrar Information" [level=2] [ref=e148]
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - term [ref=e151]: Registrar
+                - definition [ref=e152]: TurnCommerce, Inc. DBA NameBright.com
+              - generic [ref=e153]:
+                - term [ref=e154]: WHOIS Server
+                - definition [ref=e155]: whois.namebright.com
+              - generic [ref=e156]:
+                - term [ref=e157]: Referral URL
+                - definition [ref=e158]:
+                  - link "http://www.NameBright.com" [ref=e159] [cursor=pointer]:
+                    - /url: http://www.NameBright.com
+          - generic [ref=e160]:
+            - heading "Important Dates" [level=2] [ref=e161]
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - term [ref=e164]: Created
+                - definition [ref=e165]:
+                  - time [ref=e166]: February 2, 2012
+              - generic [ref=e167]:
+                - term [ref=e168]: Updated
+                - definition [ref=e169]:
+                  - time [ref=e170]: February 3, 2026
+              - generic [ref=e171]:
+                - term [ref=e172]: Expires
+                - definition [ref=e173]:
+                  - time [ref=e174]: February 2, 2027
+            - paragraph [ref=e175]:
+              - text: WHOIS data last fetched
+              - time [ref=e176]: May 12, 2026
+          - generic [ref=e177]:
+            - heading "Nameservers" [level=2] [ref=e178]
+            - table [ref=e180]:
+              - rowgroup [ref=e181]:
+                - row "Hostname IP Address" [ref=e182]:
+                  - columnheader "Hostname" [ref=e183]
+                  - columnheader "IP Address" [ref=e184]
+              - rowgroup [ref=e185]:
+                - row "nsg1.namebrightdns.com 13.221.2.210" [ref=e186]:
+                  - cell "nsg1.namebrightdns.com" [ref=e187]:
+                    - link "nsg1.namebrightdns.com" [ref=e188] [cursor=pointer]:
+                      - /url: /nameserver/nsg1.namebrightdns.com
+                  - cell "13.221.2.210" [ref=e189]:
+                    - link "13.221.2.210" [ref=e190] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/13.221.2.210
+                - row "nsg2.namebrightdns.com 54.81.105.165" [ref=e191]:
+                  - cell "nsg2.namebrightdns.com" [ref=e192]:
+                    - link "nsg2.namebrightdns.com" [ref=e193] [cursor=pointer]:
+                      - /url: /nameserver/nsg2.namebrightdns.com
+                  - cell "54.81.105.165" [ref=e194]:
+                    - link "54.81.105.165" [ref=e195] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/54.81.105.165
+          - generic [ref=e196]:
+            - heading "Domain Status" [level=2] [ref=e197]
+            - list [ref=e199]:
+              - listitem [ref=e200]: clientTransferProhibited https://icann.org/epp#clientTransferProhibited
+              - listitem [ref=e201]: clientTransferProhibited https://www.icann.org/epp#clientTransferProhibited
+          - insertion [ref=e204]
+          - generic [ref=e206]:
+            - heading "Similar Domains" [level=2] [ref=e207]
+            - list [ref=e208]:
+              - listitem [ref=e209]:
+                - link "zivor9.info" [ref=e210] [cursor=pointer]:
+                  - /url: /whois/zivor9.info
+              - listitem [ref=e211]:
+                - link "zivora.ca" [ref=e212] [cursor=pointer]:
+                  - /url: /whois/zivora.ca
+              - listitem [ref=e213]:
+                - link "zivoradjankovic.in.rs" [ref=e214] [cursor=pointer]:
+                  - /url: /whois/zivoradjankovic.in.rs
+          - generic [ref=e215]:
+            - heading "Raw WHOIS Data" [level=2] [ref=e217]
+            - paragraph [ref=e218]: Raw WHOIS responses from registry and registrar servers.
+            - generic [ref=e219]:
+              - button "Raw Registry WHOIS Data" [ref=e221] [cursor=pointer]:
+                - generic [ref=e222]: Raw Registry WHOIS Data
+                - img [ref=e223]
+              - button "Raw Registrar WHOIS Data" [ref=e226] [cursor=pointer]:
+                - generic [ref=e227]: Raw Registrar WHOIS Data
+                - img [ref=e228]
+          - insertion [ref=e232]
+          - generic [ref=e234]:
+            - heading "About WHOIS" [level=2] [ref=e235]
+            - generic [ref=e236]:
+              - paragraph [ref=e237]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+              - paragraph [ref=e238]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+    - contentinfo [ref=e239]:
+      - generic [ref=e241]:
+        - generic [ref=e242]:
+          - link "Overview" [ref=e243] [cursor=pointer]:
+            - /url: /overview
+          - link "FAQ" [ref=e244] [cursor=pointer]:
+            - /url: /faq
+          - link "Terms" [ref=e245] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e246] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e247]: © 2026 who.is All rights reserved.
+  - alert [ref=e248]

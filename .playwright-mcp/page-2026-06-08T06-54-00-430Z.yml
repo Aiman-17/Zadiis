@@ -1,0 +1,81 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - link "who.is" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "who.is" [ref=e8]
+          - generic [ref=e9]:
+            - link "WHOIS" [ref=e10] [cursor=pointer]:
+              - /url: /whois
+            - link "RDAP" [ref=e11] [cursor=pointer]:
+              - /url: /rdap
+            - link "DNS" [ref=e12] [cursor=pointer]:
+              - /url: /dns
+            - link "Uptime" [ref=e13] [cursor=pointer]:
+              - /url: /uptime
+            - link "Domain Events" [ref=e14] [cursor=pointer]:
+              - /url: /domains/events
+            - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+              - /url: /website-monitoring
+            - link "Login" [ref=e16] [cursor=pointer]:
+              - /url: /account/login
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: Enter a domain name...
+              - textbox "Enter a domain name..." [ref=e28]
+            - button "Search" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - heading "aevyn.pk" [level=1] [ref=e31]
+          - paragraph [ref=e32]: WHOIS Information
+          - generic [ref=e33]:
+            - link "Whois" [ref=e34] [cursor=pointer]:
+              - /url: /whois/aevyn.pk
+            - link "RDAP" [ref=e35] [cursor=pointer]:
+              - /url: /rdap/aevyn.pk
+            - link "DNS Records" [ref=e36] [cursor=pointer]:
+              - /url: /dns/aevyn.pk
+            - link "Uptime" [ref=e37] [cursor=pointer]:
+              - /url: /uptime/aevyn.pk
+            - link "Diagnostics" [ref=e38] [cursor=pointer]:
+              - /url: /tools/aevyn.pk
+            - link "History" [ref=e39] [cursor=pointer]:
+              - /url: /history/aevyn.pk
+            - link "Hide Contact Info" [ref=e40] [cursor=pointer]:
+              - /url: /privacy/aevyn.pk
+              - img [ref=e41]
+              - text: Hide Contact Info
+            - button "Refresh Data" [ref=e44] [cursor=pointer]
+        - generic [ref=e45]:
+          - heading "WHOIS Lookup Results" [level=2] [ref=e46]
+          - generic [ref=e47]:
+            - paragraph [ref=e48]: No WHOIS data was found for aevyn.pk
+            - paragraph [ref=e49]: "This could be because:"
+            - list [ref=e50]:
+              - listitem [ref=e51]: The domain doesn't exist
+              - listitem [ref=e52]: The WHOIS server is temporarily unavailable
+              - listitem [ref=e53]: The domain's registry doesn't provide WHOIS data
+        - generic [ref=e54]:
+          - heading "About WHOIS" [level=2] [ref=e55]
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+            - paragraph [ref=e58]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+    - contentinfo [ref=e59]:
+      - generic [ref=e61]:
+        - generic [ref=e62]:
+          - link "Overview" [ref=e63] [cursor=pointer]:
+            - /url: /overview
+          - link "FAQ" [ref=e64] [cursor=pointer]:
+            - /url: /faq
+          - link "Terms" [ref=e65] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e66] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e67]: © 2026 who.is All rights reserved.
+  - alert [ref=e68]

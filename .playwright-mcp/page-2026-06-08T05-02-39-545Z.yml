@@ -1,0 +1,275 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e3]:
+      - navigation [ref=e4]:
+        - generic [ref=e5]:
+          - link "who.is" [ref=e7] [cursor=pointer]:
+            - /url: /
+            - img "who.is" [ref=e8]
+          - generic [ref=e9]:
+            - link "WHOIS" [ref=e10] [cursor=pointer]:
+              - /url: /whois
+            - link "RDAP" [ref=e11] [cursor=pointer]:
+              - /url: /rdap
+            - link "DNS" [ref=e12] [cursor=pointer]:
+              - /url: /dns
+            - link "Uptime" [ref=e13] [cursor=pointer]:
+              - /url: /uptime
+            - link "Domain Events" [ref=e14] [cursor=pointer]:
+              - /url: /domains/events
+            - link "Website Monitoring" [ref=e15] [cursor=pointer]:
+              - /url: /website-monitoring
+            - link "Login" [ref=e16] [cursor=pointer]:
+              - /url: /account/login
+    - main [ref=e17]:
+      - generic [ref=e18]:
+        - generic [ref=e21]:
+          - heading "WHOIS Domain Lookup" [level=1] [ref=e22]
+          - paragraph [ref=e23]: Look up registration details, contacts, and nameservers for any domain name
+          - generic [ref=e25]:
+            - generic [ref=e26]:
+              - generic [ref=e27]: Enter a domain name...
+              - textbox "Enter a domain name..." [ref=e28]
+            - button "Search" [ref=e29] [cursor=pointer]
+        - generic [ref=e30]:
+          - heading "zephyrs.com" [level=1] [ref=e31]
+          - paragraph [ref=e32]: WHOIS Information
+          - paragraph [ref=e33]:
+            - text: "IP Address:"
+            - link "76.223.54.146" [ref=e34] [cursor=pointer]:
+              - /url: /whois-ip/ip-address/76.223.54.146
+          - generic [ref=e35]:
+            - link "Whois" [ref=e36] [cursor=pointer]:
+              - /url: /whois/zephyrs.com
+            - link "RDAP" [ref=e37] [cursor=pointer]:
+              - /url: /rdap/zephyrs.com
+            - link "DNS Records" [ref=e38] [cursor=pointer]:
+              - /url: /dns/zephyrs.com
+            - link "Uptime" [ref=e39] [cursor=pointer]:
+              - /url: /uptime/zephyrs.com
+            - link "Diagnostics" [ref=e40] [cursor=pointer]:
+              - /url: /tools/zephyrs.com
+            - link "History" [ref=e41] [cursor=pointer]:
+              - /url: /history/zephyrs.com
+            - link "Hide Contact Info" [ref=e42] [cursor=pointer]:
+              - /url: /privacy/zephyrs.com
+              - img [ref=e43]
+              - text: Hide Contact Info
+            - button "Refresh Data" [ref=e46] [cursor=pointer]
+        - insertion [ref=e49]:
+          - generic [ref=e51]:
+            - generic "These are topics related to the article that might interest you" [ref=e52]: Discover more
+            - link "WHOIS Lookup Service" [ref=e53] [cursor=pointer]:
+              - img [ref=e55]
+              - text: WHOIS Lookup Service
+            - link "Domain Name Search" [ref=e57] [cursor=pointer]:
+              - img [ref=e59]
+              - text: Domain Name Search
+            - link "RDAP Lookup Tool" [ref=e61] [cursor=pointer]:
+              - img [ref=e63]
+              - text: RDAP Lookup Tool
+            - link "DNS Record Management" [ref=e65] [cursor=pointer]:
+              - img [ref=e67]
+              - text: DNS Record Management
+            - link "Uptime Monitoring Service" [ref=e69] [cursor=pointer]:
+              - img [ref=e71]
+              - text: Uptime Monitoring Service
+            - link "Domain Portfolio Management" [ref=e73] [cursor=pointer]:
+              - img [ref=e75]
+              - text: Domain Portfolio Management
+        - paragraph [ref=e78]:
+          - text: The domain zephyrs.com is registered. You can still try to buy it
+          - link "here" [ref=e79] [cursor=pointer]:
+            - /url: https://domainagents.com/zephyrs.com-whodotis
+          - text: .
+        - generic [ref=e80]:
+          - generic [ref=e81]:
+            - heading "Contact Information" [level=2] [ref=e82]
+            - generic [ref=e83]:
+              - generic [ref=e84]:
+                - heading "Registrant Contact" [level=3] [ref=e85]
+                - generic [ref=e86]:
+                  - generic [ref=e87]:
+                    - term [ref=e88]: Name
+                    - definition [ref=e89]: REDACTED FOR PRIVACY
+                  - generic [ref=e90]:
+                    - term [ref=e91]: Organization
+                    - definition [ref=e92]: Super Privacy Service LTD c/o Dynadot
+                  - generic [ref=e93]:
+                    - term [ref=e94]: Address
+                    - definition [ref=e95]:
+                      - generic [ref=e96]: PO Box 701
+                      - generic [ref=e97]: San Mateo, California, 94401
+                      - generic [ref=e98]: US
+                  - generic [ref=e99]:
+                    - term [ref=e100]: Phone
+                    - definition [ref=e101]: "+1.6505854708"
+                  - generic [ref=e102]:
+                    - term [ref=e103]: Email
+                    - definition [ref=e104]: https://www [dot] dynadot [dot] com/domain/contact-request?domain=zephyrs [dot] com
+              - generic [ref=e105]:
+                - heading "Admin Contact" [level=3] [ref=e106]
+                - generic [ref=e107]:
+                  - generic [ref=e108]:
+                    - term [ref=e109]: Name
+                    - definition [ref=e110]: REDACTED FOR PRIVACY
+                  - generic [ref=e111]:
+                    - term [ref=e112]: Organization
+                    - definition [ref=e113]: Super Privacy Service LTD c/o Dynadot
+                  - generic [ref=e114]:
+                    - term [ref=e115]: Address
+                    - definition [ref=e116]:
+                      - generic [ref=e117]: PO Box 701
+                      - generic [ref=e118]: San Mateo, California, 94401
+                      - generic [ref=e119]: US
+                  - generic [ref=e120]:
+                    - term [ref=e121]: Phone
+                    - definition [ref=e122]: "+1.6505854708"
+                  - generic [ref=e123]:
+                    - term [ref=e124]: Email
+                    - definition [ref=e125]: https://www [dot] dynadot [dot] com/domain/contact-request?domain=zephyrs [dot] com
+              - generic [ref=e126]:
+                - heading "Tech Contact" [level=3] [ref=e127]
+                - generic [ref=e128]:
+                  - generic [ref=e129]:
+                    - term [ref=e130]: Name
+                    - definition [ref=e131]: REDACTED FOR PRIVACY
+                  - generic [ref=e132]:
+                    - term [ref=e133]: Organization
+                    - definition [ref=e134]: Super Privacy Service LTD c/o Dynadot
+                  - generic [ref=e135]:
+                    - term [ref=e136]: Address
+                    - definition [ref=e137]:
+                      - generic [ref=e138]: PO Box 701
+                      - generic [ref=e139]: San Mateo, California, 94401
+                      - generic [ref=e140]: US
+                  - generic [ref=e141]:
+                    - term [ref=e142]: Phone
+                    - definition [ref=e143]: "+1.6505854708"
+                  - generic [ref=e144]:
+                    - term [ref=e145]: Email
+                    - definition [ref=e146]: https://www [dot] dynadot [dot] com/domain/contact-request?domain=zephyrs [dot] com
+          - generic [ref=e147]:
+            - heading "Registrar Information" [level=2] [ref=e148]
+            - generic [ref=e149]:
+              - generic [ref=e150]:
+                - term [ref=e151]: Registrar
+                - definition [ref=e152]: Dynadot Inc
+              - generic [ref=e153]:
+                - term [ref=e154]: WHOIS Server
+                - definition [ref=e155]: whois.dynadot.com
+              - generic [ref=e156]:
+                - term [ref=e157]: Referral URL
+                - definition [ref=e158]:
+                  - link "http://www.dynadot.com" [ref=e159] [cursor=pointer]:
+                    - /url: http://www.dynadot.com
+          - generic [ref=e160]:
+            - heading "Important Dates" [level=2] [ref=e161]
+            - generic [ref=e162]:
+              - generic [ref=e163]:
+                - term [ref=e164]: Created
+                - definition [ref=e165]:
+                  - time [ref=e166]: April 13, 1995
+              - generic [ref=e167]:
+                - term [ref=e168]: Updated
+                - definition [ref=e169]:
+                  - time [ref=e170]: August 19, 2025
+              - generic [ref=e171]:
+                - term [ref=e172]: Expires
+                - definition [ref=e173]:
+                  - time [ref=e174]: April 14, 2035
+            - paragraph [ref=e175]:
+              - text: WHOIS data last fetched
+              - time [ref=e176]: June 8, 2026
+          - generic [ref=e177]:
+            - heading "Nameservers" [level=2] [ref=e178]
+            - table [ref=e180]:
+              - rowgroup [ref=e181]:
+                - row "Hostname IP Address" [ref=e182]:
+                  - columnheader "Hostname" [ref=e183]
+                  - columnheader "IP Address" [ref=e184]
+              - rowgroup [ref=e185]:
+                - row "ns1.afternic.com 97.74.98.69" [ref=e186]:
+                  - cell "ns1.afternic.com" [ref=e187]:
+                    - link "ns1.afternic.com" [ref=e188] [cursor=pointer]:
+                      - /url: /nameserver/ns1.afternic.com
+                  - cell "97.74.98.69" [ref=e189]:
+                    - link "97.74.98.69" [ref=e190] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/97.74.98.69
+                - row "ns2.afternic.com 173.201.66.69" [ref=e191]:
+                  - cell "ns2.afternic.com" [ref=e192]:
+                    - link "ns2.afternic.com" [ref=e193] [cursor=pointer]:
+                      - /url: /nameserver/ns2.afternic.com
+                  - cell "173.201.66.69" [ref=e194]:
+                    - link "173.201.66.69" [ref=e195] [cursor=pointer]:
+                      - /url: /whois-ip/ip-address/173.201.66.69
+          - generic [ref=e196]:
+            - heading "Domain Status" [level=2] [ref=e197]
+            - list [ref=e199]:
+              - listitem [ref=e200]: clientTransferProhibited https://icann.org/epp#clientTransferProhibited
+          - insertion [ref=e203]
+          - generic [ref=e205]:
+            - heading "Similar Domains" [level=2] [ref=e206]
+            - list [ref=e207]:
+              - listitem [ref=e208]:
+                - link "zephya.com" [ref=e209] [cursor=pointer]:
+                  - /url: /whois/zephya.com
+              - listitem [ref=e210]:
+                - link "zephyai.com" [ref=e211] [cursor=pointer]:
+                  - /url: /whois/zephyai.com
+              - listitem [ref=e212]:
+                - link "zephyair.com" [ref=e213] [cursor=pointer]:
+                  - /url: /whois/zephyair.com
+              - listitem [ref=e214]:
+                - link "zephyair.de" [ref=e215] [cursor=pointer]:
+                  - /url: /whois/zephyair.de
+              - listitem [ref=e216]:
+                - link "zephybell.com" [ref=e217] [cursor=pointer]:
+                  - /url: /whois/zephybell.com
+              - listitem [ref=e218]:
+                - link "zephy.biz" [ref=e219] [cursor=pointer]:
+                  - /url: /whois/zephy.biz
+              - listitem [ref=e220]:
+                - link "zephybyte.com" [ref=e221] [cursor=pointer]:
+                  - /url: /whois/zephybyte.com
+              - listitem [ref=e222]:
+                - link "zephy.ca" [ref=e223] [cursor=pointer]:
+                  - /url: /whois/zephy.ca
+              - listitem [ref=e224]:
+                - link "zephycares.com" [ref=e225] [cursor=pointer]:
+                  - /url: /whois/zephycares.com
+              - listitem [ref=e226]:
+                - link "zephyclean.com" [ref=e227] [cursor=pointer]:
+                  - /url: /whois/zephyclean.com
+              - listitem [ref=e228]:
+                - link "zephy.com" [ref=e229] [cursor=pointer]:
+                  - /url: /whois/zephy.com
+          - generic [ref=e230]:
+            - heading "Raw WHOIS Data" [level=2] [ref=e232]
+            - paragraph [ref=e233]: Raw WHOIS responses from registry and registrar servers.
+            - generic [ref=e234]:
+              - button "Raw Registry WHOIS Data" [ref=e236] [cursor=pointer]:
+                - generic [ref=e237]: Raw Registry WHOIS Data
+                - img [ref=e238]
+              - button "Raw Registrar WHOIS Data" [ref=e241] [cursor=pointer]:
+                - generic [ref=e242]: Raw Registrar WHOIS Data
+                - img [ref=e243]
+          - insertion [ref=e247]
+          - generic [ref=e249]:
+            - heading "About WHOIS" [level=2] [ref=e250]
+            - generic [ref=e251]:
+              - paragraph [ref=e252]: WHOIS is a query and response protocol used for querying databases that store registered users of Internet resources, including domain names and IP addresses.
+              - paragraph [ref=e253]: The protocol provides essential information about domain ownership, administrative contacts, and technical details that are invaluable for domain management and security purposes.
+    - contentinfo [ref=e254]:
+      - generic [ref=e256]:
+        - generic [ref=e257]:
+          - link "Overview" [ref=e258] [cursor=pointer]:
+            - /url: /overview
+          - link "FAQ" [ref=e259] [cursor=pointer]:
+            - /url: /faq
+          - link "Terms" [ref=e260] [cursor=pointer]:
+            - /url: /terms
+          - link "Contact" [ref=e261] [cursor=pointer]:
+            - /url: /contact
+        - paragraph [ref=e262]: © 2026 who.is All rights reserved.
+  - alert [ref=e263]
