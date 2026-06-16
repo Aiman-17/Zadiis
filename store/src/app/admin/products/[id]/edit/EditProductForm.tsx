@@ -1,39 +1,29 @@
 'use client'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import ImageUploader from '@/components/admin/ImageUploader'
+import type { Product, Category } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 
-export default function NewProduct() {
+export default function EditProductForm({ product, categories }: { product: Product; categories: Category[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
-  const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [form, setForm] = useState({
-    name: '',
-    sku: '',
-    description: '',
-    price: '',
-    stock_quantity: '',
-    images: [] as string[],
-    colors: '',
-    sizes: [] as string[],
-    category_id: '',
-    is_active: true,
+    name: product.name,
+    sku: product.sku || '',
+    description: product.description || '',
+    price: String(product.price),
+    stock_quantity: String(product.stock_quantity),
+    images: [...product.images],
+    colors: product.colors.join(', '),
+    sizes: [...product.sizes],
+    category_id: product.category_id || '',
+    is_active: product.is_active,
   })
-
-  useEffect(() => {
-    fetch('/api/admin/categories')
-      .then(r => r.json())
-      .then((data: { id: string; name: string }[]) => {
-        setCategories(data)
-        if (data[0]) setForm(f => ({ ...f, category_id: data[0].id }))
-      })
-      .catch(() => {})
-  }, [])
 
   const set = (k: string, v: string | boolean | string[]) => setForm(f => ({ ...f, [k]: v }))
 
@@ -47,9 +37,10 @@ export default function NewProduct() {
     e.preventDefault()
     setLoading(true)
     const res = await fetch('/api/admin/products', {
-      method: 'POST',
+      method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
+        id: product.id,
         name: form.name,
         sku: form.sku || null,
         description: form.description,
@@ -64,15 +55,16 @@ export default function NewProduct() {
     })
     if (res.ok) {
       router.push('/admin/products')
+      router.refresh()
     } else {
-      alert('Failed to save product. Please try again.')
+      alert('Failed to update product. Please try again.')
       setLoading(false)
     }
   }
 
   return (
     <div className="max-w-2xl">
-      <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Add Product</h1>
+      <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Edit Product</h1>
       <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
         <div className="grid grid-cols-2 gap-4">
           <div>
@@ -115,6 +107,7 @@ export default function NewProduct() {
               className="w-full border rounded px-3 py-2 text-sm mt-1"
               style={{ borderColor: '#E2E8F0' }}
             >
+              <option value="">— No category —</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
@@ -147,9 +140,12 @@ export default function NewProduct() {
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
           <Label htmlFor="is_active">Active (visible in store)</Label>
         </div>
-        <Button type="submit" disabled={loading} className="w-full text-white rounded-none" style={{ backgroundColor: '#1C1C1C' }}>
-          {loading ? 'Saving...' : 'Save Product'}
-        </Button>
+        <div className="flex gap-3">
+          <Button type="button" variant="outline" className="flex-1 rounded-none" onClick={() => router.push('/admin/products')}>Cancel</Button>
+          <Button type="submit" disabled={loading} className="flex-1 text-white rounded-none" style={{ backgroundColor: '#1C1C1C' }}>
+            {loading ? 'Saving...' : 'Update Product'}
+          </Button>
+        </div>
       </form>
     </div>
   )
