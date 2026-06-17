@@ -26,7 +26,8 @@ export default async function AdminProducts() {
         </Button>
       </div>
       <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-        <table className="w-full text-sm">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm min-w-[560px]">
           <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
             <tr>
               <th className="text-left p-4 font-medium">Name</th>
@@ -72,6 +73,7 @@ export default async function AdminProducts() {
             ))}
           </tbody>
         </table>
+        </div>
       </div>
     </div>
   )

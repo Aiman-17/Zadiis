@@ -8,9 +8,11 @@ import { getCart, removeFromCart, saveCart, type CartItem } from '@/lib/cart-sto
 
 export default function CartPage() {
   const [items, setItems] = useState<CartItem[]>([])
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
     setItems(getCart())
+    setMounted(true)
   }, [])
 
   const remove = (id: string, size: string, color: string) => {
@@ -28,7 +30,20 @@ export default function CartPage() {
     window.dispatchEvent(new Event('cart-updated'))
   }
 
-  const total = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+  const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
+
+  if (!mounted) {
+    return (
+      <div className="max-w-3xl mx-auto px-4 py-10">
+        <div className="h-8 w-48 bg-gray-200 rounded animate-pulse mb-8" />
+        <div className="space-y-4">
+          {[1, 2].map(i => (
+            <div key={i} className="h-32 bg-gray-100 rounded-lg animate-pulse" />
+          ))}
+        </div>
+      </div>
+    )
+  }
 
   if (items.length === 0) {
     return (
@@ -65,25 +80,34 @@ export default function CartPage() {
                 <button
                   onClick={() => updateQty(item.id, item.size, item.color, item.quantity - 1)}
                   className="w-7 h-7 border rounded flex items-center justify-center hover:bg-gray-100 text-sm"
+                  style={{ borderColor: '#E8DDD4' }}
                 >−</button>
                 <span className="text-sm w-6 text-center">{item.quantity}</span>
                 <button
                   onClick={() => updateQty(item.id, item.size, item.color, item.quantity + 1)}
                   className="w-7 h-7 border rounded flex items-center justify-center hover:bg-gray-100 text-sm"
+                  style={{ borderColor: '#E8DDD4' }}
                 >+</button>
               </div>
             </div>
-            <button onClick={() => remove(item.id, item.size, item.color)} className="text-gray-400 hover:text-red-500 shrink-0">
+            <button onClick={() => remove(item.id, item.size, item.color)} className="text-gray-400 hover:text-red-500 shrink-0 transition-colors">
               <Trash2 size={18} />
             </button>
           </div>
         ))}
       </div>
       <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
-        <div className="flex justify-between font-semibold text-lg mb-4">
-          <span>Total</span>
-          <span>PKR {total.toLocaleString()}</span>
+        <div className="flex justify-between text-sm mb-2">
+          <span>Subtotal</span>
+          <span>PKR {subtotal.toLocaleString()}</span>
         </div>
+        <div className="flex justify-between text-sm pb-4 mb-4 border-b" style={{ borderColor: '#E8DDD4' }}>
+          <span>Shipping</span>
+          <span className="text-gray-500">Calculated at checkout</span>
+        </div>
+        <Link href="/shop" className="text-sm hover:underline block mb-4" style={{ color: '#A68B6E' }}>
+          ← Continue Shopping
+        </Link>
         <Button asChild className="w-full text-white rounded-none uppercase tracking-widest py-6" style={{ backgroundColor: '#1C1C1C' }}>
           <Link href="/checkout">Proceed to Checkout</Link>
         </Button>

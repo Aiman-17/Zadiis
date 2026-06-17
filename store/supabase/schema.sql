@@ -42,3 +42,18 @@ create table orders (
 
 -- Seed initial category
 insert into categories (name, slug) values ('Women''s Clothing', 'womens-clothing');
+
+-- Row Level Security
+alter table categories enable row level security;
+alter table products enable row level security;
+alter table orders enable row level security;
+
+-- Categories: readable by everyone
+create policy "categories_select_anon" on categories for select to anon using (true);
+
+-- Products: readable by everyone
+create policy "products_select_anon" on products for select to anon using (true);
+
+-- Orders: insertable by anon, readable only by service_role
+create policy "orders_insert_anon" on orders for insert to anon with check (true);
+create policy "orders_select_service_role" on orders for select to service_role using (true);

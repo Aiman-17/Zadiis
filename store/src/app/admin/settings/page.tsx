@@ -74,7 +74,8 @@ export default function AdminSettings() {
       {/* Delivery Zones */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#E8DDD4' }}>
         <h2 className="font-semibold mb-4">Delivery Zones</h2>
-        <table className="w-full text-sm mb-4">
+        <div className="overflow-x-auto">
+        <table className="w-full text-sm mb-4 min-w-[360px]">
           <thead>
             <tr className="border-b" style={{ borderColor: '#E8DDD4' }}>
               <th className="text-left py-2 font-medium">City</th>
@@ -114,7 +115,8 @@ export default function AdminSettings() {
             ))}
           </tbody>
         </table>
-        <div className="flex gap-2 items-end">
+        </div>
+        <div className="flex flex-wrap gap-2 items-end">
           <div>
             <Label className="text-xs">City</Label>
             <Input value={newCity} onChange={e => setNewCity(e.target.value)} placeholder="Lahore" className="mt-1 w-32" />

@@ -7,6 +7,20 @@ import type { Order } from '@/types'
 
 const COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355', '#D4B896', '#6B5744']
 
+const REVENUE_TICKS = [0, 25000, 50000, 75000, 100000, 125000, 150000]
+
+function pkrShort(n: number): string {
+  if (n === 0) return '0'
+  const s = n.toString()
+  if (s.length <= 5) {
+    return s.slice(0, -3) + ',' + s.slice(-3)
+  }
+  const last3 = s.slice(-3)
+  const rest = s.slice(0, -3)
+  const restFmt = rest.length > 2 ? rest.slice(0, -2) + ',' + rest.slice(-2) : rest
+  return restFmt + ',' + last3
+}
+
 export default function DashboardCharts({ orders }: { orders: Order[] }) {
   const months = Array.from({ length: 6 }, (_, i) => {
     const d = new Date()
@@ -50,7 +64,13 @@ export default function DashboardCharts({ orders }: { orders: Order[] }) {
         <ResponsiveContainer width="100%" height={220}>
           <BarChart data={monthlyData}>
             <XAxis dataKey="month" tick={{ fontSize: 12 }} />
-            <YAxis tick={{ fontSize: 12 }} />
+            <YAxis
+              tick={{ fontSize: 11 }}
+              domain={[0, 150000]}
+              ticks={REVENUE_TICKS}
+              tickFormatter={pkrShort}
+              width={72}
+            />
             <Tooltip formatter={(v) => `PKR ${Number(v ?? 0).toLocaleString()}`} />
             <Bar dataKey="revenue" fill="#A68B6E" radius={[4, 4, 0, 0]} />
           </BarChart>
