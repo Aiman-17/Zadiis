@@ -66,7 +66,7 @@ export async function POST(req: NextRequest) {
 
     try {
       await resend.emails.send({
-        from: 'orders@zadiis.com',
+        from: 'ZADIIS <orders@zadiis.com.pk>',
         to: process.env.OWNER_EMAIL!,
         subject: `New Order ${order.order_number} — PKR ${Number(order.total).toLocaleString()}`,
         html: `
