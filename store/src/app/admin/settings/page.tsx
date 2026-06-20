@@ -12,6 +12,8 @@ export default function AdminSettings() {
   const [newCity, setNewCity] = useState('')
   const [newCharge, setNewCharge] = useState('')
   const [saving, setSaving] = useState(false)
+  const [heroImage, setHeroImage] = useState('')
+  const [heroUploading, setHeroUploading] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/delivery-zones')
@@ -19,7 +21,10 @@ export default function AdminSettings() {
       .then(setZones)
     fetch('/api/admin/settings')
       .then(r => r.json())
-      .then((s: Record<string, string>) => setCodEnabled(s.cod_enabled === 'true'))
+      .then((s: Record<string, string>) => {
+        setCodEnabled(s.cod_enabled === 'true')
+        setHeroImage(s.hero_image || '')
+      })
   }, [])
 
   const addZone = async () => {
@@ -58,6 +63,23 @@ export default function AdminSettings() {
     setZones(z => z.filter(zone => zone.id !== id))
   }
 
+  const uploadHero = async (file: File) => {
+    setHeroUploading(true)
+    const formData = new FormData()
+    formData.append('file', file)
+    const res = await fetch('/api/admin/upload', { method: 'POST', body: formData })
+    if (res.ok) {
+      const { url } = await res.json()
+      setHeroImage(url)
+      await fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'hero_image', value: url }),
+      })
+    }
+    setHeroUploading(false)
+  }
+
   const toggleCod = async (enabled: boolean) => {
     setCodEnabled(enabled)
     await fetch('/api/admin/settings', {
@@ -70,6 +92,41 @@ export default function AdminSettings() {
   return (
     <div className="max-w-2xl space-y-8">
       <h1 className="text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Settings</h1>
+
+      {/* Hero Banner */}
+      <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#E8DDD4' }}>
+        <h2 className="font-semibold mb-4">Hero Banner Image</h2>
+        {heroImage && (
+          <div className="relative w-full rounded overflow-hidden mb-4 bg-gray-100" style={{ aspectRatio: '16/6' }}>
+            <img src={heroImage} alt="Hero banner preview" className="w-full h-full object-cover" />
+          </div>
+        )}
+        <label className="flex items-center gap-2 border-2 border-dashed rounded px-4 py-3 text-sm cursor-pointer hover:bg-gray-50 transition-colors" style={{ borderColor: '#E8DDD4', color: '#A68B6E' }}>
+          <input
+            type="file"
+            accept="image/*"
+            className="hidden"
+            onChange={e => e.target.files?.[0] && uploadHero(e.target.files[0])}
+          />
+          {heroUploading ? 'Uploading...' : heroImage ? 'Replace Banner Image' : 'Upload Banner Image'}
+        </label>
+        {heroImage && (
+          <button
+            onClick={async () => {
+              setHeroImage('')
+              await fetch('/api/admin/settings', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ key: 'hero_image', value: '' }),
+              })
+            }}
+            className="mt-2 text-xs hover:opacity-80"
+            style={{ color: '#EF4444' }}
+          >
+            Remove banner
+          </button>
+        )}
+      </div>
 
       {/* Delivery Zones */}
       <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#E8DDD4' }}>

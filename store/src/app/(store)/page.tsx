@@ -1,13 +1,29 @@
 import Link from 'next/link'
+import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/ProductCard'
 import { getFeaturedProducts } from '@/lib/products'
+import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield } from 'lucide-react'
+
+async function getHeroImage(): Promise<string> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'hero_image')
+      .single()
+    return data?.value || ''
+  } catch {
+    return ''
+  }
+}
 
 export default async function HomePage() {
   let featured: Awaited<ReturnType<typeof getFeaturedProducts>> = []
+  let heroImage = ''
   try {
-    featured = await getFeaturedProducts(6)
+    ;[featured, heroImage] = await Promise.all([getFeaturedProducts(6), getHeroImage()])
   } catch {
     // Supabase not configured yet — show empty state
   }
@@ -16,12 +32,24 @@ export default async function HomePage() {
     <div>
       {/* Hero */}
       <section className="relative flex items-center justify-center text-center overflow-hidden" style={{ minHeight: '85vh', backgroundColor: '#E8DDD4' }}>
-        <div className="relative z-10 px-4">
-          <p className="text-sm uppercase tracking-widest mb-4" style={{ color: '#A68B6E', letterSpacing: '0.3em' }}>New Collection</p>
-          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ fontFamily: 'Playfair Display, serif' }}>
+        {heroImage && (
+          <Image
+            src={heroImage}
+            alt="ZADIIS Hero Banner"
+            fill
+            className="object-cover"
+            priority
+          />
+        )}
+        <div
+          className="relative z-10 px-4"
+          style={heroImage ? { backgroundColor: 'rgba(0,0,0,0.35)', padding: '40px 32px', borderRadius: '8px' } : {}}
+        >
+          <p className="text-sm uppercase tracking-widest mb-4" style={{ color: heroImage ? '#F5DEB3' : '#A68B6E', letterSpacing: '0.3em' }}>New Collection</p>
+          <h1 className="text-4xl md:text-6xl font-bold mb-6 leading-tight" style={{ fontFamily: 'Playfair Display, serif', color: heroImage ? 'white' : 'inherit' }}>
             Dressed in<br />Confidence
           </h1>
-          <p className="text-gray-600 mb-8 max-w-md mx-auto">
+          <p className="mb-8 max-w-md mx-auto" style={{ color: heroImage ? '#E5E7EB' : '#4B5563' }}>
             Discover women&apos;s fashion crafted for the modern Pakistani woman.
           </p>
           <Button asChild size="lg" className="text-white px-10 rounded-none uppercase tracking-widest text-sm" style={{ backgroundColor: '#1C1C1C' }}>
