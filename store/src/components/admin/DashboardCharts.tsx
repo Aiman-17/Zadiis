@@ -5,7 +5,7 @@ import {
 } from 'recharts'
 import type { Order } from '@/types'
 
-const PIE_COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355', '#D4B896', '#6B5744']
+const FALLBACK_COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355', '#D4B896', '#6B5744']
 
 const STATUS_COLORS: Record<string, string> = {
   new: '#3B82F6',
@@ -51,13 +51,6 @@ export default function DashboardCharts({ orders }: { orders: Order[] }) {
     }
   })
 
-  // This month sales count
-  const now = new Date()
-  const thisMonthSales = orders.filter(o => {
-    const d = new Date(o.created_at)
-    return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
-  }).length
-
   // Order status breakdown
   const statusCounts: Record<string, number> = {
     new: 0, processing: 0, shipped: 0, delivered: 0, returned: 0,
@@ -69,27 +62,20 @@ export default function DashboardCharts({ orders }: { orders: Order[] }) {
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // Sales by color
-  const colorMap: Record<string, number> = {}
+  // Top selling products by units sold
+  const productMap: Record<string, number> = {}
   orders.forEach(o =>
-    (o.items as Array<{ color: string; quantity: number }>).forEach(i => {
-      colorMap[i.color] = (colorMap[i.color] || 0) + i.quantity
+    (o.items as Array<{ product_name: string; quantity: number }>).forEach(i => {
+      productMap[i.product_name] = (productMap[i.product_name] || 0) + i.quantity
     })
   )
-  const colorData = Object.entries(colorMap)
-    .map(([name, value]) => ({ name, value }))
-    .sort((a, b) => b.value - a.value)
+  const topProducts = Object.entries(productMap)
+    .map(([name, units]) => ({ name, units }))
+    .sort((a, b) => b.units - a.units)
     .slice(0, 6)
 
   return (
     <div className="space-y-6">
-      {/* This Month Sales card */}
-      <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4', display: 'inline-flex', flexDirection: 'column', minWidth: 180 }}>
-        <p className="text-xs mb-1" style={{ color: '#6B7280' }}>This Month Total Sales</p>
-        <p className="text-3xl font-bold">{thisMonthSales}</p>
-        <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>orders placed this month</p>
-      </div>
-
       {/* Monthly Revenue Bar Chart — 12 months */}
       <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
         <h3 className="font-semibold mb-4">Monthly Revenue — PKR (Last 12 Months)</h3>
@@ -152,7 +138,7 @@ export default function DashboardCharts({ orders }: { orders: Order[] }) {
                     outerRadius={80}
                   >
                     {statusData.map((entry, i) => (
-                      <Cell key={i} fill={STATUS_COLORS[entry.name] ?? PIE_COLORS[i % PIE_COLORS.length]} />
+                      <Cell key={i} fill={STATUS_COLORS[entry.name] ?? FALLBACK_COLORS[i % FALLBACK_COLORS.length]} />
                     ))}
                   </Pie>
                   <Tooltip />
@@ -172,26 +158,28 @@ export default function DashboardCharts({ orders }: { orders: Order[] }) {
           )}
         </div>
 
-        {/* Sales by Color */}
-        {colorData.length > 0 ? (
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Sales by Color</h3>
+        {/* Top Selling Products */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <h3 className="font-semibold mb-4">Top Selling Products</h3>
+          {topProducts.length > 0 ? (
             <ResponsiveContainer width="100%" height={200}>
-              <PieChart>
-                <Pie data={colorData} dataKey="value" nameKey="name" cx="50%" cy="50%" outerRadius={75} label={({ name }) => name}>
-                  {colorData.map((_, i) => (
-                    <Cell key={i} fill={PIE_COLORS[i % PIE_COLORS.length]} />
-                  ))}
-                </Pie>
-                <Tooltip />
-              </PieChart>
+              <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
+                <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                <YAxis
+                  type="category"
+                  dataKey="name"
+                  tick={{ fontSize: 11 }}
+                  width={110}
+                  tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 13) + '…' : v}
+                />
+                <Tooltip formatter={(v) => [`${v} units`, 'Sold']} />
+                <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units Sold" />
+              </BarChart>
             </ResponsiveContainer>
-          </div>
-        ) : (
-          <div className="bg-white rounded-lg p-5 border flex items-center justify-center text-sm" style={{ borderColor: '#E8DDD4', color: '#9CA3AF' }}>
-            Sales by Color will appear once orders are placed.
-          </div>
-        )}
+          ) : (
+            <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>Top products will appear once orders are placed.</p>
+          )}
+        </div>
       </div>
     </div>
   )
