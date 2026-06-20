@@ -20,6 +20,16 @@ export default function Footer() {
           <h4 className="font-semibold mb-3">Help</h4>
           <ul className="space-y-2 text-sm" style={{ color: '#9CA3AF' }}>
             <li><Link href="/contact" className="hover:text-white transition-colors">WhatsApp Support</Link></li>
+            <li>
+              <a href="mailto:info@zadiis.com.pk" className="hover:text-white transition-colors">
+                info@zadiis.com.pk
+              </a>
+            </li>
+            <li>
+              <a href="mailto:support@zadiis.com.pk" className="hover:text-white transition-colors">
+                support@zadiis.com.pk
+              </a>
+            </li>
             <li>Free delivery on orders over PKR 2,000</li>
           </ul>
         </div>
