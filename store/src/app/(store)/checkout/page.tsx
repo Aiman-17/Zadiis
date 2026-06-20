@@ -19,6 +19,7 @@ const COD_METHOD = { id: 'cod', label: 'Cash on Delivery' }
 export default function CheckoutPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState<string | null>(null)
   const [items, setItems] = useState<CartItem[]>([])
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [codEnabled, setCodEnabled] = useState(false)
@@ -60,6 +61,7 @@ export default function CheckoutPage() {
     e.preventDefault()
     if (!form.payment) { alert('Please select a payment method'); return }
     setLoading(true)
+    setError(null)
     const orderItems = items.map(i => ({
       product_id: i.id,
       product_name: i.name,
@@ -92,11 +94,11 @@ export default function CheckoutPage() {
         window.dispatchEvent(new Event('cart-updated'))
         router.push(`/order/${data.orderId}`)
       } else {
-        alert('Something went wrong. Please try again.')
+        setError(data.error || 'Something went wrong. Please try again.')
         setLoading(false)
       }
     } catch {
-      alert('Network error. Please try again.')
+      setError('Network error. Please try again.')
       setLoading(false)
     }
   }
@@ -183,6 +185,11 @@ export default function CheckoutPage() {
             </div>
           </div>
         </div>
+        {error && (
+          <div className="rounded border px-4 py-3 text-sm" style={{ borderColor: '#FCA5A5', backgroundColor: '#FEF2F2', color: '#991B1B' }}>
+            {error}
+          </div>
+        )}
         <Button type="submit" disabled={loading} className="w-full text-white rounded-none uppercase tracking-widest py-6" style={{ backgroundColor: '#1C1C1C' }}>
           {loading ? 'Placing Order...' : 'Place Order'}
         </Button>

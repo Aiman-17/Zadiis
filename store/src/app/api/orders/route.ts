@@ -33,6 +33,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    // Validate stock for all items before creating order
+    for (const item of items as Array<{ product_id: string; product_name: string; quantity: number }>) {
+      const { data: product, error } = await supabaseAdmin
+        .from('products')
+        .select('stock_quantity, name')
+        .eq('id', item.product_id)
+        .single()
+
+      if (error || !product) {
+        return NextResponse.json({ error: `Product not found: ${item.product_name}` }, { status: 400 })
+      }
+      if (product.stock_quantity < item.quantity) {
+        return NextResponse.json({
+          error: `Sorry, "${item.product_name}" is out of stock or has insufficient quantity. Available: ${product.stock_quantity}.`,
+          outOfStock: true,
+        }, { status: 400 })
+      }
+    }
+
     let order = null
     let insertError = null
     for (let attempt = 0; attempt < 3; attempt++) {
@@ -62,6 +81,14 @@ export async function POST(req: NextRequest) {
     if (!order) {
       console.error('DB insert error:', insertError)
       return NextResponse.json({ error: insertError?.message ?? 'Failed to create order' }, { status: 500 })
+    }
+
+    // Decrement stock for each item after order is confirmed
+    for (const item of items as Array<{ product_id: string; quantity: number }>) {
+      await supabaseAdmin.rpc('decrement_stock', {
+        p_product_id: item.product_id,
+        p_quantity: item.quantity,
+      })
     }
 
     const itemRows = (order.items as Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>)
