@@ -59,3 +59,12 @@ export type DeliveryZone = {
   is_active: boolean
   created_at: string
 }
+
+export type Review = {
+  id: string
+  product_id: string
+  customer_name: string
+  rating: number
+  comment: string | null
+  created_at: string
+}
