@@ -1,20 +1,51 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
 import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X } from 'lucide-react'
-
-const NAV = [
-  { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true },
-  { href: '/admin/products', icon: Package, label: 'Products', exact: false },
-  { href: '/admin/orders', icon: ShoppingBag, label: 'Orders', exact: false },
-  { href: '/admin/settings', icon: Settings, label: 'Settings', exact: false },
-]
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const router = useRouter()
   const [open, setOpen] = useState(false)
+  const [newOrders, setNewOrders] = useState(0)
+  const lastCountRef = useRef<number | null>(null)
+
+  const NAV = [
+    { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true, badge: 0 },
+    { href: '/admin/products', icon: Package, label: 'Products', exact: false, badge: 0 },
+    { href: '/admin/orders', icon: ShoppingBag, label: 'Orders', exact: false, badge: newOrders },
+    { href: '/admin/settings', icon: Settings, label: 'Settings', exact: false, badge: 0 },
+  ]
+
+  useEffect(() => {
+    const check = async () => {
+      try {
+        const res = await fetch('/api/admin/orders')
+        if (!res.ok) return
+        const data = await res.json()
+        const count = Array.isArray(data)
+          ? data.filter((o: { order_status: string }) => o.order_status === 'new').length
+          : 0
+        if (lastCountRef.current === null) {
+          lastCountRef.current = count
+        } else if (count > lastCountRef.current) {
+          setNewOrders(count - lastCountRef.current)
+          lastCountRef.current = count
+        }
+      } catch {
+        // network error — ignore
+      }
+    }
+    check()
+    const interval = setInterval(check, 30000)
+    return () => clearInterval(interval)
+  }, [])
+
+  const clearNotifications = () => {
+    setNewOrders(0)
+    lastCountRef.current = null
+  }
 
   const isActive = (href: string, exact: boolean) =>
     exact ? pathname === href : pathname.startsWith(href)
@@ -26,11 +57,11 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const NavContent = () => (
     <>
-      {NAV.map(({ href, icon: Icon, label, exact }) => (
+      {NAV.map(({ href, icon: Icon, label, exact, badge }) => (
         <Link
           key={href}
           href={href}
-          onClick={() => setOpen(false)}
+          onClick={() => { setOpen(false); if (href === '/admin/orders') clearNotifications() }}
           className="flex items-center gap-3 px-2 py-2.5 rounded text-sm transition-colors"
           style={
             isActive(href, exact)
@@ -38,7 +69,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               : { color: 'rgba(255,255,255,0.7)' }
           }
         >
-          <Icon size={16} />{label}
+          <Icon size={16} />
+          {label}
+          {badge > 0 && (
+            <span
+              className="ml-auto text-xs rounded-full w-5 h-5 flex items-center justify-center font-bold"
+              style={{ backgroundColor: '#EF4444', color: 'white' }}
+            >
+              {badge > 9 ? '9+' : badge}
+            </span>
+          )}
         </Link>
       ))}
       <div className="flex-1" />
@@ -87,9 +127,16 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           style={{ backgroundColor: '#1C1C1C' }}
         >
           <h2 className="text-base text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS Admin</h2>
-          <button onClick={() => setOpen(true)} className="text-white p-1">
-            <Menu size={22} />
-          </button>
+          <div className="flex items-center gap-3">
+            {newOrders > 0 && (
+              <span className="text-xs rounded-full px-2 py-0.5 font-bold" style={{ backgroundColor: '#EF4444', color: 'white' }}>
+                {newOrders} new order{newOrders !== 1 ? 's' : ''}
+              </span>
+            )}
+            <button onClick={() => setOpen(true)} className="text-white p-1">
+              <Menu size={22} />
+            </button>
+          </div>
         </header>
 
         <main className="flex-1 p-4 md:p-8 overflow-auto">{children}</main>
