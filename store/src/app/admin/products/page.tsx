@@ -1,5 +1,7 @@
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase/server'
+
+export const dynamic = 'force-dynamic'
 import { Button } from '@/components/ui/button'
 import { Plus } from 'lucide-react'
 import ProductActions from '@/components/admin/ProductActions'

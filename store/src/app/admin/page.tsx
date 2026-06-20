@@ -1,5 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { ShoppingBag, TrendingUp, Package, Clock } from 'lucide-react'
+
+export const dynamic = 'force-dynamic'
 import DashboardCharts from '@/components/admin/DashboardCharts'
 import type { Order } from '@/types'
 
