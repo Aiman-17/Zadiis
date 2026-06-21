@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived } from '@/lib/email'
+import { generateInvoice } from '@/lib/invoice'
 
 function verifySignature(rawBody: string, signature: string, secret: string): boolean {
   try {
@@ -83,6 +84,9 @@ export async function POST(req: NextRequest) {
     console.error('[webhook/safepay] Failed to update order:', updateError.message)
     return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
   }
+
+  // Generate invoice for paid order (idempotent — safe to call multiple times)
+  await generateInvoice(order.id)
 
   // Send confirmation emails — fire-and-forget (errors are caught inside email.ts)
   await sendCustomerPaymentConfirmed(order.customer_email, {

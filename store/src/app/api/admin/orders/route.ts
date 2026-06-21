@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendCustomerOrderDelivered, sendOwnerPaymentReceived } from '@/lib/email'
+import { generateInvoice } from '@/lib/invoice'
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -55,5 +56,11 @@ export async function PUT(req: NextRequest) {
 
   const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Generate invoice if order was just paid (covers COD auto-pay + manual Mark Paid)
+  if (update.payment_status === 'paid') {
+    await generateInvoice(id)
+  }
+
   return NextResponse.json({ success: true })
 }
