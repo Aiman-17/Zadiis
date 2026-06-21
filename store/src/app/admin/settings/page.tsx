@@ -14,6 +14,9 @@ export default function AdminSettings() {
   const [saving, setSaving] = useState(false)
   const [heroImage, setHeroImage] = useState('')
   const [heroUploading, setHeroUploading] = useState(false)
+  const [jazzcashNumber, setJazzcashNumber] = useState('')
+  const [easypaisaNumber, setEasypaisaNumber] = useState('')
+  const [numbersSaving, setNumbersSaving] = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/delivery-zones')
@@ -24,6 +27,8 @@ export default function AdminSettings() {
       .then((s: Record<string, string>) => {
         setCodEnabled(s.cod_enabled === 'true')
         setHeroImage(s.hero_image || '')
+        setJazzcashNumber(s.jazzcash_number || '')
+        setEasypaisaNumber(s.easypaisa_number || '')
       })
   }, [])
 
@@ -87,6 +92,23 @@ export default function AdminSettings() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'cod_enabled', value: String(enabled) }),
     })
+  }
+
+  const savePaymentNumbers = async () => {
+    setNumbersSaving(true)
+    await Promise.all([
+      fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'jazzcash_number', value: jazzcashNumber.trim() }),
+      }),
+      fetch('/api/admin/settings', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ key: 'easypaisa_number', value: easypaisaNumber.trim() }),
+      }),
+    ])
+    setNumbersSaving(false)
   }
 
   return (
@@ -206,6 +228,40 @@ export default function AdminSettings() {
               style={{ transform: codEnabled ? 'translateX(20px)' : 'translateX(0)' }}
             />
           </button>
+        </div>
+      </div>
+
+      {/* Fallback Payment Numbers */}
+      <div className="bg-white rounded-lg border p-6" style={{ borderColor: '#E8DDD4' }}>
+        <h2 className="font-semibold mb-1">Fallback Payment Numbers</h2>
+        <p className="text-xs text-gray-500 mb-4">Shown to customers when Safepay is down. Enter your personal number customers can transfer to.</p>
+        <div className="space-y-4">
+          <div>
+            <Label className="text-xs">JazzCash Number</Label>
+            <Input
+              value={jazzcashNumber}
+              onChange={e => setJazzcashNumber(e.target.value)}
+              placeholder="03001234567"
+              className="mt-1"
+            />
+          </div>
+          <div>
+            <Label className="text-xs">Easypaisa Number</Label>
+            <Input
+              value={easypaisaNumber}
+              onChange={e => setEasypaisaNumber(e.target.value)}
+              placeholder="03001234567"
+              className="mt-1"
+            />
+          </div>
+          <Button
+            onClick={savePaymentNumbers}
+            disabled={numbersSaving}
+            className="text-white rounded-none"
+            style={{ backgroundColor: '#1C1C1C' }}
+          >
+            {numbersSaving ? 'Saving...' : 'Save Numbers'}
+          </Button>
         </div>
       </div>
     </div>
