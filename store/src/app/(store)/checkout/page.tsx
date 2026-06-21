@@ -161,7 +161,7 @@ export default function CheckoutPage() {
               className="w-full text-left px-4 py-3 rounded border text-sm transition-colors hover:bg-white"
               style={{ borderColor: '#E8DDD4', backgroundColor: 'white', color: '#1C1C1C' }}
             >
-              <span className="font-medium">Pay manually via {form.payment === 'jazzcash' ? 'JazzCash' : form.payment === 'easypaisa' ? 'Easypaisa' : 'bank transfer'}</span>
+              <span className="font-medium">Pay manually via {form.payment === 'jazzcash' ? 'JazzCash' : form.payment === 'easypaisa' ? 'Easypaisa' : 'card'}</span>
               {(form.payment === 'jazzcash' && gatewayDown.jazzcash_number) && (
                 <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
                   Send PKR {total.toLocaleString()} to JazzCash: {gatewayDown.jazzcash_number} — then WhatsApp us your receipt
@@ -225,7 +225,7 @@ export default function CheckoutPage() {
                 className="flex items-center gap-3 border rounded p-3 cursor-pointer transition-colors"
                 style={{ borderColor: form.payment === m.id ? '#1C1C1C' : '#E2E8F0', backgroundColor: form.payment === m.id ? '#F9FAFB' : 'white' }}
               >
-                <input type="radio" name="payment" value={m.id} checked={form.payment === m.id} onChange={() => { set('payment', m.id); setGatewayDown(null) }} />
+                <input type="radio" name="payment" value={m.id} checked={form.payment === m.id} onChange={() => { set('payment', m.id); setGatewayDown(null); setError(null) }} />
                 <span className="text-sm">{m.label}</span>
               </label>
             ))}
