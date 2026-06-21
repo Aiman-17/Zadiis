@@ -122,6 +122,16 @@ export default function AdminOrders() {
                 <span className="text-xs px-2 py-1 rounded-full font-medium" style={STATUS_STYLES[order.order_status]}>
                   {order.order_status}
                 </span>
+                <span
+                  className="text-xs px-2 py-0.5 rounded-full"
+                  style={order.payment_status === 'paid'
+                    ? { backgroundColor: '#DCFCE7', color: '#15803D' }
+                    : order.payment_status === 'failed'
+                    ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                    : { backgroundColor: '#FEF9C3', color: '#92400E' }}
+                >
+                  {order.payment_status}
+                </span>
                 {isOlderThan30Days(order.created_at) && (
                   <button
                     onClick={e => { e.stopPropagation(); deleteOrder(order.id) }}
