@@ -13,25 +13,20 @@ const BASE_PAYMENT_METHODS = [
   { id: 'easypaisa', label: 'Easypaisa' },
   { id: 'card', label: 'Credit / Debit Card' },
 ]
-
 const COD_METHOD = { id: 'cod', label: 'Cash on Delivery' }
+
+type GatewayDownData = { jazzcash_number: string; easypaisa_number: string }
 
 export default function CheckoutPage() {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState<string | null>(null)
+  const [gatewayDown, setGatewayDown] = useState<GatewayDownData | null>(null)
   const [items, setItems] = useState<CartItem[]>([])
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [codEnabled, setCodEnabled] = useState(false)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
-  const [form, setForm] = useState({
-    name: '',
-    phone: '',
-    email: '',
-    address: '',
-    city: '',
-    payment: '',
-  })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '' })
 
   useEffect(() => {
     const cart = getCart()
@@ -57,50 +52,85 @@ export default function CheckoutPage() {
   const total = subtotal + deliveryCharge
   const paymentMethods = codEnabled ? [...BASE_PAYMENT_METHODS, COD_METHOD] : BASE_PAYMENT_METHODS
 
+  const buildPayload = () => ({
+    customer_name: form.name,
+    customer_phone: form.phone,
+    customer_email: form.email || null,
+    address: form.address,
+    city: form.city,
+    items: items.map(i => ({ product_id: i.id, product_name: i.name, sku: i.sku, size: i.size, color: i.color, quantity: i.quantity, price: i.price })),
+    subtotal,
+    delivery_charge: deliveryCharge,
+    total,
+    payment_method: form.payment,
+  })
+
+  const submitCod = async (paymentOverride?: string) => {
+    const res = await fetch('/api/orders', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ ...buildPayload(), payment_method: paymentOverride ?? form.payment }),
+    })
+    const data = await res.json()
+    if (data.orderId) {
+      clearCart()
+      window.dispatchEvent(new Event('cart-updated'))
+      router.push(`/order/${data.orderId}`)
+    } else {
+      setError(data.error || 'Something went wrong. Please try again.')
+      setLoading(false)
+    }
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.payment) { alert('Please select a payment method'); return }
     setLoading(true)
     setError(null)
-    const orderItems = items.map(i => ({
-      product_id: i.id,
-      product_name: i.name,
-      sku: i.sku,
-      size: i.size,
-      color: i.color,
-      quantity: i.quantity,
-      price: i.price,
-    }))
-    try {
-      const res = await fetch('/api/orders', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          customer_name: form.name,
-          customer_phone: form.phone,
-          customer_email: form.email || null,
-          address: form.address,
-          city: form.city,
-          items: orderItems,
-          subtotal,
-          delivery_charge: deliveryCharge,
-          total,
-          payment_method: form.payment,
-        }),
-      })
-      const data = await res.json()
-      if (data.orderId) {
-        clearCart()
-        window.dispatchEvent(new Event('cart-updated'))
-        router.push(`/order/${data.orderId}`)
-      } else {
-        setError(data.error || 'Something went wrong. Please try again.')
-        setLoading(false)
-      }
-    } catch {
-      setError('Network error. Please try again.')
-      setLoading(false)
+    setGatewayDown(null)
+
+    // COD: use existing orders API directly
+    if (form.payment === 'cod') {
+      await submitCod()
+      return
     }
+
+    // Online payment: use Safepay tracker
+    const res = await fetch('/api/payments/tracker', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(buildPayload()),
+    })
+    const data = await res.json()
+
+    if (data.checkoutUrl) {
+      clearCart()
+      window.dispatchEvent(new Event('cart-updated'))
+      window.location.href = data.checkoutUrl
+      return
+    }
+
+    if (data.error === 'GATEWAY_DOWN') {
+      setGatewayDown({ jazzcash_number: data.jazzcash_number, easypaisa_number: data.easypaisa_number })
+      setLoading(false)
+      return
+    }
+
+    setError(data.error || 'Something went wrong. Please try again.')
+    setLoading(false)
+  }
+
+  const handleSwitchToCod = async () => {
+    setGatewayDown(null)
+    setLoading(true)
+    await submitCod('cod')
+  }
+
+  const handlePayManually = async () => {
+    // Place order with original payment method — admin will manually verify screenshot
+    setGatewayDown(null)
+    setLoading(true)
+    await submitCod()
   }
 
   if (items.length === 0) return null
@@ -108,6 +138,52 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <h1 className="text-2xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Checkout</h1>
+
+      {/* Gateway down fallback */}
+      {gatewayDown && (
+        <div className="mb-6 rounded-lg border p-5" style={{ borderColor: '#F5D87A', backgroundColor: '#FEFCE8' }}>
+          <p className="font-semibold mb-1" style={{ color: '#92640A' }}>Online payment is temporarily unavailable</p>
+          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Safepay is currently down. You can:</p>
+          <div className="space-y-2">
+            {codEnabled && (
+              <button
+                onClick={handleSwitchToCod}
+                disabled={loading}
+                className="w-full text-left px-4 py-3 rounded border text-sm font-medium transition-colors hover:bg-white"
+                style={{ borderColor: '#E8DDD4', backgroundColor: 'white', color: '#1C1C1C' }}
+              >
+                Continue with Cash on Delivery
+              </button>
+            )}
+            <button
+              onClick={handlePayManually}
+              disabled={loading}
+              className="w-full text-left px-4 py-3 rounded border text-sm transition-colors hover:bg-white"
+              style={{ borderColor: '#E8DDD4', backgroundColor: 'white', color: '#1C1C1C' }}
+            >
+              <span className="font-medium">Pay manually via {form.payment === 'jazzcash' ? 'JazzCash' : form.payment === 'easypaisa' ? 'Easypaisa' : 'bank transfer'}</span>
+              {(form.payment === 'jazzcash' && gatewayDown.jazzcash_number) && (
+                <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
+                  Send PKR {total.toLocaleString()} to JazzCash: {gatewayDown.jazzcash_number} — then WhatsApp us your receipt
+                </span>
+              )}
+              {(form.payment === 'easypaisa' && gatewayDown.easypaisa_number) && (
+                <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
+                  Send PKR {total.toLocaleString()} to Easypaisa: {gatewayDown.easypaisa_number} — then WhatsApp us your receipt
+                </span>
+              )}
+            </button>
+            <button
+              onClick={() => setGatewayDown(null)}
+              className="w-full text-center text-sm py-2"
+              style={{ color: '#6B7280' }}
+            >
+              Try again
+            </button>
+          </div>
+        </div>
+      )}
+
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
@@ -120,7 +196,7 @@ export default function CheckoutPage() {
           </div>
         </div>
         <div>
-          <Label htmlFor="email">Email (optional)</Label>
+          <Label htmlFor="email">Email (optional — for order updates)</Label>
           <Input id="email" type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
         </div>
         <div>
@@ -130,9 +206,7 @@ export default function CheckoutPage() {
         <div>
           <Label htmlFor="city">City *</Label>
           <select
-            id="city"
-            required
-            value={form.city}
+            id="city" required value={form.city}
             onChange={e => handleCityChange(e.target.value)}
             className="w-full border rounded px-3 py-2 text-sm mt-1 bg-white"
             style={{ borderColor: '#E2E8F0' }}
@@ -140,11 +214,7 @@ export default function CheckoutPage() {
             <option value="">Select city</option>
             {zones.map(z => <option key={z.id} value={z.city}>{z.city}</option>)}
           </select>
-          {form.city && (
-            <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>
-              Delivery charge: PKR {deliveryCharge.toLocaleString()}
-            </p>
-          )}
+          {form.city && <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>Delivery charge: PKR {deliveryCharge.toLocaleString()}</p>}
         </div>
         <div>
           <Label className="block mb-2">Payment Method *</Label>
@@ -155,7 +225,7 @@ export default function CheckoutPage() {
                 className="flex items-center gap-3 border rounded p-3 cursor-pointer transition-colors"
                 style={{ borderColor: form.payment === m.id ? '#1C1C1C' : '#E2E8F0', backgroundColor: form.payment === m.id ? '#F9FAFB' : 'white' }}
               >
-                <input type="radio" name="payment" value={m.id} checked={form.payment === m.id} onChange={() => set('payment', m.id)} />
+                <input type="radio" name="payment" value={m.id} checked={form.payment === m.id} onChange={() => { set('payment', m.id); setGatewayDown(null) }} />
                 <span className="text-sm">{m.label}</span>
               </label>
             ))}
@@ -171,17 +241,10 @@ export default function CheckoutPage() {
             ))}
           </div>
           <div className="border-t pt-3 space-y-1" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex justify-between text-sm">
-              <span>Subtotal</span>
-              <span>PKR {subtotal.toLocaleString()}</span>
-            </div>
-            <div className="flex justify-between text-sm">
-              <span>Delivery</span>
-              <span>{form.city ? `PKR ${deliveryCharge.toLocaleString()}` : '—'}</span>
-            </div>
+            <div className="flex justify-between text-sm"><span>Subtotal</span><span>PKR {subtotal.toLocaleString()}</span></div>
+            <div className="flex justify-between text-sm"><span>Delivery</span><span>{form.city ? `PKR ${deliveryCharge.toLocaleString()}` : '—'}</span></div>
             <div className="flex justify-between font-semibold pt-1 border-t" style={{ borderColor: '#E8DDD4' }}>
-              <span>Total</span>
-              <span>PKR {total.toLocaleString()}</span>
+              <span>Total</span><span>PKR {total.toLocaleString()}</span>
             </div>
           </div>
         </div>
@@ -190,9 +253,11 @@ export default function CheckoutPage() {
             {error}
           </div>
         )}
-        <Button type="submit" disabled={loading} className="w-full text-white rounded-none uppercase tracking-widest py-6" style={{ backgroundColor: '#1C1C1C' }}>
-          {loading ? 'Placing Order...' : 'Place Order'}
-        </Button>
+        {!gatewayDown && (
+          <Button type="submit" disabled={loading} className="w-full text-white rounded-none uppercase tracking-widest py-6" style={{ backgroundColor: '#1C1C1C' }}>
+            {loading ? (form.payment === 'cod' ? 'Placing Order...' : 'Redirecting to Payment...') : 'Place Order'}
+          </Button>
+        )}
       </form>
     </div>
   )
