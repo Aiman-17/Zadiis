@@ -49,6 +49,9 @@ export type Order = {
   payment_method: 'jazzcash' | 'easypaisa' | 'card' | 'cod'
   payment_status: 'pending' | 'paid' | 'failed'
   order_status: 'new' | 'processing' | 'shipped' | 'delivered' | 'returned'
+  safepay_tracker?: string
+  safepay_transaction_id?: string
+  payment_verified_at?: string
   created_at: string
 }
 
