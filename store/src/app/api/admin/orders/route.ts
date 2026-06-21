@@ -15,7 +15,6 @@ export async function GET() {
 export async function PUT(req: NextRequest) {
   const { id, order_status, payment_status } = await req.json()
 
-  // Build update object — only include fields that were provided
   const update: Record<string, unknown> = {}
   if (order_status) update.order_status = order_status
   if (payment_status) {
@@ -23,43 +22,51 @@ export async function PUT(req: NextRequest) {
     if (payment_status === 'paid') update.payment_verified_at = new Date().toISOString()
   }
 
-  // When marking as delivered, fetch the order to check payment method + send emails
+  // Fetch order data needed for emails and COD auto-pay logic
+  let fetchedOrder: {
+    order_number: string; customer_name: string; customer_phone: string
+    customer_email?: string; total: number; payment_method: string; items: unknown
+  } | null = null
+
   if (order_status === 'delivered') {
-    const { data: order } = await supabaseAdmin
+    const { data } = await supabaseAdmin
       .from('orders')
       .select('order_number, customer_name, customer_phone, customer_email, total, payment_method, items')
       .eq('id', id)
       .single()
+    fetchedOrder = data
 
-    if (order) {
-      // COD: money collected at door — auto-mark paid
-      if (order.payment_method === 'cod') {
-        update.payment_status = 'paid'
-        update.payment_verified_at = new Date().toISOString()
-        await sendOwnerPaymentReceived({
-          order_number: order.order_number,
-          customer_name: order.customer_name,
-          customer_phone: order.customer_phone,
-          total: order.total,
-          payment_method: 'cod',
-        })
-      }
-
-      // Send delivery email to customer for all payment methods
-      await sendCustomerOrderDelivered(order.customer_email, {
-        order_number: order.order_number,
-        customer_name: order.customer_name,
-        total: order.total,
-      })
+    if (fetchedOrder?.payment_method === 'cod') {
+      update.payment_status = 'paid'
+      update.payment_verified_at = new Date().toISOString()
     }
   }
 
+  // DB update first — if this fails, no emails are sent
   const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
   // Generate invoice if order was just paid (covers COD auto-pay + manual Mark Paid)
   if (update.payment_status === 'paid') {
     await generateInvoice(id)
+  }
+
+  // Send emails AFTER successful DB update
+  if (order_status === 'delivered' && fetchedOrder) {
+    if (fetchedOrder.payment_method === 'cod') {
+      await sendOwnerPaymentReceived({
+        order_number: fetchedOrder.order_number,
+        customer_name: fetchedOrder.customer_name,
+        customer_phone: fetchedOrder.customer_phone,
+        total: fetchedOrder.total,
+        payment_method: 'cod',
+      })
+    }
+    await sendCustomerOrderDelivered(fetchedOrder.customer_email, {
+      order_number: fetchedOrder.order_number,
+      customer_name: fetchedOrder.customer_name,
+      total: fetchedOrder.total,
+    })
   }
 
   return NextResponse.json({ success: true })

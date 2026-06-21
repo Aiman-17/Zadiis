@@ -34,7 +34,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
     .eq('id', id)
     .single()
 
-  if (!inv) notFound()
+  if (!inv || !inv.orders) notFound()
 
   const order = inv.orders as unknown as {
     order_number: string; customer_name: string; customer_phone: string

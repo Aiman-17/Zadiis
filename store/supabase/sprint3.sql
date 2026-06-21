@@ -17,3 +17,15 @@ CREATE TABLE IF NOT EXISTS invoices (
 ALTER TABLE invoices ENABLE ROW LEVEL SECURITY;
 CREATE POLICY "Service role manages invoices" ON invoices
   FOR ALL USING (auth.role() = 'service_role');
+
+-- Atomic invoice number sequence (prevents race conditions)
+CREATE SEQUENCE IF NOT EXISTS invoice_number_seq START WITH 1001;
+
+CREATE OR REPLACE FUNCTION get_next_invoice_number()
+RETURNS text
+LANGUAGE plpgsql
+AS $$
+BEGIN
+  RETURN 'INV-' || nextval('invoice_number_seq')::text;
+END;
+$$;

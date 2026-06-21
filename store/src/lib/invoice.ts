@@ -1,18 +1,12 @@
 import { supabaseAdmin } from '@/lib/supabase/server'
 
 async function nextInvoiceNumber(): Promise<string> {
-  const { data } = await supabaseAdmin
-    .from('invoices')
-    .select('invoice_number')
-    .order('generated_at', { ascending: false })
-    .limit(1)
-    .single()
-  let next = 1001
-  if (data?.invoice_number) {
-    const match = (data.invoice_number as string).match(/INV-(\d+)/)
-    if (match) next = parseInt(match[1]) + 1
+  const { data, error } = await supabaseAdmin.rpc('get_next_invoice_number')
+  if (error || !data) {
+    console.error('[invoice] nextInvoiceNumber RPC failed:', error?.message)
+    return `INV-${Date.now()}`
   }
-  return `INV-${next}`
+  return data as string
 }
 
 export async function generateInvoice(orderId: string): Promise<string | null> {
