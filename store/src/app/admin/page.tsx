@@ -17,22 +17,31 @@ export default async function AdminDashboard() {
     // Supabase not configured
   }
 
+  const paidOrders = allOrders.filter(o => o.payment_status === 'paid')
+
   const today = new Date().toDateString()
   const todayOrders = allOrders.filter(o => new Date(o.created_at).toDateString() === today)
   const thisMonth = new Date().getMonth()
   const thisYear = new Date().getFullYear()
-  const monthOrders = allOrders.filter(o => {
+
+  const monthPaidOrders = paidOrders.filter(o => {
     const d = new Date(o.created_at)
     return d.getMonth() === thisMonth && d.getFullYear() === thisYear
   })
-  const monthRevenue = monthOrders.reduce((s, o) => s + o.total, 0)
+  const monthPendingOrders = allOrders.filter(o => {
+    const d = new Date(o.created_at)
+    return d.getMonth() === thisMonth && d.getFullYear() === thisYear && o.payment_status === 'pending'
+  })
+
+  const monthRevenue = monthPaidOrders.reduce((s, o) => s + o.total, 0)
+  const monthPendingRevenue = monthPendingOrders.reduce((s, o) => s + o.total, 0)
   const pendingOrders = allOrders.filter(o => o.order_status === 'new' || o.order_status === 'processing')
 
   const stats = [
-    { label: "Today's Orders", value: todayOrders.length, icon: ShoppingBag },
-    { label: 'This Month Revenue', value: `PKR ${monthRevenue.toLocaleString()}`, icon: TrendingUp },
-    { label: 'Total Orders', value: allOrders.length, icon: Package },
-    { label: 'Pending Shipments', value: pendingOrders.length, icon: Clock },
+    { label: "Today's Orders", value: todayOrders.length, icon: ShoppingBag, sub: null },
+    { label: 'This Month Revenue', value: `PKR ${monthRevenue.toLocaleString()}`, icon: TrendingUp, sub: monthPendingRevenue > 0 ? `Pending: PKR ${monthPendingRevenue.toLocaleString()}` : null },
+    { label: 'Total Orders', value: allOrders.length, icon: Package, sub: null },
+    { label: 'Pending Shipments', value: pendingOrders.length, icon: Clock, sub: null },
   ]
 
   return (
@@ -44,10 +53,11 @@ export default async function AdminDashboard() {
             <s.icon size={20} className="mb-2" style={{ color: '#A68B6E' }} />
             <p className="text-2xl font-bold">{s.value}</p>
             <p className="text-xs text-gray-500 mt-1">{s.label}</p>
+            {s.sub && <p className="text-xs mt-1" style={{ color: '#F59E0B' }}>{s.sub}</p>}
           </div>
         ))}
       </div>
-      <DashboardCharts orders={allOrders} />
+      <DashboardCharts orders={paidOrders} />
     </div>
   )
 }
