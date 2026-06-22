@@ -2,6 +2,10 @@
 import { useRouter, useSearchParams } from 'next/navigation'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const TYPES = [
+  { label: 'Stitched', value: 'stitched' },
+  { label: 'Unstitched', value: 'unstitched' },
+]
 const PRICE_RANGES = [
   { label: 'Under PKR 2,000', min: '0', max: '2000' },
   { label: 'PKR 2,000 – 5,000', min: '2000', max: '5000' },
@@ -42,6 +46,21 @@ export default function ProductFilters() {
       <div className="flex justify-between items-center">
         <h3 className="font-semibold text-sm uppercase tracking-wider">Filters</h3>
         <button onClick={clearAll} className="text-xs text-gray-400 hover:text-gray-700">Clear all</button>
+      </div>
+      <div>
+        <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Type</h3>
+        <div className="flex flex-wrap gap-2">
+          {TYPES.map(t => (
+            <button
+              key={t.value}
+              onClick={() => updateParam('type', t.value)}
+              className="px-3 py-1 text-sm border rounded transition-colors"
+              style={params.get('type') === t.value ? { backgroundColor: '#1C1C1C', borderColor: '#1C1C1C', color: 'white' } : { borderColor: '#D1D5DB' }}
+            >
+              {t.label}
+            </button>
+          ))}
+        </div>
       </div>
       <div>
         <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Size</h3>

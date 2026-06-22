@@ -5,6 +5,7 @@ export async function getProducts(filters?: {
   minPrice?: number
   maxPrice?: number
   size?: string
+  type?: string
 }) {
   let query = supabase
     .from('products')
@@ -23,6 +24,12 @@ export async function getProducts(filters?: {
   // Client-side size filter (Supabase array contains)
   if (filters?.size) {
     products = products.filter(p => p.sizes.includes(filters.size!))
+  }
+
+  if (filters?.type === 'unstitched') {
+    products = products.filter(p => p.sizes.length === 0)
+  } else if (filters?.type === 'stitched') {
+    products = products.filter(p => p.sizes.length > 0)
   }
 
   return products

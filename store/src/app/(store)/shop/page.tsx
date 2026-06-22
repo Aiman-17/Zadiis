@@ -3,13 +3,14 @@ import ProductCard from '@/components/products/ProductCard'
 import ProductFilters from '@/components/products/ProductFilters'
 import { getProducts } from '@/lib/products'
 
-async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string } }) {
+async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string } }) {
   let products: Awaited<ReturnType<typeof getProducts>> = []
   try {
     products = await getProducts({
       size: searchParams.size,
       minPrice: searchParams.min ? Number(searchParams.min) : undefined,
       maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
+      type: searchParams.type,
     })
   } catch {
     // Supabase not configured yet
@@ -28,7 +29,7 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
   )
 }
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string }> }) {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string; type?: string }> }) {
   const params = await searchParams
 
   return (
