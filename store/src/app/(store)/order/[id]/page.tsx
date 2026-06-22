@@ -60,7 +60,9 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
                   <span>{item.product_name}</span>
                   {item.sku && <span className="text-gray-400 ml-1">({item.sku})</span>}
                   <span className="text-gray-500"> × {item.quantity}</span>
-                  <p className="text-xs text-gray-400">{item.size} · {item.color}</p>
+                  {(item.size || item.color) && (
+                    <p className="text-xs text-gray-400">{[item.size, item.color].filter(Boolean).join(' · ')}</p>
+                  )}
                 </div>
                 <span className="font-medium shrink-0 ml-4">PKR {(item.price * item.quantity).toLocaleString()}</span>
               </div>

@@ -74,7 +74,9 @@ export default function CartPage() {
             </div>
             <div className="flex-1 min-w-0">
               <h3 className="font-medium truncate">{item.name}</h3>
-              <p className="text-sm text-gray-500">{item.size} · {item.color}</p>
+              {(item.size || item.color) && (
+                <p className="text-sm text-gray-500">{[item.size, item.color].filter(Boolean).join(' · ')}</p>
+              )}
               <p className="font-semibold mt-1" style={{ color: '#A68B6E' }}>PKR {item.price.toLocaleString()}</p>
               <div className="flex items-center gap-3 mt-2">
                 <button

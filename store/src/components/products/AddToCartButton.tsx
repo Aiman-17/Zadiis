@@ -46,8 +46,8 @@ export default function AddToCartButton({ product }: { product: Product }) {
   const [error, setError] = useState('')
 
   const handleAdd = () => {
-    if (!selectedSize) { setError('Please select a size'); return }
-    if (!selectedColor) { setError('Please select a color'); return }
+    if (product.sizes.length > 0 && !selectedSize) { setError('Please select a size'); return }
+    if (product.colors.length > 0 && !selectedColor) { setError('Please select a color'); return }
     setError('')
     addToCart({
       id: product.id,
