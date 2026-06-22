@@ -143,7 +143,7 @@ export default function CheckoutPage() {
       {gatewayDown && (
         <div className="mb-6 rounded-lg border p-5" style={{ borderColor: '#F5D87A', backgroundColor: '#FEFCE8' }}>
           <p className="font-semibold mb-1" style={{ color: '#92640A' }}>Online payment is temporarily unavailable</p>
-          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Safepay is currently down. You can:</p>
+          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Safepay is currently down. Please choose an alternative:</p>
           <div className="space-y-2">
             {codEnabled && (
               <button
@@ -161,16 +161,31 @@ export default function CheckoutPage() {
               className="w-full text-left px-4 py-3 rounded border text-sm transition-colors hover:bg-white"
               style={{ borderColor: '#E8DDD4', backgroundColor: 'white', color: '#1C1C1C' }}
             >
-              <span className="font-medium">Pay manually via {form.payment === 'jazzcash' ? 'JazzCash' : form.payment === 'easypaisa' ? 'Easypaisa' : 'card'}</span>
-              {(form.payment === 'jazzcash' && gatewayDown.jazzcash_number) && (
-                <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
-                  Send PKR {total.toLocaleString()} to JazzCash: {gatewayDown.jazzcash_number} — then WhatsApp us your receipt
-                </span>
-              )}
-              {(form.payment === 'easypaisa' && gatewayDown.easypaisa_number) && (
-                <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
-                  Send PKR {total.toLocaleString()} to Easypaisa: {gatewayDown.easypaisa_number} — then WhatsApp us your receipt
-                </span>
+              {form.payment === 'card' ? (
+                <>
+                  <span className="font-medium">Pay manually via JazzCash or Easypaisa</span>
+                  <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
+                    Send PKR {total.toLocaleString()} to:
+                    {gatewayDown.jazzcash_number ? ` JazzCash ${gatewayDown.jazzcash_number}` : ''}
+                    {gatewayDown.jazzcash_number && gatewayDown.easypaisa_number ? ' or' : ''}
+                    {gatewayDown.easypaisa_number ? ` Easypaisa ${gatewayDown.easypaisa_number}` : ''}
+                    {' '}— then WhatsApp us your receipt
+                  </span>
+                </>
+              ) : (
+                <>
+                  <span className="font-medium">Pay manually via {form.payment === 'jazzcash' ? 'JazzCash' : 'Easypaisa'}</span>
+                  {(form.payment === 'jazzcash' && gatewayDown.jazzcash_number) && (
+                    <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
+                      Send PKR {total.toLocaleString()} to JazzCash: {gatewayDown.jazzcash_number} — then WhatsApp us your receipt
+                    </span>
+                  )}
+                  {(form.payment === 'easypaisa' && gatewayDown.easypaisa_number) && (
+                    <span className="block text-xs mt-1" style={{ color: '#A68B6E' }}>
+                      Send PKR {total.toLocaleString()} to Easypaisa: {gatewayDown.easypaisa_number} — then WhatsApp us your receipt
+                    </span>
+                  )}
+                </>
               )}
             </button>
             <button
