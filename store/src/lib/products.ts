@@ -27,9 +27,9 @@ export async function getProducts(filters?: {
   }
 
   if (filters?.type === 'unstitched') {
-    products = products.filter(p => p.sizes.length === 0)
+    products = products.filter(p => p.sizes.length === 0 || p.sizes.includes('Unstitched'))
   } else if (filters?.type === 'stitched') {
-    products = products.filter(p => p.sizes.length > 0)
+    products = products.filter(p => p.sizes.length > 0 && !p.sizes.includes('Unstitched'))
   }
 
   return products

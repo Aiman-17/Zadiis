@@ -7,7 +7,7 @@ import { Label } from '@/components/ui/label'
 import ImageUploader from '@/components/admin/ImageUploader'
 import type { Product, Category } from '@/types'
 
-const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
+const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 
 export default function EditProductForm({ product, categories }: { product: Product; categories: Category[] }) {
   const router = useRouter()
@@ -27,11 +27,18 @@ export default function EditProductForm({ product, categories }: { product: Prod
 
   const set = (k: string, v: string | boolean | string[]) => setForm(f => ({ ...f, [k]: v }))
 
-  const toggleSize = (s: string) =>
-    setForm(f => ({
-      ...f,
-      sizes: f.sizes.includes(s) ? f.sizes.filter(x => x !== s) : [...f.sizes, s],
-    }))
+  const toggleSize = (s: string) => {
+    if (s === 'Unstitched') {
+      setForm(f => ({ ...f, sizes: f.sizes.includes('Unstitched') ? [] : ['Unstitched'] }))
+    } else {
+      setForm(f => ({
+        ...f,
+        sizes: f.sizes.includes(s)
+          ? f.sizes.filter(x => x !== s)
+          : [...f.sizes.filter(x => x !== 'Unstitched'), s],
+      }))
+    }
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -122,8 +129,8 @@ export default function EditProductForm({ product, categories }: { product: Prod
         </div>
         <div>
           <Label className="block mb-2">Sizes</Label>
-          <div className="flex gap-2 flex-wrap">
-            {SIZES.map(s => (
+          <div className="flex gap-2 flex-wrap items-center">
+            {SIZES.filter(s => s !== 'Unstitched').map(s => (
               <button
                 type="button"
                 key={s}
@@ -134,7 +141,19 @@ export default function EditProductForm({ product, categories }: { product: Prod
                 {s}
               </button>
             ))}
+            <span className="text-gray-300 text-sm">|</span>
+            <button
+              type="button"
+              onClick={() => toggleSize('Unstitched')}
+              className="px-3 py-1 text-sm border rounded transition-colors"
+              style={form.sizes.includes('Unstitched') ? { backgroundColor: '#A68B6E', color: 'white', borderColor: '#A68B6E' } : { borderColor: '#A68B6E', color: '#A68B6E' }}
+            >
+              Unstitched
+            </button>
           </div>
+          {form.sizes.includes('Unstitched') && (
+            <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>No size selection shown to customers</p>
+          )}
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />

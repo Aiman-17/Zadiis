@@ -45,8 +45,10 @@ export default function AddToCartButton({ product }: { product: Product }) {
   const [added, setAdded] = useState(false)
   const [error, setError] = useState('')
 
+  const hasSizes = product.sizes.length > 0 && !(product.sizes.length === 1 && product.sizes[0] === 'Unstitched')
+
   const handleAdd = () => {
-    if (product.sizes.length > 0 && !selectedSize) { setError('Please select a size'); return }
+    if (hasSizes && !selectedSize) { setError('Please select a size'); return }
     if (product.colors.length > 0 && !selectedColor) { setError('Please select a color'); return }
     setError('')
     addToCart({
@@ -66,7 +68,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
   return (
     <div className="space-y-4">
-      {product.sizes.length > 0 && (
+      {hasSizes && (
         <div>
           <p className="text-sm font-medium mb-2">Size</p>
           <div className="flex flex-wrap gap-2">
