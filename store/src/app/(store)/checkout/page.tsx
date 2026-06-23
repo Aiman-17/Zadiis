@@ -55,7 +55,7 @@ export default function CheckoutPage() {
   const buildPayload = () => ({
     customer_name: form.name,
     customer_phone: form.phone,
-    customer_email: form.email || null,
+    customer_email: form.email,
     address: form.address,
     city: form.city,
     items: items.map(i => ({ product_id: i.id, product_name: i.name, sku: i.sku, size: i.size, color: i.color, quantity: i.quantity, price: i.price })),
@@ -143,7 +143,7 @@ export default function CheckoutPage() {
       {gatewayDown && (
         <div className="mb-6 rounded-lg border p-5" style={{ borderColor: '#F5D87A', backgroundColor: '#FEFCE8' }}>
           <p className="font-semibold mb-1" style={{ color: '#92640A' }}>Online payment is temporarily unavailable</p>
-          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Safepay is currently down. Please choose an alternative:</p>
+          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Service is currently down. Please choose an alternative:</p>
           <div className="space-y-2">
             {codEnabled && (
               <button
@@ -211,8 +211,8 @@ export default function CheckoutPage() {
           </div>
         </div>
         <div>
-          <Label htmlFor="email">Email (optional — for order updates)</Label>
-          <Input id="email" type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
+          <Label htmlFor="email">Email * (for order confirmation & updates)</Label>
+          <Input id="email" required type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
         </div>
         <div>
           <Label htmlFor="address">Delivery Address *</Label>

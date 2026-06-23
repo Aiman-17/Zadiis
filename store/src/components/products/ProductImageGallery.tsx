@@ -23,7 +23,7 @@ export default function ProductImageGallery({ images, name }: { images: string[]
           className="aspect-[3/4] relative rounded-lg overflow-hidden bg-white cursor-zoom-in group"
           onClick={() => setZoomed(true)}
         >
-          <Image src={images[active]} alt={name} fill className="object-cover" />
+          <Image src={images[active]} alt={name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
           <div
             className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity"
             style={{ backgroundColor: 'rgba(0,0,0,0.15)' }}
@@ -47,7 +47,7 @@ export default function ProductImageGallery({ images, name }: { images: string[]
                   outlineOffset: '2px',
                 }}
               >
-                <Image src={img} alt={`${name} view ${i + 1}`} fill className="object-cover" />
+                <Image src={img} alt={`${name} view ${i + 1}`} fill className="object-cover" sizes="25vw" />
               </button>
             ))}
           </div>

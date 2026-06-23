@@ -28,7 +28,7 @@ export async function POST(req: NextRequest) {
       address, city, items, subtotal, delivery_charge, total, payment_method,
     } = body
 
-    if (!customer_name || !customer_phone || !address || !city || !payment_method || !Array.isArray(items) || items.length === 0) {
+    if (!customer_name || !customer_phone || !customer_email || !address || !city || !payment_method || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
