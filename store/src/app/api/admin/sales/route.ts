@@ -1,3 +1,7 @@
+// Auth note: admin cookie validation for /api/admin/* routes is NOT enforced by middleware
+// (store/src/proxy.ts only covers /admin page routes). Consider adding an in-route
+// cookie check mirroring the pattern in store/src/proxy.ts, or extending the matcher
+// to cover /api/admin/:path* to close this gap.
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 

@@ -33,10 +33,10 @@ export async function POST(req: NextRequest) {
     }
 
     // Validate stock for all items before creating order
-    for (const item of items as Array<{ product_id: string; product_name: string; quantity: number }>) {
+    for (const item of items as Array<{ product_id: string; product_name: string; quantity: number; color?: string; size?: string }>) {
       const { data: product, error } = await supabaseAdmin
         .from('products')
-        .select('stock_quantity, name')
+        .select('stock_quantity, name, variant_stock')
         .eq('id', item.product_id)
         .single()
 
@@ -48,6 +48,19 @@ export async function POST(req: NextRequest) {
           error: `Sorry, "${item.product_name}" is out of stock or has insufficient quantity. Available: ${product.stock_quantity}.`,
           outOfStock: true,
         }, { status: 400 })
+      }
+      // Per-variant check when tracking is enabled
+      const variantStock = product.variant_stock as Record<string, Record<string, number>> | null
+      if (variantStock && Object.keys(variantStock).length > 0) {
+        const c = (item.color || '_') as string
+        const s = (item.size || '_') as string
+        const variantQty = variantStock?.[c]?.[s]
+        if (variantQty !== undefined && variantQty < item.quantity) {
+          return NextResponse.json({
+            error: `Sorry, "${item.product_name}" (${((item.color || '') + ' ' + (item.size || '')).trim()}) is out of stock for the selected variant. Available: ${variantQty}.`,
+            outOfStock: true,
+          }, { status: 400 })
+        }
       }
     }
 
