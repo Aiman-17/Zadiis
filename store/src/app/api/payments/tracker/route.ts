@@ -158,7 +158,7 @@ export async function POST(req: NextRequest) {
 
     // 7. Build Safepay hosted checkout URL
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'
-    const checkoutUrl = `${SAFEPAY_CHECKOUT_BASE}/checkout?tracker=${trackerToken}&source=checkout&env=${SAFEPAY_ENV}&redirect_url=${encodeURIComponent(`${appUrl}/order/${order.id}`)}`
+    const checkoutUrl = `${SAFEPAY_CHECKOUT_BASE}/checkout?beacon=${trackerToken}&source=checkout&env=${SAFEPAY_ENV}&redirect_url=${encodeURIComponent(`${appUrl}/order/${order.id}`)}`
 
     return NextResponse.json({ orderId: order.id, checkoutUrl }, { status: 201 })
   } catch (err) {
