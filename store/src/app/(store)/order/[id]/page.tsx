@@ -2,6 +2,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { CheckCircle } from 'lucide-react'
 import Link from 'next/link'
 import type { OrderItem } from '@/types'
+import PaymentVerifier from './PaymentVerifier'
 
 export default async function OrderConfirmationPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
@@ -106,22 +107,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
             <p className="text-sm text-gray-500">Please keep PKR {Number(order.total).toLocaleString()} ready at the time of delivery.</p>
           </div>
         ) : (
-          <div className="border rounded-lg p-4" style={{ borderColor: '#FDE68A', backgroundColor: '#FFFBEB' }}>
-            <p className="text-sm font-medium mb-1" style={{ color: '#92400E' }}>⏳ Confirming your payment…</p>
-            <p className="text-sm mb-3" style={{ color: '#92400E' }}>
-              If you completed payment on Safepay, confirmation usually arrives within a few seconds.
-              Check your email for a confirmation message.
-            </p>
-            <a
-              href={whatsappUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center gap-2 px-4 py-2 rounded text-white text-sm font-medium"
-              style={{ backgroundColor: '#25D366' }}
-            >
-              WhatsApp us if you have questions
-            </a>
-          </div>
+          <PaymentVerifier orderId={order.id} />
         )}
       </div>
 

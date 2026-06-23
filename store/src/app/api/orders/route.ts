@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendOwnerNewOrder, sendCustomerOrderConfirmed } from '@/lib/email'
+import { generateInvoice } from '@/lib/invoice'
 
 async function generateOrderNumber(): Promise<string> {
   const { data } = await supabaseAdmin
@@ -88,6 +89,9 @@ export async function POST(req: NextRequest) {
         p_quantity: item.quantity,
       })
     }
+
+    // COD orders are confirmed immediately — generate invoice now
+    await generateInvoice(order.id)
 
     await sendOwnerNewOrder({
       order_number: order.order_number,

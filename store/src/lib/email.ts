@@ -105,29 +105,48 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
 export async function sendCustomerPaymentConfirmed(to: string | null | undefined, d: {
   order_number: string
   customer_name: string
+  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
+  subtotal: number
+  delivery_charge: number
   total: number
   payment_method: string
+  address: string
+  city: string
 }): Promise<void> {
   if (!to) return
+  const itemRows = buildItemRows(d.items)
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
       <div style="padding:32px;background:#FAF8F5">
         <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Payment Confirmed!</h2>
-        <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, we've received your payment. Your order is now being prepared.</p>
+        <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your payment has been received and your order is being prepared.</p>
+        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:12px 20px;margin-bottom:24px">
+          <p style="margin:0;color:#166534;font-weight:bold">✓ Payment received via ${d.payment_method.charAt(0).toUpperCase() + d.payment_method.slice(1)}</p>
+        </div>
         <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
           <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
         </div>
-        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:16px 20px;margin-bottom:24px">
-          <p style="margin:0;color:#166534;font-weight:bold">✓ Payment received</p>
-          <p style="margin:6px 0 0;color:#166534;font-size:14px">Amount: PKR ${Number(d.total).toLocaleString()} · Method: ${d.payment_method}</p>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:16px">${itemRows}</table>
+        <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
+          <tr><td style="padding:6px 0;color:#666">Subtotal</td><td style="padding:6px 0;text-align:right;color:#1C1C1C">PKR ${Number(d.subtotal).toLocaleString()}</td></tr>
+          <tr><td style="padding:6px 0;color:#666">Delivery</td><td style="padding:6px 0;text-align:right;color:#1C1C1C">PKR ${Number(d.delivery_charge).toLocaleString()}</td></tr>
+          <tr style="border-top:2px solid #E8DDD4">
+            <td style="padding:10px 0;font-weight:bold;color:#1C1C1C">Total Paid</td>
+            <td style="padding:10px 0;text-align:right;font-weight:bold;font-size:1.1em;color:#A68B6E">PKR ${Number(d.total).toLocaleString()}</td>
+          </tr>
+        </table>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px">
+          <p style="margin:0 0 8px;font-weight:bold;color:#1C1C1C">Delivery Address</p>
+          <p style="margin:0;color:#666">${d.address}, ${d.city}</p>
         </div>
         <div style="text-align:center;margin-bottom:8px">
-          <a href="https://wa.me/${WHATSAPP}"
+          <a href="https://wa.me/${WHATSAPP}?text=Hi!%20I%20need%20help%20with%20my%20order%20${d.order_number}"
              style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
             WhatsApp Support
           </a>
+          <p style="margin:8px 0 0;font-size:12px;color:#888">Questions? Chat with us on WhatsApp</p>
         </div>
       </div>
       ${zadiisFooter()}
@@ -136,7 +155,7 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Payment confirmed for order ${d.order_number} — ZADIIS`,
+      subject: `Payment confirmed — Order ${d.order_number} — ZADIIS`,
       html,
     })
   } catch (e) {

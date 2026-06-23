@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendCustomerOrderConfirmed, sendOwnerNewOrder } from '@/lib/email'
+import { sendOwnerNewOrder } from '@/lib/email'
 
 const SAFEPAY_ENV = process.env.NEXT_PUBLIC_SAFEPAY_ENV || 'sandbox'
 const SAFEPAY_API_BASE = SAFEPAY_ENV === 'production'
@@ -131,7 +131,7 @@ export async function POST(req: NextRequest) {
       await supabaseAdmin.rpc('decrement_stock', { p_product_id: item.product_id, p_quantity: item.quantity })
     }
 
-    // 6. Send emails (order placed — before payment confirmation)
+    // 6. Notify owner of new pending order (customer email sent only after payment confirmed)
     await sendOwnerNewOrder({
       order_number: order.order_number,
       customer_name: order.customer_name,
@@ -145,17 +145,6 @@ export async function POST(req: NextRequest) {
       total: order.total,
       payment_method: order.payment_method,
       payment_status: order.payment_status ?? 'pending',
-    })
-    await sendCustomerOrderConfirmed(order.customer_email, {
-      order_number: order.order_number,
-      customer_name: order.customer_name,
-      items: order.items,
-      subtotal: order.subtotal,
-      delivery_charge: order.delivery_charge,
-      total: order.total,
-      payment_method: order.payment_method,
-      address: order.address,
-      city: order.city,
     })
 
     // 7. Build Safepay hosted checkout URL
