@@ -54,8 +54,6 @@ LANGUAGE plpgsql
 AS $$
 DECLARE
   v_current jsonb;
-  v_color   text;
-  v_size    text;
   v_qty     integer;
 BEGIN
   SELECT variant_stock INTO v_current
