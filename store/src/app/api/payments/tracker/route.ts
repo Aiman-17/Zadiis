@@ -127,8 +127,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Decrement stock
-    for (const item of items as Array<{ product_id: string; quantity: number }>) {
-      await supabaseAdmin.rpc('decrement_stock', { p_product_id: item.product_id, p_quantity: item.quantity })
+    for (const item of items as Array<{ product_id: string; quantity: number; color?: string; size?: string }>) {
+      await supabaseAdmin.rpc('decrement_stock', {
+        p_product_id: item.product_id,
+        p_quantity: item.quantity,
+        p_color: item.color || '_',
+        p_size: item.size || '_',
+      })
     }
 
     // 6. Notify owner of new pending order (customer email sent only after payment confirmed)
