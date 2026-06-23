@@ -6,9 +6,7 @@ const SAFEPAY_ENV = process.env.NEXT_PUBLIC_SAFEPAY_ENV || 'sandbox'
 const SAFEPAY_API_BASE = SAFEPAY_ENV === 'production'
   ? 'https://api.getsafepay.com'
   : 'https://sandbox.api.getsafepay.com'
-const SAFEPAY_CHECKOUT_BASE = SAFEPAY_ENV === 'production'
-  ? 'https://payments.getsafepay.com'
-  : 'https://sandbox.payments.getsafepay.com'
+const SAFEPAY_CHECKOUT_BASE = 'https://getsafepay.com'
 
 async function generateOrderNumber(): Promise<string> {
   const { data } = await supabaseAdmin
