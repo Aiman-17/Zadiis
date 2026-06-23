@@ -2,39 +2,33 @@ import Link from 'next/link'
 
 export default function Footer() {
   return (
-    <footer style={{ backgroundColor: '#1C1C1C', color: 'white' }} className="mt-20">
-      <div className="max-w-6xl mx-auto px-4 py-12 grid grid-cols-1 md:grid-cols-3 gap-8">
+    <footer style={{ backgroundColor: '#1C1C1C', color: '#E8DDD4' }} className="py-12 mt-auto">
+      <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
+        {/* Brand */}
         <div>
-          <h3 className="text-xl mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS</h3>
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>Modern Pakistani women&apos;s fashion. Quality you can feel.</p>
+          <p className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display, serif', color: 'white' }}>ZADIIS</p>
+          <p className="text-sm" style={{ color: '#9CA3AF' }}>Dressed in Confidence. Women&apos;s fashion crafted for the modern Pakistani woman.</p>
         </div>
+        {/* Quick Links */}
         <div>
-          <h4 className="font-semibold mb-3">Shop</h4>
+          <p className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: '#A68B6E' }}>Quick Links</p>
           <ul className="space-y-2 text-sm" style={{ color: '#9CA3AF' }}>
-            <li><Link href="/shop" className="hover:text-white transition-colors">All Products</Link></li>
-            <li><Link href="/about" className="hover:text-white transition-colors">About Us</Link></li>
-            <li><Link href="/contact" className="hover:text-white transition-colors">Contact</Link></li>
+            <li><Link href="/shop" className="hover:text-white transition-colors">Shop</Link></li>
+            <li><Link href="/cart" className="hover:text-white transition-colors">Cart</Link></li>
+            <li><Link href="/sale" className="hover:text-white transition-colors">Sale</Link></li>
           </ul>
         </div>
+        {/* Policies */}
         <div>
-          <h4 className="font-semibold mb-3">Help</h4>
+          <p className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: '#A68B6E' }}>Policies</p>
           <ul className="space-y-2 text-sm" style={{ color: '#9CA3AF' }}>
-            <li><Link href="/contact" className="hover:text-white transition-colors">WhatsApp Support</Link></li>
-            <li>
-              <a href="mailto:info@zadiis.com.pk" className="hover:text-white transition-colors">
-                info@zadiis.com.pk
-              </a>
-            </li>
-            <li>
-              <a href="mailto:support@zadiis.com.pk" className="hover:text-white transition-colors">
-                support@zadiis.com.pk
-              </a>
-            </li>
-            <li>Free delivery on orders over PKR 2,000</li>
+            <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Exchanges</Link></li>
+            <li><Link href="/shipping" className="hover:text-white transition-colors">Shipping Info</Link></li>
+            <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
           </ul>
         </div>
       </div>
-      <div className="border-t text-center py-4 text-xs" style={{ borderColor: '#374151', color: '#6B7280' }}>
+      <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t text-center text-xs" style={{ borderColor: '#374151', color: '#6B7280' }}>
         © {new Date().getFullYear()} ZADIIS. All rights reserved.
       </div>
     </footer>

@@ -4,7 +4,7 @@ import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/ProductCard'
 import { getFeaturedProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { Truck, RefreshCw, Shield } from 'lucide-react'
+import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
 
 async function getHeroImage(): Promise<string> {
   try {
@@ -61,10 +61,12 @@ export default async function HomePage() {
 
       {/* Trust Bar */}
       <section className="border-y bg-white py-4" style={{ borderColor: '#E8DDD4' }}>
-        <div className="max-w-4xl mx-auto px-4 flex flex-col md:flex-row items-center justify-around gap-4 text-sm text-gray-600">
+        <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-around gap-4 text-sm text-gray-600">
           <div className="flex items-center gap-2"><Truck size={18} style={{ color: '#A68B6E' }} /> Free delivery over PKR 10,000</div>
-          <div className="flex items-center gap-2"><RefreshCw size={18} style={{ color: '#A68B6E' }} /> Easy returns</div>
+          <div className="flex items-center gap-2"><RefreshCw size={18} style={{ color: '#A68B6E' }} /> Easy 7-day returns</div>
           <div className="flex items-center gap-2"><Shield size={18} style={{ color: '#A68B6E' }} /> Secure payments</div>
+          <div className="flex items-center gap-2"><Lock size={18} style={{ color: '#A68B6E' }} /> 100% authentic products</div>
+          <div className="flex items-center gap-2"><Star size={18} style={{ color: '#A68B6E' }} /> 500+ happy customers</div>
         </div>
       </section>
 
