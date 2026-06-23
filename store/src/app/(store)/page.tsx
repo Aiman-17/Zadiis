@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/ProductCard'
-import { getFeaturedProducts } from '@/lib/products'
+import { getFeaturedProducts, getBestsellerProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
 
@@ -21,9 +21,25 @@ async function getHeroImage(): Promise<string> {
 
 export default async function HomePage() {
   let featured: Awaited<ReturnType<typeof getFeaturedProducts>> = []
+  let bestSellers: Awaited<ReturnType<typeof getBestsellerProducts>> = []
   let heroImage = ''
+  let activeSale: { title: string; description: string | null; ends_at: string | null } | null = null
   try {
-    ;[featured, heroImage] = await Promise.all([getFeaturedProducts(6), getHeroImage()])
+    const [featuredData, bestSellersData, heroData, saleData] = await Promise.all([
+      getFeaturedProducts(6),
+      getBestsellerProducts(6),
+      getHeroImage(),
+      supabaseAdmin
+        .from('sales')
+        .select('title, description, ends_at')
+        .eq('is_active', true)
+        .single()
+        .then(r => r.data),
+    ])
+    featured = featuredData
+    bestSellers = bestSellersData
+    heroImage = heroData
+    activeSale = saleData
   } catch {
     // Supabase not configured yet — show empty state
   }
@@ -70,6 +86,18 @@ export default async function HomePage() {
         </div>
       </section>
 
+      {/* Sale Banner — only shown when a sale is active */}
+      {activeSale && (
+        <section className="py-6 px-4 text-center" style={{ backgroundColor: '#A68B6E' }}>
+          <Link href="/sale" className="group inline-block">
+            <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#FAF8F5', opacity: 0.8 }}>Limited Time Offer</p>
+            <p className="text-xl font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
+              {activeSale.title} — <span className="underline group-hover:no-underline">Shop the Sale →</span>
+            </p>
+          </Link>
+        </section>
+      )}
+
       {/* Featured Products */}
       <section className="max-w-6xl mx-auto px-4 py-16">
         <h2 className="text-2xl md:text-3xl text-center mb-10" style={{ fontFamily: 'Playfair Display, serif' }}>New Arrivals</h2>
@@ -88,6 +116,18 @@ export default async function HomePage() {
           </Button>
         </div>
       </section>
+
+      {/* Best Sellers */}
+      {bestSellers.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 py-16" style={{ borderTop: '1px solid #E8DDD4' }}>
+          <h2 className="text-2xl md:text-3xl text-center mb-10" style={{ fontFamily: 'Playfair Display, serif' }}>Best Sellers</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
+            {bestSellers.map(product => (
+              <ProductCard key={product.id} product={product} />
+            ))}
+          </div>
+        </section>
+      )}
     </div>
   )
 }

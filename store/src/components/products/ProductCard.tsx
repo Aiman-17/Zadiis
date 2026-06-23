@@ -2,7 +2,12 @@ import Link from 'next/link'
 import Image from 'next/image'
 import type { Product } from '@/types'
 
-export default function ProductCard({ product }: { product: Product }) {
+interface ProductCardProps {
+  product: Product
+  salePrice?: number
+}
+
+export default function ProductCard({ product, salePrice }: ProductCardProps) {
   const image = product.images[0] || ''
 
   return (
@@ -28,7 +33,16 @@ export default function ProductCard({ product }: { product: Product }) {
         )}
       </div>
       <h3 className="font-medium text-sm truncate">{product.name}</h3>
-      <p className="font-semibold text-sm mt-1" style={{ color: '#A68B6E' }}>PKR {product.price.toLocaleString()}</p>
+      <div className="flex items-baseline gap-2 mt-1">
+        {salePrice ? (
+          <>
+            <span className="font-semibold text-sm" style={{ color: '#DC2626' }}>PKR {salePrice.toLocaleString()}</span>
+            <span className="text-xs line-through" style={{ color: '#9CA3AF' }}>PKR {product.price.toLocaleString()}</span>
+          </>
+        ) : (
+          <span className="font-semibold text-sm" style={{ color: '#A68B6E' }}>PKR {product.price.toLocaleString()}</span>
+        )}
+      </div>
     </Link>
   )
 }

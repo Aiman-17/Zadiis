@@ -59,3 +59,17 @@ export async function getFeaturedProducts(limit = 6) {
   if (error) throw error
   return data as Product[]
 }
+
+export async function getBestsellerProducts(limit = 6) {
+  const { data, error } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .eq('is_bestseller', true)
+    .gt('stock_quantity', 0)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+
+  if (error) throw error
+  return data as Product[]
+}
