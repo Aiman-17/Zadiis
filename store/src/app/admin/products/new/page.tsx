@@ -5,6 +5,8 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import ImageUploader from '@/components/admin/ImageUploader'
+import VariantStockGrid from '@/components/admin/VariantStockGrid'
+import type { VariantStock } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 
@@ -23,6 +25,8 @@ export default function NewProduct() {
     sizes: [] as string[],
     category_id: '',
     is_active: true,
+    is_bestseller: false,
+    variant_stock: {} as VariantStock,
   })
 
   useEffect(() => {
@@ -35,7 +39,7 @@ export default function NewProduct() {
       .catch(() => {})
   }, [])
 
-  const set = (k: string, v: string | boolean | string[]) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: string, v: string | boolean | string[] | VariantStock) => setForm(f => ({ ...f, [k]: v }))
 
   const toggleSize = (s: string) => {
     if (s === 'Unstitched') {
@@ -50,6 +54,8 @@ export default function NewProduct() {
     }
   }
 
+  const parsedColors = form.colors.split(',').map(s => s.trim()).filter(Boolean)
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -63,10 +69,12 @@ export default function NewProduct() {
         price: Number(form.price),
         stock_quantity: Number(form.stock_quantity),
         images: form.images,
-        colors: form.colors.split(',').map(s => s.trim()).filter(Boolean),
+        colors: parsedColors,
         sizes: form.sizes,
         category_id: form.category_id || null,
         is_active: form.is_active,
+        is_bestseller: form.is_bestseller,
+        variant_stock: form.variant_stock,
       }),
     })
     if (res.ok) {
@@ -108,8 +116,9 @@ export default function NewProduct() {
             <Input id="price" required type="number" min="0" value={form.price} onChange={e => set('price', e.target.value)} className="mt-1" />
           </div>
           <div>
-            <Label htmlFor="stock">Stock Quantity *</Label>
-            <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+            <Label htmlFor="stock">Total Stock (auto-calculated)</Label>
+            <Input id="stock" type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+            <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Use the variant grid below for per-size/color stock</p>
           </div>
         </div>
         {categories.length > 0 && (
@@ -161,6 +170,22 @@ export default function NewProduct() {
           {form.sizes.includes('Unstitched') && (
             <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>No size selection shown to customers</p>
           )}
+        </div>
+
+        {/* Variant Stock Grid */}
+        <div>
+          <Label className="block mb-2">Variant Stock</Label>
+          <VariantStockGrid
+            colors={parsedColors}
+            sizes={form.sizes}
+            value={form.variant_stock}
+            onChange={v => set('variant_stock', v)}
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="is_bestseller" checked={form.is_bestseller} onChange={e => set('is_bestseller', e.target.checked)} className="w-4 h-4" />
+          <Label htmlFor="is_bestseller">Mark as Bestseller</Label>
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
