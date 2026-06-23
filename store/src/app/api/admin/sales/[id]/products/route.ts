@@ -4,7 +4,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 export async function POST(req: NextRequest, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params
   const { product_id, sale_price } = await req.json()
-  if (!product_id || !sale_price) return NextResponse.json({ error: 'product_id and sale_price required' }, { status: 400 })
+  if (!product_id || sale_price == null) return NextResponse.json({ error: 'product_id and sale_price required' }, { status: 400 })
   const { data, error } = await supabaseAdmin
     .from('sale_products')
     .upsert([{ sale_id: id, product_id, sale_price }], { onConflict: 'sale_id,product_id' })

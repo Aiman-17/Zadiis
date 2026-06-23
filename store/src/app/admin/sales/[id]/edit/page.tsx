@@ -67,7 +67,12 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
 
   const handleDelete = async () => {
     if (!confirm('Delete this sale? This cannot be undone.')) return
-    await fetch(`/api/admin/sales/${id}`, { method: 'DELETE' })
+    const res = await fetch(`/api/admin/sales/${id}`, { method: 'DELETE' })
+    if (!res.ok) {
+      const data = await res.json()
+      setError(data.error || 'Failed to delete sale')
+      return
+    }
     router.push('/admin/sales')
   }
 
@@ -82,11 +87,16 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
   }
 
   const handleRemoveProduct = async (productId: string) => {
-    await fetch(`/api/admin/sales/${id}/products`, {
+    const res = await fetch(`/api/admin/sales/${id}/products`, {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ product_id: productId }),
     })
+    if (!res.ok) {
+      const data = await res.json()
+      setError(data.error || 'Failed to remove product')
+      return
+    }
     load()
   }
 
