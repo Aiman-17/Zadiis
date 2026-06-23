@@ -6,11 +6,17 @@ import type { Sale, SaleProduct, Product } from '@/types'
 export const dynamic = 'force-dynamic'
 
 export default async function SalePage() {
-  const { data: sale } = await supabaseAdmin
-    .from('sales')
-    .select('*, sale_products(product_id, sale_price, products(*))')
-    .eq('is_active', true)
-    .single()
+  let sale: (Sale & { sale_products: (SaleProduct & { products: Product })[] }) | null = null
+  try {
+    const { data } = await supabaseAdmin
+      .from('sales')
+      .select('*, sale_products(product_id, sale_price, products(*))')
+      .eq('is_active', true)
+      .single()
+    sale = data
+  } catch {
+    // DB error — show graceful fallback
+  }
 
   if (!sale) {
     return (
