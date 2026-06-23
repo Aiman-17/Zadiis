@@ -29,14 +29,6 @@ export default function AddToCartButton({ product }: { product: Product }) {
   const hasSizes = product.sizes.length > 0 && !(product.sizes.length === 1 && product.sizes[0] === 'Unstitched')
   const hasTracking = Object.keys(product.variant_stock ?? {}).length > 0
 
-  // For a given color, returns the stock qty for a size (or undefined if no tracking)
-  const getVariantQty = (color: string, size: string): number | undefined => {
-    if (!hasTracking) return undefined
-    const c = color || '_'
-    const s = size || '_'
-    return product.variant_stock?.[c]?.[s]
-  }
-
   // When a color is selected, determine which sizes are out of stock under that color
   const isSizeDisabled = (size: string): boolean => {
     if (!hasTracking) return false
@@ -163,7 +155,7 @@ export default function AddToCartButton({ product }: { product: Product }) {
 
       <Button
         onClick={handleAdd}
-        disabled={totalOutOfStock || (hasTracking && selectedColor !== '' && selectedSize !== '' && selectedVariantQty <= 0)}
+        disabled={totalOutOfStock || (hasTracking && selectedSize !== '' && selectedVariantQty <= 0)}
         className="w-full text-white rounded-none uppercase tracking-widest py-6 transition-colors"
         style={{ backgroundColor: added ? '#A68B6E' : '#1C1C1C' }}
       >
