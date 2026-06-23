@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendOwnerNewOrder, sendCustomerOrderConfirmed } from '@/lib/email'
+import { sendOwnerNewOrder, sendCustomerOrderConfirmed, sendOwnerSaleOrder } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
 
 async function generateOrderNumber(): Promise<string> {
@@ -25,7 +25,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       customer_name, customer_phone, customer_email,
-      address, city, items, subtotal, delivery_charge, total, payment_method,
+      address, city, items, subtotal, delivery_charge, total, payment_method, is_sale,
     } = body
 
     if (!customer_name || !customer_phone || !customer_email || !address || !city || !payment_method || !Array.isArray(items) || items.length === 0) {
@@ -69,6 +69,7 @@ export async function POST(req: NextRequest) {
           delivery_charge: delivery_charge ?? 0,
           total,
           payment_method,
+          is_sale: is_sale ?? false,
         }])
         .select()
         .single()
@@ -109,6 +110,23 @@ export async function POST(req: NextRequest) {
       payment_method: order.payment_method,
       payment_status: order.payment_status ?? 'pending',
     })
+
+    if (order.is_sale) {
+      await sendOwnerSaleOrder({
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_email: order.customer_email,
+        address: order.address,
+        city: order.city,
+        items: order.items,
+        subtotal: order.subtotal,
+        delivery_charge: order.delivery_charge,
+        total: order.total,
+        payment_method: order.payment_method,
+        payment_status: order.payment_status ?? 'pending',
+      })
+    }
 
     await sendCustomerOrderConfirmed(order.customer_email, {
       order_number: order.order_number,

@@ -1,6 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendOwnerNewOrder } from '@/lib/email'
+import { sendOwnerNewOrder, sendOwnerSaleOrder } from '@/lib/email'
 
 const SAFEPAY_ENV = process.env.NEXT_PUBLIC_SAFEPAY_ENV || 'sandbox'
 const SAFEPAY_API_BASE = SAFEPAY_ENV === 'production'
@@ -31,7 +31,7 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       customer_name, customer_phone, customer_email,
-      address, city, items, subtotal, delivery_charge, total, payment_method,
+      address, city, items, subtotal, delivery_charge, total, payment_method, is_sale,
     } = body
 
     // 1. Validate required fields
@@ -115,6 +115,7 @@ export async function POST(req: NextRequest) {
           payment_method,
           payment_status: 'pending',
           safepay_tracker: trackerToken,
+          is_sale: is_sale ?? false,
         }])
         .select().single()
       if (!error) { order = data; break }
@@ -151,6 +152,23 @@ export async function POST(req: NextRequest) {
       payment_method: order.payment_method,
       payment_status: order.payment_status ?? 'pending',
     })
+
+    if (order.is_sale) {
+      await sendOwnerSaleOrder({
+        order_number: order.order_number,
+        customer_name: order.customer_name,
+        customer_phone: order.customer_phone,
+        customer_email: order.customer_email,
+        address: order.address,
+        city: order.city,
+        items: order.items,
+        subtotal: order.subtotal,
+        delivery_charge: order.delivery_charge,
+        total: order.total,
+        payment_method: order.payment_method,
+        payment_status: order.payment_status ?? 'pending',
+      })
+    }
 
     // 7. Build Safepay hosted checkout URL
     const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000'

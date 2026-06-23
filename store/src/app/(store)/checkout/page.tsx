@@ -26,6 +26,8 @@ export default function CheckoutPage() {
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [codEnabled, setCodEnabled] = useState(false)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
+  const [saleActive, setSaleActive] = useState(false)
+  const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '' })
 
   useEffect(() => {
@@ -34,9 +36,11 @@ export default function CheckoutPage() {
     setItems(cart)
     fetch('/api/delivery-zones')
       .then(r => r.json())
-      .then(({ zones, cod_enabled }: { zones: DeliveryZone[]; cod_enabled: boolean }) => {
+      .then(({ zones, cod_enabled, sale_active, sale_delivery_override }: { zones: DeliveryZone[]; cod_enabled: boolean; sale_active: boolean; sale_delivery_override: number | null }) => {
         setZones(zones)
         setCodEnabled(cod_enabled)
+        setSaleActive(sale_active)
+        setSaleDeliveryOverride(sale_delivery_override)
       })
   }, [router])
 
@@ -45,7 +49,8 @@ export default function CheckoutPage() {
   const handleCityChange = (city: string) => {
     set('city', city)
     const zone = zones.find(z => z.city === city)
-    setDeliveryCharge(zone?.delivery_charge ?? 0)
+    const baseCharge = zone?.delivery_charge ?? 0
+    setDeliveryCharge(saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge)
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -63,6 +68,7 @@ export default function CheckoutPage() {
     delivery_charge: deliveryCharge,
     total,
     payment_method: form.payment,
+    is_sale: saleActive,
   })
 
   const submitCod = async (paymentOverride?: string) => {
