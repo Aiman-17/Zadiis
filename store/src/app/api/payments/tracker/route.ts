@@ -62,20 +62,26 @@ export async function POST(req: NextRequest) {
           'X-SFPY-MERCHANT-SECRET': process.env.SAFEPAY_API_KEY!,
         },
         body: JSON.stringify({
+          client: process.env.SAFEPAY_API_KEY,
+          environment: SAFEPAY_ENV,
+          amount: Math.round(total * 100),
+          currency: 'PKR',
           payload: {
             purpose: 'ZADIIS Order',
-            amount: Math.round(total * 100), // paisa — verify with Safepay docs
-            currency: 'PKR',
             mode: 'payment',
             metadata: { source: 'zadiis' },
           },
         }),
-        signal: AbortSignal.timeout(8000), // 8s timeout
+        signal: AbortSignal.timeout(10000),
       })
-      if (!sfRes.ok) throw new Error(`Safepay ${sfRes.status}`)
+      if (!sfRes.ok) {
+        const errBody = await sfRes.text().catch(() => '(no body)')
+        console.error(`[Safepay] HTTP ${sfRes.status}:`, errBody)
+        throw new Error(`Safepay ${sfRes.status}: ${errBody}`)
+      }
       const sfData = await sfRes.json()
-      trackerToken = sfData?.data?.tracker?.token
-      if (!trackerToken) throw new Error('No tracker token in Safepay response')
+      trackerToken = sfData?.data?.token
+      if (!trackerToken) throw new Error(`No tracker token: ${JSON.stringify(sfData)}`)
     } catch (sfErr) {
       console.error('[Safepay] tracker creation failed:', sfErr)
       // Load manual payment numbers from store_settings
