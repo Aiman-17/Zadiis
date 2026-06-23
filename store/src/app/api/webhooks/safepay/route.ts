@@ -23,7 +23,7 @@ export async function POST(req: NextRequest) {
   const signature = req.headers.get('sfpy-signature') || req.headers.get('x-sfpy-signature') || ''
   const secret = process.env.SAFEPAY_SECRET_KEY!
 
-  if (secret && signature && !verifySignature(rawBody, signature, secret)) {
+  if (secret && !verifySignature(rawBody, signature, secret)) {
     console.error('[webhook/safepay] Invalid signature. sig:', signature.slice(0, 20))
     return NextResponse.json({ error: 'Invalid signature' }, { status: 401 })
   }
