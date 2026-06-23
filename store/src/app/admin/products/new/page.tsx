@@ -117,7 +117,7 @@ export default function NewProduct() {
           </div>
           <div>
             <Label htmlFor="stock">Total Stock (auto-calculated)</Label>
-            <Input id="stock" type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+            <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
             <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Use the variant grid below for per-size/color stock</p>
           </div>
         </div>
