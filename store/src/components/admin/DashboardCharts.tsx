@@ -31,13 +31,15 @@ function isThisMonth(dateStr: string) {
 
 export default function DashboardCharts({ orders, products }: { orders: Order[]; products: Product[] }) {
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
-  const last30 = orders.filter(o => isWithinDays(o.created_at, 30))
+  const last24h  = orders.filter(o => isWithinDays(o.created_at, 1))
+  const last30   = orders.filter(o => isWithinDays(o.created_at, 30))
 
   // KPI
   const revenueThisMonth = thisMonth
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) => s + o.total, 0)
   const ordersThisMonth = thisMonth.filter(o => o.order_status !== 'cancelled').length
+  const todayOrders     = last24h.length
   const pendingAction = orders.filter(o =>
     !o.is_archived && (o.order_status === 'new' || o.order_status === 'processing')
   ).length
@@ -103,6 +105,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   const recentOrders = orders.filter(o => !o.is_archived).slice(0, 10)
 
   const KPI = [
+    { label: "Today's Orders",    value: todayOrders },
     { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
     { label: 'Orders This Month',  value: ordersThisMonth },
     { label: 'Pending Action',     value: pendingAction },
@@ -112,7 +115,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
         {KPI.map(k => (
           <div key={k.label} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <p className="text-2xl font-bold">{k.value}</p>
