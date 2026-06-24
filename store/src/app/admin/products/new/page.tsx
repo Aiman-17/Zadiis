@@ -34,7 +34,6 @@ export default function NewProduct() {
       .then(r => r.json())
       .then((data: { id: string; name: string }[]) => {
         setCategories(data)
-        if (data[0]) setForm(f => ({ ...f, category_id: data[0].id }))
       })
       .catch(() => {})
   }, [])
@@ -176,6 +175,7 @@ export default function NewProduct() {
               className="w-full border rounded px-3 py-2 text-sm mt-1"
               style={{ borderColor: '#E2E8F0' }}
             >
+              <option value="">No category (optional)</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>

@@ -147,8 +147,13 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
       )}
 
       {!totalOutOfStock && selectedVariantQty > 0 && selectedVariantQty <= 5 && (
-        <p className="text-sm" style={{ color: '#B45309' }}>
-          Only {selectedVariantQty} left in stock
+        <p className="text-sm font-semibold" style={{ color: '#C62828' }}>
+          {(() => {
+            const parts = [selectedColor, selectedSize].filter(Boolean)
+            return hasTracking && parts.length
+              ? `Only ${selectedVariantQty} left in ${parts.join(' / ')}`
+              : `Only ${selectedVariantQty} left in stock`
+          })()}
         </p>
       )}
 

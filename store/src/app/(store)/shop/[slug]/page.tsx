@@ -48,6 +48,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   let reviews: Review[] = []
   let salePrice: number | null = null
   let saleEndsAt: string | null = null
+  let isSaleActive = false
   let relatedProducts: Product[] = []
 
   try {
@@ -75,6 +76,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     relatedProducts = (relatedRes.data || []) as Product[]
 
     if (saleRes.data) {
+      isSaleActive = true
       saleEndsAt = saleRes.data.ends_at
       const { data: sp } = await supabaseAdmin
         .from('sale_products')
@@ -117,6 +119,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         <Link href="/shop" className="text-sm inline-block mb-6 hover:underline" style={{ color: '#A68B6E' }}>
           ← Back to Shop
         </Link>
+        {/* Ambient sale banner — shown on non-sale products when a sale is running */}
+        {isSaleActive && !salePrice && (
+          <a href="/sale" className="flex items-center gap-2 mb-6 px-4 py-2.5 rounded-lg text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
+            <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: '#C62828' }} />
+            <span style={{ color: '#1C1C1C' }}>Sale On Now — Browse discounted styles</span>
+            <span className="ml-auto text-xs font-semibold" style={{ color: '#C62828' }}>View Sale →</span>
+          </a>
+        )}
+
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <ProductImageGallery images={product!.images} name={product!.name} />
           <div className="space-y-6">
