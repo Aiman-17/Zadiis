@@ -48,9 +48,9 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   const lowStockCount = products.filter(p => {
     const vs = p.variant_stock
     if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).some(sizeMap => Object.values(sizeMap).some(q => q <= 5))
+      return Object.values(vs).some(sizeMap => Object.values(sizeMap).some(q => q <= 3))
     }
-    return p.stock_quantity <= 5
+    return p.stock_quantity <= 3
   }).length
 
   // Warning cards
@@ -106,13 +106,13 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) => {
         Object.entries(sizes).forEach(([size, qty]) => {
-          if (qty <= 5) {
+          if (qty <= 3) {
             const variant = [color !== '_' ? color : '', size !== '_' ? size : ''].filter(Boolean).join(' / ')
             lowStockItems.push({ name: p.name, variant, qty })
           }
         })
       })
-    } else if (p.stock_quantity <= 5) {
+    } else if (p.stock_quantity <= 3) {
       lowStockItems.push({ name: p.name, variant: 'All sizes', qty: p.stock_quantity })
     }
   })

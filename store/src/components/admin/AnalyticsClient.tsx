@@ -155,13 +155,13 @@ export default function AnalyticsClient({
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) =>
         Object.entries(sizes).forEach(([size, qty]) => {
-          if (qty <= 5) {
+          if (qty <= 3) {
             const variant = [color !== '_' ? color : '', size !== '_' ? size : ''].filter(Boolean).join(' / ')
             lowStockItems.push({ name: p.name, variant, qty })
           }
         })
       )
-    } else if (p.stock_quantity <= 5) {
+    } else if (p.stock_quantity <= 3) {
       lowStockItems.push({ name: p.name, variant: 'All sizes', qty: p.stock_quantity })
     }
   })
