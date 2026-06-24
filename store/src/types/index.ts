@@ -39,6 +39,7 @@ export type OrderItem = {
   color: string
   quantity: number
   price: number
+  original_price: number
 }
 
 export type Order = {
@@ -55,7 +56,9 @@ export type Order = {
   total: number
   payment_method: 'jazzcash' | 'easypaisa' | 'card' | 'cod'
   payment_status: 'pending' | 'paid' | 'failed'
-  order_status: 'new' | 'processing' | 'shipped' | 'delivered' | 'returned'
+  order_status: 'new' | 'processing' | 'shipped' | 'delivered' | 'returned' | 'cancelled'
+  cancellation_reason?: string | null
+  is_archived: boolean
   is_sale: boolean
   safepay_tracker?: string
   safepay_transaction_id?: string
