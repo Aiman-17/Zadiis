@@ -15,7 +15,7 @@ const STATUS_COLORS: Record<string, string> = {
   cancelled:  '#9CA3AF',
 }
 
-function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
+function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
 function isWithinDays(dateStr: string, days: number) {
   const cutoff = new Date()
@@ -92,7 +92,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     const d = new Date()
     d.setDate(d.getDate() - (6 - i))
     const dateStr = d.toISOString().slice(0, 10)
-    const label = i === 6 ? 'Today' : d.toLocaleDateString('default', { weekday: 'short' })
+    const label = i === 6 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' })
     const dayOrders = orders.filter(o =>
       o.created_at.startsWith(dateStr) && o.order_status !== 'cancelled'
     )
@@ -127,7 +127,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
     { label: 'Orders This Month',  value: ordersThisMonth },
     { label: 'Total Sales',         value: unitsReceived, sub: `${unitsDelivered} delivered`, subColor: '#10B981' },
-    { label: 'Total Products',     value: totalProducts, sub: `${totalStock.toLocaleString()} units in stock`, subColor: '#F59E0B' },
+    { label: 'Total Products',     value: totalProducts, sub: `${totalStock.toLocaleString('en-US')} units in stock`, subColor: '#F59E0B' },
     { label: 'Pending Action',     value: pendingAction },
     { label: 'Low Stock Variants', value: lowStockCount },
   ]
@@ -298,7 +298,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
                       </span>
                     </td>
                     <td className="px-5 py-3 text-xs" style={{ color: '#9CA3AF' }}>
-                      {new Date(order.created_at).toLocaleDateString()}
+                      {new Date(order.created_at).toLocaleDateString('en-US')}
                     </td>
                   </tr>
                 ))}
