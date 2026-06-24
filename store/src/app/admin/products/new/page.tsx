@@ -19,6 +19,7 @@ export default function NewProduct() {
     sku: '',
     description: '',
     price: '',
+    cost_price: '',
     stock_quantity: '',
     images: [] as string[],
     colors: '',
@@ -96,6 +97,7 @@ export default function NewProduct() {
         sku: form.sku || null,
         description: form.description,
         price: Number(form.price),
+        cost_price: form.cost_price ? Number(form.cost_price) : 0,
         stock_quantity: autoStock !== null ? autoStock : Number(form.stock_quantity),
         images: form.images,
         colors: parsedColors,
@@ -142,6 +144,10 @@ export default function NewProduct() {
           <div>
             <Label htmlFor="price">Price (PKR) *</Label>
             <Input id="price" required type="number" min="0" value={form.price} onChange={e => set('price', e.target.value)} className="mt-1" />
+          </div>
+          <div>
+            <Label htmlFor="cost_price">Cost Price (PKR)</Label>
+            <Input id="cost_price" type="number" min="0" value={form.cost_price} onChange={e => set('cost_price', e.target.value)} placeholder="What you paid" className="mt-1" />
           </div>
           <div>
             <Label htmlFor="stock">

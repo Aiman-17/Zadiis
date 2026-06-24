@@ -84,6 +84,30 @@ export default function AnalyticsClient({
       ), 0
     )
 
+  // Profit — only for paid non-COD orders and delivered COD orders
+  const costMap = Object.fromEntries(products.map(p => [p.id, p.cost_price || 0]))
+  const qualifyingOrders = orders.filter(o =>
+    o.order_status !== 'cancelled' &&
+    o.order_status !== 'returned' &&
+    (o.payment_method === 'cod'
+      ? o.order_status === 'delivered'
+      : o.payment_status === 'paid')
+  )
+  const grossProfit = qualifyingOrders.reduce((s, o) =>
+    s + (o.items as OrderItem[]).reduce((si, i) => {
+      const cost = costMap[i.product_id] || 0
+      return si + (i.price - cost) * i.quantity
+    }, 0), 0
+  )
+  const profitMarginPct = netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0
+  // How much profit was sacrificed by giving sale/manual discounts on qualifying orders
+  const profitLostToDiscounts = qualifyingOrders.reduce((s, o) =>
+    s + (o.items as OrderItem[]).reduce((si, i) => {
+      const originalPrice = i.original_price ?? i.price
+      return si + (originalPrice - i.price) * i.quantity
+    }, 0), 0
+  )
+
   const trendData = buildTrendData(orders, range)
 
   // Payment methods
@@ -194,20 +218,35 @@ export default function AnalyticsClient({
       {/* Revenue Tab */}
       {tab === 'revenue' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: 'Gross Revenue',   value: pkr(grossRevenue),   color: '#1C1C1C' },
-              { label: 'Net Revenue',     value: pkr(netRevenue),     color: '#10B981' },
-              { label: 'Cancelled',       value: pkr(cancelledRev),   color: '#EF4444' },
-              { label: 'Returned',        value: pkr(returnedRev),    color: '#F59E0B' },
-              { label: 'Discounts Given', value: pkr(discountsGiven), color: '#A68B6E' },
+              { label: 'Gross Revenue', value: pkr(grossRevenue), color: '#1C1C1C' },
+              { label: 'Net Revenue',   value: pkr(netRevenue),   color: '#10B981' },
+              { label: 'Gross Profit',  value: pkr(grossProfit),  color: grossProfit >= 0 ? '#10B981' : '#EF4444',
+                sub: `${profitMarginPct}% margin` },
             ].map(k => (
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
                 <p className="text-lg font-bold" style={{ color: k.color }}>{k.value}</p>
                 <p className="text-xs text-gray-500 mt-1">{k.label}</p>
+                {'sub' in k && k.sub && (
+                  <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{k.sub}</p>
+                )}
               </div>
             ))}
           </div>
+
+          {/* Discount impact — only shown when discounts were given */}
+          {profitLostToDiscounts > 0 && (
+            <div className="rounded-lg px-4 py-3 flex items-center justify-between text-sm"
+              style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
+              <span style={{ color: '#6B7280' }}>
+                Profit reduced by discounts/sales this period:
+              </span>
+              <span className="font-semibold" style={{ color: '#C62828' }}>
+                −{pkr(profitLostToDiscounts)}
+              </span>
+            </div>
+          )}
 
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <h3 className="font-semibold mb-4">Revenue Trend</h3>

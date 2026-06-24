@@ -18,6 +18,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
     sku: product.sku || '',
     description: product.description || '',
     price: String(product.price),
+    cost_price: product.cost_price ? String(product.cost_price) : '',
     stock_quantity: String(product.stock_quantity),
     images: [...product.images],
     colors: product.colors.join(', '),
@@ -95,6 +96,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
         sku: form.sku || null,
         description: form.description,
         price: Number(form.price),
+        cost_price: form.cost_price ? Number(form.cost_price) : 0,
         stock_quantity: autoStock !== null ? autoStock : Number(form.stock_quantity),
         images: form.images,
         colors: parsedColors,
@@ -143,6 +145,10 @@ export default function EditProductForm({ product, categories }: { product: Prod
           <div>
             <Label htmlFor="price">Price (PKR) *</Label>
             <Input id="price" required type="number" min="0" value={form.price} onChange={e => set('price', e.target.value)} className="mt-1" />
+          </div>
+          <div>
+            <Label htmlFor="cost_price">Cost Price (PKR)</Label>
+            <Input id="cost_price" type="number" min="0" value={form.cost_price} onChange={e => set('cost_price', e.target.value)} placeholder="What you paid" className="mt-1" />
           </div>
           <div>
             <Label htmlFor="stock">

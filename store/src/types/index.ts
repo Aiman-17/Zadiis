@@ -25,6 +25,7 @@ export type Product = {
   stock_quantity: number
   variant_stock: VariantStock
   is_bestseller: boolean
+  cost_price: number
   total_sold: number
   best_seller_score: number
   trending_score: number
