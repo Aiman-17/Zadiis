@@ -12,6 +12,7 @@ export default function NewSalePage() {
   const [error, setError] = useState('')
   const [products, setProducts] = useState<Product[]>([])
   const [selected, setSelected] = useState<Record<string, string>>({})
+  const [discountPct, setDiscountPct] = useState('20')
   const [form, setForm] = useState({
     title: '', description: '', is_active: false,
     delivery_charge_override: '', starts_at: '', ends_at: '',
@@ -22,6 +23,19 @@ export default function NewSalePage() {
     fetch('/api/admin/products').then(r => r.json()).then(setProducts)
   }, [])
 
+  const applyDiscountToAll = () => {
+    const pct = Number(discountPct)
+    if (!pct || pct <= 0 || pct >= 100) return
+    setSelected(prev => {
+      const next = { ...prev }
+      Object.keys(next).forEach(productId => {
+        const p = products.find(pr => pr.id === productId)
+        if (p) next[productId] = String(Math.floor(p.price * (1 - pct / 100)))
+      })
+      return next
+    })
+  }
+
   const toggleProduct = (id: string, price: number) => {
     setSelected(prev => {
       if (prev[id] !== undefined) {
@@ -29,7 +43,8 @@ export default function NewSalePage() {
         delete next[id]
         return next
       }
-      return { ...prev, [id]: String(Math.floor(price * 0.8)) }
+      const pct = Number(discountPct) || 20
+      return { ...prev, [id]: String(Math.floor(price * (1 - pct / 100))) }
     })
   }
 
@@ -110,7 +125,7 @@ export default function NewSalePage() {
 
         {/* Product selection */}
         <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
-          <div className="flex items-center justify-between mb-4">
+          <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold text-sm uppercase tracking-wide" style={{ color: '#A68B6E' }}>Select Products</h2>
             {selectedCount > 0 && (
               <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#E8DDD4', color: '#A68B6E' }}>
@@ -118,6 +133,31 @@ export default function NewSalePage() {
               </span>
             )}
           </div>
+
+          {/* Quick Discount % */}
+          <div className="flex items-center gap-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
+            <label className="text-xs font-medium shrink-0" style={{ color: '#1C1C1C' }}>Discount %</label>
+            <input
+              type="number"
+              min="1"
+              max="99"
+              value={discountPct}
+              onChange={e => setDiscountPct(e.target.value)}
+              className="w-16 border rounded px-2 py-1 text-sm text-center"
+              style={{ borderColor: '#A68B6E' }}
+            />
+            <span className="text-xs" style={{ color: '#9CA3AF' }}>off original price</span>
+            <button
+              type="button"
+              onClick={applyDiscountToAll}
+              disabled={selectedCount === 0}
+              className="ml-auto text-xs px-3 py-1.5 rounded text-white transition-opacity disabled:opacity-40"
+              style={{ backgroundColor: '#A68B6E' }}
+            >
+              Apply to All
+            </button>
+          </div>
+
           <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
             {products.length === 0 && (
               <p className="text-sm py-4 text-center" style={{ color: '#9CA3AF' }}>Loading products…</p>
@@ -156,7 +196,7 @@ export default function NewSalePage() {
           </div>
           {selectedCount === 0 && products.length > 0 && (
             <p className="text-xs mt-3" style={{ color: '#9CA3AF' }}>
-              Tap a product to add it to this sale. Sale price defaults to 20% off.
+              Tap a product to add it. Sale price auto-fills at {discountPct || 20}% off.
             </p>
           )}
         </div>

@@ -16,6 +16,8 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
   const [allProducts, setAllProducts] = useState<Product[]>([])
   const [addProductId, setAddProductId] = useState('')
   const [addSalePrice, setAddSalePrice] = useState('')
+  const [discountPct, setDiscountPct] = useState('20')
+  const [applyingDiscount, setApplyingDiscount] = useState(false)
   const [form, setForm] = useState({ title: '', description: '', is_active: false, delivery_charge_override: '', starts_at: '', ends_at: '' })
 
   const load = useCallback(async () => {
@@ -100,6 +102,26 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
     load()
   }
 
+  const applyDiscountToExisting = async () => {
+    const pct = Number(discountPct)
+    if (!pct || pct <= 0 || pct >= 100) return
+    setApplyingDiscount(true)
+    await Promise.all(
+      saleProducts.map(sp => {
+        const product = allProducts.find(p => p.id === sp.product_id)
+        if (!product) return Promise.resolve()
+        const newPrice = Math.floor(product.price * (1 - pct / 100))
+        return fetch(`/api/admin/sales/${id}/products`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ product_id: sp.product_id, sale_price: newPrice }),
+        })
+      })
+    )
+    setApplyingDiscount(false)
+    load()
+  }
+
   if (!sale) return <div className="p-4">Loading...</div>
 
   const addedProductIds = new Set(saleProducts.map(sp => sp.product_id))
@@ -150,19 +172,54 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
 
       {/* Products in this sale */}
       <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
-        <h2 className="font-semibold mb-4">Products in this Sale</h2>
+        <div className="flex items-center justify-between mb-4">
+          <h2 className="font-semibold">Products in this Sale</h2>
+        </div>
+
+        {/* Quick Discount % — recalculate all existing products */}
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
+          <label className="text-xs font-medium shrink-0" style={{ color: '#1C1C1C' }}>Discount %</label>
+          <input
+            type="number"
+            min="1"
+            max="99"
+            value={discountPct}
+            onChange={e => setDiscountPct(e.target.value)}
+            className="w-16 border rounded px-2 py-1 text-sm text-center"
+            style={{ borderColor: '#A68B6E' }}
+          />
+          <span className="text-xs" style={{ color: '#9CA3AF' }}>off original price</span>
+          <Button
+            type="button"
+            onClick={applyDiscountToExisting}
+            disabled={applyingDiscount || saleProducts.length === 0}
+            className="ml-auto text-xs text-white rounded-none"
+            style={{ backgroundColor: '#A68B6E' }}
+          >
+            {applyingDiscount ? 'Updating…' : 'Apply to All'}
+          </Button>
+        </div>
 
         {/* Add product */}
         <div className="flex gap-2 mb-4">
           <select
             value={addProductId}
-            onChange={e => setAddProductId(e.target.value)}
+            onChange={e => {
+              setAddProductId(e.target.value)
+              const p = availableProducts.find(pr => pr.id === e.target.value)
+              if (p) {
+                const pct = Number(discountPct) || 20
+                setAddSalePrice(String(Math.floor(p.price * (1 - pct / 100))))
+              } else {
+                setAddSalePrice('')
+              }
+            }}
             className="flex-1 border rounded px-3 py-2 text-sm"
             style={{ borderColor: '#E2E8F0' }}
           >
             <option value="">Select product to add...</option>
             {availableProducts.map(p => (
-              <option key={p.id} value={p.id}>{p.name} (PKR {p.price})</option>
+              <option key={p.id} value={p.id}>{p.name} (PKR {p.price.toLocaleString()})</option>
             ))}
           </select>
           <Input type="number" placeholder="Sale price" value={addSalePrice} onChange={e => setAddSalePrice(e.target.value)} className="w-32" min="0" />
