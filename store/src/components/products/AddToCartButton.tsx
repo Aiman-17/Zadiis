@@ -20,7 +20,7 @@ function getColorHex(name: string) {
   return COLOR_MAP[name.toLowerCase()] ?? '#D1D5DB'
 }
 
-export default function AddToCartButton({ product }: { product: Product }) {
+export default function AddToCartButton({ product, salePrice }: { product: Product; salePrice?: number }) {
   const [selectedSize, setSelectedSize] = useState('')
   const [selectedColor, setSelectedColor] = useState('')
   const [added, setAdded] = useState(false)
@@ -63,7 +63,8 @@ export default function AddToCartButton({ product }: { product: Product }) {
       id: product.id,
       name: product.name,
       sku: product.sku,
-      price: product.price,
+      price: salePrice ?? product.price,
+      originalPrice: salePrice ? product.price : undefined,
       image: product.images[0] || '',
       size: selectedSize,
       color: selectedColor,

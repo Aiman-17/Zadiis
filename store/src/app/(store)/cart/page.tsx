@@ -77,7 +77,19 @@ export default function CartPage() {
               {(item.size || item.color) && (
                 <p className="text-sm text-gray-500">{[item.size, item.color].filter(Boolean).join(' · ')}</p>
               )}
-              <p className="font-semibold mt-1" style={{ color: '#A68B6E' }}>PKR {item.price.toLocaleString()}</p>
+              {item.originalPrice && item.originalPrice > item.price ? (
+                <div className="mt-1 space-y-0.5">
+                  <p className="font-semibold" style={{ color: '#DC2626' }}>PKR {item.price.toLocaleString('en-US')}</p>
+                  <div className="flex items-center gap-2">
+                    <p className="text-xs line-through" style={{ color: '#9CA3AF' }}>PKR {item.originalPrice.toLocaleString('en-US')}</p>
+                    <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}>
+                      Save PKR {(item.originalPrice - item.price).toLocaleString('en-US')}
+                    </span>
+                  </div>
+                </div>
+              ) : (
+                <p className="font-semibold mt-1" style={{ color: '#A68B6E' }}>PKR {item.price.toLocaleString('en-US')}</p>
+              )}
               <div className="flex items-center gap-3 mt-2">
                 <button
                   onClick={() => updateQty(item.id, item.size, item.color, item.quantity - 1)}

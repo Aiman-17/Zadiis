@@ -88,12 +88,24 @@ export default async function HomePage() {
 
       {/* Sale Banner — only shown when a sale is active */}
       {activeSale && (
-        <section className="py-6 px-4 text-center" style={{ backgroundColor: '#A68B6E' }}>
-          <Link href="/sale" className="group inline-block">
-            <p className="text-xs uppercase tracking-widest mb-1" style={{ color: '#FAF8F5', opacity: 0.8 }}>Limited Time Offer</p>
-            <p className="text-xl font-semibold text-white" style={{ fontFamily: 'Playfair Display, serif' }}>
-              {activeSale.title} — <span className="underline group-hover:no-underline">Shop the Sale →</span>
-            </p>
+        <section className="py-5 px-4 text-center" style={{ backgroundColor: '#1C1C1C' }}>
+          <div className="flex items-center justify-center gap-2 mb-1">
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#EF4444' }} />
+            <p className="text-xs uppercase tracking-widest" style={{ color: '#A68B6E', letterSpacing: '0.25em' }}>Limited Time Sale</p>
+            <span className="w-2 h-2 rounded-full animate-pulse" style={{ backgroundColor: '#EF4444' }} />
+          </div>
+          <p className="text-xl font-semibold text-white mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>
+            {activeSale.title}
+            {activeSale.description && (
+              <span className="text-base font-normal text-gray-300"> — {activeSale.description}</span>
+            )}
+          </p>
+          <Link
+            href="/sale"
+            className="inline-block text-sm font-semibold uppercase tracking-widest px-6 py-2 transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#DC2626', color: 'white' }}
+          >
+            Shop the Sale →
           </Link>
         </section>
       )}
