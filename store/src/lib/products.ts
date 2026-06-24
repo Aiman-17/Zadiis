@@ -61,6 +61,18 @@ export async function getFeaturedProducts(limit = 6) {
 }
 
 export async function getBestsellerProducts(limit = 6) {
+  // Score-based ranking when scores exist; fall back to manual is_bestseller flag
+  const { data: scored } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .gt('stock_quantity', 0)
+    .gt('best_seller_score', 0)
+    .order('best_seller_score', { ascending: false })
+    .limit(limit)
+
+  if (scored && scored.length > 0) return scored as Product[]
+
   const { data, error } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
@@ -71,5 +83,18 @@ export async function getBestsellerProducts(limit = 6) {
     .limit(limit)
 
   if (error) throw error
-  return data as Product[]
+  return (data || []) as Product[]
+}
+
+export async function getTrendingProducts(limit = 4) {
+  const { data } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .gt('stock_quantity', 0)
+    .gt('trending_score', 0)
+    .order('trending_score', { ascending: false })
+    .limit(limit)
+
+  return (data || []) as Product[]
 }

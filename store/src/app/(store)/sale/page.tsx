@@ -80,8 +80,14 @@ export default async function SalePage() {
   )
   const recentIds = new Set(sortedByRecency.slice(0, 3).map(sp => sp.product_id))
 
-  // Three non-overlapping groups
-  const bestSellerSps = saleProducts.filter(sp => sp.products?.is_bestseller)
+  // Three non-overlapping groups — score-based best sellers, fall back to is_bestseller flag
+  const scoredSps = [...saleProducts].sort(
+    (a, b) => (b.products?.best_seller_score || 0) - (a.products?.best_seller_score || 0)
+  )
+  const hasScores = saleProducts.some(sp => (sp.products?.best_seller_score || 0) > 0)
+  const bestSellerSps = hasScores
+    ? scoredSps.filter(sp => (sp.products?.best_seller_score || 0) > 0).slice(0, 4)
+    : saleProducts.filter(sp => sp.products?.is_bestseller)
   const bestSellerIds = new Set(bestSellerSps.map(sp => sp.product_id))
 
   const newDropsSps = sortedByRecency

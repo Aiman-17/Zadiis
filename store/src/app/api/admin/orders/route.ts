@@ -2,6 +2,8 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { generateInvoice } from '@/lib/invoice'
 import { sendCustomerOrderDelivered, sendOwnerPaymentReceived } from '@/lib/email'
+import { incrementTotalSold } from '@/lib/scoring'
+import type { OrderItem } from '@/types'
 
 export async function GET() {
   try {
@@ -45,7 +47,7 @@ export async function PUT(req: NextRequest) {
     if (needsOrderData) {
       const { data } = await supabaseAdmin
         .from('orders')
-        .select('order_number, customer_name, customer_phone, customer_email, total, payment_method, safepay_transaction_id')
+        .select('order_number, customer_name, customer_phone, customer_email, total, payment_method, safepay_transaction_id, items')
         .eq('id', id)
         .single()
       orderData = data
@@ -59,6 +61,11 @@ export async function PUT(req: NextRequest) {
 
     const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Increment total_sold + recalculate scores when order delivered
+    if (order_status === 'delivered' && orderData && 'items' in orderData && orderData.items) {
+      void incrementTotalSold(orderData.items as OrderItem[])
+    }
 
     // Post-update side effects — skip for cancelled orders
     if (order_status !== 'cancelled') {

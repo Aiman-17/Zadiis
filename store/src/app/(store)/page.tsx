@@ -2,7 +2,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/ProductCard'
-import { getFeaturedProducts, getBestsellerProducts } from '@/lib/products'
+import { getFeaturedProducts, getBestsellerProducts, getTrendingProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
 
@@ -22,12 +22,14 @@ async function getHeroImage(): Promise<string> {
 export default async function HomePage() {
   let featured: Awaited<ReturnType<typeof getFeaturedProducts>> = []
   let bestSellers: Awaited<ReturnType<typeof getBestsellerProducts>> = []
+  let trending: Awaited<ReturnType<typeof getTrendingProducts>> = []
   let heroImage = ''
   let activeSale: { title: string; description: string | null; ends_at: string | null } | null = null
   try {
-    const [featuredData, bestSellersData, heroData, saleData] = await Promise.all([
+    const [featuredData, bestSellersData, trendingData, heroData, saleData] = await Promise.all([
       getFeaturedProducts(6),
       getBestsellerProducts(6),
+      getTrendingProducts(4),
       getHeroImage(),
       supabaseAdmin
         .from('sales')
@@ -38,6 +40,7 @@ export default async function HomePage() {
     ])
     featured = featuredData
     bestSellers = bestSellersData
+    trending = trendingData
     heroImage = heroData
     activeSale = saleData
   } catch {
@@ -107,6 +110,21 @@ export default async function HomePage() {
           >
             Shop the Sale →
           </Link>
+        </section>
+      )}
+
+      {/* Trending Now — only shown when trending_score data exists */}
+      {trending.length > 0 && (
+        <section className="max-w-6xl mx-auto px-4 py-16" style={{ borderTop: '1px solid #E8DDD4' }}>
+          <div className="flex items-baseline justify-center gap-3 mb-10">
+            <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Trending Now</h2>
+            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Hot This Week</span>
+          </div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
+            {trending.map(product => (
+              <ProductCard key={product.id} product={product} badge="TRENDING" />
+            ))}
+          </div>
         </section>
       )}
 
