@@ -26,6 +26,13 @@ export default function ProductCard({ product, salePrice }: ProductCardProps) {
             <span className="text-gray-400 text-sm">No image</span>
           </div>
         )}
+        {salePrice && product.price > 0 && (
+          <div className="absolute top-2 left-2 z-10">
+            <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: '#DC2626', color: 'white' }}>
+              {Math.round((1 - salePrice / product.price) * 100)}% OFF
+            </span>
+          </div>
+        )}
         {product.stock_quantity === 0 && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="text-white text-sm font-medium">Sold Out</span>

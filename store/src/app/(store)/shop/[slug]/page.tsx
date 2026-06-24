@@ -133,7 +133,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <p className="text-lg line-through" style={{ color: '#9CA3AF' }}>
                       PKR {product!.price.toLocaleString('en-US')}
                     </p>
-                    <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                    <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}>
                       Save PKR {savings.toLocaleString('en-US')}
                     </span>
                   </>
