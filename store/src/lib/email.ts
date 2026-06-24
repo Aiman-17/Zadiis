@@ -218,11 +218,15 @@ export async function sendOwnerNewOrder(d: {
   total: number
   payment_method: string
   payment_status: string
+  is_sale?: boolean
 }): Promise<void> {
   const itemRows = buildItemRows(d.items)
+  const saleTag = d.is_sale ? '🛍️ SALE — ' : ''
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">New Order — ${d.order_number}</h2>
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        ${d.is_sale ? '🛍️ SALE ORDER — ' : 'New Order — '}${d.order_number}
+      </h2>
       <p><strong>Customer:</strong> ${d.customer_name} · ${d.customer_phone}</p>
       <p><strong>Email:</strong> ${d.customer_email ?? '—'}</p>
       <p><strong>Address:</strong> ${d.address}, ${d.city}</p>
@@ -236,37 +240,11 @@ export async function sendOwnerNewOrder(d: {
     await resend.emails.send({
       from: FROM,
       to: process.env.OWNER_EMAIL!,
-      subject: `New order ${d.order_number} — ${d.payment_method} — PKR ${Number(d.total).toLocaleString()}`,
+      subject: `${saleTag}New order ${d.order_number} — ${d.payment_method} — PKR ${Number(d.total).toLocaleString()}`,
       html,
     })
   } catch (e) {
     console.error('sendOwnerNewOrder failed:', e)
-  }
-}
-
-export async function sendOwnerSaleOrder(d: Parameters<typeof sendOwnerNewOrder>[0]): Promise<void> {
-  const itemRows = buildItemRows(d.items)
-  const html = `
-    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">🛍️ SALE ORDER — ${d.order_number}</h2>
-      <p><strong>Customer:</strong> ${d.customer_name} · ${d.customer_phone}</p>
-      <p><strong>Email:</strong> ${d.customer_email ?? '—'}</p>
-      <p><strong>Address:</strong> ${d.address}, ${d.city}</p>
-      <p><strong>Payment:</strong> ${d.payment_method} · ${d.payment_status}</p>
-      <table style="width:100%;border-collapse:collapse;margin:16px 0">${itemRows}</table>
-      <p><strong>Subtotal:</strong> PKR ${Number(d.subtotal).toLocaleString()}</p>
-      <p><strong>Delivery:</strong> PKR ${Number(d.delivery_charge).toLocaleString()}</p>
-      <p style="font-size:1.1em;color:#A68B6E"><strong>Total: PKR ${Number(d.total).toLocaleString()}</strong></p>
-    </div>`
-  try {
-    await resend.emails.send({
-      from: FROM,
-      to: process.env.OWNER_EMAIL!,
-      subject: `🛍️ SALE ORDER — ${d.order_number} — ${d.payment_method} — PKR ${Number(d.total).toLocaleString()}`,
-      html,
-    })
-  } catch (e) {
-    console.error('sendOwnerSaleOrder failed:', e)
   }
 }
 
