@@ -28,7 +28,7 @@ export default function CheckoutPage() {
   const [deliveryCharge, setDeliveryCharge] = useState(0)
   const [saleActive, setSaleActive] = useState(false)
   const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
-  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '' })
+  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '', website: '' })
 
   useEffect(() => {
     const cart = getCart()
@@ -62,6 +62,7 @@ export default function CheckoutPage() {
     customer_phone: form.phone,
     customer_email: form.email,
     address: form.address,
+    website: form.website,
     city: form.city,
     items: items.map(i => ({ product_id: i.id, product_name: i.name, sku: i.sku, size: i.size, color: i.color, quantity: i.quantity, price: i.price })),
     subtotal,
@@ -206,6 +207,17 @@ export default function CheckoutPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Honeypot — invisible to humans, bots fill it */}
+        <input
+          name="website"
+          type="text"
+          value={form.website}
+          onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
+          style={{ display: 'none' }}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="name">Full Name *</Label>
