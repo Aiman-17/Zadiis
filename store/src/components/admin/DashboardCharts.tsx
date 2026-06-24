@@ -252,7 +252,15 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
       {/* Recent Orders */}
       <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
         <div className="p-5 border-b" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold">Recent Orders</h3>
+          <h3 className="font-semibold">
+            Recent Orders
+            {recentOrders.length > 0 && (
+              <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-normal"
+                style={{ backgroundColor: '#E8DDD4', color: '#A68B6E' }}>
+                {recentOrders.length}
+              </span>
+            )}
+          </h3>
         </div>
         {recentOrders.length === 0 ? (
           <p className="text-sm p-5" style={{ color: '#9CA3AF' }}>No orders yet.</p>
