@@ -1,5 +1,5 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
@@ -9,6 +9,13 @@ import VariantStockGrid from '@/components/admin/VariantStockGrid'
 import type { Product, Category, VariantStock } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
+
+function sumVariantStock(vs: VariantStock): number {
+  return Object.values(vs).reduce(
+    (sum, sizeMap) => sum + Object.values(sizeMap).reduce((s, qty) => s + (qty || 0), 0),
+    0
+  )
+}
 
 export default function EditProductForm({ product, categories }: { product: Product; categories: Category[] }) {
   const router = useRouter()
@@ -45,6 +52,15 @@ export default function EditProductForm({ product, categories }: { product: Prod
 
   const parsedColors = form.colors.split(',').map(s => s.trim()).filter(Boolean)
 
+  const hasVariantTracking = useMemo(
+    () => Object.keys(form.variant_stock ?? {}).length > 0,
+    [form.variant_stock]
+  )
+  const autoStock = useMemo(
+    () => hasVariantTracking ? sumVariantStock(form.variant_stock) : null,
+    [hasVariantTracking, form.variant_stock]
+  )
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
@@ -57,7 +73,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
         sku: form.sku || null,
         description: form.description,
         price: Number(form.price),
-        stock_quantity: Number(form.stock_quantity),
+        stock_quantity: autoStock !== null ? autoStock : Number(form.stock_quantity),
         images: form.images,
         colors: parsedColors,
         sizes: form.sizes,
@@ -107,9 +123,23 @@ export default function EditProductForm({ product, categories }: { product: Prod
             <Input id="price" required type="number" min="0" value={form.price} onChange={e => set('price', e.target.value)} className="mt-1" />
           </div>
           <div>
-            <Label htmlFor="stock">Total Stock (auto-calculated)</Label>
-            <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
-            <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Use the variant grid below for per-size/color stock</p>
+            <Label htmlFor="stock">
+              Total Stock {hasVariantTracking ? <span className="font-normal text-gray-400">(auto-calculated from grid)</span> : null}
+            </Label>
+            {hasVariantTracking ? (
+              <div
+                id="stock"
+                className="mt-1 px-3 py-2 border rounded text-sm bg-gray-50"
+                style={{ borderColor: '#E2E8F0', color: '#374151' }}
+              >
+                {autoStock}
+              </div>
+            ) : (
+              <>
+                <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+                <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Fill in the variant grid below to enable auto-calculation</p>
+              </>
+            )}
           </div>
         </div>
         {categories.length > 0 && (
