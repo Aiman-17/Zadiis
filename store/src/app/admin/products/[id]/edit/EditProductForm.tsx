@@ -10,13 +10,6 @@ import type { Product, Category, VariantStock } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 
-function sumVariantStock(vs: VariantStock): number {
-  return Object.values(vs).reduce(
-    (sum, sizeMap) => sum + Object.values(sizeMap).reduce((s, qty) => s + (qty || 0), 0),
-    0
-  )
-}
-
 export default function EditProductForm({ product, categories }: { product: Product; categories: Category[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
@@ -52,18 +45,44 @@ export default function EditProductForm({ product, categories }: { product: Prod
 
   const parsedColors = form.colors.split(',').map(s => s.trim()).filter(Boolean)
 
-  const hasVariantTracking = useMemo(
-    () => Object.keys(form.variant_stock ?? {}).length > 0,
-    [form.variant_stock]
-  )
-  const autoStock = useMemo(
-    () => hasVariantTracking ? sumVariantStock(form.variant_stock) : null,
-    [hasVariantTracking, form.variant_stock]
-  )
+  // Grid is active whenever colors or non-Unstitched sizes are selected
+  const gridSizes = useMemo(() => form.sizes.filter(s => s !== 'Unstitched'), [form.sizes])
+  const hasVariantTracking = parsedColors.length > 0 || gridSizes.length > 0
+
+  // Sum over ALL currently-visible grid cells (unfilled cells default to 0)
+  const autoStock = useMemo(() => {
+    if (!hasVariantTracking) return null
+    const cols = parsedColors.length > 0 ? parsedColors : ['_']
+    const szs = gridSizes.length > 0 ? gridSizes : ['_']
+    let total = 0
+    for (const c of cols) {
+      for (const s of szs) {
+        total += form.variant_stock?.[c]?.[s] ?? 0
+      }
+    }
+    return total
+  }, [hasVariantTracking, parsedColors, gridSizes, form.variant_stock])
+
+  // Build complete Color×Size matrix so every cell is persisted (including 0s),
+  // allowing the product page to correctly disable out-of-stock variants.
+  const buildCompleteVariantStock = (): VariantStock => {
+    if (!hasVariantTracking) return {}
+    const cols = parsedColors.length > 0 ? parsedColors : ['_']
+    const szs = gridSizes.length > 0 ? gridSizes : ['_']
+    const result: VariantStock = {}
+    for (const c of cols) {
+      result[c] = {}
+      for (const s of szs) {
+        result[c][s] = form.variant_stock?.[c]?.[s] ?? 0
+      }
+    }
+    return result
+  }
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    const completeVariantStock = buildCompleteVariantStock()
     const res = await fetch('/api/admin/products', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -80,7 +99,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
         category_id: form.category_id || null,
         is_active: form.is_active,
         is_bestseller: form.is_bestseller,
-        variant_stock: form.variant_stock,
+        variant_stock: completeVariantStock,
       }),
     })
     if (res.ok) {
