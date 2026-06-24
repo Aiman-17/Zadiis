@@ -90,6 +90,10 @@ export default function ReviewForm({ productId, onSubmitted }: { productId: stri
       >
         {submitting ? 'Submitting...' : 'Submit Review'}
       </Button>
+
+      <p className="text-xs text-center" style={{ color: '#9CA3AF' }}>
+        🔒 Your privacy matters to us. We only display your name and review — your personal information is never shared.
+      </p>
     </form>
   )
 }

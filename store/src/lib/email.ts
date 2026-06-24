@@ -218,11 +218,15 @@ export async function sendOwnerNewOrder(d: {
   total: number
   payment_method: string
   payment_status: string
+  is_sale?: boolean
 }): Promise<void> {
   const itemRows = buildItemRows(d.items)
+  const saleTag = d.is_sale ? '🛍️ SALE — ' : ''
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
-      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">New Order — ${d.order_number}</h2>
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        ${d.is_sale ? '🛍️ SALE ORDER — ' : 'New Order — '}${d.order_number}
+      </h2>
       <p><strong>Customer:</strong> ${d.customer_name} · ${d.customer_phone}</p>
       <p><strong>Email:</strong> ${d.customer_email ?? '—'}</p>
       <p><strong>Address:</strong> ${d.address}, ${d.city}</p>
@@ -236,7 +240,7 @@ export async function sendOwnerNewOrder(d: {
     await resend.emails.send({
       from: FROM,
       to: process.env.OWNER_EMAIL!,
-      subject: `New order ${d.order_number} — ${d.payment_method} — PKR ${Number(d.total).toLocaleString()}`,
+      subject: `${saleTag}New order ${d.order_number} — ${d.payment_method} — PKR ${Number(d.total).toLocaleString()}`,
       html,
     })
   } catch (e) {

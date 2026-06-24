@@ -31,11 +31,11 @@ export async function POST(req: NextRequest) {
     const body = await req.json()
     const {
       customer_name, customer_phone, customer_email,
-      address, city, items, subtotal, delivery_charge, total, payment_method,
+      address, city, items, subtotal, delivery_charge, total, payment_method, is_sale,
     } = body
 
     // 1. Validate required fields
-    if (!customer_name || !customer_phone || !address || !city || !payment_method || !Array.isArray(items) || items.length === 0) {
+    if (!customer_name || !customer_phone || !customer_email || !address || !city || !payment_method || !Array.isArray(items) || items.length === 0) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
     if (!['jazzcash', 'easypaisa', 'card'].includes(payment_method)) {
@@ -43,12 +43,25 @@ export async function POST(req: NextRequest) {
     }
 
     // 2. Validate stock
-    for (const item of items as Array<{ product_id: string; product_name: string; quantity: number }>) {
+    for (const item of items as Array<{ product_id: string; product_name: string; quantity: number; color?: string; size?: string }>) {
       const { data: product, error } = await supabaseAdmin
-        .from('products').select('stock_quantity').eq('id', item.product_id).single()
+        .from('products').select('stock_quantity, name, variant_stock').eq('id', item.product_id).single()
       if (error || !product) return NextResponse.json({ error: `Product not found: ${item.product_name}` }, { status: 400 })
       if (product.stock_quantity < item.quantity) {
         return NextResponse.json({ error: `"${item.product_name}" has insufficient stock. Available: ${product.stock_quantity}.`, outOfStock: true }, { status: 400 })
+      }
+      // Per-variant check when tracking is enabled
+      const variantStock = product.variant_stock as Record<string, Record<string, number>> | null
+      if (variantStock && Object.keys(variantStock).length > 0) {
+        const c = (item.color || '_') as string
+        const s = (item.size || '_') as string
+        const variantQty = variantStock?.[c]?.[s]
+        if (variantQty !== undefined && variantQty < item.quantity) {
+          return NextResponse.json({
+            error: `Sorry, "${item.product_name}" (${((item.color || '') + ' ' + (item.size || '')).trim()}) is out of stock for the selected variant. Available: ${variantQty}.`,
+            outOfStock: true,
+          }, { status: 400 })
+        }
       }
     }
 
@@ -115,6 +128,7 @@ export async function POST(req: NextRequest) {
           payment_method,
           payment_status: 'pending',
           safepay_tracker: trackerToken,
+          is_sale: is_sale ?? false,
         }])
         .select().single()
       if (!error) { order = data; break }
@@ -127,8 +141,13 @@ export async function POST(req: NextRequest) {
     }
 
     // 5. Decrement stock
-    for (const item of items as Array<{ product_id: string; quantity: number }>) {
-      await supabaseAdmin.rpc('decrement_stock', { p_product_id: item.product_id, p_quantity: item.quantity })
+    for (const item of items as Array<{ product_id: string; quantity: number; color?: string; size?: string }>) {
+      await supabaseAdmin.rpc('decrement_stock', {
+        p_product_id: item.product_id,
+        p_quantity: item.quantity,
+        p_color: item.color || '_',
+        p_size: item.size || '_',
+      })
     }
 
     // 6. Notify owner of new pending order (customer email sent only after payment confirmed)
@@ -145,6 +164,7 @@ export async function POST(req: NextRequest) {
       total: order.total,
       payment_method: order.payment_method,
       payment_status: order.payment_status ?? 'pending',
+      is_sale: order.is_sale ?? false,
     })
 
     // 7. Build Safepay hosted checkout URL

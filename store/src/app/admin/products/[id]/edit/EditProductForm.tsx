@@ -1,11 +1,12 @@
 'use client'
-import { useState } from 'react'
+import { useState, useMemo } from 'react'
 import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import ImageUploader from '@/components/admin/ImageUploader'
-import type { Product, Category } from '@/types'
+import VariantStockGrid from '@/components/admin/VariantStockGrid'
+import type { Product, Category, VariantStock } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 
@@ -23,9 +24,11 @@ export default function EditProductForm({ product, categories }: { product: Prod
     sizes: [...product.sizes],
     category_id: product.category_id || '',
     is_active: product.is_active,
+    is_bestseller: product.is_bestseller ?? false,
+    variant_stock: (product.variant_stock ?? {}) as VariantStock,
   })
 
-  const set = (k: string, v: string | boolean | string[]) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: string, v: string | boolean | string[] | VariantStock) => setForm(f => ({ ...f, [k]: v }))
 
   const toggleSize = (s: string) => {
     if (s === 'Unstitched') {
@@ -40,9 +43,49 @@ export default function EditProductForm({ product, categories }: { product: Prod
     }
   }
 
+  const parsedColors = form.colors.split(',').map(s => s.trim()).filter(Boolean)
+
+  const gridSizes = useMemo(() => form.sizes.filter(s => s !== 'Unstitched'), [form.sizes])
+
+  // For EDIT: only activate auto-calc when the product already has saved variant_stock
+  // data. Legacy products with colors/sizes but empty variant_stock stay in manual mode
+  // to prevent accidentally zeroing out the existing stock_quantity on save.
+  const hasVariantTracking = Object.keys(form.variant_stock ?? {}).length > 0
+
+  // Sum over ALL currently-visible grid cells (unfilled cells default to 0)
+  const autoStock = useMemo(() => {
+    if (!hasVariantTracking) return null
+    const cols = parsedColors.length > 0 ? parsedColors : ['_']
+    const szs = gridSizes.length > 0 ? gridSizes : ['_']
+    let total = 0
+    for (const c of cols) {
+      for (const s of szs) {
+        total += form.variant_stock?.[c]?.[s] ?? 0
+      }
+    }
+    return total
+  }, [hasVariantTracking, parsedColors, gridSizes, form.variant_stock])
+
+  // Build complete Color×Size matrix so every cell is persisted (including 0s),
+  // allowing the product page to correctly disable out-of-stock variants.
+  const buildCompleteVariantStock = (): VariantStock => {
+    if (!hasVariantTracking) return {}
+    const cols = parsedColors.length > 0 ? parsedColors : ['_']
+    const szs = gridSizes.length > 0 ? gridSizes : ['_']
+    const result: VariantStock = {}
+    for (const c of cols) {
+      result[c] = {}
+      for (const s of szs) {
+        result[c][s] = form.variant_stock?.[c]?.[s] ?? 0
+      }
+    }
+    return result
+  }
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    const completeVariantStock = buildCompleteVariantStock()
     const res = await fetch('/api/admin/products', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -52,12 +95,14 @@ export default function EditProductForm({ product, categories }: { product: Prod
         sku: form.sku || null,
         description: form.description,
         price: Number(form.price),
-        stock_quantity: Number(form.stock_quantity),
+        stock_quantity: autoStock !== null ? autoStock : Number(form.stock_quantity),
         images: form.images,
-        colors: form.colors.split(',').map(s => s.trim()).filter(Boolean),
+        colors: parsedColors,
         sizes: form.sizes,
         category_id: form.category_id || null,
         is_active: form.is_active,
+        is_bestseller: form.is_bestseller,
+        variant_stock: completeVariantStock,
       }),
     })
     if (res.ok) {
@@ -100,8 +145,23 @@ export default function EditProductForm({ product, categories }: { product: Prod
             <Input id="price" required type="number" min="0" value={form.price} onChange={e => set('price', e.target.value)} className="mt-1" />
           </div>
           <div>
-            <Label htmlFor="stock">Stock Quantity *</Label>
-            <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+            <Label htmlFor="stock">
+              Total Stock {hasVariantTracking ? <span className="font-normal text-gray-400">(auto-calculated from grid)</span> : null}
+            </Label>
+            {hasVariantTracking ? (
+              <div
+                id="stock"
+                className="mt-1 px-3 py-2 border rounded text-sm bg-gray-50"
+                style={{ borderColor: '#E2E8F0', color: '#374151' }}
+              >
+                {autoStock}
+              </div>
+            ) : (
+              <>
+                <Input id="stock" required type="number" min="0" value={form.stock_quantity} onChange={e => set('stock_quantity', e.target.value)} className="mt-1" />
+                <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Fill in the variant grid below to enable auto-calculation</p>
+              </>
+            )}
           </div>
         </div>
         {categories.length > 0 && (
@@ -154,6 +214,22 @@ export default function EditProductForm({ product, categories }: { product: Prod
           {form.sizes.includes('Unstitched') && (
             <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>No size selection shown to customers</p>
           )}
+        </div>
+
+        {/* Variant Stock Grid */}
+        <div>
+          <Label className="block mb-2">Variant Stock</Label>
+          <VariantStockGrid
+            colors={parsedColors}
+            sizes={form.sizes}
+            value={form.variant_stock}
+            onChange={v => set('variant_stock', v)}
+          />
+        </div>
+
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="is_bestseller" checked={form.is_bestseller} onChange={e => set('is_bestseller', e.target.checked)} className="w-4 h-4" />
+          <Label htmlFor="is_bestseller">Mark as Bestseller</Label>
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />

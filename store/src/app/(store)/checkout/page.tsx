@@ -26,7 +26,9 @@ export default function CheckoutPage() {
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [codEnabled, setCodEnabled] = useState(false)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
-  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '' })
+  const [saleActive, setSaleActive] = useState(false)
+  const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
+  const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '', website: '' })
 
   useEffect(() => {
     const cart = getCart()
@@ -34,9 +36,11 @@ export default function CheckoutPage() {
     setItems(cart)
     fetch('/api/delivery-zones')
       .then(r => r.json())
-      .then(({ zones, cod_enabled }: { zones: DeliveryZone[]; cod_enabled: boolean }) => {
+      .then(({ zones, cod_enabled, sale_active, sale_delivery_override }: { zones: DeliveryZone[]; cod_enabled: boolean; sale_active: boolean; sale_delivery_override: number | null }) => {
         setZones(zones)
         setCodEnabled(cod_enabled)
+        setSaleActive(sale_active)
+        setSaleDeliveryOverride(sale_delivery_override)
       })
   }, [router])
 
@@ -45,7 +49,8 @@ export default function CheckoutPage() {
   const handleCityChange = (city: string) => {
     set('city', city)
     const zone = zones.find(z => z.city === city)
-    setDeliveryCharge(zone?.delivery_charge ?? 0)
+    const baseCharge = zone?.delivery_charge ?? 0
+    setDeliveryCharge(saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge)
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -55,14 +60,16 @@ export default function CheckoutPage() {
   const buildPayload = () => ({
     customer_name: form.name,
     customer_phone: form.phone,
-    customer_email: form.email || null,
+    customer_email: form.email,
     address: form.address,
+    website: form.website,
     city: form.city,
     items: items.map(i => ({ product_id: i.id, product_name: i.name, sku: i.sku, size: i.size, color: i.color, quantity: i.quantity, price: i.price })),
     subtotal,
     delivery_charge: deliveryCharge,
     total,
     payment_method: form.payment,
+    is_sale: saleActive,
   })
 
   const submitCod = async (paymentOverride?: string) => {
@@ -143,7 +150,7 @@ export default function CheckoutPage() {
       {gatewayDown && (
         <div className="mb-6 rounded-lg border p-5" style={{ borderColor: '#F5D87A', backgroundColor: '#FEFCE8' }}>
           <p className="font-semibold mb-1" style={{ color: '#92640A' }}>Online payment is temporarily unavailable</p>
-          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Safepay is currently down. Please choose an alternative:</p>
+          <p className="text-sm mb-4" style={{ color: '#92640A' }}>Service is currently down. Please choose an alternative:</p>
           <div className="space-y-2">
             {codEnabled && (
               <button
@@ -200,6 +207,17 @@ export default function CheckoutPage() {
       )}
 
       <form onSubmit={handleSubmit} className="space-y-5">
+        {/* Honeypot — invisible to humans, bots fill it */}
+        <input
+          name="website"
+          type="text"
+          value={form.website}
+          onChange={e => setForm(f => ({ ...f, website: e.target.value }))}
+          style={{ display: 'none' }}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden="true"
+        />
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
             <Label htmlFor="name">Full Name *</Label>
@@ -211,8 +229,8 @@ export default function CheckoutPage() {
           </div>
         </div>
         <div>
-          <Label htmlFor="email">Email (optional — for order updates)</Label>
-          <Input id="email" type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
+          <Label htmlFor="email">Email * (for order confirmation & updates)</Label>
+          <Input id="email" required type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
         </div>
         <div>
           <Label htmlFor="address">Delivery Address *</Label>
