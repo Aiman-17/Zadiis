@@ -80,7 +80,10 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     }
     return sum + p.stock_quantity
   }, 0)
-  const unitsSold = orders
+  const unitsReceived = thisMonth
+    .filter(o => o.order_status !== 'cancelled')
+    .reduce((sum, o) => sum + (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0), 0)
+  const unitsDelivered = thisMonth
     .filter(o => o.order_status === 'delivered')
     .reduce((sum, o) => sum + (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0), 0)
 
@@ -123,7 +126,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     { label: "Today's Revenue",    value: pkr(todayRevenue) },
     { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
     { label: 'Orders This Month',  value: ordersThisMonth },
-    { label: 'Units Sold',         value: unitsSold, sub: 'delivered orders' },
+    { label: 'Total Sales',         value: unitsReceived, sub: `${unitsDelivered} delivered`, subColor: '#10B981' },
     { label: 'Total Products',     value: totalProducts, sub: `${totalStock.toLocaleString()} units in stock`, subColor: '#F59E0B' },
     { label: 'Pending Action',     value: pendingAction },
     { label: 'Low Stock Variants', value: lowStockCount },
