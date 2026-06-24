@@ -71,10 +71,18 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .filter(s => s.value > 0)
 
   // All-time KPIs
-  const totalSales = orders
-    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
-    .reduce((s, o) => s + o.total, 0)
   const totalProducts = products.length
+  const totalStock = products.reduce((sum, p) => {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return sum + Object.values(vs).reduce((s, sizes) =>
+        s + Object.values(sizes as Record<string, number>).reduce((si, q) => si + q, 0), 0)
+    }
+    return sum + p.stock_quantity
+  }, 0)
+  const unitsSold = orders
+    .filter(o => o.order_status === 'delivered')
+    .reduce((sum, o) => sum + (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0), 0)
 
   // Sales trend — last 7 days + today
   const salesTrend = Array.from({ length: 7 }, (_, i) => {
@@ -110,13 +118,13 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   // Recent orders — last 10, not archived
   const recentOrders = orders.filter(o => !o.is_archived).slice(0, 10)
 
-  const KPI = [
+  const KPI: { label: string; value: string | number; sub?: string; subColor?: string }[] = [
     { label: "Today's Orders",     value: todayOrders },
     { label: "Today's Revenue",    value: pkr(todayRevenue) },
     { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
     { label: 'Orders This Month',  value: ordersThisMonth },
-    { label: 'Total Sales',        value: pkr(totalSales) },
-    { label: 'Total Products',     value: totalProducts },
+    { label: 'Units Sold',         value: unitsSold, sub: 'delivered orders' },
+    { label: 'Total Products',     value: totalProducts, sub: `${totalStock.toLocaleString()} units in stock`, subColor: '#F59E0B' },
     { label: 'Pending Action',     value: pendingAction },
     { label: 'Low Stock Variants', value: lowStockCount },
   ]
@@ -128,6 +136,9 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         {KPI.map(k => (
           <div key={k.label} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <p className="text-2xl font-bold">{k.value}</p>
+            {k.sub && (
+              <p className="text-xs font-medium mt-0.5" style={{ color: k.subColor ?? '#9CA3AF' }}>{k.sub}</p>
+            )}
             <p className="text-xs text-gray-500 mt-1">{k.label}</p>
           </div>
         ))}
@@ -211,7 +222,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
               <Tooltip formatter={(v) => [`${v} orders`, 'Orders']} />
               <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="orders">
                 {salesTrend.map((entry, i) => (
-                  <Cell key={i} fill={entry.isToday ? '#A68B6E' : '#E8DDD4'} />
+                  <Cell key={i} fill={entry.isToday ? '#1C1C1C' : '#A68B6E'} />
                 ))}
               </Bar>
             </BarChart>
