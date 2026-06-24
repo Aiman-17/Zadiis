@@ -45,9 +45,12 @@ export default function EditProductForm({ product, categories }: { product: Prod
 
   const parsedColors = form.colors.split(',').map(s => s.trim()).filter(Boolean)
 
-  // Grid is active whenever colors or non-Unstitched sizes are selected
   const gridSizes = useMemo(() => form.sizes.filter(s => s !== 'Unstitched'), [form.sizes])
-  const hasVariantTracking = parsedColors.length > 0 || gridSizes.length > 0
+
+  // For EDIT: only activate auto-calc when the product already has saved variant_stock
+  // data. Legacy products with colors/sizes but empty variant_stock stay in manual mode
+  // to prevent accidentally zeroing out the existing stock_quantity on save.
+  const hasVariantTracking = Object.keys(form.variant_stock ?? {}).length > 0
 
   // Sum over ALL currently-visible grid cells (unfilled cells default to 0)
   const autoStock = useMemo(() => {
