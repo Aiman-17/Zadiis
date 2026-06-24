@@ -1,7 +1,7 @@
 'use client'
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer,
+  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import { AlertTriangle } from 'lucide-react'
 import type { Order, OrderItem, Product } from '@/types'
@@ -32,7 +32,6 @@ function isThisMonth(dateStr: string) {
 export default function DashboardCharts({ orders, products }: { orders: Order[]; products: Product[] }) {
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last24h  = orders.filter(o => isWithinDays(o.created_at, 1))
-  const last30   = orders.filter(o => isWithinDays(o.created_at, 30))
 
   // KPI
   const revenueThisMonth = thisMonth
@@ -40,6 +39,9 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .reduce((s, o) => s + o.total, 0)
   const ordersThisMonth = thisMonth.filter(o => o.order_status !== 'cancelled').length
   const todayOrders     = last24h.length
+  const todayRevenue    = last24h
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .reduce((s, o) => s + o.total, 0)
   const pendingAction = orders.filter(o =>
     !o.is_archived && (o.order_status === 'new' || o.order_status === 'processing')
   ).length
@@ -68,19 +70,23 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // Top products — last 30 days, exclude cancelled
-  const productMap: Record<string, { units: number; revenue: number }> = {}
-  last30.filter(o => o.order_status !== 'cancelled').forEach(o =>
-    (o.items as OrderItem[]).forEach(i => {
-      if (!productMap[i.product_name]) productMap[i.product_name] = { units: 0, revenue: 0 }
-      productMap[i.product_name].units += i.quantity
-      productMap[i.product_name].revenue += i.price * i.quantity
-    })
-  )
-  const topProducts = Object.entries(productMap)
-    .map(([name, d]) => ({ name, ...d }))
-    .sort((a, b) => b.revenue - a.revenue)
-    .slice(0, 6)
+  // All-time KPIs
+  const totalSales = orders
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .reduce((s, o) => s + o.total, 0)
+  const totalProducts = products.length
+
+  // Sales trend — last 7 days + today
+  const salesTrend = Array.from({ length: 7 }, (_, i) => {
+    const d = new Date()
+    d.setDate(d.getDate() - (6 - i))
+    const dateStr = d.toISOString().slice(0, 10)
+    const label = i === 6 ? 'Today' : d.toLocaleDateString('default', { weekday: 'short' })
+    const dayOrders = orders.filter(o =>
+      o.created_at.startsWith(dateStr) && o.order_status !== 'cancelled'
+    )
+    return { label, orders: dayOrders.length, isToday: i === 6 }
+  })
 
   // Low stock list
   const lowStockItems: { name: string; variant: string; qty: number }[] = []
@@ -105,9 +111,12 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   const recentOrders = orders.filter(o => !o.is_archived).slice(0, 10)
 
   const KPI = [
-    { label: "Today's Orders",    value: todayOrders },
+    { label: "Today's Orders",     value: todayOrders },
+    { label: "Today's Revenue",    value: pkr(todayRevenue) },
     { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
     { label: 'Orders This Month',  value: ordersThisMonth },
+    { label: 'Total Sales',        value: pkr(totalSales) },
+    { label: 'Total Products',     value: totalProducts },
     { label: 'Pending Action',     value: pendingAction },
     { label: 'Low Stock Variants', value: lowStockCount },
   ]
@@ -115,7 +124,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   return (
     <div className="space-y-6">
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-5 gap-4">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {KPI.map(k => (
           <div key={k.label} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <p className="text-2xl font-bold">{k.value}</p>
@@ -191,28 +200,22 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           )}
         </div>
 
-        {/* Top Products */}
+        {/* Sales Trend */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold mb-1">Top Products</h3>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Last 30 days</p>
-          {topProducts.length > 0 ? (
-            <ResponsiveContainer width="100%" height={200}>
-              <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
-                <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={100}
-                  tickFormatter={(v: string) => v.length > 13 ? v.slice(0, 12) + '…' : v} />
-                <Tooltip formatter={(v, name) => [
-                  name === 'units' ? `${v} units` : pkr(Number(v)),
-                  name === 'units' ? 'Units' : 'Revenue',
-                ]} />
-                <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="units" />
-              </BarChart>
-            </ResponsiveContainer>
-          ) : (
-            <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>
-              Top products appear once orders are placed.
-            </p>
-          )}
+          <h3 className="font-semibold mb-1">Sales Trend</h3>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Last 7 days + today</p>
+          <ResponsiveContainer width="100%" height={200}>
+            <BarChart data={salesTrend} margin={{ left: 0, right: 8 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} width={24} />
+              <Tooltip formatter={(v) => [`${v} orders`, 'Orders']} />
+              <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="orders">
+                {salesTrend.map((entry, i) => (
+                  <Cell key={i} fill={entry.isToday ? '#A68B6E' : '#E8DDD4'} />
+                ))}
+              </Bar>
+            </BarChart>
+          </ResponsiveContainer>
         </div>
       </div>
 
