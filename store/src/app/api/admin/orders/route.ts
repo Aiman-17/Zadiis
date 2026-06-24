@@ -1,73 +1,105 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendCustomerOrderDelivered, sendOwnerPaymentReceived } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
+import { sendCustomerOrderDelivered, sendOwnerPaymentReceived } from '@/lib/email'
 
 export async function GET() {
-  const { data, error } = await supabaseAdmin
-    .from('orders')
-    .select('*')
-    .order('created_at', { ascending: false })
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data || [])
+  try {
+    const { data, error } = await supabaseAdmin
+      .from('orders')
+      .select('*')
+      .order('created_at', { ascending: false })
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json(data || [])
+  } catch {
+    return NextResponse.json([], { status: 200 })
+  }
 }
 
 export async function PUT(req: NextRequest) {
-  const { id, order_status, payment_status } = await req.json()
+  try {
+    const { id, order_status, payment_status, cancellation_reason, is_archived } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
 
-  const update: Record<string, unknown> = {}
-  if (order_status) update.order_status = order_status
-  if (payment_status) {
-    update.payment_status = payment_status
-    if (payment_status === 'paid') update.payment_verified_at = new Date().toISOString()
-  }
+    const update: Record<string, unknown> = {}
+    if (order_status !== undefined) update.order_status = order_status
+    if (payment_status !== undefined) {
+      update.payment_status = payment_status
+      if (payment_status === 'paid') update.payment_verified_at = new Date().toISOString()
+    }
+    if (cancellation_reason !== undefined) update.cancellation_reason = cancellation_reason
+    if (is_archived !== undefined) update.is_archived = is_archived
 
-  // Fetch order data needed for emails and COD auto-pay logic
-  let fetchedOrder: {
-    order_number: string; customer_name: string; customer_phone: string
-    customer_email?: string; total: number; payment_method: string; items: unknown
-  } | null = null
+    // Fetch order for email triggers only when needed
+    let orderData: {
+      order_number: string
+      customer_name: string
+      customer_phone: string
+      customer_email?: string | null
+      total: number
+      payment_method: string
+      safepay_transaction_id?: string | null
+    } | null = null
 
-  if (order_status === 'delivered') {
-    const { data } = await supabaseAdmin
-      .from('orders')
-      .select('order_number, customer_name, customer_phone, customer_email, total, payment_method, items')
-      .eq('id', id)
-      .single()
-    fetchedOrder = data
+    const needsOrderData = order_status === 'delivered' || payment_status === 'paid'
+    if (needsOrderData) {
+      const { data } = await supabaseAdmin
+        .from('orders')
+        .select('order_number, customer_name, customer_phone, customer_email, total, payment_method, safepay_transaction_id')
+        .eq('id', id)
+        .single()
+      orderData = data
+    }
 
-    if (fetchedOrder?.payment_method === 'cod') {
+    // Auto-pay COD when marked delivered
+    if (order_status === 'delivered' && orderData?.payment_method === 'cod') {
       update.payment_status = 'paid'
       update.payment_verified_at = new Date().toISOString()
     }
-  }
 
-  // DB update first — if this fails, no emails are sent
-  const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
-  if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-  // Generate invoice if order was just paid (covers COD auto-pay + manual Mark Paid)
-  if (update.payment_status === 'paid') {
-    await generateInvoice(id)
-  }
+    // Post-update side effects — skip for cancelled orders
+    if (order_status !== 'cancelled') {
+      const finalPaymentPaid = update.payment_status === 'paid' || payment_status === 'paid'
 
-  // Send emails AFTER successful DB update
-  if (order_status === 'delivered' && fetchedOrder) {
-    if (fetchedOrder.payment_method === 'cod') {
-      await sendOwnerPaymentReceived({
-        order_number: fetchedOrder.order_number,
-        customer_name: fetchedOrder.customer_name,
-        customer_phone: fetchedOrder.customer_phone,
-        total: fetchedOrder.total,
-        payment_method: 'cod',
-      })
+      if (finalPaymentPaid) {
+        await generateInvoice(id)
+      }
+
+      if (order_status === 'delivered' && orderData) {
+        if (orderData.payment_method === 'cod') {
+          await sendOwnerPaymentReceived({
+            order_number: orderData.order_number,
+            customer_name: orderData.customer_name,
+            customer_phone: orderData.customer_phone,
+            total: orderData.total,
+            payment_method: orderData.payment_method,
+          })
+        }
+        await sendCustomerOrderDelivered(orderData.customer_email, {
+          order_number: orderData.order_number,
+          customer_name: orderData.customer_name,
+          total: orderData.total,
+        })
+      }
+
+      if (payment_status === 'paid' && orderData) {
+        await sendOwnerPaymentReceived({
+          order_number: orderData.order_number,
+          customer_name: orderData.customer_name,
+          customer_phone: orderData.customer_phone,
+          total: orderData.total,
+          payment_method: orderData.payment_method,
+          safepay_transaction_id: orderData.safepay_transaction_id,
+        })
+      }
     }
-    await sendCustomerOrderDelivered(fetchedOrder.customer_email, {
-      order_number: fetchedOrder.order_number,
-      customer_name: fetchedOrder.customer_name,
-      total: fetchedOrder.total,
-    })
-  }
 
-  return NextResponse.json({ success: true })
+    return NextResponse.json({ success: true })
+  } catch (e) {
+    console.error('Admin orders PUT error:', e)
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
 }
