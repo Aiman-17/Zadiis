@@ -39,7 +39,7 @@ const RETURN_REASON_LABELS: Record<string, string> = {
   other:           'Other',
 }
 
-type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations' | 'returns'
+type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations' | 'returns' | 'trend'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
@@ -53,7 +53,7 @@ function buildTrendData(orders: Order[], range: string) {
       ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
       : d.toISOString().slice(0, 10)
     const label = isMonthly
-      ? d.toLocaleString('default', { month: 'short' })
+      ? d.toLocaleString('default', { month: 'short', year: '2-digit' })
       : d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
     if (!map[key]) map[key] = { label, revenue: 0, orders: 0 }
     if (o.order_status !== 'cancelled' && o.order_status !== 'returned') {
@@ -65,6 +65,47 @@ function buildTrendData(orders: Order[], range: string) {
   return Object.entries(map)
     .sort(([a], [b]) => a.localeCompare(b))
     .map(([, v]) => v)
+}
+
+function buildSalesTrendTable(orders: Order[], range: string) {
+  const isMonthly = range === '12m'
+  const isWeekly  = range === '90d'
+  const map: Record<string, { label: string; revenue: number; orders: number }> = {}
+
+  orders.forEach(o => {
+    if (o.order_status === 'cancelled' || o.order_status === 'returned') return
+    const d = new Date(o.created_at)
+    let key: string, label: string
+
+    if (isMonthly) {
+      key   = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      label = d.toLocaleString('default', { month: 'long', year: 'numeric' })
+    } else if (isWeekly) {
+      const ws = new Date(d)
+      ws.setDate(d.getDate() - d.getDay())
+      key   = ws.toISOString().slice(0, 10)
+      label = `Week of ${ws.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
+    } else {
+      key   = d.toISOString().slice(0, 10)
+      label = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })
+    }
+
+    if (!map[key]) map[key] = { label, revenue: 0, orders: 0 }
+    map[key].revenue += o.total
+    map[key].orders  += 1
+  })
+
+  const rows = Object.entries(map)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, v]) => v)
+
+  return rows.map((row, i) => {
+    const prev   = rows[i - 1]
+    const growth = prev && prev.revenue > 0
+      ? Math.round(((row.revenue - prev.revenue) / prev.revenue) * 100)
+      : null
+    return { ...row, growth }
+  })
 }
 
 export default function AnalyticsClient({
@@ -121,7 +162,8 @@ export default function AnalyticsClient({
     }, 0), 0
   )
 
-  const trendData = buildTrendData(orders, range)
+  const trendData      = buildTrendData(orders, range)
+  const salesTrendRows = buildSalesTrendTable(orders, range)
 
   // Payment methods
   const paymentMap: Record<string, number> = {}
@@ -208,6 +250,7 @@ export default function AnalyticsClient({
 
   const TABS: { key: Tab; label: string }[] = [
     { key: 'revenue',       label: 'Revenue' },
+    { key: 'trend',         label: 'Sales Trend' },
     { key: 'products',      label: 'Products' },
     { key: 'inventory',     label: 'Inventory' },
     { key: 'cancellations', label: 'Cancellations' },
@@ -333,6 +376,90 @@ export default function AnalyticsClient({
                 <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
               )}
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Sales Trend Tab */}
+      {tab === 'trend' && (
+        <div className="space-y-6">
+          {/* Chart */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-1">Revenue by Period</h3>
+            <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>
+              {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} breakdown
+            </p>
+            {salesTrendRows.length > 0 ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={salesTrendRows} margin={{ left: 0, right: 8 }}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                  <YAxis tick={{ fontSize: 10 }} width={44}
+                    tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
+                  <Tooltip formatter={(v: number) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']} />
+                  <Bar dataKey="revenue" fill="#A68B6E" radius={[4, 4, 0, 0]} name="Revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
+            )}
+          </div>
+
+          {/* Period breakdown table */}
+          <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+            <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold text-sm">Period Breakdown</h3>
+            </div>
+            {salesTrendRows.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data for this period.</p>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
+                    <tr>
+                      <th className="text-left px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Period</th>
+                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Orders</th>
+                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
+                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>vs Prev</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {[...salesTrendRows].reverse().map((row, i) => (
+                      <tr key={i} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                        <td className="px-5 py-3">{row.label}</td>
+                        <td className="px-5 py-3 text-right" style={{ color: '#6B7280' }}>{row.orders}</td>
+                        <td className="px-5 py-3 text-right font-medium">
+                          PKR {row.revenue.toLocaleString()}
+                        </td>
+                        <td className="px-5 py-3 text-right">
+                          {row.growth === null ? (
+                            <span style={{ color: '#D1D5DB' }}>—</span>
+                          ) : row.growth === 0 ? (
+                            <span style={{ color: '#9CA3AF' }}>0%</span>
+                          ) : row.growth > 0 ? (
+                            <span className="font-medium" style={{ color: '#10B981' }}>↑ {row.growth}%</span>
+                          ) : (
+                            <span className="font-medium" style={{ color: '#EF4444' }}>↓ {Math.abs(row.growth)}%</span>
+                          )}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                  <tfoot className="border-t" style={{ borderColor: '#E8DDD4' }}>
+                    <tr style={{ backgroundColor: '#FAF8F5' }}>
+                      <td className="px-5 py-3 font-semibold">Total</td>
+                      <td className="px-5 py-3 text-right font-semibold">
+                        {salesTrendRows.reduce((s, r) => s + r.orders, 0)}
+                      </td>
+                      <td className="px-5 py-3 text-right font-semibold">
+                        PKR {salesTrendRows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}
+                      </td>
+                      <td className="px-5 py-3" />
+                    </tr>
+                  </tfoot>
+                </table>
+              </div>
+            )}
           </div>
         </div>
       )}

@@ -88,16 +88,22 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     return sum + p.stock_quantity
   }, 0)
 
-  // Sales trend — last 7 days + today
-  const salesTrend = Array.from({ length: 7 }, (_, i) => {
+  // Monthly sales trend — last 12 months
+  const monthlySalesTrend = Array.from({ length: 12 }, (_, i) => {
     const d = new Date()
-    d.setDate(d.getDate() - (6 - i))
-    const dateStr = d.toISOString().slice(0, 10)
-    const label = i === 6 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' })
-    const dayOrders = orders.filter(o =>
-      o.created_at.startsWith(dateStr) && o.order_status !== 'cancelled'
-    )
-    return { label, orders: dayOrders.length, isToday: i === 6 }
+    d.setDate(1)
+    d.setMonth(d.getMonth() - (11 - i))
+    const year  = d.getFullYear()
+    const month = d.getMonth()
+    const label = month === 0
+      ? `Jan '${String(year).slice(2)}`
+      : d.toLocaleString('default', { month: 'short' })
+    const mo = orders.filter(o => {
+      const od = new Date(o.created_at)
+      return od.getFullYear() === year && od.getMonth() === month &&
+        o.order_status !== 'cancelled' && o.order_status !== 'returned'
+    })
+    return { label, revenue: mo.reduce((s, o) => s + o.total, 0), orders: mo.length }
   })
 
   // Low stock list
@@ -261,18 +267,23 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           )}
         </div>
 
-        {/* Sales Trend */}
+        {/* Sales Trend — 12 months */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <h3 className="font-semibold mb-1">Sales Trend</h3>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Orders per day — last 7 days</p>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Revenue per month — last 12 months</p>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={salesTrend} margin={{ left: 0, right: 8 }}>
-              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-              <YAxis tick={{ fontSize: 10 }} allowDecimals={false} width={24} />
-              <Tooltip formatter={(v) => [`${v} orders`, 'Orders']} />
-              <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="orders">
-                {salesTrend.map((entry, i) => (
-                  <Cell key={i} fill={entry.isToday ? '#1C1C1C' : '#A68B6E'} />
+            <BarChart data={monthlySalesTrend} margin={{ left: 0, right: 8 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+              <YAxis tick={{ fontSize: 10 }} width={38}
+                tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
+              <Tooltip
+                formatter={(v: number) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']}
+                labelFormatter={(l) => String(l)}
+              />
+              <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
+                {monthlySalesTrend.map((entry, i) => (
+                  <Cell key={i}
+                    fill={i === 11 ? '#1C1C1C' : entry.revenue > 0 ? '#A68B6E' : '#E8DDD4'} />
                 ))}
               </Bar>
             </BarChart>
