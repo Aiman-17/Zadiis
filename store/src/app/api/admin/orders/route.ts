@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { generateInvoice } from '@/lib/invoice'
-import { sendCustomerOrderDelivered, sendOwnerPaymentReceived } from '@/lib/email'
+import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled } from '@/lib/email'
 import { incrementTotalSold } from '@/lib/scoring'
 import type { OrderItem } from '@/types'
 
@@ -32,7 +32,6 @@ export async function PUT(req: NextRequest) {
     if (cancellation_reason !== undefined) update.cancellation_reason = cancellation_reason
     if (is_archived !== undefined) update.is_archived = is_archived
 
-    // Fetch order for email triggers only when needed
     let orderData: {
       order_number: string
       customer_name: string
@@ -43,7 +42,7 @@ export async function PUT(req: NextRequest) {
       safepay_transaction_id?: string | null
     } | null = null
 
-    const needsOrderData = order_status === 'delivered' || payment_status === 'paid'
+    const needsOrderData = order_status === 'delivered' || order_status === 'cancelled' || payment_status === 'paid'
     if (needsOrderData) {
       const { data } = await supabaseAdmin
         .from('orders')
@@ -62,9 +61,17 @@ export async function PUT(req: NextRequest) {
     const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // Increment total_sold + recalculate scores when order delivered
+    // Increment total_sold when delivered
     if (order_status === 'delivered' && orderData && 'items' in orderData && orderData.items) {
       void incrementTotalSold(orderData.items as OrderItem[])
+    }
+
+    // Auto-send cancellation email to customer
+    if (order_status === 'cancelled' && orderData) {
+      void sendCustomerOrderCancelled(orderData.customer_email, {
+        order_number: orderData.order_number,
+        customer_name: orderData.customer_name,
+      })
     }
 
     // Post-update side effects — skip for cancelled orders

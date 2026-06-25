@@ -396,6 +396,199 @@ export async function sendOwnerStockConflict(d: { product_names: string }): Prom
   )
 }
 
+const CANCEL_REASON_LABELS: Record<string, string> = {
+  changed_mind:       'Changed My Mind',
+  ordered_by_mistake: 'Ordered by Mistake',
+  found_better_price: 'Found a Better Price',
+  delivery_too_slow:  'Delivery Taking Too Long',
+  other:              'Other',
+}
+
+const RETURN_REASON_LABELS: Record<string, string> = {
+  wrong_size:      'Wrong Size',
+  defective_item:  'Defective / Damaged',
+  wrong_item_sent: 'Wrong Item Sent',
+  changed_mind:    'Changed Mind',
+  other:           'Other',
+}
+
+export async function sendCustomerOrderCancelled(to: string | null | undefined, d: {
+  order_number: string
+  customer_name: string
+}): Promise<void> {
+  if (!to) return
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Order Cancelled</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your order has been cancelled as requested.</p>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
+          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
+        </div>
+        <p style="color:#666;font-size:14px">If you paid online, your refund will be processed within 3–5 business days. For any questions, please WhatsApp us.</p>
+        <div style="text-align:center;margin-top:24px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Your order ${d.order_number} has been cancelled — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerOrderCancelled failed:', e)
+  }
+}
+
+export async function sendOwnerCancellationRequest(d: {
+  order_number: string
+  customer_email: string
+  customer_name?: string | null
+  reason: string
+  notes?: string | null
+}): Promise<void> {
+  const reasonLabel = CANCEL_REASON_LABELS[d.reason] || d.reason
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        ⚠️ Cancellation Request — ${d.order_number}
+      </h2>
+      <p><strong>Customer:</strong> ${d.customer_name || '—'}</p>
+      <p><strong>Email:</strong> ${d.customer_email}</p>
+      <p><strong>Reason:</strong> ${reasonLabel}</p>
+      ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+      <p style="color:#6B7280;font-size:13px;margin-top:16px">Go to your admin panel → Cancellations tab to process this request.</p>
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: process.env.OWNER_EMAIL!,
+      subject: `Cancellation request — ${d.order_number}`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendOwnerCancellationRequest failed:', e)
+  }
+}
+
+export async function sendCustomerCancellationConfirmation(to: string | null | undefined, d: {
+  order_number: string
+  customer_name?: string | null
+}): Promise<void> {
+  if (!to) return
+  const name = d.customer_name || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">We've Received Your Request</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${name}, thank you for getting in touch.</p>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
+          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
+        </div>
+        <p style="color:#666;font-size:14px">We have received your cancellation request and our team will review it within <strong>24 hours</strong>. You will receive a confirmation email once your cancellation has been processed.</p>
+        <p style="color:#666;font-size:14px;margin-top:12px">In the meantime, if you have any questions, please don't hesitate to reach out via WhatsApp.</p>
+        <div style="text-align:center;margin-top:24px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Cancellation request received — ${d.order_number} — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerCancellationConfirmation failed:', e)
+  }
+}
+
+export async function sendOwnerReturnRequest(d: {
+  order_number: string
+  customer_email: string
+  customer_name?: string | null
+  reason: string
+  notes?: string | null
+}): Promise<void> {
+  const reasonLabel = RETURN_REASON_LABELS[d.reason] || d.reason
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        📦 Return Request — ${d.order_number}
+      </h2>
+      <p><strong>Customer:</strong> ${d.customer_name || '—'}</p>
+      <p><strong>Email:</strong> ${d.customer_email}</p>
+      <p><strong>Reason:</strong> ${reasonLabel}</p>
+      ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+      <p style="color:#6B7280;font-size:13px;margin-top:16px">Go to your admin panel → Returns tab to process this request.</p>
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: process.env.OWNER_EMAIL!,
+      subject: `Return request — ${d.order_number}`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendOwnerReturnRequest failed:', e)
+  }
+}
+
+export async function sendCustomerReturnConfirmation(to: string | null | undefined, d: {
+  order_number: string
+  customer_name?: string | null
+}): Promise<void> {
+  if (!to) return
+  const name = d.customer_name || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Return Request Received</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${name}, we've received your return request.</p>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
+          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
+        </div>
+        <p style="color:#666;font-size:14px">Our team will review your return request and respond within <strong>24 hours</strong> with next steps, including the return address and instructions.</p>
+        <p style="color:#666;font-size:14px;margin-top:12px">Please do not ship the item back until you've received our confirmation. Thank you for your patience.</p>
+        <div style="text-align:center;margin-top:24px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Return request received — ${d.order_number} — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerReturnConfirmation failed:', e)
+  }
+}
+
 export async function sendBackInStockEmail(to: string, d: {
   product_name: string
   product_slug: string

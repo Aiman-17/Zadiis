@@ -5,6 +5,17 @@ import type { Order, OrderItem } from '@/types'
 import CancelModal from '@/components/admin/CancelModal'
 import ReturnModal from '@/components/admin/ReturnModal'
 
+type RequestRecord = {
+  id: string
+  order_number: string
+  customer_email: string
+  customer_name: string | null
+  reason: string
+  notes: string | null
+  status: 'pending' | 'resolved'
+  created_at: string
+}
+
 const STATUS_STYLES: Record<string, React.CSSProperties> = {
   new:        { backgroundColor: '#DBEAFE', color: '#1D4ED8' },
   processing: { backgroundColor: '#FEF9C3', color: '#92400E' },
@@ -14,33 +25,67 @@ const STATUS_STYLES: Record<string, React.CSSProperties> = {
   cancelled:  { backgroundColor: '#F3F4F6', color: '#6B7280' },
 }
 
+const REQUEST_REASON_LABELS: Record<string, string> = {
+  changed_mind:       'Changed Mind',
+  ordered_by_mistake: 'Ordered by Mistake',
+  found_better_price: 'Found Better Price',
+  delivery_too_slow:  'Delivery Too Slow',
+  wrong_size:         'Wrong Size',
+  defective_item:     'Defective / Damaged',
+  wrong_item_sent:    'Wrong Item Sent',
+  other:              'Other',
+}
+
+// Lifecycle: new → processing → shipped → delivered | cancelled | returned
 const STATUSES = ['new', 'processing', 'shipped', 'delivered', 'returned']
-type Tab = 'active' | 'completed' | 'archived'
+
+type Tab = 'active' | 'pending_shipment' | 'completed' | 'returns' | 'cancellations' | 'archived'
 
 export default function AdminOrders() {
-  const [orders, setOrders] = useState<Order[]>([])
-  const [expanded, setExpanded] = useState<string | null>(null)
-  const [tab, setTab] = useState<Tab>('active')
-  const [cancelId, setCancelId] = useState<string | null>(null)
-  const [returnId, setReturnId] = useState<string | null>(null)
+  const [orders,          setOrders]          = useState<Order[]>([])
+  const [returnRequests,  setReturnRequests]   = useState<RequestRecord[]>([])
+  const [cancelRequests,  setCancelRequests]   = useState<RequestRecord[]>([])
+  const [expanded,        setExpanded]         = useState<string | null>(null)
+  const [tab,             setTab]              = useState<Tab>('active')
+  const [cancelId,        setCancelId]         = useState<string | null>(null)
+  const [returnId,        setReturnId]         = useState<string | null>(null)
+  const [requestError,    setRequestError]     = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/orders')
       .then(r => r.json())
       .then(data => setOrders(Array.isArray(data) ? data : []))
+    fetch('/api/admin/requests')
+      .then(r => r.json())
+      .then(data => {
+        setReturnRequests(data.returns || [])
+        setCancelRequests(data.cancellations || [])
+      })
+      .catch(() => {})
   }, [])
 
   const counts = useMemo(() => ({
-    active:    orders.filter(o => !o.is_archived && o.order_status !== 'delivered' && o.order_status !== 'cancelled' && o.order_status !== 'returned').length,
-    completed: orders.filter(o => !o.is_archived && (o.order_status === 'delivered' || o.order_status === 'cancelled' || o.order_status === 'returned')).length,
-    archived:  orders.filter(o => o.is_archived).length,
-  }), [orders])
+    active:           orders.filter(o => !o.is_archived && o.order_status === 'new').length,
+    pending_shipment: orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped')).length,
+    completed:        orders.filter(o => !o.is_archived && o.order_status === 'delivered').length,
+    returns:          orders.filter(o => !o.is_archived && o.order_status === 'returned').length + returnRequests.length,
+    cancellations:    orders.filter(o => !o.is_archived && o.order_status === 'cancelled').length + cancelRequests.length,
+    archived:         orders.filter(o => o.is_archived).length,
+  }), [orders, returnRequests, cancelRequests])
 
   const filtered = useMemo(() => {
-    if (tab === 'active')    return orders.filter(o => !o.is_archived && o.order_status !== 'delivered' && o.order_status !== 'cancelled' && o.order_status !== 'returned')
-    if (tab === 'completed') return orders.filter(o => !o.is_archived && (o.order_status === 'delivered' || o.order_status === 'cancelled' || o.order_status === 'returned'))
+    if (tab === 'active')            return orders.filter(o => !o.is_archived && o.order_status === 'new')
+    if (tab === 'pending_shipment')  return orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped'))
+    if (tab === 'completed')         return orders.filter(o => !o.is_archived && o.order_status === 'delivered')
+    if (tab === 'returns')           return orders.filter(o => !o.is_archived && o.order_status === 'returned')
+    if (tab === 'cancellations')     return orders.filter(o => !o.is_archived && o.order_status === 'cancelled')
     return orders.filter(o => o.is_archived)
   }, [orders, tab])
+
+  const activeRequests = useMemo(() =>
+    tab === 'returns' ? returnRequests : tab === 'cancellations' ? cancelRequests : [],
+    [tab, returnRequests, cancelRequests]
+  )
 
   const updateStatus = async (id: string, order_status: string) => {
     await fetch('/api/admin/orders', {
@@ -57,9 +102,7 @@ export default function AdminOrders() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, reason, notes }),
     })
-    setOrders(prev => prev.map(o =>
-      o.id === id ? { ...o, order_status: 'returned' as const } : o
-    ))
+    setOrders(prev => prev.map(o => o.id === id ? { ...o, order_status: 'returned' as const } : o))
     setReturnId(null)
   }
 
@@ -85,10 +128,47 @@ export default function AdminOrders() {
     if (expanded === id) setExpanded(null)
   }
 
+  const resolveRequest = async (id: string, type: 'return' | 'cancellation') => {
+    await fetch('/api/admin/requests', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type }),
+    })
+    if (type === 'return') setReturnRequests(prev => prev.filter(r => r.id !== id))
+    else setCancelRequests(prev => prev.filter(r => r.id !== id))
+  }
+
+  // Find order by number from loaded orders and open the relevant modal
+  const handleCancelFromRequest = (orderNumber: string, requestId: string) => {
+    setRequestError(null)
+    const order = orders.find(o => o.order_number === orderNumber)
+    if (!order) {
+      setRequestError(`Order ${orderNumber} not found — it may already be cancelled.`)
+      return
+    }
+    setCancelId(order.id)
+    // Auto-resolve the request after modal confirms
+    void resolveRequest(requestId, 'cancellation')
+  }
+
+  const handleReturnFromRequest = (orderNumber: string, requestId: string) => {
+    setRequestError(null)
+    const order = orders.find(o => o.order_number === orderNumber)
+    if (!order) {
+      setRequestError(`Order ${orderNumber} not found — it may already be returned.`)
+      return
+    }
+    setReturnId(order.id)
+    void resolveRequest(requestId, 'return')
+  }
+
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'active',    label: `Active (${counts.active})` },
-    { key: 'completed', label: `Completed (${counts.completed})` },
-    { key: 'archived',  label: `Archived (${counts.archived})` },
+    { key: 'active',           label: `Active (${counts.active})` },
+    { key: 'pending_shipment', label: `Pending Shipment (${counts.pending_shipment})` },
+    { key: 'completed',        label: `Completed (${counts.completed})` },
+    { key: 'returns',          label: `Returns (${counts.returns})` },
+    { key: 'cancellations',    label: `Cancellations (${counts.cancellations})` },
+    { key: 'archived',         label: `Archived (${counts.archived})` },
   ]
 
   return (
@@ -108,11 +188,12 @@ export default function AdminOrders() {
 
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Orders</h1>
 
+      {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
         {TABS.map(t => (
           <button
             key={t.key}
-            onClick={() => setTab(t.key)}
+            onClick={() => { setTab(t.key); setRequestError(null) }}
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={tab === t.key
               ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
@@ -123,7 +204,80 @@ export default function AdminOrders() {
         ))}
       </div>
 
-      {filtered.length === 0 && (
+      {/* Customer request cards (Returns + Cancellations tabs only) */}
+      {activeRequests.length > 0 && (
+        <div className="mb-5 space-y-2">
+          <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#A68B6E' }}>
+            Customer Requests — Pending Action
+          </p>
+          {requestError && (
+            <div className="rounded-md px-4 py-2.5 text-sm mb-2"
+              style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', border: '1px solid #FECACA' }}>
+              {requestError}
+            </div>
+          )}
+          {activeRequests.map(req => {
+            const isReturn = tab === 'returns'
+            return (
+              <div key={req.id} className="bg-white rounded-lg border p-4"
+                style={{
+                  borderColor: isReturn ? '#BFDBFE' : '#FDE68A',
+                  borderLeftWidth: 4,
+                  borderLeftColor: isReturn ? '#3B82F6' : '#F59E0B',
+                }}>
+                <div className="flex items-start justify-between gap-3 flex-wrap">
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2 mb-1 flex-wrap">
+                      <span className="text-xs font-bold px-2 py-0.5 rounded-full"
+                        style={isReturn
+                          ? { backgroundColor: '#DBEAFE', color: '#1D4ED8' }
+                          : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
+                        {isReturn ? 'RETURN REQUEST' : 'CANCEL REQUEST'}
+                      </span>
+                      <span className="font-medium text-sm" style={{ color: '#A68B6E' }}>{req.order_number}</span>
+                    </div>
+                    <p className="text-sm font-medium">{req.customer_name || 'Customer'}</p>
+                    <p className="text-xs" style={{ color: '#6B7280' }}>{req.customer_email}</p>
+                    <p className="text-xs mt-1" style={{ color: '#4B5563' }}>
+                      Reason: {REQUEST_REASON_LABELS[req.reason] || req.reason}
+                    </p>
+                    {req.notes && (
+                      <p className="text-xs mt-0.5 italic" style={{ color: '#9CA3AF' }}>"{req.notes}"</p>
+                    )}
+                    <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+                      {new Date(req.created_at).toLocaleDateString()}
+                    </p>
+                  </div>
+                  <div className="flex gap-2 flex-shrink-0">
+                    <button
+                      onClick={() => isReturn
+                        ? handleReturnFromRequest(req.order_number, req.id)
+                        : handleCancelFromRequest(req.order_number, req.id)
+                      }
+                      className="text-xs px-3 py-1.5 rounded-full font-medium"
+                      style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? '#1D4ED8' : '#92400E' }}
+                    >
+                      {isReturn ? 'Process Return' : 'Cancel Order'}
+                    </button>
+                    <button
+                      onClick={() => resolveRequest(req.id, isReturn ? 'return' : 'cancellation')}
+                      className="text-xs px-3 py-1.5 rounded-full border"
+                      style={{ borderColor: '#E8DDD4', color: '#9CA3AF' }}
+                    >
+                      Dismiss
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )
+          })}
+          {filtered.length > 0 && (
+            <div className="border-t mt-3 mb-1" style={{ borderColor: '#E8DDD4' }} />
+          )}
+        </div>
+      )}
+
+      {filtered.length === 0 && activeRequests.length === 0 && (
         <p className="text-sm" style={{ color: '#9CA3AF' }}>No orders in this category.</p>
       )}
 
@@ -165,7 +319,7 @@ export default function AdminOrders() {
                   {order.payment_status}
                 </span>
 
-                {/* Cancel — active orders only */}
+                {/* Cancel — active/pending orders only */}
                 {!order.is_archived && order.order_status !== 'cancelled' && order.order_status !== 'delivered' && order.order_status !== 'returned' && (
                   <button
                     onClick={e => { e.stopPropagation(); setCancelId(order.id) }}
@@ -178,7 +332,7 @@ export default function AdminOrders() {
                   </button>
                 )}
 
-                {/* Archive — completed orders only */}
+                {/* Archive — terminal status orders only */}
                 {!order.is_archived && (order.order_status === 'delivered' || order.order_status === 'cancelled' || order.order_status === 'returned') && (
                   <button
                     onClick={e => { e.stopPropagation(); archiveOrder(order.id) }}

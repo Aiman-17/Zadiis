@@ -26,7 +26,15 @@ const CANCEL_REASON_LABELS: Record<string, string> = {
   other:                 'Other',
 }
 
-type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations'
+const RETURN_REASON_LABELS: Record<string, string> = {
+  wrong_size:      'Wrong Size',
+  defective_item:  'Defective / Damaged',
+  wrong_item_sent: 'Wrong Item Sent',
+  changed_mind:    'Changed Mind',
+  other:           'Other',
+}
+
+type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations' | 'returns'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
@@ -180,11 +188,25 @@ export default function AnalyticsClient({
     ? ((cancelledOrders.length / orders.length) * 100).toFixed(1)
     : '0.0'
 
+  // Returns
+  const returnReasonMap: Record<string, number> = {}
+  returnedOrders.forEach(o => {
+    const r = (o as Order & { return_reason?: string }).return_reason || 'other'
+    returnReasonMap[r] = (returnReasonMap[r] || 0) + 1
+  })
+  const returnReasonData = Object.entries(returnReasonMap)
+    .map(([key, count]) => ({ name: RETURN_REASON_LABELS[key] ?? key, count }))
+    .sort((a, b) => b.count - a.count)
+  const returnRate = orders.length > 0
+    ? ((returnedOrders.length / orders.length) * 100).toFixed(1)
+    : '0.0'
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'revenue',       label: 'Revenue' },
     { key: 'products',      label: 'Products' },
     { key: 'inventory',     label: 'Inventory' },
     { key: 'cancellations', label: 'Cancellations' },
+    { key: 'returns',       label: 'Returns' },
   ]
 
   return (
@@ -432,6 +454,42 @@ export default function AnalyticsClient({
             ) : (
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>
                 No cancellations in this period.
+              </p>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Returns Tab */}
+      {tab === 'returns' && (
+        <div className="space-y-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            {[
+              { label: 'Return Rate',     value: `${returnRate}%`,          color: '#EF4444' },
+              { label: 'Orders Returned', value: returnedOrders.length,     color: '#1C1C1C' },
+              { label: 'Revenue Lost',    value: pkr(returnedRev),          color: '#EF4444' },
+            ].map(k => (
+              <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+                <p className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</p>
+                <p className="text-xs text-gray-500 mt-1">{k.label}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Return Reasons</h3>
+            {returnReasonData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={240}>
+                <BarChart data={returnReasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
+                  <Tooltip />
+                  <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} name="Count" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>
+                No returns in this period.
               </p>
             )}
           </div>
