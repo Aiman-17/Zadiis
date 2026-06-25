@@ -23,6 +23,7 @@ export default function Footer() {
           <p className="text-sm font-semibold mb-3 uppercase tracking-widest" style={{ color: '#A68B6E' }}>Policies</p>
           <ul className="space-y-2 text-sm" style={{ color: '#9CA3AF' }}>
             <li><Link href="/returns" className="hover:text-white transition-colors">Returns & Exchanges</Link></li>
+            <li><Link href="/cancel-order" className="hover:text-white transition-colors">Cancel an Order</Link></li>
             <li><Link href="/shipping" className="hover:text-white transition-colors">Shipping Info</Link></li>
             <li><Link href="/privacy" className="hover:text-white transition-colors">Privacy Policy</Link></li>
           </ul>
