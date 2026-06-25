@@ -1,9 +1,9 @@
 'use client'
 import {
   BarChart, Bar, PieChart, Pie, Cell,
-  XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
+  XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
-import { AlertTriangle } from 'lucide-react'
+import Link from 'next/link'
 import type { Order, OrderItem, Product } from '@/types'
 
 const STATUS_COLORS: Record<string, string> = {
@@ -30,21 +30,22 @@ function isThisMonth(dateStr: string) {
 }
 
 export default function DashboardCharts({ orders, products }: { orders: Order[]; products: Product[] }) {
-  const thisMonth = orders.filter(o => isThisMonth(o.created_at))
-  const last24h  = orders.filter(o => isWithinDays(o.created_at, 1))
+  const thisMonth  = orders.filter(o => isThisMonth(o.created_at))
+  const last7days  = orders.filter(o => isWithinDays(o.created_at, 7))
 
-  // KPI
+  // Action KPIs
+  const newOrders       = orders.filter(o => !o.is_archived && o.order_status === 'new' && isWithinDays(o.created_at, 7)).length
+  const pendingShipment = orders.filter(o => !o.is_archived && o.order_status === 'processing').length
+
+  // Revenue KPIs
+  const thisWeekRevenue  = last7days
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .reduce((s, o) => s + o.total, 0)
   const revenueThisMonth = thisMonth
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) => s + o.total, 0)
-  const ordersThisMonth = thisMonth.filter(o => o.order_status !== 'cancelled').length
-  const todayOrders     = last24h.length
-  const todayRevenue    = last24h
-    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
-    .reduce((s, o) => s + o.total, 0)
-  const pendingAction = orders.filter(o =>
-    !o.is_archived && (o.order_status === 'new' || o.order_status === 'processing')
-  ).length
+  const ordersThisMonth  = thisMonth.filter(o => o.order_status !== 'cancelled').length
+
   const lowStockCount = products.filter(p => {
     const vs = p.variant_stock
     if (vs && Object.keys(vs).length > 0) {
@@ -53,11 +54,9 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     return p.stock_quantity <= 3
   }).length
 
-  // Warning cards
-  const cancelledThisMonth = thisMonth.filter(o => o.order_status === 'cancelled')
-  const returnedThisMonth  = thisMonth.filter(o => o.order_status === 'returned')
-  const cancelledRevenue = cancelledThisMonth.reduce((s, o) => s + o.total, 0)
-  const returnedRevenue  = returnedThisMonth.reduce((s, o) => s + o.total, 0)
+  // 7-day cancellations & returns (for inventory health cards)
+  const cancelled7d = last7days.filter(o => o.order_status === 'cancelled').length
+  const returned7d  = last7days.filter(o => o.order_status === 'returned').length
 
   // Order status donut — ALL non-archived orders
   const statusCounts: Record<string, number> = {
@@ -118,9 +117,6 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   })
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
-  // Recent orders — last 10, not archived
-  const recentOrders = orders.filter(o => !o.is_archived).slice(0, 10)
-
   // Inventory health — variant-aware stock per product
   function getProductStock(p: Product): number {
     const vs = p.variant_stock
@@ -150,22 +146,34 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5)
 
-  const KPI: { label: string; value: string | number; sub?: string; subColor?: string }[] = [
-    { label: "Today's Orders",     value: todayOrders },
-    { label: "Today's Revenue",    value: pkr(todayRevenue) },
-    { label: 'Revenue This Month', value: pkr(revenueThisMonth) },
-    { label: 'Orders This Month',  value: ordersThisMonth },
-    { label: 'Total Sales',         value: unitsReceived, sub: `${unitsDelivered} delivered`, subColor: '#10B981' },
-    { label: 'Total Products',     value: totalProducts, sub: `${totalStock.toLocaleString('en-US')} units in stock`, subColor: '#F59E0B' },
-    { label: 'Pending Action',     value: pendingAction },
-    { label: 'Low Stock Variants', value: lowStockCount },
-  ]
-
   return (
     <div className="space-y-6">
-      {/* KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        {KPI.map(k => (
+      {/* Action Cards — prominent, linkable */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+        <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#EFF6FF', borderLeftColor: '#3B82F6', borderTop: '1px solid #BFDBFE', borderRight: '1px solid #BFDBFE', borderBottom: '1px solid #BFDBFE' }}>
+          <p className="text-3xl font-bold" style={{ color: '#1D4ED8' }}>{newOrders}</p>
+          <p className="text-sm font-semibold mt-1" style={{ color: '#1D4ED8' }}>New Orders</p>
+          <p className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>status: new · last 7 days · tap to manage</p>
+        </Link>
+        <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#FFFBEB', borderLeftColor: '#F59E0B', borderTop: '1px solid #FDE68A', borderRight: '1px solid #FDE68A', borderBottom: '1px solid #FDE68A' }}>
+          <p className="text-3xl font-bold" style={{ color: '#B45309' }}>{pendingShipment}</p>
+          <p className="text-sm font-semibold mt-1" style={{ color: '#B45309' }}>Pending Shipment</p>
+          <p className="text-xs mt-0.5" style={{ color: '#D97706' }}>processing orders · tap to manage</p>
+        </Link>
+      </div>
+
+      {/* Informational KPI Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+        {[
+          { label: "This Week's Revenue", value: pkr(thisWeekRevenue) },
+          { label: 'Revenue This Month',  value: pkr(revenueThisMonth) },
+          { label: 'Orders This Month',   value: ordersThisMonth },
+          { label: 'Total Sales',          value: unitsReceived, sub: `${unitsDelivered} delivered`, subColor: '#10B981' },
+          { label: 'Total Products',      value: totalProducts, sub: `${totalStock.toLocaleString('en-US')} units in stock`, subColor: '#F59E0B' },
+          { label: 'Low Stock Variants',  value: lowStockCount },
+        ].map(k => (
           <div key={k.label} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <p className="text-2xl font-bold">{k.value}</p>
             {k.sub && (
@@ -175,40 +183,6 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           </div>
         ))}
       </div>
-
-      {/* Warning Row — only shown when there are cancelled/returned orders this month */}
-      {(cancelledRevenue > 0 || returnedRevenue > 0) && (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {cancelledRevenue > 0 && (
-            <div className="rounded-lg p-4 border flex items-start gap-3"
-              style={{ backgroundColor: '#FEF2F2', borderColor: '#FECACA' }}>
-              <AlertTriangle size={16} className="mt-0.5 shrink-0" style={{ color: '#EF4444' }} />
-              <div>
-                <p className="text-sm font-medium" style={{ color: '#DC2626' }}>
-                  Cancelled This Month — {pkr(cancelledRevenue)}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: '#EF4444' }}>
-                  {cancelledThisMonth.length} order{cancelledThisMonth.length !== 1 ? 's' : ''} cancelled
-                </p>
-              </div>
-            </div>
-          )}
-          {returnedRevenue > 0 && (
-            <div className="rounded-lg p-4 border flex items-start gap-3"
-              style={{ backgroundColor: '#FFFBEB', borderColor: '#FDE68A' }}>
-              <AlertTriangle size={16} className="mt-0.5 shrink-0" style={{ color: '#F59E0B' }} />
-              <div>
-                <p className="text-sm font-medium" style={{ color: '#92400E' }}>
-                  Returned This Month — {pkr(returnedRevenue)}
-                </p>
-                <p className="text-xs mt-0.5" style={{ color: '#B45309' }}>
-                  {returnedThisMonth.length} order{returnedThisMonth.length !== 1 ? 's' : ''} returned
-                </p>
-              </div>
-            </div>
-          )}
-        </div>
-      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -265,18 +239,34 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
       {/* Inventory Health */}
       <div>
         <h3 className="font-semibold mb-3">Inventory Health</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Active Products', value: totalProducts,    color: '#374151' },
-            { label: 'In Stock',        value: inStockCount,     color: '#10B981' },
-            { label: 'Last Chance',     value: lastChanceCount,  color: '#F59E0B' },
-            { label: 'Sold Out',        value: soldOutCount,     color: '#EF4444' },
-          ].map(({ label, value, color }) => (
-            <div key={label} className="bg-white rounded-lg p-4 border text-center" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
-            </div>
-          ))}
+            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null },
+            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null },
+            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null },
+            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null },
+            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders' },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders' },
+          ].map(({ label, value, color, href }) => {
+            const inner = (
+              <>
+                <p className="text-2xl font-bold" style={{ color }}>{value}</p>
+                <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
+                {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>→ View orders</p>}
+              </>
+            )
+            return href ? (
+              <Link key={label} href={href}
+                className="bg-white rounded-lg p-4 border text-center block hover:shadow-sm transition-shadow"
+                style={{ borderColor: '#E8DDD4' }}>
+                {inner}
+              </Link>
+            ) : (
+              <div key={label} className="bg-white rounded-lg p-4 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                {inner}
+              </div>
+            )
+          })}
         </div>
       </div>
 
@@ -389,50 +379,6 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         </div>
       )}
 
-      {/* Recent Orders */}
-      <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-        <div className="p-5 border-b" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold">
-            Recent Orders
-            {recentOrders.length > 0 && (
-              <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-normal"
-                style={{ backgroundColor: '#E8DDD4', color: '#A68B6E' }}>
-                {recentOrders.length}
-              </span>
-            )}
-          </h3>
-        </div>
-        {recentOrders.length === 0 ? (
-          <p className="text-sm p-5" style={{ color: '#9CA3AF' }}>No orders yet.</p>
-        ) : (
-          <div className="overflow-x-auto">
-            <table className="w-full text-sm min-w-[500px]">
-              <tbody>
-                {recentOrders.map(order => (
-                  <tr key={order.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                    <td className="px-5 py-3 font-medium" style={{ color: '#A68B6E' }}>
-                      {order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}
-                    </td>
-                    <td className="px-5 py-3">{order.customer_name}</td>
-                    <td className="px-5 py-3 font-semibold">{pkr(order.total)}</td>
-                    <td className="px-5 py-3">
-                      <span className="text-xs px-2 py-1 rounded-full font-medium"
-                        style={STATUS_COLORS[order.order_status]
-                          ? { backgroundColor: STATUS_COLORS[order.order_status] + '22', color: STATUS_COLORS[order.order_status] }
-                          : {}}>
-                        {order.order_status}
-                      </span>
-                    </td>
-                    <td className="px-5 py-3 text-xs" style={{ color: '#9CA3AF' }}>
-                      {new Date(order.created_at).toLocaleDateString('en-US')}
-                    </td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          </div>
-        )}
-      </div>
     </div>
   )
 }
