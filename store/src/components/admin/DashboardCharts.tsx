@@ -166,10 +166,10 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           )}
         </Link>
         <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#FFFBEB', borderLeftColor: '#F59E0B', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B' }}>
-          <p className="text-3xl font-bold" style={{ color: '#B45309' }}>{pendingShipment}</p>
-          <p className="text-sm font-semibold mt-1" style={{ color: '#B45309' }}>Pending Shipment</p>
-          <p className="text-xs mt-0.5" style={{ color: '#D97706' }}>processing + shipped · tap to manage</p>
+          style={{ backgroundColor: '#F5F3FF', border: '1px solid #DDD6FE', borderLeft: '4px solid #7C3AED' }}>
+          <p className="text-3xl font-bold" style={{ color: '#5B21B6' }}>{pendingShipment}</p>
+          <p className="text-sm font-semibold mt-1" style={{ color: '#5B21B6' }}>Pending Shipment</p>
+          <p className="text-xs mt-0.5" style={{ color: '#7C3AED' }}>processing + shipped · tap to manage</p>
         </Link>
       </div>
 
