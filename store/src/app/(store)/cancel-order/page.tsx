@@ -1,8 +1,6 @@
 'use client'
 import { useState } from 'react'
 
-export const metadata = undefined
-
 const REASONS = [
   { value: 'changed_mind',       label: 'I changed my mind' },
   { value: 'ordered_by_mistake', label: 'I ordered by mistake' },
