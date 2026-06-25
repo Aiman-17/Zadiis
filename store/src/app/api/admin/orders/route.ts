@@ -5,6 +5,22 @@ import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrder
 import { incrementTotalSold } from '@/lib/scoring'
 import type { OrderItem } from '@/types'
 
+export async function DELETE(req: NextRequest) {
+  try {
+    const { id } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+    const { data: order } = await supabaseAdmin
+      .from('orders').select('payment_status').eq('id', id).single()
+    if (!order || order.payment_status !== 'paid')
+      return NextResponse.json({ error: 'Only paid orders can be deleted' }, { status: 400 })
+    const { error } = await supabaseAdmin.from('orders').delete().eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function GET() {
   try {
     const { data, error } = await supabaseAdmin
