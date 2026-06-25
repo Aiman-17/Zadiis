@@ -1,38 +1,56 @@
 import { supabase } from './supabase/client'
 import type { Product } from '@/types'
 
+async function getActiveSaleExcludeIds(): Promise<string[]> {
+  const { data: sale } = await supabase
+    .from('sales')
+    .select('id')
+    .eq('is_active', true)
+    .maybeSingle()
+  if (!sale) return []
+  const { data: sps } = await supabase
+    .from('sale_products')
+    .select('product_id')
+    .eq('sale_id', sale.id)
+  return (sps || []).map((sp: { product_id: string }) => sp.product_id)
+}
+
 export async function getProducts(filters?: {
   minPrice?: number
   maxPrice?: number
   size?: string
   type?: string
 }) {
+  const excludeIds = await getActiveSaleExcludeIds()
+
   let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
     .order('created_at', { ascending: false })
 
+  if (excludeIds.length > 0) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+  }
+
   if (filters?.minPrice !== undefined) query = query.gte('price', filters.minPrice)
   if (filters?.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
+
+  // Size and type filters applied at DB level — never pull the whole catalog into JS
+  if (filters?.size) {
+    query = query.contains('sizes', [filters.size])
+  }
+
+  if (filters?.type === 'unstitched') {
+    query = query.or('sizes.eq.{},sizes.cs.{"Unstitched"}')
+  } else if (filters?.type === 'stitched') {
+    query = query.not('sizes', 'cs', '{"Unstitched"}').not('sizes', 'eq', '{}')
+  }
 
   const { data, error } = await query
   if (error) throw error
 
-  let products = data as Product[]
-
-  // Client-side size filter (Supabase array contains)
-  if (filters?.size) {
-    products = products.filter(p => p.sizes.includes(filters.size!))
-  }
-
-  if (filters?.type === 'unstitched') {
-    products = products.filter(p => p.sizes.length === 0 || p.sizes.includes('Unstitched'))
-  } else if (filters?.type === 'stitched') {
-    products = products.filter(p => p.sizes.length > 0 && !p.sizes.includes('Unstitched'))
-  }
-
-  return products
+  return data as Product[]
 }
 
 export async function getProductBySlug(slug: string) {
@@ -47,8 +65,23 @@ export async function getProductBySlug(slug: string) {
   return data as Product
 }
 
+export async function getJustDroppedProducts(limit = 4) {
+  const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const { data } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .gt('stock_quantity', 0)
+    .gte('created_at', d7)
+    .order('created_at', { ascending: false })
+    .limit(limit)
+  return (data || []) as Product[]
+}
+
 export async function getFeaturedProducts(limit = 6) {
-  const { data, error } = await supabase
+  const excludeIds = await getActiveSaleExcludeIds()
+
+  let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
@@ -56,12 +89,16 @@ export async function getFeaturedProducts(limit = 6) {
     .order('created_at', { ascending: false })
     .limit(limit)
 
+  if (excludeIds.length > 0) {
+    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+  }
+
+  const { data, error } = await query
   if (error) throw error
   return data as Product[]
 }
 
 export async function getBestsellerProducts(limit = 6) {
-  // Score-based ranking when scores exist; fall back to manual is_bestseller flag
   const { data: scored } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
@@ -83,6 +120,18 @@ export async function getBestsellerProducts(limit = 6) {
     .limit(limit)
 
   if (error) throw error
+  return (data || []) as Product[]
+}
+
+export async function getLastChanceProducts(limit = 4) {
+  const { data } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .gt('stock_quantity', 0)
+    .lte('stock_quantity', 3)
+    .order('stock_quantity', { ascending: true })
+    .limit(limit)
   return (data || []) as Product[]
 }
 

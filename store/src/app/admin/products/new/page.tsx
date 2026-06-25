@@ -26,6 +26,7 @@ export default function NewProduct() {
     sizes: [] as string[],
     category_id: '',
     is_active: true,
+    is_bestseller: false,
     variant_stock: {} as VariantStock,
   })
 
@@ -104,6 +105,7 @@ export default function NewProduct() {
         sizes: form.sizes,
         category_id: form.category_id || null,
         is_active: form.is_active,
+        is_bestseller: form.is_bestseller,
         variant_stock: completeVariantStock,
       }),
     })
@@ -232,6 +234,10 @@ export default function NewProduct() {
           />
         </div>
 
+        <div className="flex items-center gap-3">
+          <input type="checkbox" id="is_bestseller" checked={form.is_bestseller} onChange={e => set('is_bestseller', e.target.checked)} className="w-4 h-4" />
+          <Label htmlFor="is_bestseller">Best Seller (shown in "Most Loved" on homepage)</Label>
+        </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
           <Label htmlFor="is_active">Active (visible in store)</Label>

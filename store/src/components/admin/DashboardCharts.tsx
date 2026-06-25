@@ -121,6 +121,35 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   // Recent orders — last 10, not archived
   const recentOrders = orders.filter(o => !o.is_archived).slice(0, 10)
 
+  // Inventory health — variant-aware stock per product
+  function getProductStock(p: Product): number {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).reduce(
+        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+      )
+    }
+    return p.stock_quantity
+  }
+  const soldOutCount    = products.filter(p => getProductStock(p) === 0).length
+  const lastChanceCount = products.filter(p => { const s = getProductStock(p); return s > 0 && s <= 3 }).length
+  const inStockCount    = products.filter(p => getProductStock(p) > 0).length
+
+  // Merchandising signals — derived from scored product data
+  const topBestSellers = [...products]
+    .filter(p => p.best_seller_score > 0)
+    .sort((a, b) => b.best_seller_score - a.best_seller_score)
+    .slice(0, 5)
+  const topTrending = [...products]
+    .filter(p => p.trending_score > 0)
+    .sort((a, b) => b.trending_score - a.trending_score)
+    .slice(0, 5)
+  const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
+  const justDropped = [...products]
+    .filter(p => new Date(p.created_at) >= d7)
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 5)
+
   const KPI: { label: string; value: string | number; sub?: string; subColor?: string }[] = [
     { label: "Today's Orders",     value: todayOrders },
     { label: "Today's Revenue",    value: pkr(todayRevenue) },
@@ -230,6 +259,103 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
               </Bar>
             </BarChart>
           </ResponsiveContainer>
+        </div>
+      </div>
+
+      {/* Inventory Health */}
+      <div>
+        <h3 className="font-semibold mb-3">Inventory Health</h3>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+          {[
+            { label: 'Active Products', value: totalProducts,    color: '#374151' },
+            { label: 'In Stock',        value: inStockCount,     color: '#10B981' },
+            { label: 'Last Chance',     value: lastChanceCount,  color: '#F59E0B' },
+            { label: 'Sold Out',        value: soldOutCount,     color: '#EF4444' },
+          ].map(({ label, value, color }) => (
+            <div key={label} className="bg-white rounded-lg p-4 border text-center" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-2xl font-bold" style={{ color }}>{value}</p>
+              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {/* Merchandising Panel */}
+      <div>
+        <h3 className="font-semibold mb-3">Merchandising</h3>
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          {/* Best Sellers */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <p className="font-semibold text-sm">Best Sellers</p>
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>by score</span>
+            </div>
+            {topBestSellers.length === 0 ? (
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>No scores yet. Scores calculate as orders are fulfilled.</p>
+            ) : (
+              <ol className="space-y-2.5">
+                {topBestSellers.map((p, i) => (
+                  <li key={p.id} className="flex items-center gap-2 text-sm">
+                    <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#A68B6E' }}>#{i + 1}</span>
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
+          {/* Trending Now */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <p className="font-semibold text-sm">Trending Now</p>
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C' }}>this week</span>
+            </div>
+            {topTrending.length === 0 ? (
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>No trending data yet. Products score after recent orders.</p>
+            ) : (
+              <ol className="space-y-2.5">
+                {topTrending.map((p, i) => (
+                  <li key={p.id} className="flex items-center gap-2 text-sm">
+                    <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#C62828' }}>#{i + 1}</span>
+                    <span className="flex-1 truncate">{p.name}</span>
+                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>↑ {p.trending_score.toFixed(1)}</span>
+                  </li>
+                ))}
+              </ol>
+            )}
+          </div>
+
+          {/* Just Dropped */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="flex items-center gap-2 mb-4">
+              <p className="font-semibold text-sm">Just Dropped</p>
+              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
+            </div>
+            {justDropped.length === 0 ? (
+              <p className="text-xs" style={{ color: '#9CA3AF' }}>No new products in the last 7 days.</p>
+            ) : (
+              <ul className="space-y-2.5">
+                {justDropped.map(p => {
+                  const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86_400_000)
+                  const stock   = getProductStock(p)
+                  return (
+                    <li key={p.id} className="flex items-center gap-2 text-sm">
+                      <span className="flex-1 truncate">{p.name}</span>
+                      <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>
+                        {ageDays === 0 ? 'today' : `${ageDays}d ago`}
+                      </span>
+                      {stock <= 3 && stock > 0 && (
+                        <span className="text-xs font-semibold shrink-0" style={{ color: '#C62828' }}>{stock} left</span>
+                      )}
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+
         </div>
       </div>
 

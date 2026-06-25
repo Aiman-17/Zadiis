@@ -5,13 +5,28 @@ import { useRouter } from 'next/navigation'
 import { Trash2, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Product } from '@/types'
 
-function ProductRow({ p, onDelete }: { p: Product; onDelete: (id: string) => void }) {
+function ProductRow({ p, onDelete, waitlist }: { p: Product; onDelete: (id: string) => void; waitlist: number }) {
   return (
     <tr className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-      <td className="p-4 font-medium">{p.name}</td>
+      <td className="p-4 font-medium">
+        <span>{p.name}</span>
+        {waitlist > 0 && (
+          <span
+            className="ml-2 text-xs font-semibold px-1.5 py-0.5 rounded-full"
+            style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+            title={`${waitlist} customer${waitlist !== 1 ? 's' : ''} waiting for restock`}
+          >
+            {waitlist} waiting
+          </span>
+        )}
+      </td>
       <td className="p-4 text-sm" style={{ color: '#6B7280' }}>{p.sku || '—'}</td>
       <td className="p-4">PKR {p.price.toLocaleString()}</td>
-      <td className="p-4">{p.stock_quantity}</td>
+      <td className="p-4">
+        <span style={p.stock_quantity === 0 ? { color: '#EF4444', fontWeight: 600 } : {}}>
+          {p.stock_quantity === 0 ? 'Sold Out' : p.stock_quantity}
+        </span>
+      </td>
       <td className="p-4">
         <div className="flex items-center gap-3">
           <Link href={`/admin/products/${p.id}/edit`} style={{ color: '#A68B6E' }} className="hover:underline text-sm">
@@ -55,9 +70,11 @@ function ArchivedRow({ p, onRestore }: { p: Product; onRestore: (id: string) => 
 export default function AdminProductsClient({
   activeProducts: initialActive,
   archivedProducts: initialArchived,
+  waitlistCounts,
 }: {
   activeProducts: Product[]
   archivedProducts: Product[]
+  waitlistCounts: Record<string, number>
 }) {
   const router = useRouter()
   const [active, setActive] = useState(initialActive)
@@ -118,7 +135,7 @@ export default function AdminProductsClient({
                   </td>
                 </tr>
               ) : active.map(p => (
-                <ProductRow key={p.id} p={p} onDelete={handleDelete} />
+                <ProductRow key={p.id} p={p} onDelete={handleDelete} waitlist={waitlistCounts[p.id] || 0} />
               ))}
             </tbody>
           </table>

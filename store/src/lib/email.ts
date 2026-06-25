@@ -102,38 +102,105 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
   }
 }
 
-export async function sendCustomerPaymentConfirmed(to: string | null | undefined, d: {
-  order_number: string
-  customer_name: string
-  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
-  subtotal: number
-  delivery_charge: number
-  total: number
+const PAYMENT_METHOD_LABELS: Record<string, string> = {
+  jazzcash:  'JazzCash',
+  easypaisa: 'EasyPaisa',
+  card:      'Credit / Debit Card',
+  cod:       'Cash on Delivery',
+}
+
+function buildInvoiceBlock(d: {
+  invoice_number: string
+  order_number:   string
+  customer_name:  string
+  address:        string
+  city:           string
   payment_method: string
-  address: string
-  city: string
+  transaction_id?: string
+}): string {
+  const date = new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })
+  const method = PAYMENT_METHOD_LABELS[d.payment_method] || d.payment_method
+  return `
+    <div style="border:2px solid #1C1C1C;border-radius:8px;overflow:hidden;margin-bottom:28px">
+      <!-- Invoice header strip -->
+      <table style="width:100%;border-collapse:collapse;background:#1C1C1C">
+        <tr>
+          <td style="padding:16px 20px">
+            <p style="margin:0;color:#A68B6E;font-size:10px;letter-spacing:3px;text-transform:uppercase">Tax Invoice</p>
+            <p style="margin:6px 0 0;color:white;font-family:Georgia,serif;font-size:22px;letter-spacing:1px">${d.invoice_number}</p>
+          </td>
+          <td style="padding:16px 20px;text-align:right;vertical-align:middle">
+            <span style="display:inline-block;background:#10B981;color:white;padding:6px 18px;border-radius:20px;font-size:12px;font-weight:bold;letter-spacing:2px">PAID</span>
+          </td>
+        </tr>
+      </table>
+      <!-- Invoice meta -->
+      <table style="width:100%;border-collapse:collapse;background:white;padding:0">
+        <tr>
+          <td style="padding:14px 20px 0;font-size:12px;color:#888">Date</td>
+          <td style="padding:14px 20px 0;font-size:12px;color:#1C1C1C;text-align:right">${date}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 20px 0;font-size:12px;color:#888">Order</td>
+          <td style="padding:6px 20px 0;font-size:12px;color:#1C1C1C;text-align:right;font-weight:bold">${d.order_number}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 20px 0;font-size:12px;color:#888">Bill To</td>
+          <td style="padding:6px 20px 0;font-size:12px;color:#1C1C1C;text-align:right">${d.customer_name}, ${d.address}, ${d.city}</td>
+        </tr>
+        <tr>
+          <td style="padding:6px 20px 0;font-size:12px;color:#888">Paid Via</td>
+          <td style="padding:6px 20px 0;font-size:12px;color:#1C1C1C;text-align:right">${method}</td>
+        </tr>
+        ${d.transaction_id ? `
+        <tr>
+          <td style="padding:6px 20px 14px;font-size:12px;color:#888">Transaction ID</td>
+          <td style="padding:6px 20px 14px;font-size:11px;color:#1C1C1C;text-align:right;font-family:monospace">${d.transaction_id}</td>
+        </tr>` : `<tr><td colspan="2" style="padding:0 0 8px"></td></tr>`}
+      </table>
+    </div>`
+}
+
+export async function sendCustomerPaymentConfirmed(to: string | null | undefined, d: {
+  order_number:   string
+  customer_name:  string
+  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
+  subtotal:        number
+  delivery_charge: number
+  total:           number
+  payment_method:  string
+  address:         string
+  city:            string
+  invoice_number?: string
+  transaction_id?: string
 }): Promise<void> {
   if (!to) return
-  const itemRows = buildItemRows(d.items)
+  const itemRows    = buildItemRows(d.items)
+  const invoiceBlock = d.invoice_number
+    ? buildInvoiceBlock({
+        invoice_number: d.invoice_number,
+        order_number:   d.order_number,
+        customer_name:  d.customer_name,
+        address:        d.address,
+        city:           d.city,
+        payment_method: d.payment_method,
+        transaction_id: d.transaction_id,
+      })
+    : ''
+
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
       <div style="padding:32px;background:#FAF8F5">
         <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Payment Confirmed!</h2>
         <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your payment has been received and your order is being prepared.</p>
-        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:12px 20px;margin-bottom:24px">
-          <p style="margin:0;color:#166534;font-weight:bold">✓ Payment received via ${d.payment_method.charAt(0).toUpperCase() + d.payment_method.slice(1)}</p>
-        </div>
-        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
-          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
-          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
-        </div>
+        ${invoiceBlock}
         <table style="width:100%;border-collapse:collapse;margin-bottom:16px">${itemRows}</table>
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px">
           <tr><td style="padding:6px 0;color:#666">Subtotal</td><td style="padding:6px 0;text-align:right;color:#1C1C1C">PKR ${Number(d.subtotal).toLocaleString()}</td></tr>
           <tr><td style="padding:6px 0;color:#666">Delivery</td><td style="padding:6px 0;text-align:right;color:#1C1C1C">PKR ${Number(d.delivery_charge).toLocaleString()}</td></tr>
           <tr style="border-top:2px solid #E8DDD4">
-            <td style="padding:10px 0;font-weight:bold;color:#1C1C1C">Total Paid</td>
+            <td style="padding:10px 0;font-weight:bold;color:#1C1C1C">Amount Paid</td>
             <td style="padding:10px 0;text-align:right;font-weight:bold;font-size:1.1em;color:#A68B6E">PKR ${Number(d.total).toLocaleString()}</td>
           </tr>
         </table>
@@ -273,5 +340,45 @@ export async function sendOwnerPaymentReceived(d: {
     })
   } catch (e) {
     console.error('sendOwnerPaymentReceived failed:', e)
+  }
+}
+
+export async function sendBackInStockEmail(to: string, d: {
+  product_name: string
+  product_slug: string
+  product_image?: string
+}): Promise<void> {
+  const storeUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://zadiis.com.pk'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">It&apos;s back!</h2>
+        <p style="color:#666;margin:0 0 24px">
+          Great news — <strong>${d.product_name}</strong> is back in stock.
+          Grab yours before it sells out again.
+        </p>
+        ${d.product_image
+          ? `<img src="${d.product_image}" alt="${d.product_name}" style="width:100%;max-width:300px;border-radius:8px;display:block;margin-bottom:24px" />`
+          : ''}
+        <a href="${storeUrl}/shop/${d.product_slug}"
+           style="display:inline-block;background:#1C1C1C;color:white;padding:14px 32px;text-decoration:none;font-size:13px;letter-spacing:2px;text-transform:uppercase;border-radius:2px">
+          Shop Now →
+        </a>
+        <p style="color:#9CA3AF;font-size:11px;margin-top:28px">
+          You received this because you joined the waitlist for this item on zadiis.com.pk.
+        </p>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `${d.product_name} is back in stock — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendBackInStockEmail failed:', e)
   }
 }

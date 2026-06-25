@@ -10,16 +10,22 @@ export const dynamic = 'force-dynamic'
 export default async function AdminProducts() {
   let activeProducts: Product[] = []
   let archivedProducts: Product[] = []
+  let waitlistCounts: Record<string, number> = {}
 
   try {
-    const { data } = await supabaseAdmin
-      .from('products')
-      .select('*')
-      .order('created_at', { ascending: false })
+    const [productsRes, waitlistRes] = await Promise.all([
+      supabaseAdmin.from('products').select('*').order('created_at', { ascending: false }),
+      supabaseAdmin.from('product_waitlist').select('product_id').is('notified_at', null),
+    ])
 
-    const all = (data || []) as Product[]
+    const all = (productsRes.data || []) as Product[]
     activeProducts = all.filter(p => p.is_active)
     archivedProducts = all.filter(p => !p.is_active)
+
+    for (const entry of (waitlistRes.data || [])) {
+      const pid = (entry as { product_id: string }).product_id
+      waitlistCounts[pid] = (waitlistCounts[pid] || 0) + 1
+    }
   } catch {
     // Supabase not configured
   }
@@ -35,6 +41,7 @@ export default async function AdminProducts() {
       <AdminProductsClient
         activeProducts={activeProducts}
         archivedProducts={archivedProducts}
+        waitlistCounts={waitlistCounts}
       />
     </div>
   )

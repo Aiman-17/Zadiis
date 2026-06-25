@@ -1,5 +1,6 @@
-import { NextRequest, NextResponse } from 'next/server'
+import { NextRequest, NextResponse, after } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
+import { sendBackInStockEmail } from '@/lib/email'
 
 export async function GET() {
   const { data, error } = await supabaseAdmin
@@ -45,8 +46,48 @@ export async function PUT(req: NextRequest) {
   if (variantStock && Object.keys(variantStock).length > 0) {
     body.stock_quantity = calcTotalStock(variantStock)
   }
+
+  // Read old stock before updating (needed to detect 0 → positive transition)
+  const newStock = body.stock_quantity as number | undefined
+  let restockProduct: { name: string; slug: string; images: string[] } | null = null
+  if (typeof newStock === 'number' && newStock > 0) {
+    const { data: current } = await supabaseAdmin
+      .from('products')
+      .select('stock_quantity, name, slug, images')
+      .eq('id', id)
+      .single()
+    if (current?.stock_quantity === 0) restockProduct = current
+  }
+
+  // Update product FIRST — response is never held hostage by email latency
   const { error } = await supabaseAdmin.from('products').update(body).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // Send back-in-stock emails after the response is returned (non-blocking)
+  if (restockProduct) {
+    const snap = restockProduct
+    after(async () => {
+      const { data: waitlist } = await supabaseAdmin
+        .from('product_waitlist')
+        .select('email')
+        .eq('product_id', id)
+        .is('notified_at', null)
+      if (!waitlist?.length) return
+      await Promise.all(
+        waitlist.map(w => sendBackInStockEmail(w.email, {
+          product_name:  snap.name,
+          product_slug:  snap.slug,
+          product_image: (snap.images as string[])?.[0],
+        }))
+      )
+      await supabaseAdmin
+        .from('product_waitlist')
+        .update({ notified_at: new Date().toISOString() })
+        .eq('product_id', id)
+        .is('notified_at', null)
+    })
+  }
+
   return NextResponse.json({ success: true })
 }
 

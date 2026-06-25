@@ -106,3 +106,12 @@ export type SaleProduct = {
   created_at: string
   products?: Product
 }
+
+export type ProductWaitlist = {
+  id: string
+  product_id: string
+  email: string
+  phone: string | null
+  notified_at: string | null
+  created_at: string
+}

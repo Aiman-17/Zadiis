@@ -88,18 +88,20 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
   }
 
-  await generateInvoice(order.id)
+  const invoiceNumber = await generateInvoice(order.id)
 
   await sendCustomerPaymentConfirmed(order.customer_email, {
-    order_number: order.order_number,
-    customer_name: order.customer_name,
-    items: order.items,
-    subtotal: order.subtotal,
+    order_number:    order.order_number,
+    customer_name:   order.customer_name,
+    items:           order.items,
+    subtotal:        order.subtotal,
     delivery_charge: order.delivery_charge,
-    total: order.total,
-    payment_method: order.payment_method,
-    address: order.address,
-    city: order.city,
+    total:           order.total,
+    payment_method:  order.payment_method,
+    address:         order.address,
+    city:            order.city,
+    invoice_number:  invoiceNumber ?? undefined,
+    transaction_id:  transactionId ?? undefined,
   })
 
   await sendOwnerPaymentReceived({

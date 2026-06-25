@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   const { data: order } = await supabaseAdmin
     .from('orders')
-    .select('id, order_number, customer_name, customer_phone, customer_email, safepay_tracker, payment_status, payment_method, total, subtotal, delivery_charge, items, address, city')
+    .select('id, order_number, customer_name, customer_phone, customer_email, safepay_tracker, safepay_transaction_id, payment_status, payment_method, total, subtotal, delivery_charge, items, address, city')
     .eq('id', orderId)
     .single()
 
@@ -59,19 +59,21 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ error: 'DB update failed' }, { status: 500 })
   }
 
-  // Generate invoice + send emails (fire-and-forget failures)
-  await generateInvoice(order.id)
+  // Generate invoice (idempotent — returns existing number if already created)
+  const invoiceNumber = await generateInvoice(order.id)
 
   await sendCustomerPaymentConfirmed(order.customer_email, {
-    order_number: order.order_number,
-    customer_name: order.customer_name,
-    items: order.items,
-    subtotal: order.subtotal,
+    order_number:    order.order_number,
+    customer_name:   order.customer_name,
+    items:           order.items,
+    subtotal:        order.subtotal,
     delivery_charge: order.delivery_charge,
-    total: order.total,
-    payment_method: order.payment_method,
-    address: order.address,
-    city: order.city,
+    total:           order.total,
+    payment_method:  order.payment_method,
+    address:         order.address,
+    city:            order.city,
+    invoice_number:  invoiceNumber ?? undefined,
+    transaction_id:  order.safepay_transaction_id ?? undefined,
   })
 
   await sendOwnerPaymentReceived({

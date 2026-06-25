@@ -125,6 +125,22 @@ export async function POST(req: NextRequest) {
       })
     }
 
+    // Write relational order_items rows — enables indexed analytics queries
+    await supabaseAdmin.from('order_items').insert(
+      enrichedItems.map(item => ({
+        order_id:       order.id,
+        product_id:     item.product_id || null,
+        product_name:   item.product_name,
+        sku:            item.sku || null,
+        size:           item.size || null,
+        color:          item.color || null,
+        quantity:       item.quantity,
+        unit_price:     item.price,
+        original_price: item.original_price,
+        created_at:     order.created_at,
+      }))
+    )
+
     // COD orders are confirmed immediately — generate invoice now
     await generateInvoice(order.id)
 

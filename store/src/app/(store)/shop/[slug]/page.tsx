@@ -6,6 +6,8 @@ import AddToCartButton from '@/components/products/AddToCartButton'
 import ProductImageGallery from '@/components/products/ProductImageGallery'
 import ReviewListWrapper from '@/components/products/ReviewListWrapper'
 import ProductCard from '@/components/products/ProductCard'
+import ProductSaleUrgency from '@/components/products/ProductSaleUrgency'
+import NotifyMeButton from '@/components/products/NotifyMeButton'
 import type { Review, Product } from '@/types'
 import type { Metadata } from 'next'
 
@@ -50,9 +52,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   let saleEndsAt: string | null = null
   let isSaleActive = false
   let relatedProducts: Product[] = []
+  let soldLast24h = 0
+
+  const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
   try {
-    const [reviewsRes, saleRes, relatedRes] = await Promise.all([
+    const [reviewsRes, saleRes, relatedRes, recentOrderIdsRes] = await Promise.all([
       supabaseAdmin
         .from('reviews')
         .select('*')
@@ -70,10 +75,26 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .eq('category_id', product!.category_id)
         .neq('id', product!.id)
         .limit(4),
+      // Fetch qualifying order IDs from last 24h — join happens at DB level
+      supabaseAdmin
+        .from('orders')
+        .select('id')
+        .in('order_status', ['processing', 'shipped', 'delivered'])
+        .gte('created_at', oneDayAgo),
     ])
 
     reviews = (reviewsRes.data || []) as Review[]
     relatedProducts = (relatedRes.data || []) as Product[]
+
+    const recentOrderIds = (recentOrderIdsRes.data || []).map((o: { id: string }) => o.id)
+    if (recentOrderIds.length > 0) {
+      const { data: soldItems } = await supabaseAdmin
+        .from('order_items')
+        .select('quantity')
+        .eq('product_id', product!.id)
+        .in('order_id', recentOrderIds)
+      soldLast24h = (soldItems || []).reduce((s: number, i: { quantity: number }) => s + i.quantity, 0)
+    }
 
     if (saleRes.data) {
       isSaleActive = true
@@ -89,6 +110,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   } catch {
     // fail gracefully
   }
+
+  const isSoldOut = (() => {
+    const vs = product!.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).reduce(
+        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+      ) === 0
+    }
+    return product!.stock_quantity === 0
+  })()
 
   const displayPrice = salePrice ?? product!.price
   const savings = salePrice ? product!.price - salePrice : 0
@@ -115,7 +146,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-5xl mx-auto px-4 py-10">
+      <div className="max-w-5xl mx-auto px-4 py-6">
         <Link href="/shop" className="text-sm inline-block mb-6 hover:underline" style={{ color: '#A68B6E' }}>
           ← Back to Shop
         </Link>
@@ -138,13 +169,16 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               <div className="flex items-center gap-3 mt-2 flex-wrap">
                 {salePrice ? (
                   <>
-                    <p className="text-2xl font-bold" style={{ color: '#DC2626' }}>
+                    <p className="text-2xl font-bold" style={{ color: '#A68B6E' }}>
                       PKR {salePrice.toLocaleString('en-US')}
                     </p>
                     <p className="text-lg line-through" style={{ color: '#9CA3AF' }}>
                       PKR {product!.price.toLocaleString('en-US')}
                     </p>
-                    <span className="text-xs font-bold px-2 py-1 rounded" style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>
+                      -{Math.round((1 - salePrice / product!.price) * 100)}%
+                    </span>
+                    <span className="text-xs" style={{ color: '#10B981' }}>
                       Save PKR {savings.toLocaleString('en-US')}
                     </span>
                   </>
@@ -160,35 +194,52 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
               {/* Sale urgency banner */}
               {salePrice && (
-                <div className="mt-3 p-3 rounded-lg flex items-center gap-2" style={{ backgroundColor: '#FEF2F2', border: '1px solid #FECACA' }}>
-                  <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: '#EF4444' }} />
-                  <p className="text-sm font-medium" style={{ color: '#DC2626' }}>
-                    Sale price!{' '}
-                    {saleEndsAt
-                      ? `Ends ${new Date(saleEndsAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric' })}`
-                      : 'Limited time only'}
-                  </p>
+                <div className="mt-3">
+                  <ProductSaleUrgency
+                    endsAt={saleEndsAt}
+                    stockQty={product!.stock_quantity}
+                  />
                 </div>
               )}
             </div>
 
             {product!.description && <p className="text-gray-600 leading-relaxed">{product!.description}</p>}
+
+            {/* Social proof — only show when meaningful (2+ sold) */}
+            {soldLast24h >= 2 && (
+              <p className="text-sm font-medium" style={{ color: '#10B981' }}>
+                🔥 {soldLast24h} sold in the last 24 hours
+              </p>
+            )}
+
+            {/* Stock urgency — only on non-sale products (sale products use ProductSaleUrgency) */}
+            {!salePrice && product!.stock_quantity > 0 && product!.stock_quantity <= 10 && (
+              <p className="text-sm font-semibold" style={{ color: product!.stock_quantity <= 3 ? '#B91C1C' : '#B45309' }}>
+                {product!.stock_quantity <= 3
+                  ? `Hurry! Only ${product!.stock_quantity} left in stock`
+                  : `Only ${product!.stock_quantity} left in stock`}
+              </p>
+            )}
+
             <AddToCartButton product={product!} salePrice={salePrice ?? undefined} />
+
+            {/* Waitlist — shown when product is completely sold out */}
+            {isSoldOut && <NotifyMeButton productId={product!.id} />}
             <p className="text-xs text-gray-400">Free delivery on orders over PKR 10,000</p>
           </div>
         </div>
 
         {/* Reviews section */}
-        <div className="mt-16 border-t pt-10" style={{ borderColor: '#E8DDD4' }}>
-          <h2 className="text-xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Customer Reviews</h2>
+        <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
+          <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Customer Reviews</h2>
           <ReviewListWrapper productId={product!.id} initialReviews={reviews} />
         </div>
 
         {/* You May Also Like */}
         {relatedProducts.length > 0 && (
-          <div className="mt-16 border-t pt-10" style={{ borderColor: '#E8DDD4' }}>
-            <h2 className="text-xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>You May Also Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
+            <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>You May Also Like</h2>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {relatedProducts.map(p => (
                 <ProductCard key={p.id} product={p} />
               ))}
