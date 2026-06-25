@@ -14,6 +14,9 @@ type RequestRecord = {
   notes: string | null
   status: 'pending' | 'resolved'
   created_at: string
+  request_type?: 'return' | 'exchange'
+  exchange_details?: string | null
+  exchange_status?: 'pending' | 'shipped' | 'delivered' | null
 }
 
 const STATUS_STYLES: Record<string, React.CSSProperties> = {
@@ -138,6 +141,24 @@ export default function AdminOrders() {
     else setCancelRequests(prev => prev.filter(r => r.id !== id))
   }
 
+  const markExchangeShipped = async (id: string) => {
+    await fetch('/api/admin/requests', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type: 'return', action: 'shipped' }),
+    })
+    setReturnRequests(prev => prev.map(r => r.id === id ? { ...r, exchange_status: 'shipped' as const } : r))
+  }
+
+  const markExchangeDelivered = async (id: string) => {
+    await fetch('/api/admin/requests', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, type: 'return', action: 'delivered' }),
+    })
+    setReturnRequests(prev => prev.filter(r => r.id !== id))
+  }
+
   // Find order by number from loaded orders and open the relevant modal
   const handleCancelFromRequest = (orderNumber: string, requestId: string) => {
     setRequestError(null)
@@ -217,30 +238,50 @@ export default function AdminOrders() {
             </div>
           )}
           {activeRequests.map(req => {
-            const isReturn = tab === 'returns'
+            const isReturn   = tab === 'returns'
+            const isExchange = req.request_type === 'exchange'
+
+            // Exchange border: purple. Return: blue. Cancel: amber.
+            const borderLeftColor = isExchange ? '#A78BFA' : isReturn ? '#3B82F6' : '#F59E0B'
+
             return (
               <div key={req.id} className="bg-white rounded-lg border p-4"
                 style={{
-                  borderColor: isReturn ? '#BFDBFE' : '#FDE68A',
+                  borderColor: isExchange ? '#DDD6FE' : isReturn ? '#BFDBFE' : '#FDE68A',
                   borderLeftWidth: 4,
-                  borderLeftColor: isReturn ? '#3B82F6' : '#F59E0B',
+                  borderLeftColor,
                 }}>
                 <div className="flex items-start justify-between gap-3 flex-wrap">
                   <div className="min-w-0">
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full"
-                        style={isReturn
-                          ? { backgroundColor: '#DBEAFE', color: '#1D4ED8' }
-                          : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
-                        {isReturn ? 'RETURN REQUEST' : 'CANCEL REQUEST'}
+                        style={isExchange
+                          ? { backgroundColor: '#EDE9FE', color: '#6D28D9' }
+                          : isReturn
+                            ? { backgroundColor: '#DBEAFE', color: '#1D4ED8' }
+                            : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
+                        {isExchange ? 'EXCHANGE REQUEST' : isReturn ? 'RETURN REQUEST' : 'CANCEL REQUEST'}
                       </span>
                       <span className="font-medium text-sm" style={{ color: '#A68B6E' }}>{req.order_number}</span>
+                      {isExchange && req.exchange_status === 'shipped' && (
+                        <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                          style={{ backgroundColor: '#EDE9FE', color: '#6D28D9' }}>
+                          Shipped
+                        </span>
+                      )}
                     </div>
                     <p className="text-sm font-medium">{req.customer_name || 'Customer'}</p>
                     <p className="text-xs" style={{ color: '#6B7280' }}>{req.customer_email}</p>
-                    <p className="text-xs mt-1" style={{ color: '#4B5563' }}>
-                      Reason: {REQUEST_REASON_LABELS[req.reason] || req.reason}
-                    </p>
+                    {isExchange && req.exchange_details && (
+                      <p className="text-xs mt-1 font-medium" style={{ color: '#4B5563' }}>
+                        Wants: {req.exchange_details}
+                      </p>
+                    )}
+                    {!isExchange && (
+                      <p className="text-xs mt-1" style={{ color: '#4B5563' }}>
+                        Reason: {REQUEST_REASON_LABELS[req.reason] || req.reason}
+                      </p>
+                    )}
                     {req.notes && (
                       <p className="text-xs mt-0.5 italic" style={{ color: '#9CA3AF' }}>"{req.notes}"</p>
                     )}
@@ -248,17 +289,37 @@ export default function AdminOrders() {
                       {new Date(req.created_at).toLocaleDateString()}
                     </p>
                   </div>
-                  <div className="flex gap-2 flex-shrink-0">
-                    <button
-                      onClick={() => isReturn
-                        ? handleReturnFromRequest(req.order_number, req.id)
-                        : handleCancelFromRequest(req.order_number, req.id)
-                      }
-                      className="text-xs px-3 py-1.5 rounded-full font-medium"
-                      style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? '#1D4ED8' : '#92400E' }}
-                    >
-                      {isReturn ? 'Process Return' : 'Cancel Order'}
-                    </button>
+                  <div className="flex gap-2 flex-shrink-0 flex-wrap justify-end">
+                    {isExchange ? (
+                      req.exchange_status === 'shipped' ? (
+                        <button
+                          onClick={() => markExchangeDelivered(req.id)}
+                          className="text-xs px-3 py-1.5 rounded-full font-medium"
+                          style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}
+                        >
+                          Mark Delivered
+                        </button>
+                      ) : (
+                        <button
+                          onClick={() => markExchangeShipped(req.id)}
+                          className="text-xs px-3 py-1.5 rounded-full font-medium"
+                          style={{ backgroundColor: '#EDE9FE', color: '#6D28D9' }}
+                        >
+                          Mark Shipped
+                        </button>
+                      )
+                    ) : (
+                      <button
+                        onClick={() => isReturn
+                          ? handleReturnFromRequest(req.order_number, req.id)
+                          : handleCancelFromRequest(req.order_number, req.id)
+                        }
+                        className="text-xs px-3 py-1.5 rounded-full font-medium"
+                        style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? '#1D4ED8' : '#92400E' }}
+                      >
+                        {isReturn ? 'Process Return' : 'Cancel Order'}
+                      </button>
+                    )}
                     <button
                       onClick={() => resolveRequest(req.id, isReturn ? 'return' : 'cancellation')}
                       className="text-xs px-3 py-1.5 rounded-full border"

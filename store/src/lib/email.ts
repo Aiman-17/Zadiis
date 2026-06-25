@@ -589,6 +589,160 @@ export async function sendCustomerReturnConfirmation(to: string | null | undefin
   }
 }
 
+export async function sendOwnerExchangeRequest(d: {
+  order_number: string
+  customer_email: string
+  customer_name?: string | null
+  exchange_details: string
+  notes?: string | null
+}): Promise<void> {
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        🔄 Exchange Request — ${d.order_number}
+      </h2>
+      <p><strong>Customer:</strong> ${d.customer_name || '—'}</p>
+      <p><strong>Email:</strong> ${d.customer_email}</p>
+      <p><strong>Wants instead:</strong> ${d.exchange_details}</p>
+      ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+      <p style="color:#6B7280;font-size:13px;margin-top:16px">Go to your admin panel → Returns tab to process this exchange. Ship the replacement and click Mark Shipped to notify the customer.</p>
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: process.env.OWNER_EMAIL!,
+      subject: `Exchange request — ${d.order_number}`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendOwnerExchangeRequest failed:', e)
+  }
+}
+
+export async function sendCustomerExchangeConfirmation(to: string | null | undefined, d: {
+  order_number: string
+  customer_name?: string | null
+}): Promise<void> {
+  if (!to) return
+  const name = d.customer_name || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Exchange Request Received</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${name}, we've received your exchange request.</p>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
+          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
+        </div>
+        <p style="color:#666;font-size:14px">Our team will prepare your replacement and you will receive a shipping confirmation email as soon as your exchange is dispatched. Please do not send back the original item until you hear from us.</p>
+        <p style="color:#666;font-size:14px;margin-top:12px">If you have any questions in the meantime, please reach out to us on WhatsApp.</p>
+        <div style="text-align:center;margin-top:24px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Exchange request received — ${d.order_number} — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerExchangeConfirmation failed:', e)
+  }
+}
+
+export async function sendCustomerExchangeShipped(to: string | null | undefined, d: {
+  order_number: string
+  customer_name?: string | null
+  exchange_details?: string | null
+}): Promise<void> {
+  if (!to) return
+  const name = d.customer_name || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Your Exchange is on the Way!</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${name}, great news — your exchange for order ${d.order_number} has been dispatched.</p>
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Original Order</p>
+          <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
+        </div>
+        ${d.exchange_details ? `
+        <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px">
+          <p style="margin:0 0 4px;font-weight:bold;color:#1C1C1C;font-size:13px;text-transform:uppercase;letter-spacing:1px">Replacement Item</p>
+          <p style="margin:0;color:#4B5563;font-size:15px">${d.exchange_details}</p>
+        </div>` : ''}
+        <div style="background:#EDE9FE;border:1px solid #C4B5FD;border-radius:8px;padding:16px 20px;margin-bottom:24px">
+          <p style="margin:0;color:#5B21B6;font-weight:bold">📦 Dispatched</p>
+          <p style="margin:8px 0 0;color:#5B21B6;font-size:14px">Please allow <strong>2–3 business days</strong> for processing. Your replacement is expected to arrive within <strong>3–4 business days</strong> from today.</p>
+        </div>
+        <p style="color:#666;font-size:14px">If you haven't received your exchange after 4 business days, please reach out to us on WhatsApp and we'll assist you right away.</p>
+        <div style="text-align:center;margin-top:24px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Your exchange for ${d.order_number} is on the way — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerExchangeShipped failed:', e)
+  }
+}
+
+export async function sendCustomerExchangeDelivered(to: string | null | undefined, d: {
+  order_number: string
+  customer_name?: string | null
+}): Promise<void> {
+  if (!to) return
+  const name = d.customer_name || 'there'
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:32px;background:#FAF8F5">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Your Exchange Has Arrived!</h2>
+        <p style="color:#666;margin:0 0 24px">Hi ${name}, your exchange for order <strong>${d.order_number}</strong> has been delivered. We hope it is exactly what you were looking for!</p>
+        <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:16px 20px;margin-bottom:24px">
+          <p style="margin:0;color:#166534;font-weight:bold">✓ Exchange Delivered</p>
+          <p style="margin:6px 0 0;color:#166534;font-size:14px">We hope you love your new piece. Thank you for choosing ZADIIS — we look forward to serving you again!</p>
+        </div>
+        <div style="text-align:center;margin-top:8px">
+          <a href="https://wa.me/${WHATSAPP}"
+             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
+            WhatsApp Support
+          </a>
+        </div>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Your exchange for ${d.order_number} has been delivered — ZADIIS`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendCustomerExchangeDelivered failed:', e)
+  }
+}
+
 export async function sendBackInStockEmail(to: string, d: {
   product_name: string
   product_slug: string

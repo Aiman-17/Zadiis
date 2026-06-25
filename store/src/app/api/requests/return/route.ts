@@ -1,6 +1,11 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendOwnerReturnRequest, sendCustomerReturnConfirmation } from '@/lib/email'
+import {
+  sendOwnerReturnRequest,
+  sendCustomerReturnConfirmation,
+  sendOwnerExchangeRequest,
+  sendCustomerExchangeConfirmation,
+} from '@/lib/email'
 
 const VALID_REASONS = new Set([
   'wrong_size',
@@ -8,13 +13,32 @@ const VALID_REASONS = new Set([
   'wrong_item_sent',
   'changed_mind',
   'other',
+  'exchange',
 ])
 
 export async function POST(req: NextRequest) {
   try {
-    const { order_number, customer_email, customer_name, reason, notes } = await req.json()
+    const {
+      order_number,
+      customer_email,
+      customer_name,
+      reason,
+      notes,
+      request_type = 'return',
+      exchange_details,
+    } = await req.json()
 
-    if (!order_number?.trim() || !customer_email?.trim() || !reason || !VALID_REASONS.has(reason)) {
+    const isExchange = request_type === 'exchange'
+
+    if (!order_number?.trim() || !customer_email?.trim()) {
+      return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
+    }
+
+    if (isExchange && !exchange_details?.trim()) {
+      return NextResponse.json({ error: 'Please describe what you would like instead' }, { status: 400 })
+    }
+
+    if (!isExchange && (!reason || !VALID_REASONS.has(reason))) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
@@ -49,19 +73,28 @@ export async function POST(req: NextRequest) {
     }
 
     const { error } = await supabaseAdmin.from('return_requests').insert({
-      order_number:   normalised,
-      customer_email: customer_email.trim().toLowerCase(),
-      customer_name:  customer_name?.trim() || null,
-      reason,
-      notes: notes?.trim() || null,
+      order_number:     normalised,
+      customer_email:   customer_email.trim().toLowerCase(),
+      customer_name:    customer_name?.trim() || null,
+      reason:           isExchange ? 'exchange' : reason,
+      notes:            notes?.trim() || null,
+      request_type,
+      exchange_details: isExchange ? exchange_details.trim() : null,
     })
 
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    await Promise.allSettled([
-      sendOwnerReturnRequest({ order_number: normalised, customer_email, customer_name, reason, notes }),
-      sendCustomerReturnConfirmation(customer_email, { order_number: normalised, customer_name }),
-    ])
+    if (isExchange) {
+      await Promise.allSettled([
+        sendOwnerExchangeRequest({ order_number: normalised, customer_email, customer_name, exchange_details, notes }),
+        sendCustomerExchangeConfirmation(customer_email, { order_number: normalised, customer_name }),
+      ])
+    } else {
+      await Promise.allSettled([
+        sendOwnerReturnRequest({ order_number: normalised, customer_email, customer_name, reason, notes }),
+        sendCustomerReturnConfirmation(customer_email, { order_number: normalised, customer_name }),
+      ])
+    }
 
     return NextResponse.json({ success: true })
   } catch {
