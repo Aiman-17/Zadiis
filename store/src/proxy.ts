@@ -1,14 +1,16 @@
 import { NextRequest, NextResponse } from 'next/server'
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const { pathname } = req.nextUrl
 
   const isAdminRoute = pathname.startsWith('/admin')
   const isAdminLogin = pathname === '/admin/login'
   const isAdminApi = pathname.startsWith('/api/admin')
+  const isAuthEndpoint = pathname === '/api/admin/auth'
 
   if (!isAdminRoute && !isAdminApi) return NextResponse.next()
   if (isAdminLogin) return NextResponse.next()
+  if (isAuthEndpoint) return NextResponse.next()
 
   const cookie = req.cookies.get('admin-auth')
   const authenticated = cookie?.value === process.env.ADMIN_PASSWORD
