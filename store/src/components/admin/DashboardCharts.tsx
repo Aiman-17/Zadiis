@@ -241,17 +241,18 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         <h3 className="font-semibold mb-3">Inventory Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null },
-            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null },
-            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null },
-            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null },
-            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders' },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders' },
-          ].map(({ label, value, color, href }) => {
+            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,              sub: null },
+            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,              sub: null },
+            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,              sub: '1–3 units total stock' },
+            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,              sub: null },
+            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
+          ].map(({ label, value, color, href, sub }) => {
             const inner = (
               <>
                 <p className="text-2xl font-bold" style={{ color }}>{value}</p>
                 <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
+                {sub && <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{sub}</p>}
                 {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>→ View orders</p>}
               </>
             )
