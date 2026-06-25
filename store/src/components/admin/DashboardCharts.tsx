@@ -205,16 +205,18 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           <p className="text-xs text-gray-500 mt-1">Avg. Order Value</p>
         </div>
 
-        {/* Low Stock Variants */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+        {/* Low Stock Variants — links to filtered products */}
+        <Link href="/admin/products?filter=low-stock"
+          className="bg-white rounded-lg p-5 border block hover:shadow-sm transition-shadow"
+          style={{ borderColor: lowStockItems.length > 0 ? '#FCA5A5' : '#E8DDD4' }}>
           <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? '#DC2626' : '#374151' }}>
             {lowStockItems.length}
           </p>
           <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
             variants need restocking
           </p>
-          <p className="text-xs text-gray-500 mt-1">Low Stock Alerts</p>
-        </div>
+          <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Low Stock Alerts → view</p>
+        </Link>
 
         {/* Total Products */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>

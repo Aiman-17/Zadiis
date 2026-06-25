@@ -1,9 +1,19 @@
 'use client'
 import { useState } from 'react'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
+import { useRouter, useSearchParams } from 'next/navigation'
 import { Trash2, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Product } from '@/types'
+
+function isLowStock(p: Product): boolean {
+  const vs = p.variant_stock
+  if (vs && Object.keys(vs).length > 0) {
+    return Object.values(vs).some(sizes =>
+      Object.values(sizes as Record<string, number>).some(q => q <= 3)
+    )
+  }
+  return p.stock_quantity <= 3
+}
 
 function ProductRow({ p, onDelete, waitlist }: { p: Product; onDelete: (id: string) => void; waitlist: number }) {
   return (
@@ -77,9 +87,14 @@ export default function AdminProductsClient({
   waitlistCounts: Record<string, number>
 }) {
   const router = useRouter()
+  const searchParams = useSearchParams()
+  const filterLowStock = searchParams.get('filter') === 'low-stock'
+
   const [active, setActive] = useState(initialActive)
   const [archived, setArchived] = useState(initialArchived)
   const [showArchived, setShowArchived] = useState(false)
+
+  const visibleActive = filterLowStock ? active.filter(isLowStock) : active
 
   const handleDelete = async (id: string) => {
     if (!confirm('Archive this product? It will be hidden from the store.')) return
@@ -113,6 +128,20 @@ export default function AdminProductsClient({
 
   return (
     <div className="space-y-6">
+
+      {/* Low stock filter banner */}
+      {filterLowStock && (
+        <div className="flex items-center justify-between px-4 py-2.5 rounded-lg text-sm"
+          style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5' }}>
+          <span style={{ color: '#B91C1C' }}>
+            Showing {visibleActive.length} product{visibleActive.length !== 1 ? 's' : ''} with low stock variants
+          </span>
+          <Link href="/admin/products" className="text-xs font-medium hover:underline" style={{ color: '#A68B6E' }}>
+            Clear filter
+          </Link>
+        </div>
+      )}
+
       {/* Active products */}
       <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
         <div className="overflow-x-auto">
@@ -125,16 +154,21 @@ export default function AdminProductsClient({
               </tr>
             </thead>
             <tbody>
-              {active.length === 0 ? (
+              {visibleActive.length === 0 ? (
                 <tr>
                   <td colSpan={5} className="p-8 text-center" style={{ color: '#9CA3AF' }}>
-                    No active products.{' '}
-                    <Link href="/admin/products/new" style={{ color: '#A68B6E' }} className="hover:underline">
-                      Add your first product
-                    </Link>
+                    {filterLowStock ? (
+                      <>No low stock products. All variants are well stocked.</>
+                    ) : (
+                      <>No active products.{' '}
+                        <Link href="/admin/products/new" style={{ color: '#A68B6E' }} className="hover:underline">
+                          Add your first product
+                        </Link>
+                      </>
+                    )}
                   </td>
                 </tr>
-              ) : active.map(p => (
+              ) : visibleActive.map(p => (
                 <ProductRow key={p.id} p={p} onDelete={handleDelete} waitlist={waitlistCounts[p.id] || 0} />
               ))}
             </tbody>
