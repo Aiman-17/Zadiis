@@ -409,6 +409,9 @@ export default function AnalyticsClient({
                     <div>
                       <p className="text-sm font-medium">{item.name}</p>
                       {item.variant && <p className="text-xs" style={{ color: '#6B7280' }}>{item.variant}</p>}
+                      <p className="text-xs mt-0.5" style={{ color: item.qty === 0 ? '#DC2626' : item.qty === 1 ? '#B45309' : '#9CA3AF' }}>
+                        {item.qty === 0 ? 'Restock immediately' : item.qty === 1 ? 'Last chance — almost gone' : item.qty === 2 ? 'Almost sold out' : 'Running low'}
+                      </p>
                     </div>
                     <span className="text-xs font-semibold px-2 py-1 rounded-full"
                       style={item.qty === 0
