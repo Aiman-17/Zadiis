@@ -57,18 +57,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   // Fix #5 — AOV
   const aov = ordersThisMonth > 0 ? Math.round(revenueThisMonth / ordersThisMonth) : 0
 
-  // Fix #7 — outstanding COD (shipped/processing COD orders not yet collected)
-  const outstandingCOD = orders
-    .filter(o =>
-      o.payment_method === 'cod' &&
-      !o.is_archived &&
-      o.order_status !== 'delivered' &&
-      o.order_status !== 'cancelled' &&
-      o.order_status !== 'returned'
-    )
-    .reduce((s, o) => s + o.total, 0)
-
-  // Fix #8 — fulfillment rate
+  // fulfillment rate
   const fulfillmentRate = ordersThisMonth > 0
     ? Math.round((deliveredThisMonth / ordersThisMonth) * 100)
     : 0
@@ -216,15 +205,15 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           <p className="text-xs text-gray-500 mt-1">Avg. Order Value</p>
         </div>
 
-        {/* Outstanding COD */}
+        {/* Low Stock Variants */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold" style={{ color: outstandingCOD > 0 ? '#B45309' : '#374151' }}>
-            {pkr(outstandingCOD)}
+          <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? '#DC2626' : '#374151' }}>
+            {lowStockItems.length}
           </p>
           <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
-            cash in field (not yet collected)
+            variants need restocking
           </p>
-          <p className="text-xs text-gray-500 mt-1">Outstanding COD</p>
+          <p className="text-xs text-gray-500 mt-1">Low Stock Alerts</p>
         </div>
 
         {/* Total Products */}
