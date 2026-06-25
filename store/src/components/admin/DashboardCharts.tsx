@@ -30,31 +30,50 @@ function isThisMonth(dateStr: string) {
 }
 
 export default function DashboardCharts({ orders, products }: { orders: Order[]; products: Product[] }) {
-  const thisMonth  = orders.filter(o => isThisMonth(o.created_at))
-  const last7days  = orders.filter(o => isWithinDays(o.created_at, 7))
+  const thisMonth = orders.filter(o => isThisMonth(o.created_at))
+  const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
 
-  // Action KPIs
-  const newOrders       = orders.filter(o => !o.is_archived && o.order_status === 'new' && isWithinDays(o.created_at, 7)).length
-  const pendingShipment = orders.filter(o => !o.is_archived && o.order_status === 'processing').length
+  // Fix #2 — Action cards match orders page counts (all-time, not 7-day)
+  const newOrders       = orders.filter(o => !o.is_archived && o.order_status === 'new').length
+  const pendingShipment = orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped')).length
 
-  // Revenue KPIs
-  const thisWeekRevenue  = last7days
+  // Fix #2 — overdue new orders (placed > 24h ago, still unprocessed)
+  const overdueNewOrders = orders.filter(o =>
+    !o.is_archived && o.order_status === 'new' && !isWithinDays(o.created_at, 1)
+  ).length
+
+  // Fix #1 — show gross AND net revenue separately
+  const grossRevenue7d  = last7days.reduce((s, o) => s + o.total, 0)
+  const netRevenue7d    = last7days
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) => s + o.total, 0)
-  const revenueThisMonth = thisMonth
+
+  const revenueThisMonth  = thisMonth
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) => s + o.total, 0)
-  const ordersThisMonth  = thisMonth.filter(o => o.order_status !== 'cancelled').length
+  const ordersThisMonth   = thisMonth.filter(o => o.order_status !== 'cancelled').length
+  const deliveredThisMonth = thisMonth.filter(o => o.order_status === 'delivered').length
 
-  const lowStockCount = products.filter(p => {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).some(sizeMap => Object.values(sizeMap).some(q => q <= 3))
-    }
-    return p.stock_quantity <= 3
-  }).length
+  // Fix #5 — AOV
+  const aov = ordersThisMonth > 0 ? Math.round(revenueThisMonth / ordersThisMonth) : 0
 
-  // 7-day cancellations & returns (for inventory health cards)
+  // Fix #7 — outstanding COD (shipped/processing COD orders not yet collected)
+  const outstandingCOD = orders
+    .filter(o =>
+      o.payment_method === 'cod' &&
+      !o.is_archived &&
+      o.order_status !== 'delivered' &&
+      o.order_status !== 'cancelled' &&
+      o.order_status !== 'returned'
+    )
+    .reduce((s, o) => s + o.total, 0)
+
+  // Fix #8 — fulfillment rate
+  const fulfillmentRate = ordersThisMonth > 0
+    ? Math.round((deliveredThisMonth / ordersThisMonth) * 100)
+    : 0
+
+  // 7-day cancellations & returns
   const cancelled7d = last7days.filter(o => o.order_status === 'cancelled').length
   const returned7d  = last7days.filter(o => o.order_status === 'returned').length
 
@@ -69,7 +88,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // All-time KPIs
+  // Product stock helpers
   const totalProducts = products.length
   const totalStock = products.reduce((sum, p) => {
     const vs = p.variant_stock
@@ -79,12 +98,6 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     }
     return sum + p.stock_quantity
   }, 0)
-  const unitsReceived = thisMonth
-    .filter(o => o.order_status !== 'cancelled')
-    .reduce((sum, o) => sum + (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0), 0)
-  const unitsDelivered = thisMonth
-    .filter(o => o.order_status === 'delivered')
-    .reduce((sum, o) => sum + (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0), 0)
 
   // Sales trend — last 7 days + today
   const salesTrend = Array.from({ length: 7 }, (_, i) => {
@@ -117,7 +130,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   })
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
-  // Inventory health — variant-aware stock per product
+  // Inventory health
   function getProductStock(p: Product): number {
     const vs = p.variant_stock
     if (vs && Object.keys(vs).length > 0) {
@@ -131,9 +144,8 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   const lastChanceCount = products.filter(p => { const s = getProductStock(p); return s > 0 && s <= 3 }).length
   const inStockCount    = products.filter(p => getProductStock(p) > 0).length
 
-  // Merchandising signals — derived from scored product data
+  // Fix #6 — Best Sellers: ALL products ranked, not just score > 0
   const topBestSellers = [...products]
-    .filter(p => p.best_seller_score > 0)
     .sort((a, b) => b.best_seller_score - a.best_seller_score)
     .slice(0, 5)
   const topTrending = [...products]
@@ -148,40 +160,81 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
 
   return (
     <div className="space-y-6">
-      {/* Action Cards — prominent, linkable */}
+
+      {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#EFF6FF', borderLeftColor: '#3B82F6', borderTop: '1px solid #BFDBFE', borderRight: '1px solid #BFDBFE', borderBottom: '1px solid #BFDBFE' }}>
+          style={{ backgroundColor: '#EFF6FF', borderLeftColor: '#3B82F6', border: '1px solid #BFDBFE', borderLeft: '4px solid #3B82F6' }}>
           <p className="text-3xl font-bold" style={{ color: '#1D4ED8' }}>{newOrders}</p>
           <p className="text-sm font-semibold mt-1" style={{ color: '#1D4ED8' }}>New Orders</p>
-          <p className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>status: new · last 7 days · tap to manage</p>
+          <p className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+            All unprocessed orders · tap to manage
+          </p>
+          {overdueNewOrders > 0 && (
+            <p className="text-xs mt-1 font-semibold" style={{ color: '#DC2626' }}>
+              ⚠ {overdueNewOrders} order{overdueNewOrders > 1 ? 's' : ''} waiting over 24h
+            </p>
+          )}
         </Link>
         <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#FFFBEB', borderLeftColor: '#F59E0B', borderTop: '1px solid #FDE68A', borderRight: '1px solid #FDE68A', borderBottom: '1px solid #FDE68A' }}>
+          style={{ backgroundColor: '#FFFBEB', borderLeftColor: '#F59E0B', border: '1px solid #FDE68A', borderLeft: '4px solid #F59E0B' }}>
           <p className="text-3xl font-bold" style={{ color: '#B45309' }}>{pendingShipment}</p>
           <p className="text-sm font-semibold mt-1" style={{ color: '#B45309' }}>Pending Shipment</p>
-          <p className="text-xs mt-0.5" style={{ color: '#D97706' }}>processing orders · tap to manage</p>
+          <p className="text-xs mt-0.5" style={{ color: '#D97706' }}>processing + shipped · tap to manage</p>
         </Link>
       </div>
 
-      {/* Informational KPI Cards */}
+      {/* Fix #1 #3 #5 #7 #8 — KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {[
-          { label: "This Week's Revenue", value: pkr(thisWeekRevenue) },
-          { label: 'Revenue This Month',  value: pkr(revenueThisMonth) },
-          { label: 'Orders This Month',   value: ordersThisMonth },
-          { label: 'Total Sales',          value: unitsReceived, sub: `${unitsDelivered} delivered`, subColor: '#10B981' },
-          { label: 'Total Products',      value: totalProducts, sub: `${totalStock.toLocaleString('en-US')} units in stock`, subColor: '#F59E0B' },
-          { label: 'Low Stock Variants',  value: lowStockCount },
-        ].map(k => (
-          <div key={k.label} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <p className="text-2xl font-bold">{k.value}</p>
-            {k.sub && (
-              <p className="text-xs font-medium mt-0.5" style={{ color: k.subColor ?? '#9CA3AF' }}>{k.sub}</p>
-            )}
-            <p className="text-xs text-gray-500 mt-1">{k.label}</p>
-          </div>
-        ))}
+        {/* Gross Revenue 7d with net sub */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
+          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+            Net: {pkr(netRevenue7d)}
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Gross Revenue (7d)</p>
+        </div>
+
+        {/* Revenue This Month */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
+          <p className="text-xs text-gray-500 mt-1">Revenue This Month</p>
+        </div>
+
+        {/* Orders This Month + fulfillment rate */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{ordersThisMonth}</p>
+          <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? '#10B981' : '#F59E0B' }}>
+            {fulfillmentRate}% fulfilled
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Orders This Month</p>
+        </div>
+
+        {/* AOV */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{pkr(aov)}</p>
+          <p className="text-xs text-gray-500 mt-1">Avg. Order Value</p>
+        </div>
+
+        {/* Outstanding COD */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold" style={{ color: outstandingCOD > 0 ? '#B45309' : '#374151' }}>
+            {pkr(outstandingCOD)}
+          </p>
+          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+            cash in field (not yet collected)
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Outstanding COD</p>
+        </div>
+
+        {/* Total Products */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{totalProducts}</p>
+          <p className="text-xs font-medium mt-0.5" style={{ color: '#F59E0B' }}>
+            {totalStock.toLocaleString('en-US')} units in stock
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Total Products</p>
+        </div>
       </div>
 
       {/* Charts Row */}
@@ -220,7 +273,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         {/* Sales Trend */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <h3 className="font-semibold mb-1">Sales Trend</h3>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Last 7 days + today</p>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Orders per day — last 7 days</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={salesTrend} margin={{ left: 0, right: 8 }}>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
@@ -241,12 +294,12 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         <h3 className="font-semibold mb-3">Inventory Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,              sub: null },
-            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,              sub: null },
-            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,              sub: '1–3 units total stock' },
-            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,              sub: null },
-            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
+            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,            sub: null },
+            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,            sub: null },
+            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,            sub: '1–3 units remaining' },
+            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,            sub: null },
+            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders', sub: null },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders', sub: null },
           ].map(({ label, value, color, href, sub }) => {
             const inner = (
               <>
@@ -276,25 +329,23 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         <h3 className="font-semibold mb-3">Merchandising</h3>
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
 
-          {/* Best Sellers */}
+          {/* Fix #6 — Best Sellers: all products ranked */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex items-center gap-2 mb-4">
               <p className="font-semibold text-sm">Best Sellers</p>
               <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>by score</span>
             </div>
-            {topBestSellers.length === 0 ? (
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>No scores yet. Scores calculate as orders are fulfilled.</p>
-            ) : (
-              <ol className="space-y-2.5">
-                {topBestSellers.map((p, i) => (
-                  <li key={p.id} className="flex items-center gap-2 text-sm">
-                    <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#A68B6E' }}>#{i + 1}</span>
-                    <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</span>
-                  </li>
-                ))}
-              </ol>
-            )}
+            <ol className="space-y-2.5">
+              {topBestSellers.map((p, i) => (
+                <li key={p.id} className="flex items-center gap-2 text-sm">
+                  <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#A68B6E' }}>#{i + 1}</span>
+                  <span className="flex-1 truncate">{p.name}</span>
+                  <span className="text-xs shrink-0" style={{ color: p.total_sold > 0 ? '#374151' : '#D1D5DB' }}>
+                    {p.total_sold > 0 ? `${p.total_sold} sold` : 'no sales'}
+                  </span>
+                </li>
+              ))}
+            </ol>
           </div>
 
           {/* Trending Now */}
@@ -350,16 +401,16 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         </div>
       </div>
 
-      {/* Low Stock Alerts */}
+      {/* Fix #4 — Low Stock Alerts badge outside h3 */}
       {lowStockItems.length > 0 && (
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold mb-4">
-            Low Stock Alerts
-            <span className="ml-2 text-xs px-2 py-0.5 rounded-full font-normal"
+          <div className="flex items-center gap-2 mb-4">
+            <h3 className="font-semibold">Low Stock Alerts</h3>
+            <span className="text-xs px-2 py-0.5 rounded-full font-normal"
               style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
               {lowStockItems.length}
             </span>
-          </h3>
+          </div>
           <div className="space-y-2">
             {lowStockItems.slice(0, 10).map((item, i) => (
               <div key={i} className="flex items-center justify-between py-2 border-b last:border-0"
