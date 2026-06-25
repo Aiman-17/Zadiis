@@ -29,14 +29,15 @@ const STATUS_STYLES: Record<string, React.CSSProperties> = {
 }
 
 const REQUEST_REASON_LABELS: Record<string, string> = {
-  changed_mind:       'Changed Mind',
-  ordered_by_mistake: 'Ordered by Mistake',
-  found_better_price: 'Found Better Price',
-  delivery_too_slow:  'Delivery Too Slow',
-  wrong_size:         'Wrong Size',
-  defective_item:     'Defective / Damaged',
-  wrong_item_sent:    'Wrong Item Sent',
-  other:              'Other',
+  changed_mind:          'Changed Mind',
+  ordered_by_mistake:    'Ordered by Mistake',
+  found_better_price:    'Found Better Price',
+  delivery_too_slow:     'Delivery Too Slow',
+  wrong_size:            'Wrong Size',
+  defective_item:        'Defective / Damaged',
+  wrong_item_sent:       'Wrong Item Sent',
+  exchange:              'Exchange Request',
+  other:                 'Other',
 }
 
 // Lifecycle: new → processing → shipped → delivered | cancelled | returned

@@ -18,11 +18,15 @@ const PAYMENT_COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355']
 
 const CANCEL_REASON_LABELS: Record<string, string> = {
   customer_changed_mind: 'Changed Mind',
+  changed_mind:          'Changed Mind',
   no_response:           'No Response',
   wrong_address:         'Wrong Address',
   duplicate_order:       'Duplicate',
   out_of_stock:          'Out of Stock',
   delivery_delay:        'Delivery Delay',
+  delivery_too_slow:     'Delivery Too Slow',
+  ordered_by_mistake:    'Ordered by Mistake',
+  found_better_price:    'Found Better Price',
   other:                 'Other',
 }
 
@@ -31,6 +35,7 @@ const RETURN_REASON_LABELS: Record<string, string> = {
   defective_item:  'Defective / Damaged',
   wrong_item_sent: 'Wrong Item Sent',
   changed_mind:    'Changed Mind',
+  exchange:        'Exchange Request',
   other:           'Other',
 }
 
