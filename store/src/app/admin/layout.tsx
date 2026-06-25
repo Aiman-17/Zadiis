@@ -2,7 +2,7 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2 } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -19,6 +19,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/invoices', icon: FileText, label: 'Invoices', exact: false, badge: 0 },
     { href: '/admin/sales', icon: Tag, label: 'Sales', exact: false, badge: 0 },
     { href: '/admin/analytics', icon: BarChart2, label: 'Analytics', exact: false, badge: 0 },
+    { href: '/admin/cod', icon: DollarSign, label: 'COD', exact: false, badge: 0 },
     { href: '/admin/settings', icon: Settings, label: 'Settings', exact: false, badge: 0 },
   ]
 

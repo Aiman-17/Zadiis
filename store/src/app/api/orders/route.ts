@@ -141,6 +141,19 @@ export async function POST(req: NextRequest) {
       }))
     )
 
+    // Write stock movement ledger rows
+    const movements = enrichedItems
+      .filter(item => item.product_id)
+      .map(item => ({
+        product_id: item.product_id,
+        delta:      -item.quantity,
+        reason:     'sale' as const,
+        order_id:   order.id,
+      }))
+    if (movements.length > 0) {
+      await supabaseAdmin.from('stock_movements').insert(movements)
+    }
+
     // COD orders are confirmed immediately — generate invoice now
     await generateInvoice(order.id)
 

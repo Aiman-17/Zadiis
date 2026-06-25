@@ -62,6 +62,9 @@ export type Order = {
   payment_status: 'pending' | 'paid' | 'failed'
   order_status: 'new' | 'processing' | 'shipped' | 'delivered' | 'returned' | 'cancelled'
   cancellation_reason?: string | null
+  return_reason?: string | null
+  cod_status?: 'pending' | 'received' | 'lost' | null
+  cod_collected_at?: string | null
   is_archived: boolean
   is_sale: boolean
   safepay_tracker?: string

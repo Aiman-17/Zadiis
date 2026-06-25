@@ -343,6 +343,59 @@ export async function sendOwnerPaymentReceived(d: {
   }
 }
 
+async function sendWhatsAppToOwner(message: string): Promise<void> {
+  const sid  = process.env.TWILIO_ACCOUNT_SID
+  const token = process.env.TWILIO_AUTH_TOKEN
+  const from  = process.env.TWILIO_WHATSAPP_FROM   // e.g. whatsapp:+14155238886
+  const to    = process.env.OWNER_WHATSAPP_NUMBER   // e.g. +923001234567
+  if (!sid || !token || !from || !to) return
+  try {
+    const body = new URLSearchParams({
+      To:   `whatsapp:${to}`,
+      From: from,
+      Body: message,
+    })
+    await fetch(`https://api.twilio.com/2010-04-01/Accounts/${sid}/Messages.json`, {
+      method:  'POST',
+      headers: {
+        Authorization: `Basic ${Buffer.from(`${sid}:${token}`).toString('base64')}`,
+        'Content-Type': 'application/x-www-form-urlencoded',
+      },
+      body: body.toString(),
+    })
+  } catch (e) {
+    console.error('WhatsApp notification failed:', e)
+  }
+}
+
+export async function sendOwnerStockConflict(d: { product_names: string }): Promise<void> {
+  const ts = new Date().toLocaleString('en-PK', { timeZone: 'Asia/Karachi' })
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
+      <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
+        Stock Conflict Detected
+      </h2>
+      <p>A customer reached the checkout page but one or more items in their cart were no longer available.</p>
+      <p><strong>Item(s):</strong> ${d.product_names}</p>
+      <p><strong>Time:</strong> ${ts}</p>
+      <p style="color:#6B7280;font-size:13px">The item was automatically removed from the customer's cart. You may want to review stock levels.</p>
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to: process.env.OWNER_EMAIL!,
+      subject: `Stock conflict at checkout — ${d.product_names}`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendOwnerStockConflict email failed:', e)
+  }
+  const ts2 = new Date().toLocaleTimeString('en-PK', { timeZone: 'Asia/Karachi', hour: '2-digit', minute: '2-digit' })
+  await sendWhatsAppToOwner(
+    `[ZADIIS] Stock conflict at ${ts2}: "${d.product_names}" went out of stock while a customer was checking out. Please review your inventory.`
+  )
+}
+
 export async function sendBackInStockEmail(to: string, d: {
   product_name: string
   product_slug: string

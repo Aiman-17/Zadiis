@@ -1,9 +1,10 @@
 import { Suspense } from 'react'
 import ProductCard from '@/components/products/ProductCard'
 import ProductFilters from '@/components/products/ProductFilters'
+import ShopSearchBar from '@/components/products/ShopSearchBar'
 import { getProducts } from '@/lib/products'
 
-async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string } }) {
+async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string; q?: string } }) {
   let products: Awaited<ReturnType<typeof getProducts>> = []
   try {
     products = await getProducts({
@@ -11,6 +12,7 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
       minPrice: searchParams.min ? Number(searchParams.min) : undefined,
       maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
       type: searchParams.type,
+      q: searchParams.q,
     })
   } catch {
     // Supabase not configured yet
@@ -29,13 +31,16 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
   )
 }
 
-export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string; type?: string }> }) {
+export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string; type?: string; q?: string }> }) {
   const params = await searchParams
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-10">
-      <h1 className="text-3xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
-      <div className="flex flex-col md:flex-row gap-8">
+      <h1 className="text-3xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
+      <Suspense>
+        <ShopSearchBar />
+      </Suspense>
+      <div className="flex flex-col md:flex-row gap-8 mt-6">
         <aside className="w-full md:w-56 shrink-0">
           <Suspense>
             <ProductFilters />

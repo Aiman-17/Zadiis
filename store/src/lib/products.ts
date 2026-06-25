@@ -1,18 +1,23 @@
 import { supabase } from './supabase/client'
 import type { Product } from '@/types'
 
+let _saleCache: { ids: string[]; ts: number } | null = null
+
 async function getActiveSaleExcludeIds(): Promise<string[]> {
+  if (_saleCache && Date.now() - _saleCache.ts < 30_000) return _saleCache.ids
   const { data: sale } = await supabase
     .from('sales')
     .select('id')
     .eq('is_active', true)
     .maybeSingle()
-  if (!sale) return []
+  if (!sale) { _saleCache = { ids: [], ts: Date.now() }; return [] }
   const { data: sps } = await supabase
     .from('sale_products')
     .select('product_id')
     .eq('sale_id', sale.id)
-  return (sps || []).map((sp: { product_id: string }) => sp.product_id)
+  const ids = (sps || []).map((sp: { product_id: string }) => sp.product_id)
+  _saleCache = { ids, ts: Date.now() }
+  return ids
 }
 
 export async function getProducts(filters?: {
@@ -20,6 +25,7 @@ export async function getProducts(filters?: {
   maxPrice?: number
   size?: string
   type?: string
+  q?: string
 }) {
   const excludeIds = await getActiveSaleExcludeIds()
 
@@ -33,6 +39,7 @@ export async function getProducts(filters?: {
     query = query.not('id', 'in', `(${excludeIds.join(',')})`)
   }
 
+  if (filters?.q) query = query.ilike('name', `%${filters.q}%`)
   if (filters?.minPrice !== undefined) query = query.gte('price', filters.minPrice)
   if (filters?.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
 

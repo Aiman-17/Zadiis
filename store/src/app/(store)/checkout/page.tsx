@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
-import { getCart, clearCart } from '@/lib/cart-store'
+import { getCart, saveCart, clearCart } from '@/lib/cart-store'
 import type { CartItem } from '@/lib/cart-store'
 import type { DeliveryZone } from '@/types'
 
@@ -29,11 +29,35 @@ export default function CheckoutPage() {
   const [saleActive, setSaleActive] = useState(false)
   const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '', website: '' })
+  const [stockWarning, setStockWarning] = useState<string | null>(null)
 
   useEffect(() => {
     const cart = getCart()
     if (cart.length === 0) { router.push('/cart'); return }
-    setItems(cart)
+
+    // Validate stock before displaying checkout — items sold between add-to-cart and now
+    fetch('/api/cart/validate', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items: cart.map(i => ({ product_id: i.id, product_name: i.name, color: i.color, size: i.size, quantity: i.quantity })) }),
+    })
+      .then(r => r.json())
+      .then(({ unavailable }: { unavailable: Array<{ product_id: string; product_name: string }> }) => {
+        if (unavailable && unavailable.length > 0) {
+          const names = unavailable.map(i => i.product_name).join(', ')
+          setStockWarning(names)
+          const ids = new Set(unavailable.map(i => i.product_id))
+          const updated = cart.filter(i => !ids.has(i.id))
+          if (updated.length === 0) { router.push('/cart'); return }
+          saveCart(updated)
+          window.dispatchEvent(new Event('cart-updated'))
+          setItems(updated)
+        } else {
+          setItems(cart)
+        }
+      })
+      .catch(() => setItems(cart))
+
     fetch('/api/delivery-zones')
       .then(r => r.json())
       .then(({ zones, cod_enabled, sale_active, sale_delivery_override }: { zones: DeliveryZone[]; cod_enabled: boolean; sale_active: boolean; sale_delivery_override: number | null }) => {
@@ -145,6 +169,18 @@ export default function CheckoutPage() {
   return (
     <div className="max-w-2xl mx-auto px-4 py-10">
       <h1 className="text-2xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Checkout</h1>
+
+      {/* Stock conflict — warm, professional message */}
+      {stockWarning && (
+        <div className="mb-6 rounded-lg border p-5" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
+          <p className="font-semibold mb-1" style={{ color: '#1C1C1C' }}>We're sorry — an item is no longer available</p>
+          <p className="text-sm" style={{ color: '#6B7280' }}>
+            Unfortunately, <strong>{stockWarning}</strong> was claimed by another customer just moments ago and is now out of stock.
+            We have gently removed it from your cart. Items like this tend to move quickly — please explore our collection for similar styles you'll love.
+          </p>
+          <button onClick={() => setStockWarning(null)} className="text-xs mt-3" style={{ color: '#A68B6E' }}>Dismiss</button>
+        </div>
+      )}
 
       {/* Gateway down fallback */}
       {gatewayDown && (

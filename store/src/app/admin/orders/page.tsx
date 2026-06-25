@@ -3,6 +3,7 @@ import { useState, useEffect, useMemo } from 'react'
 import { Archive, XCircle } from 'lucide-react'
 import type { Order, OrderItem } from '@/types'
 import CancelModal from '@/components/admin/CancelModal'
+import ReturnModal from '@/components/admin/ReturnModal'
 
 const STATUS_STYLES: Record<string, React.CSSProperties> = {
   new:        { backgroundColor: '#DBEAFE', color: '#1D4ED8' },
@@ -21,6 +22,7 @@ export default function AdminOrders() {
   const [expanded, setExpanded] = useState<string | null>(null)
   const [tab, setTab] = useState<Tab>('active')
   const [cancelId, setCancelId] = useState<string | null>(null)
+  const [returnId, setReturnId] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -47,6 +49,18 @@ export default function AdminOrders() {
       body: JSON.stringify({ id, order_status }),
     })
     setOrders(prev => prev.map(o => o.id === id ? { ...o, order_status: order_status as Order['order_status'] } : o))
+  }
+
+  const returnOrder = async (id: string, reason: string, notes: string) => {
+    await fetch('/api/admin/orders/return', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id, reason, notes }),
+    })
+    setOrders(prev => prev.map(o =>
+      o.id === id ? { ...o, order_status: 'returned' as const } : o
+    ))
+    setReturnId(null)
   }
 
   const cancelOrder = async (id: string, reason: string) => {
@@ -83,6 +97,12 @@ export default function AdminOrders() {
         <CancelModal
           onConfirm={reason => cancelOrder(cancelId, reason)}
           onClose={() => setCancelId(null)}
+        />
+      )}
+      {returnId && (
+        <ReturnModal
+          onConfirm={(reason, notes) => returnOrder(returnId, reason, notes)}
+          onClose={() => setReturnId(null)}
         />
       )}
 
@@ -203,7 +223,7 @@ export default function AdminOrders() {
                       {STATUSES.map(s => (
                         <button
                           key={s}
-                          onClick={() => updateStatus(order.id, s)}
+                          onClick={() => s === 'returned' ? setReturnId(order.id) : updateStatus(order.id, s)}
                           className="text-xs px-3 py-1 rounded-full border transition-colors"
                           style={order.order_status === s
                             ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
