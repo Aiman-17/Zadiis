@@ -277,7 +277,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
               <YAxis tick={{ fontSize: 10 }} width={38}
                 tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
               <Tooltip
-                formatter={(v: number) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']}
+                formatter={(v) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']}
                 labelFormatter={(l) => String(l)}
               />
               <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">

@@ -396,7 +396,7 @@ export default function AnalyticsClient({
                   <XAxis dataKey="label" tick={{ fontSize: 10 }} />
                   <YAxis tick={{ fontSize: 10 }} width={44}
                     tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
-                  <Tooltip formatter={(v: number) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']} />
+                  <Tooltip formatter={(v) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']} />
                   <Bar dataKey="revenue" fill="#A68B6E" radius={[4, 4, 0, 0]} name="Revenue" />
                 </BarChart>
               </ResponsiveContainer>
