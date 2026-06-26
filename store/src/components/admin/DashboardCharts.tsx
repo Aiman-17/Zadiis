@@ -327,15 +327,13 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
       {/* Inventory Health */}
       <div>
         <h3 className="font-semibold mb-3">Inventory Health</h3>
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,                        sub: null },
-            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,                        sub: null },
-            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,                        sub: '1–3 units remaining' },
-            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,                        sub: null },
-            { label: 'Slow Movers',     value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/analytics', sub: slowMoverCount > 0 ? 'see Merchandising tab' : 'All moving well' },
-            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders',             sub: null },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',             sub: null },
+            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: null,              sub: '1–3 units remaining' },
+            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: null,              sub: null },
+            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/analytics', sub: slowMoverCount > 0 ? 'see Merchandising tab' : 'All moving well' },
+            { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
           ].map(({ label, value, color, href, sub }) => {
             const inner = (
               <>
