@@ -43,6 +43,10 @@ type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations' | 'returns' | 
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
+function localDateKey(d: Date): string {
+  return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
+}
+
 function buildTrendData(orders: Order[], range: string) {
   const isMonthly = range === '12m'
   const map: Record<string, { label: string; revenue: number; orders: number }> = {}
@@ -51,7 +55,7 @@ function buildTrendData(orders: Order[], range: string) {
     const d = new Date(o.created_at)
     const key = isMonthly
       ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      : d.toISOString().slice(0, 10)
+      : localDateKey(d)
     const label = isMonthly
       ? d.toLocaleString('default', { month: 'short', year: '2-digit' })
       : d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
@@ -83,10 +87,10 @@ function buildSalesTrendTable(orders: Order[], range: string) {
     } else if (isWeekly) {
       const ws = new Date(d)
       ws.setDate(d.getDate() - d.getDay())
-      key   = ws.toISOString().slice(0, 10)
+      key   = localDateKey(ws)
       label = `Week of ${ws.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
     } else {
-      key   = d.toISOString().slice(0, 10)
+      key   = localDateKey(d)
       label = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })
     }
 
