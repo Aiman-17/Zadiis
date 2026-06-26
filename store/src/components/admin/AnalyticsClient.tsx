@@ -408,6 +408,37 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
+  // ── Inventory tab: category breakdown + flag signals ──────────────────────
+  const categoryStockMap: Record<string, { stock: number; sold: number; count: number }> = {}
+  products.forEach(p => {
+    const cat = p.product_category || 'Uncategorized'
+    if (!categoryStockMap[cat]) categoryStockMap[cat] = { stock: 0, sold: 0, count: 0 }
+    categoryStockMap[cat].stock += getMerchStock(p)
+    categoryStockMap[cat].sold  += p.total_sold
+    categoryStockMap[cat].count++
+  })
+  const categoryStockData = Object.entries(categoryStockMap)
+    .map(([cat, d]) => ({ cat, ...d }))
+    .sort((a, b) => b.stock - a.stock)
+
+  const invBestSellers = products
+    .filter(p => p.is_bestseller || p.best_seller_score > 0)
+    .sort((a, b) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0) || b.best_seller_score - a.best_seller_score)
+    .slice(0, 8)
+    .map(p => ({ ...p, stock: getMerchStock(p) }))
+
+  const invTrending = products
+    .filter(p => p.is_trending || p.trending_score > 0)
+    .sort((a, b) => (b.is_trending ? 1 : 0) - (a.is_trending ? 1 : 0) || b.trending_score - a.trending_score)
+    .slice(0, 8)
+    .map(p => ({ ...p, stock: getMerchStock(p) }))
+
+  const invNewArrivals = products
+    .filter(p => p.is_new_arrival || new Date(p.created_at) >= thirtyDaysAgo)
+    .sort((a, b) => (b.is_new_arrival ? 1 : 0) - (a.is_new_arrival ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+    .slice(0, 8)
+    .map(p => ({ ...p, stock: getMerchStock(p) }))
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'revenue',       label: 'Revenue' },
     { key: 'trend',         label: 'Sales Trend' },
@@ -544,21 +575,38 @@ export default function AnalyticsClient({
       {/* Sales Trend Tab */}
       {tab === 'trend' && (
         <div className="space-y-6">
-          {/* Chart */}
+          {/* Chart — orders per period, revenue on hover */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-1">Revenue by Period</h3>
-            <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>
-              {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} breakdown
-            </p>
+            <div className="flex items-baseline justify-between mb-4">
+              <h3 className="font-semibold">Sales Trend</h3>
+              <span className="text-xs" style={{ color: '#9CA3AF' }}>
+                {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} · hover for revenue
+              </span>
+            </div>
             {salesTrendRows.length > 0 ? (
               <ResponsiveContainer width="100%" height={240}>
                 <BarChart data={salesTrendRows} margin={{ left: 0, right: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
                   <XAxis dataKey="label" tick={{ fontSize: 10 }} />
-                  <YAxis tick={{ fontSize: 10 }} width={44}
-                    tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
-                  <Tooltip formatter={(v) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']} />
-                  <Bar dataKey="revenue" fill="#A68B6E" radius={[4, 4, 0, 0]} name="Revenue" />
+                  <YAxis tick={{ fontSize: 10 }} width={28} allowDecimals={false} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { orders: number; revenue: number }
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold mb-1">{label}</p>
+                          <p style={{ color: '#1C1C1C' }}>{d.orders} order{d.orders !== 1 ? 's' : ''}</p>
+                          <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="Orders">
+                    {salesTrendRows.map((entry, i) => (
+                      <Cell key={i} fill={entry.orders > 0 ? '#A68B6E' : '#E8DDD4'} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -677,45 +725,156 @@ export default function AnalyticsClient({
       {/* Inventory Tab */}
       {tab === 'inventory' && (
         <div className="space-y-6">
-          <div className="bg-white rounded-lg p-4 border inline-block" style={{ borderColor: '#E8DDD4' }}>
-            <p className="text-2xl font-bold">{pkr(inventoryValue)}</p>
-            <p className="text-xs text-gray-500 mt-1">Total Inventory Value</p>
+
+          {/* Summary KPIs */}
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-xl font-bold">{pkr(inventoryValue)}</p>
+              <p className="text-xs text-gray-500 mt-1">Inventory Value</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-xl font-bold">{invBestSellers.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#92400E' }}>Best Sellers tracked</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-xl font-bold">{invTrending.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#9D174D' }}>Trending products</p>
+            </div>
+            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-xl font-bold">{invNewArrivals.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#5B21B6' }}>New Arrivals (30d)</p>
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">
-              Low Stock & Out of Stock
-              {lowStockItems.length > 0 && (
-                <span className="ml-2 text-xs px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
-                  {lowStockItems.length} variants
-                </span>
-              )}
-            </h3>
-            {lowStockItems.length === 0 ? (
-              <p className="text-sm" style={{ color: '#10B981' }}>All products are well stocked.</p>
-            ) : (
-              <div className="space-y-2">
-                {lowStockItems.map((item, i) => (
-                  <div key={i} className="flex items-center justify-between py-2 border-b last:border-0"
-                    style={{ borderColor: '#F3F4F6' }}>
-                    <div>
-                      <p className="text-sm font-medium">{item.name}</p>
-                      {item.variant && <p className="text-xs" style={{ color: '#6B7280' }}>{item.variant}</p>}
-                      <p className="text-xs mt-0.5" style={{ color: item.qty === 0 ? '#DC2626' : item.qty === 1 ? '#B45309' : '#9CA3AF' }}>
-                        {item.qty === 0 ? 'Restock immediately' : item.qty === 1 ? 'Last chance — almost gone' : item.qty === 2 ? 'Almost sold out' : 'Running low'}
-                      </p>
-                    </div>
-                    <span className="text-xs font-semibold px-2 py-1 rounded-full"
-                      style={item.qty === 0
-                        ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                        : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
-                      {item.qty === 0 ? 'OUT OF STOCK' : `${item.qty} left`}
-                    </span>
-                  </div>
-                ))}
+          {/* Category inventory bar chart */}
+          {categoryStockData.length > 0 && (
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-1">Stock by Collection</h3>
+              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Hover to see units sold vs remaining</p>
+              <ResponsiveContainer width="100%" height={Math.max(160, categoryStockData.length * 40)}>
+                <BarChart data={categoryStockData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                  <YAxis type="category" dataKey="cat" tick={{ fontSize: 10 }} width={80} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { cat: string; stock: number; sold: number; count: number }
+                      const total = d.stock + d.sold
+                      const pct = total > 0 ? Math.round((d.sold / total) * 100) : 0
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold mb-1">{d.cat}</p>
+                          <p>{d.stock} units in stock</p>
+                          <p style={{ color: '#A68B6E' }}>{d.sold} units sold</p>
+                          <p style={{ color: '#6B7280' }}>{pct}% sell-through · {d.count} products</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="stock" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Stock" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
+          {/* Flag-based restock signals */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+            {/* ★ Best Sellers */}
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
+                <span className="text-sm font-semibold" style={{ color: '#92400E' }}>★ Best Sellers</span>
+                <span className="text-xs ml-auto" style={{ color: '#B45309' }}>restock priority</span>
               </div>
-            )}
+              {invBestSellers.length === 0 ? (
+                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No best sellers yet. Flag products or let scoring run.</p>
+              ) : (
+                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                  {invBestSellers.map(p => (
+                    <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium truncate">{p.name}</p>
+                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</p>
+                      </div>
+                      <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                        style={p.stock === 0
+                          ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                          : p.stock <= 5
+                          ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                        {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ↑ Trending */}
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FDF2F8' }}>
+                <span className="text-sm font-semibold" style={{ color: '#9D174D' }}>↑ Trending</span>
+                <span className="text-xs ml-auto" style={{ color: '#BE185D' }}>moving fast</span>
+              </div>
+              {invTrending.length === 0 ? (
+                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No trending products yet. Scoring updates after orders.</p>
+              ) : (
+                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                  {invTrending.map(p => (
+                    <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                      <div className="min-w-0 flex-1">
+                        <p className="text-xs font-medium truncate">{p.name}</p>
+                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold · ↑{p.trending_score.toFixed(1)}</p>
+                      </div>
+                      <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                        style={p.stock === 0
+                          ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                          : p.stock <= 5
+                          ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                        {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            {/* ✦ New Arrivals */}
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#F5F3FF' }}>
+                <span className="text-sm font-semibold" style={{ color: '#5B21B6' }}>✦ New Arrivals</span>
+                <span className="text-xs ml-auto" style={{ color: '#6D28D9' }}>last 30 days</span>
+              </div>
+              {invNewArrivals.length === 0 ? (
+                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No new arrivals in the last 30 days.</p>
+              ) : (
+                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                  {invNewArrivals.map(p => {
+                    const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000)
+                    return (
+                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{p.name}</p>
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>
+                            {ageDays === 0 ? 'today' : `${ageDays}d ago`} · {p.total_sold} sold
+                          </p>
+                        </div>
+                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                          style={p.stock === 0
+                            ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                            : p.stock <= 5
+                            ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                        </span>
+                      </div>
+                    )
+                  })}
+                </div>
+              )}
+            </div>
+
           </div>
         </div>
       )}
