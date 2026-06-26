@@ -29,7 +29,14 @@ function isThisMonth(dateStr: string) {
   return d.getMonth() === now.getMonth() && d.getFullYear() === now.getFullYear()
 }
 
-export default function DashboardCharts({ orders, products }: { orders: Order[]; products: Product[] }) {
+type ActiveSaleSummary = {
+  id: string; title: string; revenue: number; orders: number
+  todayRevenue: number; yesterdayRevenue: number
+}
+
+export default function DashboardCharts({ orders, products, activeSales = [] }: {
+  orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]
+}) {
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
 
@@ -202,8 +209,42 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 5)
 
+  // Sale banner logic
+  const totalSaleRevenue = activeSales.reduce((s, a) => s + a.revenue, 0)
+  const totalSaleOrders  = activeSales.reduce((s, a) => s + a.orders, 0)
+  const todayTotal       = activeSales.reduce((s, a) => s + a.todayRevenue, 0)
+  const yesterdayTotal   = activeSales.reduce((s, a) => s + a.yesterdayRevenue, 0)
+  const growthPct = yesterdayTotal > 0
+    ? Math.round(((todayTotal - yesterdayTotal) / yesterdayTotal) * 100)
+    : todayTotal > 0 ? 100 : null
+
   return (
     <div className="space-y-6">
+
+      {/* Active sale banner */}
+      {activeSales.length > 0 && (
+        <Link
+          href={activeSales.length === 1 ? `/admin/sales/${activeSales[0].id}/analytics` : '/admin/sales'}
+          className="flex items-center justify-between px-5 py-4 rounded-lg transition-opacity hover:opacity-90"
+          style={{ background: 'linear-gradient(135deg, #1C1C1C 0%, #3A2F2A 100%)', color: 'white', textDecoration: 'none' }}>
+          <div>
+            <p className="text-sm font-semibold mb-0.5" style={{ color: '#E8DDD4' }}>
+              {activeSales.length === 1
+                ? `${activeSales[0].title} is live`
+                : `${activeSales.length} sales running`}
+            </p>
+            <p className="text-xs" style={{ color: '#A68B6E' }}>
+              {totalSaleOrders > 0
+                ? `${pkr(totalSaleRevenue)} · ${totalSaleOrders} order${totalSaleOrders !== 1 ? 's' : ''}${growthPct !== null ? ` · today ${growthPct >= 0 ? '↑' : '↓'} ${Math.abs(growthPct)}% vs yesterday` : ''}`
+                : 'No orders yet — sale is live, waiting for first order'}
+            </p>
+          </div>
+          <span className="text-xs font-medium px-3 py-1.5 rounded-full shrink-0"
+            style={{ backgroundColor: '#A68B6E', color: 'white' }}>
+            {activeSales.length === 1 ? 'View Analytics →' : 'View All →'}
+          </span>
+        </Link>
+      )}
 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
