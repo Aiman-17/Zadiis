@@ -88,22 +88,23 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     return sum + p.stock_quantity
   }, 0)
 
-  // Monthly sales trend — last 12 months
-  const monthlySalesTrend = Array.from({ length: 12 }, (_, i) => {
+  // 7-day sales trend
+  const salesTrend7d = Array.from({ length: 7 }, (_, i) => {
     const d = new Date()
-    d.setDate(1)
-    d.setMonth(d.getMonth() - (11 - i))
-    const year  = d.getFullYear()
-    const month = d.getMonth()
-    const label = month === 0
-      ? `Jan '${String(year).slice(2)}`
-      : d.toLocaleString('default', { month: 'short' })
-    const mo = orders.filter(o => {
-      const od = new Date(o.created_at)
-      return od.getFullYear() === year && od.getMonth() === month &&
-        o.order_status !== 'cancelled' && o.order_status !== 'returned'
-    })
-    return { label, revenue: mo.reduce((s, o) => s + o.total, 0), orders: mo.length }
+    d.setDate(d.getDate() - (6 - i))
+    const dateStr = d.toISOString().slice(0, 10)
+    const label   = i === 6 ? 'Today' : d.toLocaleDateString('en-US', { weekday: 'short' })
+    const dayOrders = orders.filter(o =>
+      o.created_at.startsWith(dateStr) &&
+      o.order_status !== 'cancelled' &&
+      o.order_status !== 'returned'
+    )
+    return {
+      label,
+      revenue: dayOrders.reduce((s, o) => s + o.total, 0),
+      orders:  dayOrders.length,
+      isToday: i === 6,
+    }
   })
 
   // Low stock list
@@ -267,13 +268,13 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           )}
         </div>
 
-        {/* Sales Trend — 12 months */}
+        {/* Sales Trend — last 7 days */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <h3 className="font-semibold mb-1">Sales Trend</h3>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Revenue per month — last 12 months</p>
+          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Revenue per day — last 7 days</p>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={monthlySalesTrend} margin={{ left: 0, right: 8 }}>
-              <XAxis dataKey="label" tick={{ fontSize: 9 }} />
+            <BarChart data={salesTrend7d} margin={{ left: 0, right: 8 }}>
+              <XAxis dataKey="label" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} width={38}
                 tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
               <Tooltip
@@ -281,9 +282,8 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
                 labelFormatter={(l) => String(l)}
               />
               <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
-                {monthlySalesTrend.map((entry, i) => (
-                  <Cell key={i}
-                    fill={i === 11 ? '#1C1C1C' : entry.revenue > 0 ? '#A68B6E' : '#E8DDD4'} />
+                {salesTrend7d.map((entry, i) => (
+                  <Cell key={i} fill={entry.isToday ? '#1C1C1C' : entry.revenue > 0 ? '#A68B6E' : '#E8DDD4'} />
                 ))}
               </Bar>
             </BarChart>
