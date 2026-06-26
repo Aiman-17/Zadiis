@@ -33,6 +33,9 @@ export type Product = {
   is_active: boolean
   created_at: string
   categories?: Category
+  product_category?: string
+  is_trending?: boolean
+  is_new_arrival?: boolean
 }
 
 export type OrderItem = {

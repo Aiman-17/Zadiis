@@ -66,6 +66,33 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
   const cancelled7d = last7days.filter(o => o.order_status === 'cancelled').length
   const returned7d  = last7days.filter(o => o.order_status === 'returned').length
 
+  // Previous 7d for comparison
+  const prev7dStart = new Date(Date.now() - 14 * 86400000)
+  const prev7dEnd   = new Date(Date.now() - 7  * 86400000)
+  const prevNet7d   = orders
+    .filter(o => {
+      const d = new Date(o.created_at)
+      return d >= prev7dStart && d < prev7dEnd &&
+        o.order_status !== 'cancelled' && o.order_status !== 'returned'
+    })
+    .reduce((s, o) => s + o.total, 0)
+  const revenue7dChangePct = prevNet7d > 0
+    ? Math.round(((netRevenue7d - prevNet7d) / prevNet7d) * 100)
+    : null
+
+  // Slow movers for Inventory Health badge
+  const slowMoverCount = products.filter(p => {
+    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    if (ageDays < 15) return false
+    const vs = p.variant_stock
+    const stock = vs && Object.keys(vs).length > 0
+      ? Object.values(vs).reduce((sum, sizes) =>
+          sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
+      : p.stock_quantity
+    if (stock === 0) return false
+    return (p.total_sold / ageDays) < 0.3
+  }).length
+
   // Order status donut — ALL non-archived orders
   const statusCounts: Record<string, number> = {
     new: 0, processing: 0, shipped: 0, delivered: 0, returned: 0, cancelled: 0,
@@ -182,12 +209,18 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
 
       {/* Fix #1 #3 #5 #7 #8 — KPI Cards */}
       <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {/* Gross Revenue 7d with net sub */}
+        {/* Gross Revenue 7d with net sub + vs prev */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
           <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
             Net: {pkr(netRevenue7d)}
           </p>
+          {revenue7dChangePct !== null && (
+            <p className="text-xs mt-0.5 font-medium"
+              style={{ color: revenue7dChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+              {revenue7dChangePct >= 0 ? '↑' : '↓'} {Math.abs(revenue7dChangePct)}% vs prev 7d
+            </p>
+          )}
           <p className="text-xs text-gray-500 mt-1">Gross Revenue (7d)</p>
         </div>
 
@@ -294,14 +327,15 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
       {/* Inventory Health */}
       <div>
         <h3 className="font-semibold mb-3">Inventory Health</h3>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
           {[
-            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,            sub: null },
-            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,            sub: null },
-            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,            sub: '1–3 units remaining' },
-            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,            sub: null },
-            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders', sub: null },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders', sub: null },
+            { label: 'Active Products', value: totalProducts,   color: '#374151', href: null,                        sub: null },
+            { label: 'In Stock',        value: inStockCount,    color: '#10B981', href: null,                        sub: null },
+            { label: 'Last Chance',     value: lastChanceCount, color: '#F59E0B', href: null,                        sub: '1–3 units remaining' },
+            { label: 'Sold Out',        value: soldOutCount,    color: '#EF4444', href: null,                        sub: null },
+            { label: 'Slow Movers',     value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/analytics', sub: slowMoverCount > 0 ? 'see Merchandising tab' : 'All moving well' },
+            { label: 'Returns (7d)',    value: returned7d,      color: '#DC2626', href: '/admin/orders',             sub: null },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',             sub: null },
           ].map(({ label, value, color, href, sub }) => {
             const inner = (
               <>

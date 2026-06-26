@@ -9,10 +9,21 @@ import VariantStockGrid from '@/components/admin/VariantStockGrid'
 import type { Product, Category, VariantStock } from '@/types'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
+const PRESET_CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale']
+
+const FLAG_OPTIONS = [
+  { key: 'is_bestseller',  label: '★ Best Seller', activeBg: '#FFFBEB', activeColor: '#92400E' },
+  { key: 'is_trending',    label: '↑ Trending',    activeBg: '#FDF2F8', activeColor: '#9D174D' },
+  { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: '#F5F3FF', activeColor: '#5B21B6' },
+] as const
 
 export default function EditProductForm({ product, categories }: { product: Product; categories: Category[] }) {
   const router = useRouter()
   const [loading, setLoading] = useState(false)
+  const existingCat = product.product_category || ''
+  const [isOtherCategory, setIsOtherCategory] = useState(
+    existingCat !== '' && !PRESET_CATEGORIES.includes(existingCat)
+  )
   const [form, setForm] = useState({
     name: product.name,
     sku: product.sku || '',
@@ -24,8 +35,11 @@ export default function EditProductForm({ product, categories }: { product: Prod
     colors: product.colors.join(', '),
     sizes: [...product.sizes],
     category_id: product.category_id || '',
+    product_category: existingCat,
     is_active: product.is_active,
     is_bestseller: product.is_bestseller ?? false,
+    is_trending: product.is_trending ?? false,
+    is_new_arrival: product.is_new_arrival ?? false,
     variant_stock: (product.variant_stock ?? {}) as VariantStock,
   })
 
@@ -102,8 +116,11 @@ export default function EditProductForm({ product, categories }: { product: Prod
         colors: parsedColors,
         sizes: form.sizes,
         category_id: form.category_id || null,
+        product_category: form.product_category || null,
         is_active: form.is_active,
         is_bestseller: form.is_bestseller,
+        is_trending: form.is_trending,
+        is_new_arrival: form.is_new_arrival,
         variant_stock: completeVariantStock,
       }),
     })
@@ -172,7 +189,7 @@ export default function EditProductForm({ product, categories }: { product: Prod
         </div>
         {categories.length > 0 && (
           <div>
-            <Label htmlFor="category">Category</Label>
+            <Label htmlFor="category">Collection (FK)</Label>
             <select
               id="category"
               value={form.category_id}
@@ -180,11 +197,37 @@ export default function EditProductForm({ product, categories }: { product: Prod
               className="w-full border rounded px-3 py-2 text-sm mt-1"
               style={{ borderColor: '#E2E8F0' }}
             >
-              <option value="">— No category —</option>
+              <option value="">— No collection —</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
             </select>
           </div>
         )}
+        <div>
+          <Label className="block mb-2">Season / Type</Label>
+          <select
+            value={isOtherCategory ? 'Other' : (form.product_category || '')}
+            onChange={e => {
+              const v = e.target.value
+              if (v === 'Other') { setIsOtherCategory(true); set('product_category', '') }
+              else { setIsOtherCategory(false); set('product_category', v) }
+            }}
+            className="w-full border rounded px-3 py-2 text-sm"
+            style={{ borderColor: '#E2E8F0' }}
+          >
+            <option value="">— Select season / type —</option>
+            {PRESET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
+            <option value="Other">Other (type below)</option>
+          </select>
+          {isOtherCategory && (
+            <Input
+              className="mt-2"
+              placeholder="e.g. Party Wear, Bridal"
+              value={form.product_category}
+              onChange={e => set('product_category', e.target.value)}
+              style={{ borderColor: '#E2E8F0' }}
+            />
+          )}
+        </div>
         <div>
           <Label className="block mb-2">Product Images</Label>
           <ImageUploader images={form.images} onChange={urls => set('images', urls)} />
@@ -233,9 +276,24 @@ export default function EditProductForm({ product, categories }: { product: Prod
           />
         </div>
 
-        <div className="flex items-center gap-3">
-          <input type="checkbox" id="is_bestseller" checked={form.is_bestseller} onChange={e => set('is_bestseller', e.target.checked)} className="w-4 h-4" />
-          <Label htmlFor="is_bestseller">Mark as Bestseller</Label>
+        <div>
+          <Label className="block mb-2">Product Flags</Label>
+          <div className="flex gap-2 flex-wrap">
+            {FLAG_OPTIONS.map(flag => (
+              <button
+                type="button"
+                key={flag.key}
+                onClick={() => set(flag.key, !form[flag.key])}
+                className="px-3 py-1.5 text-xs border rounded-full font-medium transition-all"
+                style={form[flag.key]
+                  ? { backgroundColor: flag.activeBg, color: flag.activeColor, borderColor: flag.activeColor }
+                  : { borderColor: '#E2E8F0', color: '#9CA3AF', backgroundColor: 'white' }}
+              >
+                {flag.label}
+              </button>
+            ))}
+          </div>
+          <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>Auto-scoring also runs in the background — these are manual overrides</p>
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />

@@ -15,28 +15,81 @@ function isLowStock(p: Product): boolean {
   return p.stock_quantity <= 3
 }
 
+function getProductStock(p: Product): number {
+  const vs = p.variant_stock
+  if (vs && Object.keys(vs).length > 0) {
+    return Object.values(vs).reduce(
+      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+    )
+  }
+  return p.stock_quantity
+}
+
+function productVelocity(p: Product): number {
+  const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+  return p.total_sold / ageDays
+}
+
+function daysToSellout(p: Product): number | null {
+  const stock = getProductStock(p)
+  const v = productVelocity(p)
+  if (v <= 0 || stock <= 0) return null
+  return Math.round(stock / v)
+}
+
+function isSlowMover(p: Product): boolean {
+  const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+  if (ageDays < 15) return false
+  const stock = getProductStock(p)
+  if (stock === 0) return false
+  return productVelocity(p) < 0.3
+}
+
+function DTSBadge({ p }: { p: Product }) {
+  const dts = daysToSellout(p)
+  if (dts === null) return <span style={{ color: '#D1D5DB' }}>—</span>
+  if (dts <= 7)  return <span className="font-medium text-xs" style={{ color: '#DC2626' }}>{dts}d ⚠</span>
+  if (dts <= 30) return <span className="text-xs" style={{ color: '#F59E0B' }}>{dts}d</span>
+  return <span className="text-xs" style={{ color: '#9CA3AF' }}>{dts}d</span>
+}
+
 function ProductRow({ p, onDelete, waitlist }: { p: Product; onDelete: (id: string) => void; waitlist: number }) {
+  const stock = getProductStock(p)
   return (
     <tr className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-      <td className="p-4 font-medium">
-        <span>{p.name}</span>
-        {waitlist > 0 && (
-          <span
-            className="ml-2 text-xs font-semibold px-1.5 py-0.5 rounded-full"
-            style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
-            title={`${waitlist} customer${waitlist !== 1 ? 's' : ''} waiting for restock`}
-          >
-            {waitlist} waiting
-          </span>
+      <td className="p-4">
+        <div className="flex flex-wrap items-center gap-1.5">
+          <span className="font-medium">{p.name}</span>
+          {waitlist > 0 && (
+            <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
+              style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+              title={`${waitlist} customer${waitlist !== 1 ? 's' : ''} waiting for restock`}>
+              {waitlist} waiting
+            </span>
+          )}
+          {p.product_category && (
+            <span className="text-xs px-1.5 py-0.5 rounded"
+              style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>
+              {p.product_category}
+            </span>
+          )}
+        </div>
+        {(p.is_bestseller || p.is_trending || p.is_new_arrival) && (
+          <div className="flex gap-1 mt-1">
+            {p.is_bestseller  && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>★ Best Seller</span>}
+            {p.is_trending    && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FDF2F8', color: '#9D174D' }}>↑ Trending</span>}
+            {p.is_new_arrival && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#F5F3FF', color: '#5B21B6' }}>✦ New</span>}
+          </div>
         )}
       </td>
       <td className="p-4 text-sm" style={{ color: '#6B7280' }}>{p.sku || '—'}</td>
       <td className="p-4">PKR {p.price.toLocaleString()}</td>
       <td className="p-4">
-        <span style={p.stock_quantity === 0 ? { color: '#EF4444', fontWeight: 600 } : {}}>
-          {p.stock_quantity === 0 ? 'Sold Out' : p.stock_quantity}
+        <span style={stock === 0 ? { color: '#EF4444', fontWeight: 600 } : {}}>
+          {stock === 0 ? 'Sold Out' : stock}
         </span>
       </td>
+      <td className="p-4 text-sm"><DTSBadge p={p} /></td>
       <td className="p-4">
         <div className="flex items-center gap-3">
           <Link href={`/admin/products/${p.id}/edit`} style={{ color: '#A68B6E' }} className="hover:underline text-sm">
@@ -124,10 +177,23 @@ export default function AdminProductsClient({
     router.refresh()
   }
 
-  const TABLE_HEAD = ['Name', 'SKU', 'Price', 'Stock', 'Actions']
+  const TABLE_HEAD = ['Name', 'SKU', 'Price', 'Stock', 'Days to Sellout', 'Actions']
+
+  const bsCount    = active.filter(p => p.is_bestseller).length
+  const trendCount = active.filter(p => p.is_trending).length
+  const newCount   = active.filter(p => p.is_new_arrival).length
+  const slowCount  = active.filter(isSlowMover).length
 
   return (
     <div className="space-y-6">
+
+      {/* Merch counts */}
+      <div className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
+        {bsCount > 0    && <span><strong style={{ color: '#92400E' }}>{bsCount}</strong> <span style={{ color: '#9CA3AF' }}>Best Seller{bsCount !== 1 ? 's' : ''}</span></span>}
+        {trendCount > 0 && <span><strong style={{ color: '#9D174D' }}>{trendCount}</strong> <span style={{ color: '#9CA3AF' }}>Trending</span></span>}
+        {newCount > 0   && <span><strong style={{ color: '#5B21B6' }}>{newCount}</strong> <span style={{ color: '#9CA3AF' }}>New Arrival{newCount !== 1 ? 's' : ''}</span></span>}
+        {slowCount > 0  && <span><strong style={{ color: '#DC2626' }}>{slowCount}</strong> <span style={{ color: '#9CA3AF' }}>Slow Mover{slowCount !== 1 ? 's' : ''}</span></span>}
+      </div>
 
       {/* Low stock filter banner */}
       {filterLowStock && (
@@ -156,7 +222,7 @@ export default function AdminProductsClient({
             <tbody>
               {visibleActive.length === 0 ? (
                 <tr>
-                  <td colSpan={5} className="p-8 text-center" style={{ color: '#9CA3AF' }}>
+                  <td colSpan={6} className="p-8 text-center" style={{ color: '#9CA3AF' }}>
                     {filterLowStock ? (
                       <>No low stock products. All variants are well stocked.</>
                     ) : (

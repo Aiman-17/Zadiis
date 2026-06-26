@@ -39,7 +39,7 @@ const RETURN_REASON_LABELS: Record<string, string> = {
   other:           'Other',
 }
 
-type Tab = 'revenue' | 'products' | 'inventory' | 'cancellations' | 'returns' | 'trend'
+type Tab = 'revenue' | 'trend' | 'products' | 'inventory' | 'merchandising' | 'cancellations' | 'returns'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
@@ -302,11 +302,118 @@ export default function AnalyticsClient({
     ? ((returnedOrders.length / orders.length) * 100).toFixed(1)
     : '0.0'
 
+  // ── Merchandising ──────────────────────────────────────────────────────────
+  function getMerchStock(p: Product): number {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).reduce(
+        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+      )
+    }
+    return p.stock_quantity
+  }
+
+  // Category performance (from range orders)
+  const productCategoryMap = Object.fromEntries(products.map(p => [p.id, p.product_category || 'Uncategorized']))
+  const categoryPerfMap: Record<string, { revenue: number; units: number; orderCount: number }> = {}
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+    const catsInOrder = new Set<string>()
+    ;(o.items as OrderItem[]).forEach(item => {
+      const cat = productCategoryMap[item.product_id] || 'Uncategorized'
+      if (!categoryPerfMap[cat]) categoryPerfMap[cat] = { revenue: 0, units: 0, orderCount: 0 }
+      categoryPerfMap[cat].revenue += item.price * item.quantity
+      categoryPerfMap[cat].units   += item.quantity
+      catsInOrder.add(cat)
+    })
+    catsInOrder.forEach(cat => { categoryPerfMap[cat].orderCount += 1 })
+  })
+  const categoryPerf = Object.entries(categoryPerfMap)
+    .map(([cat, d]) => ({ cat, ...d }))
+    .sort((a, b) => b.revenue - a.revenue)
+
+  // Price range performance
+  const priceRangeBuckets = [
+    { label: 'Under 1.5k', min: 0,    max: 1500 },
+    { label: '1.5k – 3k',  min: 1500, max: 3000 },
+    { label: '3k – 5k',    min: 3000, max: 5000 },
+    { label: '5k+',        min: 5000, max: Infinity },
+  ]
+  const priceRefMap = Object.fromEntries(products.map(p => [p.id, p.price]))
+  const priceRangeStats = priceRangeBuckets.map(r => {
+    let rev = 0, units = 0, cnt = 0
+    orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+      let inRange = false
+      ;(o.items as OrderItem[]).forEach(item => {
+        const price = priceRefMap[item.product_id] ?? item.price
+        if (price >= r.min && price < r.max) { rev += item.price * item.quantity; units += item.quantity; inRange = true }
+      })
+      if (inRange) cnt++
+    })
+    return { label: r.label, revenue: rev, units, orderCount: cnt }
+  })
+
+  // Size sell-through (sold vs remaining stock)
+  const sizeInventory: Record<string, number> = {}
+  products.forEach(p => {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      Object.values(vs).forEach(sizes =>
+        Object.entries(sizes).forEach(([sz, qty]) => {
+          if (sz !== '_') sizeInventory[sz] = (sizeInventory[sz] || 0) + (qty as number)
+        })
+      )
+    }
+  })
+  const sizeSellThrough = Object.entries(sizeMap)
+    .map(([sz, sold]) => {
+      const remaining = sizeInventory[sz] || 0
+      const total = sold + remaining
+      const pct = total > 0 ? Math.round((sold / total) * 100) : 0
+      return { sz, sold, remaining, pct }
+    })
+    .sort((a, b) => b.sold - a.sold)
+    .slice(0, 10)
+
+  // Slow movers (15-day threshold, velocity < 0.3/day, in stock)
+  const slowMovers = products
+    .filter(p => {
+      const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+      if (ageDays < 15) return false
+      const stock = getMerchStock(p)
+      if (stock === 0) return false
+      return (p.total_sold / ageDays) < 0.3
+    })
+    .map(p => {
+      const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+      return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
+    })
+    .sort((a, b) => a.velocity - b.velocity)
+
+  // Dead inventory (no sales + stock ≥ 10 + older than 15 days)
+  const deadInventory = products
+    .filter(p => {
+      const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+      return ageDays > 15 && p.total_sold === 0 && getMerchStock(p) >= 10
+    })
+    .map(p => ({ ...p, stock: getMerchStock(p), ageDays: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) }))
+    .sort((a, b) => b.stock - a.stock)
+
+  // New arrivals (last 30 days)
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
+  const newArrivals = products
+    .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
+    .map(p => {
+      const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+      return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
   const TABS: { key: Tab; label: string }[] = [
     { key: 'revenue',       label: 'Revenue' },
     { key: 'trend',         label: 'Sales Trend' },
     { key: 'products',      label: 'Products' },
     { key: 'inventory',     label: 'Inventory' },
+    { key: 'merchandising', label: 'Merchandising' },
     { key: 'cancellations', label: 'Cancellations' },
     { key: 'returns',       label: 'Returns' },
   ]
@@ -610,6 +717,201 @@ export default function AnalyticsClient({
               </div>
             )}
           </div>
+        </div>
+      )}
+
+      {/* Merchandising Tab */}
+      {tab === 'merchandising' && (
+        <div className="space-y-6">
+
+          {/* Category Performance */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Category Performance</h3>
+            {categoryPerf.length === 0 ? (
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>No sales data — add a Season/Type to products first.</p>
+            ) : (
+              <div className="space-y-3">
+                {categoryPerf.map(c => {
+                  const maxRev = categoryPerf[0].revenue
+                  const barPct = maxRev > 0 ? Math.round((c.revenue / maxRev) * 100) : 0
+                  return (
+                    <div key={c.cat}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">{c.cat}</span>
+                        <span style={{ color: '#6B7280' }}>
+                          PKR {c.revenue.toLocaleString()} · {c.units} units · {c.orderCount} orders
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                        <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: '#A68B6E' }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* Price Range Performance */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Price Range Performance</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {priceRangeStats.map(r => (
+                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
+                  <p className="text-lg font-bold mt-1">{r.units}</p>
+                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
+                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>
+                    PKR {Math.round(r.revenue / 1000)}k
+                  </p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Size Sell-Through */}
+          {sizeSellThrough.length > 0 && (
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-4">Size Sell-Through</h3>
+              <div className="space-y-2.5">
+                {sizeSellThrough.map(s => (
+                  <div key={s.sz} className="flex items-center gap-3">
+                    <span className="w-10 text-sm font-medium text-right shrink-0">{s.sz}</span>
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                      <div className="h-full rounded-full"
+                        style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? '#10B981' : s.pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
+                    </div>
+                    <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: '#6B7280' }}>{s.pct}%</span>
+                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{s.sold} sold / {s.remaining} left</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* New Arrivals Performance */}
+          {newArrivals.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">New Arrivals (last 30 days)</h3>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {newArrivals.map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3 font-medium">{p.name}</td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d ago</td>
+                      <td className="px-4 py-3 text-right">{p.total_sold}</td>
+                      <td className="px-4 py-3 text-right">{p.stock}</td>
+                      <td className="px-5 py-3 text-right text-xs">
+                        {p.velocity >= 1 ? (
+                          <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
+                        ) : p.velocity > 0 ? (
+                          <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                        ) : (
+                          <span style={{ color: '#D1D5DB' }}>no sales</span>
+                        )}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {/* Slow Movers */}
+          <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold text-sm">Slow Movers</h3>
+              <span className="text-xs px-2 py-0.5 rounded-full"
+                style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
+                {slowMovers.length}
+              </span>
+              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>&lt; 0.3 units/day · 15+ days old · in stock</span>
+            </div>
+            {slowMovers.length === 0 ? (
+              <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>
+            ) : (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {slowMovers.slice(0, 15).map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && (
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right">{p.total_sold}</td>
+                      <td className="px-4 py-3 text-right">{p.stock}</td>
+                      <td className="px-5 py-3 text-right text-xs font-medium" style={{ color: '#DC2626' }}>
+                        {p.velocity > 0 ? `${p.velocity.toFixed(2)}/d` : 'no sales'}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            )}
+          </div>
+
+          {/* Dead Inventory */}
+          {deadInventory.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Dead Inventory</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
+                  {deadInventory.length}
+                </span>
+                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deadInventory.map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && (
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
+                      <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
         </div>
       )}
 
