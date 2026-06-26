@@ -374,14 +374,14 @@ export default function AnalyticsClient({
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 10)
 
-  // Slow movers (15-day threshold, velocity < 0.3/day, in stock)
+  // Slow movers: 0 sales + older than 15 days + still in stock
   const slowMovers = products
     .filter(p => {
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
       if (ageDays < 15) return false
       const stock = getMerchStock(p)
       if (stock === 0) return false
-      return (p.total_sold / ageDays) < 0.3
+      return p.total_sold === 0
     })
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
@@ -995,7 +995,7 @@ export default function AnalyticsClient({
                 style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
                 {slowMovers.length}
               </span>
-              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>&lt; 0.3 units/day · 15+ days old · in stock</span>
+              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · 15+ days old · in stock</span>
             </div>
             {slowMovers.length === 0 ? (
               <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>

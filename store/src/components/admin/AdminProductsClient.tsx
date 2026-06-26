@@ -42,7 +42,7 @@ function isSlowMover(p: Product): boolean {
   if (ageDays < 15) return false
   const stock = getProductStock(p)
   if (stock === 0) return false
-  return productVelocity(p) < 0.3
+  return p.total_sold === 0
 }
 
 function DTSBadge({ p }: { p: Product }) {
@@ -141,13 +141,22 @@ export default function AdminProductsClient({
 }) {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const filterLowStock = searchParams.get('filter') === 'low-stock'
+  const filterParam    = searchParams.get('filter')
+  const filterLowStock  = filterParam === 'low-stock'
+  const filterSoldOut   = filterParam === 'sold-out'
+  const filterSlowMovers = filterParam === 'slow-movers'
 
   const [active, setActive] = useState(initialActive)
   const [archived, setArchived] = useState(initialArchived)
   const [showArchived, setShowArchived] = useState(false)
 
-  const visibleActive = filterLowStock ? active.filter(isLowStock) : active
+  const visibleActive = filterLowStock
+    ? active.filter(isLowStock)
+    : filterSoldOut
+    ? active.filter(p => getProductStock(p) === 0)
+    : filterSlowMovers
+    ? active.filter(isSlowMover)
+    : active
 
   const handleDelete = async (id: string) => {
     if (!confirm('Archive this product? It will be hidden from the store.')) return
@@ -195,12 +204,14 @@ export default function AdminProductsClient({
         {slowCount > 0  && <span><strong style={{ color: '#DC2626' }}>{slowCount}</strong> <span style={{ color: '#9CA3AF' }}>Slow Mover{slowCount !== 1 ? 's' : ''}</span></span>}
       </div>
 
-      {/* Low stock filter banner */}
-      {filterLowStock && (
+      {/* Active filter banner */}
+      {(filterLowStock || filterSoldOut || filterSlowMovers) && (
         <div className="flex items-center justify-between px-4 py-2.5 rounded-lg text-sm"
           style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5' }}>
           <span style={{ color: '#B91C1C' }}>
-            Showing {visibleActive.length} product{visibleActive.length !== 1 ? 's' : ''} with low stock variants
+            {filterLowStock  && `Showing ${visibleActive.length} product${visibleActive.length !== 1 ? 's' : ''} with low stock (1–3 units)`}
+            {filterSoldOut   && `Showing ${visibleActive.length} sold out product${visibleActive.length !== 1 ? 's' : ''}`}
+            {filterSlowMovers && `Showing ${visibleActive.length} slow mover${visibleActive.length !== 1 ? 's' : ''} — 0 sales, 15+ days old`}
           </span>
           <Link href="/admin/products" className="text-xs font-medium hover:underline" style={{ color: '#A68B6E' }}>
             Clear filter
@@ -223,9 +234,10 @@ export default function AdminProductsClient({
               {visibleActive.length === 0 ? (
                 <tr>
                   <td colSpan={6} className="p-8 text-center" style={{ color: '#9CA3AF' }}>
-                    {filterLowStock ? (
-                      <>No low stock products. All variants are well stocked.</>
-                    ) : (
+                    {filterLowStock   && 'No low stock products. All variants are well stocked.'}
+                    {filterSoldOut    && 'No sold out products.'}
+                    {filterSlowMovers && 'No slow movers. All active products have at least one sale.'}
+                    {!filterLowStock && !filterSoldOut && !filterSlowMovers && (
                       <>No active products.{' '}
                         <Link href="/admin/products/new" style={{ color: '#A68B6E' }} className="hover:underline">
                           Add your first product

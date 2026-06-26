@@ -80,7 +80,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     ? Math.round(((netRevenue7d - prevNet7d) / prevNet7d) * 100)
     : null
 
-  // Slow movers for Inventory Health badge
+  // Slow movers: 0 sales + older than 15 days + still in stock
   const slowMoverCount = products.filter(p => {
     const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
     if (ageDays < 15) return false
@@ -90,7 +90,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
       : p.stock_quantity
     if (stock === 0) return false
-    return (p.total_sold / ageDays) < 0.3
+    return p.total_sold === 0
   }).length
 
   // Order status donut — ALL non-archived orders
@@ -329,9 +329,9 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         <h3 className="font-semibold mb-3">Inventory Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: null,              sub: '1–3 units remaining' },
-            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: null,              sub: null },
-            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/analytics', sub: slowMoverCount > 0 ? 'see Merchandising tab' : 'All moving well' },
+            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining' },
+            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',    sub: null },
+            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? '0 sales · 15+ days' : 'All moving well' },
             { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
             { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
           ].map(({ label, value, color, href, sub }) => {
