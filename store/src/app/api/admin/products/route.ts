@@ -5,7 +5,7 @@ import { sendBackInStockEmail } from '@/lib/email'
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('products')
-    .select('id, name, slug, price, images')
+    .select('id, name, slug, sku, price, cost_price, images, stock_quantity, variant_stock, total_sold, is_new_arrival, is_bestseller, is_trending, best_seller_score, created_at, product_category')
     .eq('is_active', true)
     .order('name')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
