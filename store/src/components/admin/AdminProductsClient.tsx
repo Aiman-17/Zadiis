@@ -228,7 +228,7 @@ export default function AdminProductsClient({
           <span style={{ color: '#B91C1C' }}>
             {filterLowStock  && `Showing ${visibleActive.length} product${visibleActive.length !== 1 ? 's' : ''} with low stock (1–3 units)`}
             {filterSoldOut   && `Showing ${visibleActive.length} sold out product${visibleActive.length !== 1 ? 's' : ''}`}
-            {filterSlowMovers && `Showing ${visibleActive.length} slow mover${visibleActive.length !== 1 ? 's' : ''} — 0 sales, 15+ days old`}
+            {filterSlowMovers && `Showing ${visibleActive.length} slow mover${visibleActive.length !== 1 ? 's' : ''} — below 50% of store avg sell-through, 15+ days old`}
           </span>
           <Link href="/admin/products" className="text-xs font-medium hover:underline" style={{ color: '#A68B6E' }}>
             Clear filter
