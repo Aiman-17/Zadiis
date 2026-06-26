@@ -80,17 +80,28 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     ? Math.round(((netRevenue7d - prevNet7d) / prevNet7d) * 100)
     : null
 
-  // Slow movers: 0 sales + older than 15 days + still in stock
-  const slowMoverCount = products.filter(p => {
-    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-    if (ageDays < 15) return false
+  // Slow movers — relative: below 50% of store average sell-through, 15+ days old
+  function dashStock(p: Product): number {
     const vs = p.variant_stock
-    const stock = vs && Object.keys(vs).length > 0
+    return vs && Object.keys(vs).length > 0
       ? Object.values(vs).reduce((sum, sizes) =>
           sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
       : p.stock_quantity
-    if (stock === 0) return false
-    return p.total_sold === 0
+  }
+  const eligibleProds = products.filter(p => {
+    const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    return age >= 15 && dashStock(p) > 0
+  })
+  const dashAvgSellThrough = eligibleProds.length > 0
+    ? eligibleProds.reduce((sum, p) => {
+        const s = dashStock(p)
+        return sum + p.total_sold / (p.total_sold + s)
+      }, 0) / eligibleProds.length
+    : 0
+  const slowMoverCount = eligibleProds.filter(p => {
+    if (dashAvgSellThrough === 0) return false
+    const s = dashStock(p)
+    return (p.total_sold / (p.total_sold + s)) < dashAvgSellThrough * 0.5
   }).length
 
   // Order status donut — ALL non-archived orders
@@ -331,7 +342,7 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
           {[
             { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining' },
             { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',    sub: null },
-            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? '0 sales · 15+ days' : 'All moving well' },
+            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well' },
             { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
             { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
           ].map(({ label, value, color, href, sub }) => {

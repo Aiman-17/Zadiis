@@ -374,14 +374,27 @@ export default function AnalyticsClient({
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 10)
 
-  // Slow movers: 0 sales + older than 15 days + still in stock
+  // Slow movers — relative: below 50% of store average sell-through, 15+ days old, in stock
+  const eligibleMerch = products.filter(p => {
+    const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    return age >= 15 && getMerchStock(p) > 0
+  })
+  const merchAvgSellThrough = eligibleMerch.length > 0
+    ? eligibleMerch.reduce((sum, p) => {
+        const s = getMerchStock(p)
+        return sum + p.total_sold / (p.total_sold + s)
+      }, 0) / eligibleMerch.length
+    : 0
+
   const slowMovers = products
     .filter(p => {
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
       if (ageDays < 15) return false
       const stock = getMerchStock(p)
       if (stock === 0) return false
-      return p.total_sold === 0
+      if (merchAvgSellThrough === 0) return false
+      const st = p.total_sold / (p.total_sold + stock)
+      return st < merchAvgSellThrough * 0.5
     })
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
@@ -995,7 +1008,7 @@ export default function AnalyticsClient({
                 style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
                 {slowMovers.length}
               </span>
-              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · 15+ days old · in stock</span>
+              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>sell-through &lt; 50% of store avg · 15+ days · in stock</span>
             </div>
             {slowMovers.length === 0 ? (
               <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>

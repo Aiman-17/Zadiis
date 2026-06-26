@@ -37,12 +37,20 @@ function daysToSellout(p: Product): number | null {
   return Math.round(stock / v)
 }
 
-function isSlowMover(p: Product): boolean {
+function productSellThrough(p: Product): number {
+  const stock = getProductStock(p)
+  const total = p.total_sold + stock
+  return total > 0 ? p.total_sold / total : 0
+}
+
+function isSlowMover(p: Product, avgSellThrough: number): boolean {
   const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
   if (ageDays < 15) return false
   const stock = getProductStock(p)
   if (stock === 0) return false
-  return p.total_sold === 0
+  // Slow if sell-through is less than half the store average
+  // Edge case: if avg is 0 (nothing has sold store-wide), nothing is flagged
+  return avgSellThrough > 0 && productSellThrough(p) < avgSellThrough * 0.5
 }
 
 function DTSBadge({ p }: { p: Product }) {
@@ -155,7 +163,7 @@ export default function AdminProductsClient({
     : filterSoldOut
     ? active.filter(p => getProductStock(p) === 0)
     : filterSlowMovers
-    ? active.filter(isSlowMover)
+    ? active.filter(p => isSlowMover(p, avgSellThrough))
     : active
 
   const handleDelete = async (id: string) => {
@@ -188,10 +196,19 @@ export default function AdminProductsClient({
 
   const TABLE_HEAD = ['Name', 'SKU', 'Price', 'Stock', 'Days to Sellout', 'Actions']
 
+  // Store average sell-through — only products 15+ days old and in stock
+  const eligibleForAvg = active.filter(p => {
+    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    return ageDays >= 15 && getProductStock(p) > 0
+  })
+  const avgSellThrough = eligibleForAvg.length > 0
+    ? eligibleForAvg.reduce((sum, p) => sum + productSellThrough(p), 0) / eligibleForAvg.length
+    : 0
+
   const bsCount    = active.filter(p => p.is_bestseller).length
   const trendCount = active.filter(p => p.is_trending).length
   const newCount   = active.filter(p => p.is_new_arrival).length
-  const slowCount  = active.filter(isSlowMover).length
+  const slowCount  = active.filter(p => isSlowMover(p, avgSellThrough)).length
 
   return (
     <div className="space-y-6">
