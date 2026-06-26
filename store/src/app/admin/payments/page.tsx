@@ -27,15 +27,14 @@ export default function AdminPayments() {
   const active   = orders.filter(o => !o.is_archived)
   const archived = orders.filter(o => o.is_archived)
 
-  // "All" = active non-paid (need attention); paid ones belong only in Paid tab
   const filtered = useMemo(() => {
-    if (tab === 'all')    return active.filter(o => o.payment_status !== 'paid')
-    if (tab === 'paid')   return active.filter(o => o.payment_status === 'paid')
+    if (tab === 'all')     return active
+    if (tab === 'paid')    return active.filter(o => o.payment_status === 'paid')
     return active.filter(o => o.payment_status === 'pending')
   }, [active, tab])
 
   const tabs: { key: Tab; label: string }[] = [
-    { key: 'all',     label: `All (${active.filter(o => o.payment_status !== 'paid').length})` },
+    { key: 'all',     label: `All (${active.length})` },
     { key: 'pending', label: `Pending (${active.filter(o => o.payment_status === 'pending').length})` },
     { key: 'paid',    label: `Paid (${active.filter(o => o.payment_status === 'paid').length})` },
   ]
