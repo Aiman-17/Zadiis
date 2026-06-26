@@ -15,7 +15,7 @@ export default async function CodPage() {
 
   const totalOut      = allCod.reduce((s, o) => s + Number(o.total), 0)
   const totalReceived = allCod.filter(o => o.cod_status === 'received').reduce((s, o) => s + Number(o.total), 0)
-  const totalPending  = allCod.filter(o => o.cod_status !== 'received' && o.cod_status !== 'lost' && o.order_status === 'delivered').reduce((s, o) => s + Number(o.total), 0)
+  const totalPending  = allCod.filter(o => o.cod_status !== 'received' && o.cod_status !== 'lost').reduce((s, o) => s + Number(o.total), 0)
   const totalLost     = allCod.filter(o => o.cod_status === 'lost').reduce((s, o) => s + Number(o.total), 0)
 
   return (
