@@ -175,7 +175,17 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
     return p.stock_quantity
   }
   const soldOutCount    = products.filter(p => getProductStock(p) === 0).length
-  const lastChanceCount = products.filter(p => { const s = getProductStock(p); return s > 0 && s <= 3 }).length
+  // Match the products page filter: any variant with ≤3 units (or total stock ≤3 for non-variant products)
+  const lastChanceCount = products.filter(p => {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).some(sizes =>
+        Object.values(sizes as Record<string, number>).some(q => q > 0 && q <= 3)
+      )
+    }
+    const s = getProductStock(p)
+    return s > 0 && s <= 3
+  }).length
   const inStockCount    = products.filter(p => getProductStock(p) > 0).length
 
   // Fix #6 — Best Sellers: ALL products ranked, not just score > 0
@@ -340,18 +350,18 @@ export default function DashboardCharts({ orders, products }: { orders: Order[];
         <h3 className="font-semibold mb-3">Inventory Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining' },
-            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',    sub: null },
-            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well' },
-            { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',   sub: null },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',   sub: null },
-          ].map(({ label, value, color, href, sub }) => {
+            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining',                                                       linkLabel: '→ View products' },
+            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',     sub: null,                                                                        linkLabel: '→ View products' },
+            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well', linkLabel: '→ View products' },
+            { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+          ].map(({ label, value, color, href, sub, linkLabel }) => {
             const inner = (
               <>
                 <p className="text-2xl font-bold" style={{ color }}>{value}</p>
                 <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
                 {sub && <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{sub}</p>}
-                {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>→ View orders</p>}
+                {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{linkLabel}</p>}
               </>
             )
             return href ? (

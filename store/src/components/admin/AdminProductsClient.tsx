@@ -158,6 +158,15 @@ export default function AdminProductsClient({
   const [archived, setArchived] = useState(initialArchived)
   const [showArchived, setShowArchived] = useState(false)
 
+  // Store average sell-through — must be above visibleActive to avoid TDZ
+  const eligibleForAvg = active.filter(p => {
+    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    return ageDays >= 15 && getProductStock(p) > 0
+  })
+  const avgSellThrough = eligibleForAvg.length > 0
+    ? eligibleForAvg.reduce((sum, p) => sum + productSellThrough(p), 0) / eligibleForAvg.length
+    : 0
+
   const visibleActive = filterLowStock
     ? active.filter(isLowStock)
     : filterSoldOut
@@ -195,15 +204,6 @@ export default function AdminProductsClient({
   }
 
   const TABLE_HEAD = ['Name', 'SKU', 'Price', 'Stock', 'Days to Sellout', 'Actions']
-
-  // Store average sell-through — only products 15+ days old and in stock
-  const eligibleForAvg = active.filter(p => {
-    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-    return ageDays >= 15 && getProductStock(p) > 0
-  })
-  const avgSellThrough = eligibleForAvg.length > 0
-    ? eligibleForAvg.reduce((sum, p) => sum + productSellThrough(p), 0) / eligibleForAvg.length
-    : 0
 
   const bsCount    = active.filter(p => p.is_bestseller).length
   const trendCount = active.filter(p => p.is_trending).length
