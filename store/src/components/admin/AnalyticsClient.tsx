@@ -47,22 +47,65 @@ function localDateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
-function buildTrendData(orders: Order[], range: string) {
-  const isMonthly = range === '12m'
+function buildAllBuckets(range: string, longMonthLabel = false) {
+  const today = new Date()
   const map: Record<string, { label: string; revenue: number; orders: number }> = {}
 
+  if (range === '12m') {
+    for (let i = 11; i >= 0; i--) {
+      const d = new Date(today.getFullYear(), today.getMonth() - i, 1)
+      const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      const label = longMonthLabel
+        ? d.toLocaleString('default', { month: 'long', year: 'numeric' })
+        : d.toLocaleString('default', { month: 'short', year: '2-digit' })
+      map[key] = { label, revenue: 0, orders: 0 }
+    }
+  } else if (range === '90d') {
+    const start = new Date(today)
+    start.setDate(today.getDate() - 90)
+    const ws = new Date(start)
+    ws.setDate(start.getDate() - start.getDay())
+    const cur = new Date(ws)
+    while (cur <= today) {
+      const key = localDateKey(cur)
+      const label = `Week of ${cur.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
+      map[key] = { label, revenue: 0, orders: 0 }
+      cur.setDate(cur.getDate() + 7)
+    }
+  } else {
+    const days = range === '7d' ? 7 : 30
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(today)
+      d.setDate(today.getDate() - i)
+      const key = localDateKey(d)
+      map[key] = { label: '', revenue: 0, orders: 0 }
+    }
+  }
+  return map
+}
+
+function buildTrendData(orders: Order[], range: string) {
+  const isMonthly = range === '12m'
+  const map = buildAllBuckets(range, false)
+
+  // Fill in daily labels (need locale formatting per-day)
+  if (!isMonthly && range !== '90d') {
+    Object.keys(map).forEach(key => {
+      const [y, m, day] = key.split('-').map(Number)
+      const d = new Date(y, m - 1, day)
+      map[key].label = d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
+    })
+  }
+
   orders.forEach(o => {
+    if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
     const key = isMonthly
       ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
       : localDateKey(d)
-    const label = isMonthly
-      ? d.toLocaleString('default', { month: 'short', year: '2-digit' })
-      : d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
-    if (!map[key]) map[key] = { label, revenue: 0, orders: 0 }
-    if (o.order_status !== 'cancelled' && o.order_status !== 'returned') {
+    if (map[key]) {
       map[key].revenue += o.total
-      map[key].orders += 1
+      map[key].orders  += 1
     }
   })
 
@@ -74,29 +117,36 @@ function buildTrendData(orders: Order[], range: string) {
 function buildSalesTrendTable(orders: Order[], range: string) {
   const isMonthly = range === '12m'
   const isWeekly  = range === '90d'
-  const map: Record<string, { label: string; revenue: number; orders: number }> = {}
+  const map = buildAllBuckets(range, true)
+
+  // Fill in daily labels with weekday
+  if (!isMonthly && !isWeekly) {
+    Object.keys(map).forEach(key => {
+      const [y, m, day] = key.split('-').map(Number)
+      const d = new Date(y, m - 1, day)
+      map[key].label = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })
+    })
+  }
 
   orders.forEach(o => {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
-    let key: string, label: string
+    let key: string
 
     if (isMonthly) {
-      key   = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      label = d.toLocaleString('default', { month: 'long', year: 'numeric' })
+      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     } else if (isWeekly) {
       const ws = new Date(d)
       ws.setDate(d.getDate() - d.getDay())
-      key   = localDateKey(ws)
-      label = `Week of ${ws.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
+      key = localDateKey(ws)
     } else {
-      key   = localDateKey(d)
-      label = d.toLocaleDateString('default', { weekday: 'short', month: 'short', day: 'numeric' })
+      key = localDateKey(d)
     }
 
-    if (!map[key]) map[key] = { label, revenue: 0, orders: 0 }
-    map[key].revenue += o.total
-    map[key].orders  += 1
+    if (map[key]) {
+      map[key].revenue += o.total
+      map[key].orders  += 1
+    }
   })
 
   const rows = Object.entries(map)
