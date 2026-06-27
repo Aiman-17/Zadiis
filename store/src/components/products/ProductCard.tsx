@@ -53,27 +53,25 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
-        {/* New Arrival — top-left image badge in price color */}
-        {showNewArrival && (
-          <div className="absolute top-2 left-2 z-10">
-            <span
-              className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-widest"
-              style={{ backgroundColor: '#A68B6E', color: 'white' }}
-            >
-              New
-            </span>
-          </div>
-        )}
-
-        {/* Sale discount — bottom-left */}
-        {discountPct > 0 && (
-          <div className="absolute bottom-2 left-2 z-10">
-            <span
-              className="text-[9px] font-bold px-1 py-0.5 rounded-sm"
-              style={{ backgroundColor: '#C62828', color: 'white' }}
-            >
-              -{discountPct}%
-            </span>
+        {/* Top-right badges: discount + NEW stacked */}
+        {(discountPct > 0 || showNewArrival) && (
+          <div className="absolute top-2 right-2 z-10 flex flex-col items-end gap-1">
+            {discountPct > 0 && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5"
+                style={{ backgroundColor: '#C62828', color: 'white' }}
+              >
+                -{discountPct}%
+              </span>
+            )}
+            {showNewArrival && (
+              <span
+                className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-widest"
+                style={{ backgroundColor: '#A68B6E', color: 'white' }}
+              >
+                New
+              </span>
+            )}
           </div>
         )}
 
