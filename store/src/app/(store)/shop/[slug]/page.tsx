@@ -10,7 +10,6 @@ import ReviewListWrapper from '@/components/products/ReviewListWrapper'
 import ProductCard from '@/components/products/ProductCard'
 import ProductSaleUrgency from '@/components/products/ProductSaleUrgency'
 import NotifyMeButton from '@/components/products/NotifyMeButton'
-import ProductViewers from '@/components/products/ProductViewers'
 import { Flame, Hourglass } from 'lucide-react'
 import type { Review, Product } from '@/types'
 import type { Metadata } from 'next'
@@ -248,14 +247,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             {product!.description && <p className="text-gray-600 leading-relaxed">{product!.description}</p>}
 
             {/* Social proof */}
-            <div className="space-y-1.5">
-              {soldLast24h >= 2 && (
-                <p className="text-sm font-medium" style={{ color: '#10B981' }}>
-                  🔥 {soldLast24h} sold in the last 24 hours
-                </p>
-              )}
-              <ProductViewers />
-            </div>
+            {soldLast24h >= 2 && (
+              <p className="text-sm font-medium" style={{ color: '#10B981' }}>
+                🔥 {soldLast24h} sold in the last 24 hours
+              </p>
+            )}
 
             {/* Stock urgency — only on non-sale products (sale products use ProductSaleUrgency) */}
             {!salePrice && product!.stock_quantity > 0 && product!.stock_quantity <= 10 && (
