@@ -138,11 +138,11 @@ export default async function HomePage() {
       {/* Product sections — compact stacked rows */}
       {(
         [
-          { key: 'trending',    label: 'Trending',     products: trending,     accent: '#C62828', badge: 'TRENDING',    href: '/shop' },
-          { key: 'newArrivals', label: 'New Arrivals',  products: newArrivals,  accent: '#059669', badge: undefined,     href: '/new-arrivals' },
-          { key: 'justDropped', label: 'Just Dropped',  products: justDropped,  accent: '#1C1C1C', badge: undefined,     href: '/shop' },
+          { key: 'trending',    label: 'Trending',     products: trending,     accent: '#A68B6E', badge: 'TRENDING',    href: '/shop' },
+          { key: 'lastChance',  label: 'Last Chance',   products: lastChance,   accent: '#A68B6E', badge: undefined,     href: '/shop' },
+          { key: 'newArrivals', label: 'New Arrivals',  products: newArrivals,  accent: '#A68B6E', badge: undefined,     href: '/new-arrivals' },
+          { key: 'justDropped', label: 'Just Dropped',  products: justDropped,  accent: '#A68B6E', badge: undefined,     href: '/shop' },
           { key: 'bestSellers', label: 'Best Sellers',  products: bestSellers,  accent: '#A68B6E', badge: 'BESTSELLER',  href: '/shop' },
-          { key: 'lastChance',  label: 'Last Chance',   products: lastChance,   accent: '#C62828', badge: undefined,     href: '/shop' },
         ] as { key: string; label: string; products: Product[]; accent: string; badge: string | undefined; href: string }[]
       ).filter(s => s.products.length > 0).map(s => (
         <div key={s.key} className="border-t" style={{ borderColor: '#E8DDD4' }}>
