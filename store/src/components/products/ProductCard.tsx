@@ -39,8 +39,7 @@ function getEffectiveBadge(product: Product, callerBadge?: string): string | und
   if (product.is_new_arrival) return 'NEW ARRIVAL'
   if (product.is_trending || callerBadge === 'TRENDING') return 'TRENDING'
   if (
-    product.is_bestseller ||
-    (product.best_seller_score && product.best_seller_score > 0) ||
+    (product.best_seller_score && product.best_seller_score >= 5) ||
     callerBadge === 'BESTSELLER'
   ) return 'BESTSELLER'
   const ageDays = (Date.now() - new Date(product.created_at).getTime()) / 86_400_000
@@ -51,8 +50,7 @@ function getEffectiveBadge(product: Product, callerBadge?: string): string | und
 function getIconKey(product: Product, callerBadge?: string): IconKey | undefined {
   if (product.is_trending || callerBadge === 'TRENDING') return 'trending'
   if (
-    product.is_bestseller ||
-    (product.best_seller_score && product.best_seller_score > 0) ||
+    (product.best_seller_score && product.best_seller_score >= 5) ||
     callerBadge === 'BESTSELLER'
   ) return 'bestseller'
   if (product.is_new_arrival) return 'new_arrival'

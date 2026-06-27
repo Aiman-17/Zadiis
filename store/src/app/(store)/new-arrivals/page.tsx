@@ -76,14 +76,37 @@ export default async function NewArrivalsPage() {
             )
           })}
         </div>
+      ) : products.length === 1 ? (
+        /* Single product — centered featured card, not orphaned in a grid */
+        <div className="flex justify-center">
+          <div className="w-48 md:w-64">
+            <ProductCard product={products[0]} />
+          </div>
+        </div>
       ) : (
-        /* Single collection — plain grid */
+        /* Multiple products, single collection — plain grid */
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
           {products.map(product => (
             <ProductCard key={product.id} product={product} />
           ))}
         </div>
       )}
+
+      {/* Notify CTA — always shown below products */}
+      <div className="mt-14 py-10 border-t text-center" style={{ borderColor: '#E8DDD4' }}>
+        <p className="text-xs uppercase tracking-widest mb-2" style={{ color: '#A68B6E', letterSpacing: '0.25em' }}>Never Miss a Drop</p>
+        <h2 className="text-xl mb-2" style={{ fontFamily: 'Playfair Display, serif' }}>Be the First to Know</h2>
+        <p className="text-sm mb-6 max-w-sm mx-auto" style={{ color: '#6B7280' }}>
+          New styles launch every week. Chat with us on WhatsApp and we&apos;ll notify you the moment a new collection drops.
+        </p>
+        <a
+          href="https://wa.me/+923703465516?text=Hi!%20Please%20notify%20me%20about%20new%20arrivals%20at%20ZADII%27S."
+          className="inline-block text-sm font-semibold uppercase tracking-widest px-8 py-3 transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#25D366', color: 'white' }}
+        >
+          Notify Me on WhatsApp
+        </a>
+      </div>
     </div>
   )
 }
