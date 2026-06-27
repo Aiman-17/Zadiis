@@ -6,7 +6,7 @@ export async function GET() {
     const [{ data: zones }, { data: settings }, { data: activeSale }] = await Promise.all([
       supabaseAdmin.from('delivery_zones').select('id, city, delivery_charge').eq('is_active', true).order('city'),
       supabaseAdmin.from('store_settings').select('key, value'),
-      supabaseAdmin.from('sales').select('id, delivery_charge_override').eq('is_active', true).single(),
+      supabaseAdmin.from('sales').select('id, delivery_charge_override').eq('is_active', true).or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`).maybeSingle(),
     ])
     const cod_enabled = settings?.find(s => s.key === 'cod_enabled')?.value === 'true'
     return NextResponse.json({

@@ -45,6 +45,7 @@ export default async function SalePage() {
       .from('sales')
       .select('*, sale_products(product_id, sale_price, created_at, products(*, categories(name, slug)))')
       .eq('is_active', true)
+      .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
       .maybeSingle()
 
     if (data) {

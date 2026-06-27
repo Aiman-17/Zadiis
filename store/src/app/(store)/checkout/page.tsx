@@ -65,6 +65,28 @@ export default function CheckoutPage() {
         setCodEnabled(cod_enabled)
         setSaleActive(sale_active)
         setSaleDeliveryOverride(sale_delivery_override)
+
+        // Sale ended — revert any cart items that were added at sale price back to original prices
+        if (!sale_active) {
+          const cart = getCart()
+          const uniqueIds = [...new Set(cart.map(i => i.id))]
+          if (uniqueIds.length > 0) {
+            fetch('/api/products/prices', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ ids: uniqueIds }),
+            })
+              .then(r => r.json())
+              .then((prices: Array<{ id: string; price: number }>) => {
+                const priceMap = Object.fromEntries(prices.map(p => [p.id, p.price]))
+                const updated = cart.map(i => priceMap[i.id] != null ? { ...i, price: priceMap[i.id] } : i)
+                saveCart(updated)
+                window.dispatchEvent(new Event('cart-updated'))
+                setItems(updated)
+              })
+              .catch(() => {})
+          }
+        }
       })
   }, [router])
 

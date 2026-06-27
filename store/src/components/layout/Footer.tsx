@@ -1,6 +1,6 @@
 import Link from 'next/link'
 
-export default function Footer() {
+export default function Footer({ hasSale = false }: { hasSale?: boolean }) {
   return (
     <footer style={{ backgroundColor: '#1C1C1C', color: '#E8DDD4' }} className="py-12 mt-auto">
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
@@ -15,7 +15,7 @@ export default function Footer() {
           <ul className="space-y-2 text-sm" style={{ color: '#9CA3AF' }}>
             <li><Link href="/shop" className="hover:text-white transition-colors">Shop</Link></li>
             <li><Link href="/cart" className="hover:text-white transition-colors">Cart</Link></li>
-            <li><Link href="/sale" className="hover:text-white transition-colors">Sale</Link></li>
+            {hasSale && <li><Link href="/sale" className="hover:text-white transition-colors">Sale</Link></li>}
           </ul>
         </div>
         {/* Policies */}

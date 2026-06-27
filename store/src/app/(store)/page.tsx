@@ -45,7 +45,8 @@ export default async function HomePage() {
         .from('sales')
         .select('id, title, description, ends_at')
         .eq('is_active', true)
-        .single()
+        .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+        .maybeSingle()
         .then(r => r.data),
     ])
     newArrivals = newArrivalsData

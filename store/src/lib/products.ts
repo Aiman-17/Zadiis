@@ -11,10 +11,12 @@ let _saleCache: { ids: string[]; ts: number } | null = null
 
 async function getActiveSaleExcludeIds(): Promise<string[]> {
   if (_saleCache && Date.now() - _saleCache.ts < 30_000) return _saleCache.ids
+  const now = new Date().toISOString()
   const { data: sale } = await supabaseAdmin
     .from('sales')
     .select('id')
     .eq('is_active', true)
+    .or(`ends_at.is.null,ends_at.gt.${now}`)
     .maybeSingle()
   if (!sale) { _saleCache = { ids: [], ts: Date.now() }; return [] }
   const { data: sps } = await supabaseAdmin

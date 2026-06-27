@@ -71,6 +71,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .from('sales')
         .select('id, ends_at')
         .eq('is_active', true)
+        .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
         .maybeSingle(),
       supabaseAdmin
         .from('products')

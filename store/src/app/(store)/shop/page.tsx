@@ -54,7 +54,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       getJustDroppedProducts(4),
       getBestsellerProducts(4),
       getLastChanceProducts(4),
-      supabaseAdmin.from('sales').select('id').eq('is_active', true).maybeSingle(),
+      supabaseAdmin.from('sales').select('id').eq('is_active', true).or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`).maybeSingle(),
     ])
     trending = t; newArrivals = na; justDropped = jd; bestSellers = bs; lastChance = lc
 
