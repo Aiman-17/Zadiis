@@ -29,12 +29,17 @@ async function getSaleRevenue(saleIds: string[]): Promise<Record<string, { reven
 
   for (const order of orders as Order[]) {
     const items = (order.items || []) as OrderItem[]
-    const matchedSaleId = items
-      .map(i => productToSale[i.product_id])
-      .find(sid => sid && saleIds.includes(sid))
-    if (matchedSaleId) {
-      result[matchedSaleId].revenue += order.total
-      result[matchedSaleId].orders++
+    // Accumulate per-sale revenue from only the items that belong to each sale
+    const saleRevById: Record<string, number> = {}
+    for (const item of items) {
+      const sid = productToSale[item.product_id]
+      if (sid && saleIds.includes(sid)) {
+        saleRevById[sid] = (saleRevById[sid] || 0) + item.price * item.quantity
+      }
+    }
+    for (const [sid, rev] of Object.entries(saleRevById)) {
+      result[sid].revenue += rev
+      result[sid].orders++
     }
   }
 

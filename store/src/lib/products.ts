@@ -1,4 +1,5 @@
 import { supabase } from './supabase/client'
+import { supabaseAdmin } from './supabase/server'
 import type { Product } from '@/types'
 
 function getPKTDate(): string {
@@ -10,13 +11,13 @@ let _saleCache: { ids: string[]; ts: number } | null = null
 
 async function getActiveSaleExcludeIds(): Promise<string[]> {
   if (_saleCache && Date.now() - _saleCache.ts < 30_000) return _saleCache.ids
-  const { data: sale } = await supabase
+  const { data: sale } = await supabaseAdmin
     .from('sales')
     .select('id')
     .eq('is_active', true)
     .maybeSingle()
   if (!sale) { _saleCache = { ids: [], ts: Date.now() }; return [] }
-  const { data: sps } = await supabase
+  const { data: sps } = await supabaseAdmin
     .from('sale_products')
     .select('product_id')
     .eq('sale_id', sale.id)

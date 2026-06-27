@@ -45,7 +45,7 @@ export default async function SalePage() {
       .from('sales')
       .select('*, sale_products(product_id, sale_price, created_at, products(*, categories(name, slug)))')
       .eq('is_active', true)
-      .single()
+      .maybeSingle()
 
     if (data) {
       sale = data as unknown as Sale
