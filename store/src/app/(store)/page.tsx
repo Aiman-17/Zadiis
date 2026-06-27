@@ -3,7 +3,8 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import ProductCard from '@/components/products/ProductCard'
+import ProductSectionTabs from '@/components/products/ProductSectionTabs'
+
 import { getNewArrivalProducts, getBestsellerProducts, getTrendingProducts, getLastChanceProducts, getJustDroppedProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
@@ -133,85 +134,15 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Trending Now — shown first when trending products exist */}
-      {trending.length >= 1 && (
-        <section className="max-w-6xl mx-auto px-4 py-10" style={{ borderTop: '1px solid #E8DDD4' }}>
-          <div className="flex items-baseline justify-center gap-3 mb-6">
-            <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Trending Now</h2>
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Hot This Week</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {trending.map(product => (
-              <ProductCard key={product.id} product={product} badge="TRENDING" salePrice={salePriceMap[product.id]} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* New Arrivals — admin-marked products with active date window */}
-      {newArrivals.length >= 1 && (
-        <section className="max-w-6xl mx-auto px-4 py-10" style={{ borderTop: '1px solid #E8DDD4' }}>
-          <div className="flex items-baseline justify-center gap-3 mb-6">
-            <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>New Arrivals</h2>
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#059669', letterSpacing: '0.2em' }}>Just Launched</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {newArrivals.map(product => (
-              <ProductCard key={product.id} product={product} salePrice={salePriceMap[product.id]} />
-            ))}
-          </div>
-          <div className="text-center mt-8">
-            <Button asChild variant="outline" className="rounded-none uppercase tracking-widest text-sm px-10" style={{ borderColor: '#1C1C1C' }}>
-              <Link href="/new-arrivals">View All New Arrivals</Link>
-            </Button>
-          </div>
-        </section>
-      )}
-
-      {/* Just Dropped — products listed in last 72 hours (not new arrivals) */}
-      {justDropped.length >= 1 && (
-        <section className="max-w-6xl mx-auto px-4 py-10" style={{ borderTop: '1px solid #E8DDD4' }}>
-          <div className="flex items-baseline justify-center gap-3 mb-6">
-            <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Just Dropped</h2>
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#1C1C1C', letterSpacing: '0.2em' }}>New In</span>
-          </div>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {justDropped.map(product => (
-              <ProductCard key={product.id} product={product} salePrice={salePriceMap[product.id]} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Best Sellers — only shown when 2+ exist */}
-      {bestSellers.length >= 2 && (
-        <section className="max-w-6xl mx-auto px-4 py-10" style={{ borderTop: '1px solid #E8DDD4' }}>
-          <h2 className="text-2xl md:text-3xl text-center mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Best Sellers</h2>
-          <div className="grid grid-cols-2 md:grid-cols-3 gap-4 md:gap-6">
-            {bestSellers.map(product => (
-              <ProductCard key={product.id} product={product} badge="BESTSELLER" salePrice={salePriceMap[product.id]} />
-            ))}
-          </div>
-        </section>
-      )}
-
-      {/* Last Chance — stock ≤ 3, shown when at least 1 product qualifies */}
-      {lastChance.length >= 1 && (
-        <section className="max-w-6xl mx-auto px-4 py-10" style={{ borderTop: '1px solid #E8DDD4' }}>
-          <div className="flex items-baseline justify-center gap-3 mb-6">
-            <h2 className="text-2xl md:text-3xl" style={{ fontFamily: 'Playfair Display, serif' }}>Last Chance</h2>
-            <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Almost Gone</span>
-          </div>
-          <p className="text-center text-sm mb-6" style={{ color: '#9CA3AF' }}>
-            These styles are almost sold out — grab yours before they&apos;re gone.
-          </p>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-6">
-            {lastChance.map(product => (
-              <ProductCard key={product.id} product={product} salePrice={salePriceMap[product.id]} />
-            ))}
-          </div>
-        </section>
-      )}
+      {/* Product sections — tabbed to keep the page compact */}
+      <ProductSectionTabs
+        trending={trending}
+        newArrivals={newArrivals}
+        justDropped={justDropped}
+        bestSellers={bestSellers}
+        lastChance={lastChance}
+        salePriceMap={salePriceMap}
+      />
     </div>
   )
 }

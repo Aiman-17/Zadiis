@@ -1,6 +1,7 @@
 'use client'
 import { useRouter, useSearchParams } from 'next/navigation'
 
+const CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale']
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 const TYPES = [
   { label: 'Stitched', value: 'stitched' },
@@ -13,29 +14,24 @@ const PRICE_RANGES = [
   { label: 'Over PKR 10,000', min: '10000', max: '999999' },
 ]
 
+const activeStyle = { backgroundColor: '#1C1C1C', borderColor: '#1C1C1C', color: 'white' }
+const idleStyle = { borderColor: '#D1D5DB' }
+
 export default function ProductFilters() {
   const router = useRouter()
   const params = useSearchParams()
 
   const updateParam = (key: string, value: string) => {
     const p = new URLSearchParams(params.toString())
-    if (p.get(key) === value) {
-      p.delete(key)
-    } else {
-      p.set(key, value)
-    }
+    if (p.get(key) === value) p.delete(key)
+    else p.set(key, value)
     router.push(`/shop?${p.toString()}`)
   }
 
   const setPrice = (min: string, max: string) => {
     const p = new URLSearchParams(params.toString())
-    if (p.get('min') === min && p.get('max') === max) {
-      p.delete('min')
-      p.delete('max')
-    } else {
-      p.set('min', min)
-      p.set('max', max)
-    }
+    if (p.get('min') === min && p.get('max') === max) { p.delete('min'); p.delete('max') }
+    else { p.set('min', min); p.set('max', max) }
     router.push(`/shop?${p.toString()}`)
   }
 
@@ -47,6 +43,25 @@ export default function ProductFilters() {
         <h3 className="font-semibold text-sm uppercase tracking-wider">Filters</h3>
         <button onClick={clearAll} className="text-xs text-gray-400 hover:text-gray-700">Clear all</button>
       </div>
+
+      {/* Category */}
+      <div>
+        <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Category</h3>
+        <div className="flex flex-wrap gap-2">
+          {CATEGORIES.map(cat => (
+            <button
+              key={cat}
+              onClick={() => updateParam('cat', cat)}
+              className="px-3 py-1 text-sm border rounded transition-colors"
+              style={params.get('cat') === cat ? activeStyle : idleStyle}
+            >
+              {cat}
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Type */}
       <div>
         <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Type</h3>
         <div className="flex flex-wrap gap-2">
@@ -55,13 +70,15 @@ export default function ProductFilters() {
               key={t.value}
               onClick={() => updateParam('type', t.value)}
               className="px-3 py-1 text-sm border rounded transition-colors"
-              style={params.get('type') === t.value ? { backgroundColor: '#1C1C1C', borderColor: '#1C1C1C', color: 'white' } : { borderColor: '#D1D5DB' }}
+              style={params.get('type') === t.value ? activeStyle : idleStyle}
             >
               {t.label}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Size */}
       <div>
         <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Size</h3>
         <div className="flex flex-wrap gap-2">
@@ -69,14 +86,16 @@ export default function ProductFilters() {
             <button
               key={size}
               onClick={() => updateParam('size', size)}
-              className={`px-3 py-1 text-sm border rounded transition-colors ${params.get('size') === size ? 'text-white' : 'border-gray-300 hover:border-gray-500'}`}
-              style={params.get('size') === size ? { backgroundColor: '#1C1C1C', borderColor: '#1C1C1C', color: 'white' } : undefined}
+              className="px-3 py-1 text-sm border rounded transition-colors"
+              style={params.get('size') === size ? activeStyle : idleStyle}
             >
               {size}
             </button>
           ))}
         </div>
       </div>
+
+      {/* Price */}
       <div>
         <h3 className="font-semibold text-sm uppercase tracking-wider mb-3">Price</h3>
         <div className="space-y-2">

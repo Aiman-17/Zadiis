@@ -26,6 +26,7 @@ export async function getProducts(filters?: {
   size?: string
   type?: string
   q?: string
+  category?: string
 }) {
   const excludeIds = await getActiveSaleExcludeIds()
 
@@ -40,6 +41,7 @@ export async function getProducts(filters?: {
     query = query.not('id', 'in', `(${excludeIds.join(',')})`)
   }
 
+  if (filters?.category) query = query.eq('product_category', filters.category)
   if (filters?.q) query = query.ilike('name', `%${filters.q}%`)
   if (filters?.minPrice !== undefined) query = query.gte('price', filters.minPrice)
   if (filters?.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
