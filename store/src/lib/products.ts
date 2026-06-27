@@ -29,10 +29,13 @@ export async function getProducts(filters?: {
 }) {
   const excludeIds = await getActiveSaleExcludeIds()
 
+  const today = new Date().toISOString().split('T')[0]
+
   let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
+    .or(`is_new_arrival.eq.false,new_arrival_end.lt.${today}`)
     .order('created_at', { ascending: false })
 
   if (excludeIds.length > 0) {
@@ -73,14 +76,30 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getJustDroppedProducts(limit = 4) {
-  const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000).toISOString()
+  const h72 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
   const { data } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
+    .eq('is_new_arrival', false)
     .gt('stock_quantity', 0)
-    .gte('created_at', d7)
+    .gte('created_at', h72)
     .order('created_at', { ascending: false })
+    .limit(limit)
+  return (data || []) as Product[]
+}
+
+export async function getNewArrivalProducts(limit = 8) {
+  const today = new Date().toISOString().split('T')[0]
+  const { data } = await supabase
+    .from('products')
+    .select('*, categories(name, slug)')
+    .eq('is_active', true)
+    .eq('is_new_arrival', true)
+    .gt('stock_quantity', 0)
+    .or(`new_arrival_start.is.null,new_arrival_start.lte.${today}`)
+    .or(`new_arrival_end.is.null,new_arrival_end.gte.${today}`)
+    .order('new_arrival_start', { ascending: false })
     .limit(limit)
   return (data || []) as Product[]
 }

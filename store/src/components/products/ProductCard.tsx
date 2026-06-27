@@ -3,18 +3,13 @@ import Image from 'next/image'
 import type { Product } from '@/types'
 
 const BADGE_STYLE: Record<string, { bg: string; color: string }> = {
-  'JUST DROPPED':      { bg: '#1C1C1C', color: 'white' },
-  'NEW THIS WEEK':     { bg: '#1C1C1C', color: 'white' },
-  'NEW ARRIVAL':       { bg: '#A68B6E', color: 'white' },
-  'TRENDING':          { bg: '#1C1C1C', color: 'white' },
-  'BESTSELLER':        { bg: '#A68B6E', color: 'white' },
-  'CUSTOMER FAVORITE': { bg: '#A68B6E', color: 'white' },
-  'LAST CHANCE':       { bg: '#C62828', color: 'white' },
-  'LIMITED STOCK':     { bg: '#C62828', color: 'white' },
-  'FAST SELLING':      { bg: '#C62828', color: 'white' },
+  'JUST DROPPED': { bg: '#1C1C1C', color: 'white' },
+  'NEW ARRIVAL':  { bg: '#059669', color: 'white' },
+  'TRENDING':     { bg: '#1C1C1C', color: 'white' },
+  'BESTSELLER':   { bg: '#A68B6E', color: 'white' },
+  'LAST CHANCE':  { bg: '#C62828', color: 'white' },
 }
 
-// Badges that render even when a sale discount is already shown
 const ALWAYS_SHOW = new Set(['LAST CHANCE', 'JUST DROPPED'])
 
 function getEffectiveStock(product: Product): number {
@@ -27,14 +22,27 @@ function getEffectiveStock(product: Product): number {
   return product.stock_quantity
 }
 
-// Priority: LAST CHANCE > caller badge (TRENDING / BESTSELLER) > age badge
 function getEffectiveBadge(product: Product, callerBadge?: string): string | undefined {
   const stock = getEffectiveStock(product)
   if (stock > 0 && stock <= 3) return 'LAST CHANCE'
+  if (product.is_new_arrival) return 'NEW ARRIVAL'
   if (callerBadge) return callerBadge
   const ageDays = (Date.now() - new Date(product.created_at).getTime()) / 86_400_000
-  if (ageDays <= 7) return 'JUST DROPPED'
-  if (ageDays <= 30) return 'NEW ARRIVAL'
+  if (ageDays <= 3) return 'JUST DROPPED'
+  return undefined
+}
+
+// Small icon shown top-right on the image card
+function getImageIcon(product: Product, callerBadge?: string): string | undefined {
+  if (product.is_trending || callerBadge === 'TRENDING') return '🔥'
+  if (
+    product.is_bestseller ||
+    (product.best_seller_score && product.best_seller_score > 0) ||
+    callerBadge === 'BESTSELLER'
+  ) return '⭐'
+  if (product.is_new_arrival) return '✨'
+  const ageDays = (Date.now() - new Date(product.created_at).getTime()) / 86_400_000
+  if (ageDays <= 3) return '⚡'
   return undefined
 }
 
@@ -53,7 +61,7 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
   const effectiveBadge = getEffectiveBadge(product, badge)
   const badgeStyle = effectiveBadge ? BADGE_STYLE[effectiveBadge] : null
   const showBadge = effectiveBadge && badgeStyle && (!discountPct || ALWAYS_SHOW.has(effectiveBadge))
-
+  const imageIcon = getImageIcon(product, badge)
   const isSoldOut = getEffectiveStock(product) === 0
 
   return (
@@ -73,11 +81,11 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
-        {/* Sale discount badge — bottom-left */}
+        {/* Sale discount — bottom-left */}
         {discountPct > 0 && (
           <div className="absolute bottom-2 left-2 z-10">
             <span
-              className="text-sm font-bold px-2 py-0.5 rounded-sm"
+              className="text-xs font-bold px-1.5 py-0.5 rounded-sm"
               style={{ backgroundColor: '#C62828', color: 'white' }}
             >
               -{discountPct}%
@@ -85,10 +93,17 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
+        {/* On-image icon — top-right (🔥 ⭐ ✨ ⚡) */}
+        {imageIcon && (
+          <div className="absolute top-1.5 right-1.5 z-10 text-sm leading-none">
+            {imageIcon}
+          </div>
+        )}
+
         {/* Sold-out overlay */}
         {isSoldOut && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
-            <span className="text-white text-sm font-medium tracking-wide">Sold Out</span>
+            <span className="text-white text-xs font-medium tracking-wide">Sold Out</span>
           </div>
         )}
       </div>
@@ -97,14 +112,14 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
 
       {showBadge && (
         <span
-          className="inline-block text-xs font-semibold px-2 py-0.5 rounded-sm mt-1 tracking-wide"
+          className="inline-block text-xs font-medium px-1.5 py-0.5 rounded-sm mt-0.5 tracking-wide"
           style={{ backgroundColor: badgeStyle!.bg, color: badgeStyle!.color }}
         >
           {effectiveBadge}
         </span>
       )}
 
-      <div className="flex items-baseline gap-2 mt-1">
+      <div className="flex items-baseline gap-2 mt-0.5">
         {salePrice ? (
           <>
             <span className="font-semibold text-sm" style={{ color: '#A68B6E' }}>

@@ -36,6 +36,10 @@ export type Product = {
   product_category?: string
   is_trending?: boolean
   is_new_arrival?: boolean
+  collection_name?: string
+  new_arrival_start?: string
+  new_arrival_end?: string
+  no_restock?: boolean
 }
 
 export type OrderItem = {
