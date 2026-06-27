@@ -77,6 +77,7 @@ export type Order = {
   safepay_tracker?: string
   safepay_transaction_id?: string
   payment_verified_at?: string
+  email_bounced?: boolean
   created_at: string
 }
 

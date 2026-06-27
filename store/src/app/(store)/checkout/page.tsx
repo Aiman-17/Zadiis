@@ -29,7 +29,21 @@ export default function CheckoutPage() {
   const [saleActive, setSaleActive] = useState(false)
   const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
   const [form, setForm] = useState({ name: '', phone: '', email: '', address: '', city: '', payment: '', website: '' })
+  const [fieldErrors, setFieldErrors] = useState<{ phone?: string; email?: string }>({})
   const [stockWarning, setStockWarning] = useState<string | null>(null)
+
+  const validatePhone = (v: string) => {
+    const clean = v.replace(/[\s\-]/g, '')
+    if (!clean) return 'Phone number is required'
+    if (!/^03[0-9]{9}$/.test(clean)) return 'Must be 11 digits starting with 03 (e.g. 03001234567)'
+    return ''
+  }
+
+  const validateEmail = (v: string) => {
+    if (!v) return 'Email is required'
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Please enter a valid email address'
+    return ''
+  }
 
   useEffect(() => {
     const cart = getCart()
@@ -138,6 +152,14 @@ export default function CheckoutPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     if (!form.payment) { alert('Please select a payment method'); return }
+
+    const phoneErr = validatePhone(form.phone)
+    const emailErr = validateEmail(form.email)
+    if (phoneErr || emailErr) {
+      setFieldErrors({ phone: phoneErr || undefined, email: emailErr || undefined })
+      return
+    }
+
     setLoading(true)
     setError(null)
     setGatewayDown(null)
@@ -283,12 +305,26 @@ export default function CheckoutPage() {
           </div>
           <div>
             <Label htmlFor="phone">Phone *</Label>
-            <Input id="phone" required type="tel" value={form.phone} onChange={e => set('phone', e.target.value)} className="mt-1" />
+            <Input
+              id="phone" required type="tel" value={form.phone}
+              onChange={e => { set('phone', e.target.value); setFieldErrors(prev => ({ ...prev, phone: undefined })) }}
+              onBlur={e => { const err = validatePhone(e.target.value); setFieldErrors(prev => ({ ...prev, phone: err || undefined })) }}
+              className="mt-1"
+              style={fieldErrors.phone ? { borderColor: '#EF4444' } : {}}
+            />
+            {fieldErrors.phone && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{fieldErrors.phone}</p>}
           </div>
         </div>
         <div>
           <Label htmlFor="email">Email * (for order confirmation & updates)</Label>
-          <Input id="email" required type="email" value={form.email} onChange={e => set('email', e.target.value)} className="mt-1" />
+          <Input
+            id="email" required type="email" value={form.email}
+            onChange={e => { set('email', e.target.value); setFieldErrors(prev => ({ ...prev, email: undefined })) }}
+            onBlur={e => { const err = validateEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: err || undefined })) }}
+            className="mt-1"
+            style={fieldErrors.email ? { borderColor: '#EF4444' } : {}}
+          />
+          {fieldErrors.email && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
         </div>
         <div>
           <Label htmlFor="address">Delivery Address *</Label>

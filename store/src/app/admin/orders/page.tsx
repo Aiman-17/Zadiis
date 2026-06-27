@@ -1,6 +1,6 @@
 'use client'
 import { useState, useEffect, useMemo } from 'react'
-import { Archive, XCircle } from 'lucide-react'
+import { Archive, XCircle, Pencil, Check, X } from 'lucide-react'
 import type { Order, OrderItem } from '@/types'
 import CancelModal from '@/components/admin/CancelModal'
 import ReturnModal from '@/components/admin/ReturnModal'
@@ -54,6 +54,10 @@ export default function AdminOrders() {
   const [cancelId,        setCancelId]         = useState<string | null>(null)
   const [returnId,        setReturnId]         = useState<string | null>(null)
   const [requestError,    setRequestError]     = useState<string | null>(null)
+  const [editingId,       setEditingId]        = useState<string | null>(null)
+  const [editForm,        setEditForm]         = useState({ phone: '', email: '', address: '' })
+  const [editError,       setEditError]        = useState<string | null>(null)
+  const [editSaving,      setEditSaving]       = useState(false)
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -130,6 +134,34 @@ export default function AdminOrders() {
     })
     setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: true } : o))
     if (expanded === id) setExpanded(null)
+  }
+
+  const startEdit = (order: Order) => {
+    setEditingId(order.id)
+    setEditForm({ phone: order.customer_phone, email: order.customer_email || '', address: order.address })
+    setEditError(null)
+  }
+
+  const saveContact = async (orderId: string) => {
+    setEditSaving(true)
+    setEditError(null)
+    const res = await fetch('/api/admin/orders', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ id: orderId, customer_phone: editForm.phone, customer_email: editForm.email, address: editForm.address }),
+    })
+    const data = await res.json()
+    if (data.error) {
+      setEditError(data.error)
+      setEditSaving(false)
+      return
+    }
+    setOrders(prev => prev.map(o => o.id === orderId
+      ? { ...o, customer_phone: editForm.phone, customer_email: editForm.email, address: editForm.address, email_bounced: false }
+      : o
+    ))
+    setEditingId(null)
+    setEditSaving(false)
   }
 
   const resolveRequest = async (id: string, type: 'return' | 'cancellation') => {
@@ -351,9 +383,14 @@ export default function AdminOrders() {
               onClick={() => setExpanded(expanded === order.id ? null : order.id)}
             >
               <div className="min-w-0">
-                <p className="font-medium text-sm">
+                <p className="font-medium text-sm flex items-center gap-2 flex-wrap">
                   <span style={{ color: '#A68B6E' }}>{order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}</span>
                   {' — '}{order.customer_name}
+                  {order.email_bounced && (
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                      ⚠️ Email bounced
+                    </span>
+                  )}
                 </p>
                 <p className="text-xs" style={{ color: '#6B7280' }}>
                   {order.customer_phone} · {order.city} · {new Date(order.created_at).toLocaleDateString()}
@@ -430,6 +467,70 @@ export default function AdminOrders() {
                   <p className="mt-1" style={{ color: '#6B7280' }}>
                     {order.address} · Payment: {order.payment_method}
                   </p>
+                </div>
+
+                {/* Edit contact details */}
+                <div className="mt-3 pt-3 border-t" style={{ borderColor: '#E8DDD4' }}>
+                  {editingId === order.id ? (
+                    <div className="space-y-2">
+                      <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#A68B6E' }}>Edit Contact Details</p>
+                      <div>
+                        <label className="text-xs text-gray-500">Phone</label>
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm mt-0.5"
+                          style={{ borderColor: '#E2E8F0' }}
+                          value={editForm.phone}
+                          onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
+                          placeholder="03001234567"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Email</label>
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm mt-0.5"
+                          style={{ borderColor: '#E2E8F0' }}
+                          value={editForm.email}
+                          onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
+                          placeholder="customer@email.com"
+                        />
+                      </div>
+                      <div>
+                        <label className="text-xs text-gray-500">Address</label>
+                        <input
+                          className="w-full border rounded px-2 py-1 text-sm mt-0.5"
+                          style={{ borderColor: '#E2E8F0' }}
+                          value={editForm.address}
+                          onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))}
+                        />
+                      </div>
+                      {editError && <p className="text-xs" style={{ color: '#DC2626' }}>{editError}</p>}
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() => saveContact(order.id)}
+                          disabled={editSaving}
+                          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full font-medium"
+                          style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}
+                        >
+                          <Check size={12} /> {editSaving ? 'Saving...' : 'Save'}
+                        </button>
+                        <button
+                          onClick={() => { setEditingId(null); setEditError(null) }}
+                          className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border"
+                          style={{ borderColor: '#E8DDD4', color: '#9CA3AF' }}
+                        >
+                          <X size={12} /> Cancel
+                        </button>
+                      </div>
+                    </div>
+                  ) : (
+                    <button
+                      onClick={() => startEdit(order)}
+                      className="flex items-center gap-1.5 text-xs"
+                      style={{ color: '#9CA3AF' }}
+                    >
+                      <Pencil size={12} /> Edit contact details
+                    </button>
+                  )}
                 </div>
 
                 {order.order_status !== 'cancelled' && !order.is_archived && (

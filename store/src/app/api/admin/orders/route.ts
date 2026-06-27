@@ -5,6 +5,38 @@ import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrder
 import { incrementTotalSold } from '@/lib/scoring'
 import type { OrderItem } from '@/types'
 
+export async function PATCH(req: NextRequest) {
+  try {
+    const { id, customer_phone, customer_email, address } = await req.json()
+    if (!id) return NextResponse.json({ error: 'id required' }, { status: 400 })
+
+    const update: Record<string, unknown> = {}
+
+    if (customer_phone !== undefined) {
+      const clean = String(customer_phone).replace(/[\s\-]/g, '')
+      if (!/^03[0-9]{9}$/.test(clean))
+        return NextResponse.json({ error: 'Phone must be 11 digits starting with 03' }, { status: 400 })
+      update.customer_phone = clean
+    }
+    if (customer_email !== undefined) {
+      if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer_email))
+        return NextResponse.json({ error: 'Invalid email address' }, { status: 400 })
+      update.customer_email = customer_email
+      update.email_bounced = false
+    }
+    if (address !== undefined) update.address = address
+
+    if (Object.keys(update).length === 0)
+      return NextResponse.json({ error: 'Nothing to update' }, { status: 400 })
+
+    const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
+    if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+    return NextResponse.json({ success: true })
+  } catch {
+    return NextResponse.json({ error: 'Internal server error' }, { status: 500 })
+  }
+}
+
 export async function DELETE(req: NextRequest) {
   try {
     const { id } = await req.json()

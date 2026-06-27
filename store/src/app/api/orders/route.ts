@@ -38,6 +38,13 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
+    const cleanPhone = String(customer_phone).replace(/[\s\-]/g, '')
+    if (!/^03[0-9]{9}$/.test(cleanPhone))
+      return NextResponse.json({ error: 'Phone must be 11 digits and start with 03 (e.g. 03001234567)' }, { status: 400 })
+
+    if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(customer_email))
+      return NextResponse.json({ error: 'Please enter a valid email address' }, { status: 400 })
+
     // Validate stock for all items before creating order
     for (const item of items as Array<{ product_id: string; product_name: string; quantity: number; color?: string; size?: string }>) {
       const { data: product, error } = await supabaseAdmin
