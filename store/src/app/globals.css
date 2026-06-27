@@ -137,3 +137,20 @@ body {
 h1, h2, h3 {
   font-family: 'Playfair Display', serif;
 }
+
+@keyframes fire-flicker {
+  0%   { transform: scale(1)    rotate(-1.5deg); opacity: 1; }
+  20%  { transform: scale(1.2)  rotate(2.5deg);  opacity: 0.9; }
+  40%  { transform: scale(0.92) rotate(-2.5deg); opacity: 1; }
+  60%  { transform: scale(1.15) rotate(2deg);    opacity: 0.85; }
+  80%  { transform: scale(0.95) rotate(-1deg);   opacity: 1; }
+  100% { transform: scale(1.08) rotate(1.5deg);  opacity: 0.9; }
+}
+
+@keyframes hourglass-flip {
+  0%   { transform: rotate(0deg); }
+  38%  { transform: rotate(0deg); }
+  50%  { transform: rotate(180deg); }
+  88%  { transform: rotate(180deg); }
+  100% { transform: rotate(360deg); }
+}

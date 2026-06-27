@@ -1,20 +1,8 @@
 'use client'
 import Link from 'next/link'
 import Image from 'next/image'
-import { Flame, Timer } from 'lucide-react'
+import { Flame, Hourglass } from 'lucide-react'
 import type { Product } from '@/types'
-
-const BADGE_STYLE: Record<string, { bg: string; color: string }> = {
-  'NEW ARRIVAL': { bg: '#059669', color: 'white' },
-  'BESTSELLER':  { bg: '#C9961A', color: 'white' },
-}
-
-const ICON_CONFIG = {
-  trending:    { Icon: Flame, bg: 'rgba(198,40,40,0.90)', color: 'white', animClass: 'animate-bounce' },
-  last_chance: { Icon: Timer, bg: 'rgba(198,40,40,0.90)', color: 'white', animClass: 'animate-pulse' },
-} as const
-
-type IconKey = keyof typeof ICON_CONFIG
 
 function getEffectiveStock(product: Product): number {
   const vs = product.variant_stock
@@ -26,26 +14,6 @@ function getEffectiveStock(product: Product): number {
   return product.stock_quantity
 }
 
-function getEffectiveBadge(product: Product, callerBadge?: string): string | undefined {
-  const stock = getEffectiveStock(product)
-  if (stock > 0 && stock <= 3) return 'LAST CHANCE'
-  if (product.is_new_arrival) return 'NEW ARRIVAL'
-  if (product.is_trending || callerBadge === 'TRENDING') return 'TRENDING'
-  if (
-    (product.best_seller_score && product.best_seller_score >= 5) ||
-    callerBadge === 'BESTSELLER'
-  ) return 'BESTSELLER'
-  const ageDays = (Date.now() - new Date(product.created_at).getTime()) / 86_400_000
-  if (ageDays <= 3) return 'JUST DROPPED'
-  return undefined
-}
-
-function getIconKey(effectiveBadge?: string): IconKey | undefined {
-  if (effectiveBadge === 'TRENDING') return 'trending'
-  if (effectiveBadge === 'LAST CHANCE') return 'last_chance'
-  return undefined
-}
-
 interface ProductCardProps {
   product: Product
   salePrice?: number
@@ -54,19 +22,23 @@ interface ProductCardProps {
 
 export default function ProductCard({ product, salePrice, badge }: ProductCardProps) {
   const image = product.images[0] || ''
+  const stock = getEffectiveStock(product)
+  const isSoldOut = stock === 0
+
   const discountPct = salePrice && product.price > 0
     ? Math.round((1 - salePrice / product.price) * 100)
     : 0
 
-  const effectiveBadge = getEffectiveBadge(product, badge)
-  const badgeStyle = effectiveBadge ? BADGE_STYLE[effectiveBadge] : null
-  const showBadge = !!badgeStyle
-  const iconKey = getIconKey(effectiveBadge)
-  const iconConfig = iconKey ? ICON_CONFIG[iconKey] : null
-  const isSoldOut = getEffectiveStock(product) === 0
+  // Independent signal checks — all can show simultaneously
+  const showFire       = !!(product.is_trending || badge === 'TRENDING')
+  const showHourglass  = stock > 0 && stock <= 3
+  const showNewArrival = !!product.is_new_arrival
+  const showBestseller = !!((product.best_seller_score && product.best_seller_score >= 5) || badge === 'BESTSELLER')
+  const hasBadgeRow    = showFire || showHourglass || showNewArrival || showBestseller
 
   return (
     <Link href={`/shop/${product.slug}`} className="group block">
+      {/* Image — clean, only sale % tag overlay */}
       <div className="overflow-hidden rounded-sm bg-white aspect-[3/4] relative mb-2">
         {image ? (
           <Image
@@ -82,7 +54,6 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
-        {/* Sale discount — bottom-left */}
         {discountPct > 0 && (
           <div className="absolute bottom-2 left-2 z-10">
             <span
@@ -94,17 +65,6 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
-        {/* Animated icon — top-right (Flame for trending, Timer for last chance) */}
-        {iconConfig && (
-          <div
-            className={`absolute top-1.5 right-1.5 z-10 rounded-full p-1.5 flex items-center justify-center ${iconConfig.animClass}`}
-            style={{ backgroundColor: iconConfig.bg }}
-          >
-            <iconConfig.Icon size={11} color={iconConfig.color} strokeWidth={2.5} />
-          </div>
-        )}
-
-        {/* Sold-out overlay */}
         {isSoldOut && (
           <div className="absolute inset-0 bg-black/40 flex items-center justify-center">
             <span className="text-white text-[10px] font-medium tracking-wide">Sold Out</span>
@@ -114,13 +74,50 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
 
       <h3 className="font-medium text-xs truncate leading-snug">{product.name}</h3>
 
-      {showBadge && (
-        <span
-          className="inline-block text-[9px] font-semibold px-1.5 py-[1px] rounded-sm mt-0.5 tracking-widest uppercase"
-          style={{ backgroundColor: badgeStyle!.bg, color: badgeStyle!.color }}
-        >
-          {effectiveBadge}
-        </span>
+      {/* Badge row — animated icons + text badges, all independent */}
+      {hasBadgeRow && (
+        <div className="flex items-center gap-1 mt-0.5 flex-wrap">
+          {showFire && (
+            <span
+              className="inline-flex items-center justify-center w-[18px] h-[18px]"
+              style={{
+                color: '#ea580c',
+                animation: 'fire-flicker 0.65s ease-in-out infinite alternate',
+                transformOrigin: 'bottom center',
+              }}
+            >
+              <Flame size={14} strokeWidth={2.2} />
+            </span>
+          )}
+          {showHourglass && (
+            <span
+              className="inline-flex items-center justify-center w-[18px] h-[18px]"
+              style={{
+                color: '#C62828',
+                animation: 'hourglass-flip 3s ease-in-out infinite',
+                transformOrigin: 'center center',
+              }}
+            >
+              <Hourglass size={13} strokeWidth={2.2} />
+            </span>
+          )}
+          {showNewArrival && (
+            <span
+              className="text-[9px] font-semibold px-1.5 py-[1px] rounded-sm tracking-widest uppercase"
+              style={{ backgroundColor: '#059669', color: 'white' }}
+            >
+              New Arrival
+            </span>
+          )}
+          {showBestseller && (
+            <span
+              className="text-[9px] font-semibold px-1.5 py-[1px] rounded-sm tracking-widest uppercase"
+              style={{ backgroundColor: '#C9961A', color: 'white' }}
+            >
+              Bestseller
+            </span>
+          )}
+        </div>
       )}
 
       <div className="flex items-baseline gap-1.5 mt-0.5">
