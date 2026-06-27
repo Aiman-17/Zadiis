@@ -148,7 +148,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <div className="max-w-5xl mx-auto px-4 py-6">
+      <div className="max-w-5xl mx-auto px-4 py-8 md:py-10">
         <Link href="/shop" className="text-sm inline-block mb-6 hover:underline" style={{ color: '#A68B6E' }}>
           ← Back to Shop
         </Link>
@@ -163,7 +163,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
           <ProductImageGallery images={product!.images} name={product!.name} />
-          <div className="space-y-6">
+          <div className="space-y-5 md:space-y-6 pt-2 md:pt-0">
             <div>
               <h1 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>{product!.name}</h1>
 

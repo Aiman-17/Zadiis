@@ -6,7 +6,7 @@ export default function Footer() {
       <div className="max-w-6xl mx-auto px-4 grid grid-cols-1 md:grid-cols-3 gap-8">
         {/* Brand */}
         <div>
-          <p className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display, serif', color: 'white' }}>ZADIIS</p>
+          <p className="text-lg font-bold mb-3" style={{ fontFamily: 'Playfair Display, serif', color: 'white' }}>ZADII&apos;S</p>
           <p className="text-sm" style={{ color: '#9CA3AF' }}>Dressed in Confidence. Women&apos;s fashion crafted for the modern Pakistani woman.</p>
         </div>
         {/* Quick Links */}
@@ -30,7 +30,7 @@ export default function Footer() {
         </div>
       </div>
       <div className="max-w-6xl mx-auto px-4 mt-8 pt-6 border-t text-center text-xs" style={{ borderColor: '#374151', color: '#6B7280' }}>
-        © {new Date().getFullYear()} ZADIIS. All rights reserved.
+        © {new Date().getFullYear()} ZADII&apos;S. All rights reserved.
       </div>
     </footer>
   )

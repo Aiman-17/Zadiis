@@ -81,7 +81,10 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
     <div className="space-y-4">
       {hasSizes && (
         <div>
-          <p className="text-sm font-medium mb-2">Size</p>
+          <div className="flex items-center justify-between mb-2">
+            <p className="text-sm font-medium">Size</p>
+            <a href="/size-guide" className="text-xs underline hover:opacity-70 transition-opacity" style={{ color: '#A68B6E' }}>Size Guide</a>
+          </div>
           <div className="flex flex-wrap gap-2">
             {product.sizes.map(size => {
               const disabled = isSizeDisabled(size)

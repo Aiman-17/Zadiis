@@ -37,30 +37,35 @@ export default function ProductSectionTabs({ trending, newArrivals, justDropped,
   return (
     <section className="max-w-6xl mx-auto px-4 py-6 border-t" style={{ borderColor: '#E8DDD4' }}>
       {/* Tab strip */}
-      <div className="flex gap-0 border-b mb-6 overflow-x-auto scrollbar-none" style={{ borderColor: '#E8DDD4' }}>
-        {available.map(s => {
-          const isActive = s.key === active
-          return (
-            <button
-              key={s.key}
-              onClick={() => setActive(s.key)}
-              className="shrink-0 px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap"
-              style={isActive
-                ? { color: s.accent, borderBottom: `2px solid ${s.accent}`, marginBottom: '-1px' }
-                : { color: '#9CA3AF', borderBottom: '2px solid transparent', marginBottom: '-1px' }}
-            >
-              {s.label}
-              {s.sub && isActive && (
-                <span
-                  className="ml-1.5 text-[9px] font-bold uppercase tracking-widest hidden sm:inline"
-                  style={{ color: s.accent }}
-                >
-                  {s.sub}
-                </span>
-              )}
-            </button>
-          )
-        })}
+      <div className="relative mb-6">
+        <div className="flex gap-0 border-b overflow-x-auto scrollbar-none" style={{ borderColor: '#E8DDD4' }}>
+          {available.map(s => {
+            const isActive = s.key === active
+            return (
+              <button
+                key={s.key}
+                onClick={() => setActive(s.key)}
+                className="shrink-0 px-3 md:px-4 py-2.5 text-sm font-medium transition-colors whitespace-nowrap"
+                style={isActive
+                  ? { color: s.accent, borderBottom: `2px solid ${s.accent}`, marginBottom: '-1px' }
+                  : { color: '#9CA3AF', borderBottom: '2px solid transparent', marginBottom: '-1px' }}
+              >
+                {s.label}
+                {s.sub && isActive && (
+                  <span
+                    className="ml-1.5 text-[9px] font-bold uppercase tracking-widest hidden sm:inline"
+                    style={{ color: s.accent }}
+                  >
+                    {s.sub}
+                  </span>
+                )}
+              </button>
+            )
+          })}
+        </div>
+        {/* Fade hint to signal horizontal scroll on mobile */}
+        <div className="absolute right-0 top-0 bottom-[1px] w-8 pointer-events-none md:hidden"
+          style={{ background: 'linear-gradient(to right, transparent, #FAF8F5)' }} />
       </div>
 
       {/* Grid */}
