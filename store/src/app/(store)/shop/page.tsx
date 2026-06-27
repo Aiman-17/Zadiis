@@ -91,7 +91,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
         <ShopSearchBar />
       </Suspense>
       <div className="flex flex-col md:flex-row gap-8 mt-4">
-        <aside className="w-full md:w-56 shrink-0">
+        <aside className="shrink-0 md:w-56">
           <Suspense>
             <ProductFilters />
           </Suspense>
