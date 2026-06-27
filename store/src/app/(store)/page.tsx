@@ -147,9 +147,10 @@ export default async function HomePage() {
       ).filter(s => s.products.length > 0).map(s => (
         <div key={s.key} className="border-t" style={{ borderColor: '#E8DDD4' }}>
           <div className="max-w-6xl mx-auto px-4 py-4">
-            <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#A68B6E' }}>{s.label}</h2>
-              <Link href={s.href} className="text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity" style={{ color: '#A68B6E' }}>
+            <div className="flex items-center gap-3 mb-3">
+              <h2 className="text-sm font-bold uppercase tracking-widest shrink-0" style={{ color: '#A68B6E' }}>{s.label}</h2>
+              <div className="flex-1 h-px" style={{ backgroundColor: '#E8DDD4' }} />
+              <Link href={s.href} className="text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity shrink-0" style={{ color: '#A68B6E' }}>
                 View All →
               </Link>
             </div>
