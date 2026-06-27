@@ -148,8 +148,8 @@ export default async function HomePage() {
         <div key={s.key} className="border-t" style={{ borderColor: '#E8DDD4' }}>
           <div className="max-w-6xl mx-auto px-4 py-4">
             <div className="flex justify-between items-center mb-3">
-              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: s.accent }}>{s.label}</h2>
-              <Link href={s.href} className="text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity" style={{ color: s.accent }}>
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: '#1C1C1C' }}>{s.label}</h2>
+              <Link href={s.href} className="text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity" style={{ color: '#A68B6E' }}>
                 View All →
               </Link>
             </div>

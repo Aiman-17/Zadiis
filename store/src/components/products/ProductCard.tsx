@@ -8,7 +8,7 @@ const BADGE_STYLE: Record<string, { bg: string; color: string }> = {
   'JUST DROPPED': { bg: '#1C1C1C',  color: 'white' },
   'NEW ARRIVAL':  { bg: '#059669',  color: 'white' },
   'TRENDING':     { bg: '#1C1C1C',  color: 'white' },
-  'BESTSELLER':   { bg: '#A68B6E',  color: 'white' },
+  'BESTSELLER':   { bg: '#C9961A',  color: 'white' },
   'LAST CHANCE':  { bg: '#C62828',  color: 'white' },
 }
 
