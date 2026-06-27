@@ -3,11 +3,12 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import Image from 'next/image'
 import { Button } from '@/components/ui/button'
-import ProductSectionTabs from '@/components/products/ProductSectionTabs'
+import ProductCard from '@/components/products/ProductCard'
 
 import { getNewArrivalProducts, getBestsellerProducts, getTrendingProducts, getLastChanceProducts, getJustDroppedProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
+import type { Product } from '@/types'
 
 async function getHeroImage(): Promise<string> {
   try {
@@ -33,9 +34,9 @@ export default async function HomePage() {
   let salePriceMap: Record<string, number> = {}
   try {
     const [newArrivalsData, justDroppedData, bestSellersData, trendingData, lastChanceData, heroData, saleData] = await Promise.all([
-      getNewArrivalProducts(8),
+      getNewArrivalProducts(4),
       getJustDroppedProducts(4),
-      getBestsellerProducts(6),
+      getBestsellerProducts(4),
       getTrendingProducts(4),
       getLastChanceProducts(4),
       getHeroImage(),
@@ -134,15 +135,32 @@ export default async function HomePage() {
         </section>
       )}
 
-      {/* Product sections — tabbed to keep the page compact */}
-      <ProductSectionTabs
-        trending={trending}
-        newArrivals={newArrivals}
-        justDropped={justDropped}
-        bestSellers={bestSellers}
-        lastChance={lastChance}
-        salePriceMap={salePriceMap}
-      />
+      {/* Product sections — compact stacked rows */}
+      {(
+        [
+          { key: 'trending',    label: 'Trending',     products: trending,     accent: '#C62828', badge: 'TRENDING',    href: '/shop' },
+          { key: 'newArrivals', label: 'New Arrivals',  products: newArrivals,  accent: '#059669', badge: undefined,     href: '/new-arrivals' },
+          { key: 'justDropped', label: 'Just Dropped',  products: justDropped,  accent: '#1C1C1C', badge: undefined,     href: '/shop' },
+          { key: 'bestSellers', label: 'Best Sellers',  products: bestSellers,  accent: '#A68B6E', badge: 'BESTSELLER',  href: '/shop' },
+          { key: 'lastChance',  label: 'Last Chance',   products: lastChance,   accent: '#C62828', badge: undefined,     href: '/shop' },
+        ] as { key: string; label: string; products: Product[]; accent: string; badge: string | undefined; href: string }[]
+      ).filter(s => s.products.length > 0).map(s => (
+        <div key={s.key} className="border-t" style={{ borderColor: '#E8DDD4' }}>
+          <div className="max-w-6xl mx-auto px-4 py-4">
+            <div className="flex justify-between items-center mb-3">
+              <h2 className="text-xs font-bold uppercase tracking-widest" style={{ color: s.accent }}>{s.label}</h2>
+              <Link href={s.href} className="text-xs font-semibold uppercase tracking-widest hover:opacity-70 transition-opacity" style={{ color: s.accent }}>
+                View All →
+              </Link>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {s.products.slice(0, 4).map(p => (
+                <ProductCard key={p.id} product={p} badge={s.badge} salePrice={salePriceMap[p.id]} />
+              ))}
+            </div>
+          </div>
+        </div>
+      ))}
     </div>
   )
 }
