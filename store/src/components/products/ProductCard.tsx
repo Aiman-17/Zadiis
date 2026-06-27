@@ -25,7 +25,7 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
   const stock = getEffectiveStock(product)
   const isSoldOut = stock === 0
 
-  const discountPct = salePrice && product.price > 0
+  const discountPct = salePrice != null && product.price > 0
     ? Math.round((1 - salePrice / product.price) * 100)
     : 0
 
@@ -34,11 +34,10 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
   const showHourglass  = stock > 0 && stock <= 3
   const showNewArrival = !!product.is_new_arrival
   const showBestseller = !!((product.best_seller_score && product.best_seller_score >= 5) || badge === 'BESTSELLER')
-  const hasBadgeRow    = showFire || showHourglass || showNewArrival || showBestseller
+  const hasBadgeRow    = showFire || showHourglass || showBestseller
 
   return (
     <Link href={`/shop/${product.slug}`} className="group block">
-      {/* Image — clean, only sale % tag overlay */}
       <div className="overflow-hidden rounded-sm bg-white aspect-[3/4] relative mb-2">
         {image ? (
           <Image
@@ -54,6 +53,19 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
           </div>
         )}
 
+        {/* New Arrival — top-left image badge in price color */}
+        {showNewArrival && (
+          <div className="absolute top-2 left-2 z-10">
+            <span
+              className="text-[9px] font-bold px-1.5 py-0.5 uppercase tracking-widest"
+              style={{ backgroundColor: '#A68B6E', color: 'white' }}
+            >
+              New
+            </span>
+          </div>
+        )}
+
+        {/* Sale discount — bottom-left */}
         {discountPct > 0 && (
           <div className="absolute bottom-2 left-2 z-10">
             <span
@@ -74,7 +86,7 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
 
       <h3 className="font-medium text-xs truncate leading-snug">{product.name}</h3>
 
-      {/* Badge row — animated icons + text badges, all independent */}
+      {/* Badge row — animated icons + bestseller badge */}
       {hasBadgeRow && (
         <div className="flex items-center gap-1 mt-0.5 flex-wrap">
           {showFire && (
@@ -101,14 +113,6 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
               <Hourglass size={13} strokeWidth={2.2} />
             </span>
           )}
-          {showNewArrival && (
-            <span
-              className="text-[9px] font-semibold px-1.5 py-[1px] rounded-sm tracking-widest uppercase"
-              style={{ backgroundColor: '#059669', color: 'white' }}
-            >
-              New Arrival
-            </span>
-          )}
           {showBestseller && (
             <span
               className="text-[9px] font-semibold px-1.5 py-[1px] rounded-sm tracking-widest uppercase"
@@ -121,7 +125,7 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
       )}
 
       <div className="flex items-baseline gap-1.5 mt-0.5">
-        {salePrice ? (
+        {salePrice != null ? (
           <>
             <span className="font-semibold text-xs" style={{ color: '#A68B6E' }}>
               PKR {salePrice.toLocaleString('en-US')}
