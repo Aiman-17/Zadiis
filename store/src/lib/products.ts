@@ -60,8 +60,9 @@ export async function getProducts(filters?: {
   if (filters?.tab) {
     switch (filters.tab) {
       case 'trending':
-        query = query.or('trending_score.gt.0,is_trending.eq.true').order('trending_score', { ascending: false })
-        tabOrdered = true
+        // Use only the admin-set flag — trending_score is auto-computed from sales
+        // velocity so bestsellers bleed in; is_trending is the explicit admin signal
+        query = query.eq('is_trending', true).order('created_at', { ascending: false })
         break
       case 'new-arrivals': {
         const today = getPKTDate()
@@ -103,9 +104,14 @@ export async function getProducts(filters?: {
   }
 
   if (filters?.type === 'unstitched') {
-    query = query.or('sizes.eq.{},sizes.cs.{"Unstitched"}')
+    // sizes IS NULL (no sizes entered) OR empty array OR contains "Unstitched"
+    // Note: no double-quotes inside {} — they break PostgREST parsing inside or()
+    query = query.or('sizes.is.null,sizes.eq.{},sizes.cs.{Unstitched}')
   } else if (filters?.type === 'stitched') {
-    query = query.not('sizes', 'cs', '{"Unstitched"}').not('sizes', 'eq', '{}')
+    query = query
+      .not('sizes', 'is', null)
+      .not('sizes', 'cs', '{Unstitched}')
+      .not('sizes', 'eq', '{}')
   }
 
   // Default sort: newest first — only applied when tab hasn't set its own order
