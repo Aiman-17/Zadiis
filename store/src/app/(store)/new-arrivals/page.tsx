@@ -7,7 +7,7 @@ import type { Product } from '@/types'
 export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
-  title: 'New Arrivals | ZADIIS',
+  title: 'New Arrivals',
   description: 'Shop the latest new arrivals at ZADIIS — fresh seasonal launches and new fashion collections.',
 }
 

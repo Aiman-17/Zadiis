@@ -29,13 +29,11 @@ export async function getProducts(filters?: {
 }) {
   const excludeIds = await getActiveSaleExcludeIds()
 
-  const today = new Date().toISOString().split('T')[0]
-
   let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
-    .or(`is_new_arrival.eq.false,new_arrival_end.lt.${today}`)
+    .eq('is_new_arrival', false)
     .order('created_at', { ascending: false })
 
   if (excludeIds.length > 0) {
