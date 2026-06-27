@@ -35,22 +35,56 @@ export async function getProducts(filters?: {
   type?: string
   q?: string
   category?: string
+  tab?: string
 }) {
   const isSearch = !!filters?.q
+  const isTab = !!filters?.tab
 
   let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
-    .order('created_at', { ascending: false })
 
-  // Browsing: hide new arrivals + sale products (they have dedicated sections).
-  // Searching: return everything — customer typed a keyword, find it anywhere.
-  if (!isSearch) {
+  // Browsing without tab/search: hide new arrivals + sale products (they have dedicated sections).
+  // Tab or search: bypass those exclusions — apply the tab's own conditions instead.
+  if (!isSearch && !isTab) {
     const excludeIds = await getActiveSaleExcludeIds()
     query = query.eq('is_new_arrival', false)
     if (excludeIds.length > 0) {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+    }
+  }
+
+  // Tab filter — each tab adds its own DB conditions and sort order
+  let tabOrdered = false
+  if (filters?.tab) {
+    switch (filters.tab) {
+      case 'trending':
+        query = query.or('trending_score.gt.0,is_trending.eq.true').order('trending_score', { ascending: false })
+        tabOrdered = true
+        break
+      case 'new-arrivals': {
+        const today = getPKTDate()
+        query = query
+          .eq('is_new_arrival', true)
+          .gt('stock_quantity', 0)
+          .or(`new_arrival_start.is.null,new_arrival_start.lte.${today}`)
+          .or(`new_arrival_end.is.null,new_arrival_end.gte.${today}`)
+        break
+      }
+      case 'just-dropped': {
+        const h72 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
+        query = query.eq('is_new_arrival', false).gt('stock_quantity', 0).gte('created_at', h72)
+        break
+      }
+      case 'best-sellers':
+        query = query.or('best_seller_score.gt.0,is_bestseller.eq.true').order('best_seller_score', { ascending: false })
+        tabOrdered = true
+        break
+      case 'last-chance':
+        query = query.gt('stock_quantity', 0).lte('stock_quantity', 3).order('stock_quantity', { ascending: true })
+        tabOrdered = true
+        break
     }
   }
 
@@ -64,7 +98,6 @@ export async function getProducts(filters?: {
   if (filters?.minPrice !== undefined) query = query.gte('price', filters.minPrice)
   if (filters?.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
 
-  // Size and type filters applied at DB level — never pull the whole catalog into JS
   if (filters?.size) {
     query = query.contains('sizes', [filters.size])
   }
@@ -74,6 +107,9 @@ export async function getProducts(filters?: {
   } else if (filters?.type === 'stitched') {
     query = query.not('sizes', 'cs', '{"Unstitched"}').not('sizes', 'eq', '{}')
   }
+
+  // Default sort: newest first — only applied when tab hasn't set its own order
+  if (!tabOrdered) query = query.order('created_at', { ascending: false })
 
   const { data, error } = await query
   if (error) throw error
