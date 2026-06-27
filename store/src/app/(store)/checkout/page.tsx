@@ -32,6 +32,19 @@ export default function CheckoutPage() {
   const [fieldErrors, setFieldErrors] = useState<{ phone?: string; email?: string }>({})
   const [stockWarning, setStockWarning] = useState<string | null>(null)
 
+  // OTP state
+  const [otpState, setOtpState] = useState<'idle' | 'sending' | 'sent' | 'verifying' | 'verified'>('idle')
+  const [otpCode, setOtpCode] = useState('')
+  const [otpError, setOtpError] = useState<string | null>(null)
+  const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [resendCooldown, setResendCooldown] = useState(0)
+
+  useEffect(() => {
+    if (resendCooldown <= 0) return
+    const t = setTimeout(() => setResendCooldown(prev => prev - 1), 1000)
+    return () => clearTimeout(t)
+  }, [resendCooldown])
+
   const validatePhone = (v: string) => {
     const clean = v.replace(/[\s\-]/g, '')
     if (!clean) return 'Phone number is required'
@@ -43,6 +56,55 @@ export default function CheckoutPage() {
     if (!v) return 'Email is required'
     if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(v)) return 'Please enter a valid email address'
     return ''
+  }
+
+  const sendOtp = async (email: string) => {
+    setOtpState('sending')
+    setOtpError(null)
+    setOtpCode('')
+    const res = await fetch('/api/otp/send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email }),
+    })
+    const data = await res.json()
+    if (data.error) {
+      setOtpError(data.error)
+      setOtpState('idle')
+      return
+    }
+    setOtpState('sent')
+    setResendCooldown(60)
+  }
+
+  const handleEmailBlur = async (email: string) => {
+    const err = validateEmail(email)
+    if (err) { setFieldErrors(prev => ({ ...prev, email: err })); return }
+    setFieldErrors(prev => ({ ...prev, email: undefined }))
+    if (email === verifiedEmail) return
+    await sendOtp(email)
+  }
+
+  const handleOtpChange = async (value: string) => {
+    const digits = value.replace(/\D/g, '').slice(0, 6)
+    setOtpCode(digits)
+    setOtpError(null)
+    if (digits.length < 6) return
+    setOtpState('verifying')
+    const res = await fetch('/api/otp/verify', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: form.email, otp: digits }),
+    })
+    const data = await res.json()
+    if (data.error) {
+      setOtpError(data.error)
+      setOtpState('sent')
+      setOtpCode('')
+      return
+    }
+    setOtpState('verified')
+    setVerifiedEmail(form.email)
   }
 
   useEffect(() => {
@@ -157,6 +219,11 @@ export default function CheckoutPage() {
     const emailErr = validateEmail(form.email)
     if (phoneErr || emailErr) {
       setFieldErrors({ phone: phoneErr || undefined, email: emailErr || undefined })
+      return
+    }
+
+    if (otpState !== 'verified') {
+      setError('Please verify your email address with the code we sent you.')
       return
     }
 
@@ -317,14 +384,66 @@ export default function CheckoutPage() {
         </div>
         <div>
           <Label htmlFor="email">Email * (for order confirmation & updates)</Label>
-          <Input
-            id="email" required type="email" value={form.email}
-            onChange={e => { set('email', e.target.value); setFieldErrors(prev => ({ ...prev, email: undefined })) }}
-            onBlur={e => { const err = validateEmail(e.target.value); setFieldErrors(prev => ({ ...prev, email: err || undefined })) }}
-            className="mt-1"
-            style={fieldErrors.email ? { borderColor: '#EF4444' } : {}}
-          />
+          <div className="relative mt-1">
+            <Input
+              id="email" required type="email" value={form.email}
+              onChange={e => {
+                set('email', e.target.value)
+                setFieldErrors(prev => ({ ...prev, email: undefined }))
+                // Reset OTP if email changed after verifying
+                if (otpState === 'verified' && e.target.value !== verifiedEmail) {
+                  setOtpState('idle')
+                  setVerifiedEmail('')
+                  setOtpCode('')
+                  setOtpError(null)
+                }
+              }}
+              onBlur={e => handleEmailBlur(e.target.value)}
+              className="pr-24"
+              style={
+                fieldErrors.email ? { borderColor: '#EF4444' }
+                : otpState === 'verified' ? { borderColor: '#10B981' }
+                : {}
+              }
+            />
+            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">
+              {otpState === 'sending' && <span style={{ color: '#9CA3AF' }}>Sending…</span>}
+              {otpState === 'verified' && <span style={{ color: '#10B981', fontWeight: 600 }}>✓ Verified</span>}
+            </span>
+          </div>
           {fieldErrors.email && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
+
+          {/* OTP input — shown once code is sent */}
+          {(otpState === 'sent' || otpState === 'verifying') && (
+            <div className="mt-3 p-4 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
+              <p className="text-xs mb-2" style={{ color: '#6B7280' }}>
+                Enter the 6-digit code sent to <strong>{form.email}</strong>
+              </p>
+              <input
+                type="text"
+                inputMode="numeric"
+                maxLength={6}
+                value={otpCode}
+                onChange={e => handleOtpChange(e.target.value)}
+                placeholder="000000"
+                disabled={otpState === 'verifying'}
+                className="w-full border rounded px-3 py-3 text-center text-xl font-mono tracking-[0.5em]"
+                style={{ borderColor: otpError ? '#EF4444' : '#E2E8F0', backgroundColor: 'white' }}
+                autoComplete="one-time-code"
+              />
+              {otpState === 'verifying' && <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>Verifying…</p>}
+              {otpError && <p className="text-xs mt-1.5" style={{ color: '#EF4444' }}>{otpError}</p>}
+              <button
+                type="button"
+                onClick={() => sendOtp(form.email)}
+                disabled={resendCooldown > 0}
+                className="text-xs mt-2"
+                style={{ color: resendCooldown > 0 ? '#9CA3AF' : '#A68B6E' }}
+              >
+                {resendCooldown > 0 ? `Resend in ${resendCooldown}s` : 'Resend code'}
+              </button>
+            </div>
+          )}
         </div>
         <div>
           <Label htmlFor="address">Delivery Address *</Label>

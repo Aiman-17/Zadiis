@@ -743,6 +743,33 @@ export async function sendCustomerExchangeDelivered(to: string | null | undefine
   }
 }
 
+export async function sendOtpEmail(to: string, otp: string): Promise<void> {
+  const html = `
+    <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
+      ${zadiisHeader()}
+      <div style="padding:40px 32px;background:#FAF8F5;text-align:center">
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Verify Your Email</h2>
+        <p style="color:#666;margin:0 0 28px;font-size:14px">Enter this code at checkout to confirm your email address:</p>
+        <div style="background:white;border:2px solid #E8DDD4;border-radius:12px;padding:28px 40px;display:inline-block;margin-bottom:24px">
+          <p style="margin:0;font-size:42px;font-weight:bold;color:#1C1C1C;letter-spacing:14px;font-family:monospace">${otp}</p>
+        </div>
+        <p style="color:#9CA3AF;font-size:13px;margin:0">This code expires in 10 minutes.</p>
+        <p style="color:#9CA3AF;font-size:12px;margin:8px 0 0">If you didn't request this, you can safely ignore this email.</p>
+      </div>
+      ${zadiisFooter()}
+    </div>`
+  try {
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `${otp} — Your ZADIIS verification code`,
+      html,
+    })
+  } catch (e) {
+    console.error('sendOtpEmail failed:', e)
+  }
+}
+
 export async function sendBackInStockEmail(to: string, d: {
   product_name: string
   product_slug: string
