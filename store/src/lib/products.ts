@@ -1,6 +1,11 @@
 import { supabase } from './supabase/client'
 import type { Product } from '@/types'
 
+function getPKTDate(): string {
+  const now = new Date()
+  return new Date(now.getTime() + 5 * 60 * 60 * 1000).toISOString().split('T')[0]
+}
+
 let _saleCache: { ids: string[]; ts: number } | null = null
 
 async function getActiveSaleExcludeIds(): Promise<string[]> {
@@ -28,21 +33,31 @@ export async function getProducts(filters?: {
   q?: string
   category?: string
 }) {
-  const excludeIds = await getActiveSaleExcludeIds()
+  const isSearch = !!filters?.q
 
   let query = supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
-    .eq('is_new_arrival', false)
     .order('created_at', { ascending: false })
 
-  if (excludeIds.length > 0) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+  // Browsing: hide new arrivals + sale products (they have dedicated sections).
+  // Searching: return everything — customer typed a keyword, find it anywhere.
+  if (!isSearch) {
+    const excludeIds = await getActiveSaleExcludeIds()
+    query = query.eq('is_new_arrival', false)
+    if (excludeIds.length > 0) {
+      query = query.not('id', 'in', `(${excludeIds.join(',')})`)
+    }
   }
 
   if (filters?.category) query = query.eq('product_category', filters.category)
-  if (filters?.q) query = query.ilike('name', `%${filters.q}%`)
+  if (filters?.q) {
+    const term = filters.q.replace(/'/g, "''")
+    query = query.or(
+      `name.ilike.%${term}%,description.ilike.%${term}%,product_category.ilike.%${term}%,collection_name.ilike.%${term}%`
+    )
+  }
   if (filters?.minPrice !== undefined) query = query.gte('price', filters.minPrice)
   if (filters?.maxPrice !== undefined) query = query.lte('price', filters.maxPrice)
 
@@ -90,24 +105,18 @@ export async function getJustDroppedProducts(limit = 4) {
 }
 
 export async function getNewArrivalProducts(limit = 8) {
-  const today = new Date().toISOString().split('T')[0]
+  const today = getPKTDate()
   const { data } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
     .eq('is_new_arrival', true)
     .gt('stock_quantity', 0)
+    .or(`new_arrival_start.is.null,new_arrival_start.lte.${today}`)
+    .or(`new_arrival_end.is.null,new_arrival_end.gte.${today}`)
     .order('created_at', { ascending: false })
-    .limit(limit * 2)
-  // Date filtering in JS to avoid schema-cache issues with new columns
-  const filtered = (data || []).filter(p => {
-    const start = p.new_arrival_start
-    const end = p.new_arrival_end
-    if (start && start > today) return false
-    if (end && end < today) return false
-    return true
-  })
-  return filtered.slice(0, limit) as Product[]
+    .limit(limit)
+  return (data || []) as Product[]
 }
 
 export async function getFeaturedProducts(limit = 6) {
@@ -173,7 +182,7 @@ export async function getTrendingProducts(limit = 4) {
     .select('*, categories(name, slug)')
     .eq('is_active', true)
     .gt('stock_quantity', 0)
-    .gt('trending_score', 0)
+    .or('trending_score.gt.0,is_trending.eq.true')
     .order('trending_score', { ascending: false })
     .limit(limit)
 
