@@ -71,5 +71,15 @@ export default function ProductSaleUrgency({
         </div>
       )}
     </div>
+
+    {/* Sale restock warning */}
+    <div className="mt-2.5 pt-2.5 border-t" style={{ borderColor: '#2C2C2C' }}>
+      <p className="text-xs font-bold uppercase tracking-widest" style={{ color: '#A68B6E' }}>
+        Sale stock will not be restocked.
+      </p>
+      <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+        Hurry up — grab yours before someone else does.
+      </p>
+    </div>
   )
 }

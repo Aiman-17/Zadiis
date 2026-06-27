@@ -10,6 +10,8 @@ import ReviewListWrapper from '@/components/products/ReviewListWrapper'
 import ProductCard from '@/components/products/ProductCard'
 import ProductSaleUrgency from '@/components/products/ProductSaleUrgency'
 import NotifyMeButton from '@/components/products/NotifyMeButton'
+import ProductViewers from '@/components/products/ProductViewers'
+import { Flame, Hourglass } from 'lucide-react'
 import type { Review, Product } from '@/types'
 import type { Metadata } from 'next'
 
@@ -126,6 +128,17 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   const displayPrice = salePrice ?? product!.price
   const savings = salePrice ? product!.price - salePrice : 0
 
+  const totalStock = (() => {
+    const vs = product!.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).reduce(
+        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+      )
+    }
+    return product!.stock_quantity
+  })()
+  const isLastChance = totalStock > 0 && totalStock <= 3
+
   const jsonLd = {
     '@context': 'https://schema.org',
     '@type': 'Product',
@@ -165,6 +178,32 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           <ProductImageGallery images={product!.images} name={product!.name} />
           <div className="space-y-5 md:space-y-6 pt-2 md:pt-0">
             <div>
+              {/* Category identity strip — contextual to product flags */}
+              {salePrice ? (
+                <div className="flex items-center gap-2 mb-2">
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>Sale</span>
+                  <span className="text-xs" style={{ color: '#C62828' }}>Limited time price — ends when timer hits zero</span>
+                </div>
+              ) : isLastChance ? (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Hourglass size={13} color="#C62828" style={{ animation: 'hourglass-flip 3s ease-in-out infinite', transformOrigin: 'center' }} />
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Almost Gone — Final Stock</span>
+                </div>
+              ) : product!.is_trending ? (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <Flame size={13} color="#ea580c" style={{ animation: 'fire-flicker 0.65s ease-in-out infinite alternate', transformOrigin: 'bottom center' }} />
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ea580c' }}>Trending Now — High Demand</span>
+                </div>
+              ) : product!.is_new_arrival ? (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#059669' }}>✦ Fresh Drop — Just Launched</span>
+                </div>
+              ) : product!.best_seller_score && product!.best_seller_score >= 5 ? (
+                <div className="flex items-center gap-1.5 mb-2">
+                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C9961A' }}>★ Our Most Loved Piece</span>
+                </div>
+              ) : null}
+
               <h1 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>{product!.name}</h1>
 
               {/* Price section */}
@@ -207,12 +246,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {product!.description && <p className="text-gray-600 leading-relaxed">{product!.description}</p>}
 
-            {/* Social proof — only show when meaningful (2+ sold) */}
-            {soldLast24h >= 2 && (
-              <p className="text-sm font-medium" style={{ color: '#10B981' }}>
-                🔥 {soldLast24h} sold in the last 24 hours
-              </p>
-            )}
+            {/* Social proof */}
+            <div className="space-y-1.5">
+              {soldLast24h >= 2 && (
+                <p className="text-sm font-medium" style={{ color: '#10B981' }}>
+                  🔥 {soldLast24h} sold in the last 24 hours
+                </p>
+              )}
+              <ProductViewers />
+            </div>
 
             {/* Stock urgency — only on non-sale products (sale products use ProductSaleUrgency) */}
             {!salePrice && product!.stock_quantity > 0 && product!.stock_quantity <= 10 && (
@@ -227,7 +269,6 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
 
             {/* Waitlist — shown when product is completely sold out */}
             {isSoldOut && <NotifyMeButton productId={product!.id} />}
-            <p className="text-xs text-gray-400">Free delivery on orders over PKR 10,000</p>
           </div>
         </div>
 
