@@ -8,6 +8,7 @@ import ProductCard from '@/components/products/ProductCard'
 import { getNewArrivalProducts, getBestsellerProducts, getTrendingProducts, getLastChanceProducts, getJustDroppedProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
+import HomeSaleCountdown from '@/components/store/HomeSaleCountdown'
 import type { Product } from '@/types'
 
 async function getHeroImage(): Promise<string> {
@@ -125,9 +126,10 @@ export default async function HomePage() {
               <span className="text-base font-normal text-gray-300"> — {activeSale.description}</span>
             )}
           </p>
+          <HomeSaleCountdown endsAt={activeSale.ends_at} />
           <Link
             href="/sale"
-            className="inline-block text-sm font-semibold uppercase tracking-widest px-6 py-2 transition-opacity hover:opacity-90"
+            className="inline-block text-sm font-semibold uppercase tracking-widest px-6 py-2 transition-opacity hover:opacity-90 mt-3"
             style={{ backgroundColor: '#DC2626', color: 'white' }}
           >
             Shop the Sale →

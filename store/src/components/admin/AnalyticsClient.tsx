@@ -175,7 +175,10 @@ export default function AnalyticsClient({
   const router = useRouter()
   const pathname = usePathname()
 
-  const setRange = (r: string) => router.push(`${pathname}?range=${r}`)
+  const setRange = (r: string) => {
+    router.push(`${pathname}?range=${r}`, { scroll: false })
+    router.refresh()
+  }
 
   // Revenue
   const grossRevenue   = orders.reduce((s, o) => s + o.total, 0)
@@ -239,6 +242,16 @@ export default function AnalyticsClient({
     .map(([name, d]) => ({ name, ...d }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 8)
+
+  // Per-product color + size breakdown (for tooltip on hover)
+  const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
+  orders.filter(o => o.order_status !== 'cancelled').forEach(o =>
+    (o.items as OrderItem[]).forEach(i => {
+      if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
+      if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
+      if (i.size  && i.size  !== '_') productSizeColorMap[i.product_name].sizes[i.size]   = (productSizeColorMap[i.product_name].sizes[i.size]   || 0) + i.quantity
+    })
+  )
 
   // Colors, Sizes, Cities
   const colorMap: Record<string, number> = {}
@@ -697,15 +710,66 @@ export default function AnalyticsClient({
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110}
                     tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 13) + '…' : v} />
-                  <Tooltip formatter={(v, name) => [
-                    name === 'units' ? `${v} units` : pkr(Number(v)),
-                    name === 'units' ? 'Units Sold' : 'Revenue',
-                  ]} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { name: string; units: number; revenue: number }
+                      const detail = productSizeColorMap[d.name]
+                      const topColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                      const topSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                      return (
+                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-1" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold">{d.name}</p>
+                          <p style={{ color: '#A68B6E' }}>{d.units} units · {pkr(d.revenue)}</p>
+                          {topColors.length > 0 && (
+                            <p style={{ color: '#6B7280' }}>Colors: {topColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
+                          )}
+                          {topSizes.length > 0 && (
+                            <p style={{ color: '#6B7280' }}>Sizes: {topSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
+                          )}
+                        </div>
+                      )
+                    }}
+                  />
                   <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="units" />
                 </BarChart>
               </ResponsiveContainer>
             ) : (
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
+            )}
+          </div>
+
+          {/* Category Sales Chart */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-1">Sales by Category</h3>
+            <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Which categories are selling fastest this period</p>
+            {categoryPerf.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No category data — assign product_category to products first.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(160, categoryPerf.length * 44)}>
+                <BarChart data={categoryPerf} layout="vertical" margin={{ left: 8, right: 40 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
+                  <YAxis type="category" dataKey="cat" tick={{ fontSize: 11 }} width={80} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { cat: string; revenue: number; units: number; orderCount: number }
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold mb-1">{d.cat}</p>
+                          <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)}</p>
+                          <p style={{ color: '#6B7280' }}>{d.units} units · {d.orderCount} orders</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="revenue" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Revenue">
+                    {categoryPerf.map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? '#1C1C1C' : i === 1 ? '#A68B6E' : '#C9A87C'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
             )}
           </div>
 
