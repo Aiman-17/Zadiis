@@ -95,11 +95,17 @@ export async function getNewArrivalProducts(limit = 8) {
     .eq('is_active', true)
     .eq('is_new_arrival', true)
     .gt('stock_quantity', 0)
-    .or(`new_arrival_start.is.null,new_arrival_start.lte.${today}`)
-    .or(`new_arrival_end.is.null,new_arrival_end.gte.${today}`)
-    .order('new_arrival_start', { ascending: false })
-    .limit(limit)
-  return (data || []) as Product[]
+    .order('created_at', { ascending: false })
+    .limit(limit * 2)
+  // Date filtering in JS to avoid schema-cache issues with new columns
+  const filtered = (data || []).filter(p => {
+    const start = p.new_arrival_start
+    const end = p.new_arrival_end
+    if (start && start > today) return false
+    if (end && end < today) return false
+    return true
+  })
+  return filtered.slice(0, limit) as Product[]
 }
 
 export async function getFeaturedProducts(limit = 6) {
