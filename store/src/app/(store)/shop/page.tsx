@@ -41,14 +41,16 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
       <Suspense>
         <ProductSectionTabs />
       </Suspense>
 
-      <h1 className="text-2xl mt-6 mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
-      <Suspense>
-        <ShopSearchBar />
-      </Suspense>
+      <div className="mt-4">
+        <Suspense>
+          <ShopSearchBar />
+        </Suspense>
+      </div>
       <div className="flex flex-col md:flex-row gap-8 mt-4">
         <aside className="shrink-0 md:w-56">
           <Suspense>
