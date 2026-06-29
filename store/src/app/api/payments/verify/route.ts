@@ -74,6 +74,7 @@ export async function POST(req: NextRequest) {
     city:            order.city,
     invoice_number:  invoiceNumber ?? undefined,
     transaction_id:  order.safepay_transaction_id ?? undefined,
+    is_sale:         order.is_sale ?? false,
   })
 
   await sendOwnerPaymentReceived({

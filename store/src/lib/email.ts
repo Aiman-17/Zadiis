@@ -45,6 +45,7 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
   payment_method: string
   address: string
   city: string
+  is_sale?: boolean
 }): Promise<void> {
   if (!to) return
   const itemRows = buildItemRows(d.items)
@@ -52,8 +53,12 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
       <div style="padding:32px;background:#FAF8F5">
-        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Order Confirmed!</h2>
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">${d.is_sale ? '🛍️ Sale Order Confirmed!' : 'Order Confirmed!'}</h2>
         <p style="color:#666;margin:0 0 24px">Thank you ${d.customer_name}, your order has been placed successfully.</p>
+        ${d.is_sale ? `<div style="background:#FEF9EC;border:1px solid #F5D87A;border-radius:8px;padding:14px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;color:#92640A;font-weight:bold">You ordered during our sale!</p>
+          <p style="margin:4px 0 0;color:#92640A;font-size:13px">Your sale prices are locked in. Congratulations on the deal!</p>
+        </div>` : ''}
         <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
           <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
@@ -173,6 +178,7 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
   city:            string
   invoice_number?: string
   transaction_id?: string
+  is_sale?:        boolean
 }): Promise<void> {
   if (!to) return
   const itemRows    = buildItemRows(d.items)
@@ -192,8 +198,12 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
       <div style="padding:32px;background:#FAF8F5">
-        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Payment Confirmed!</h2>
+        <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">${d.is_sale ? '🛍️ Sale Payment Confirmed!' : 'Payment Confirmed!'}</h2>
         <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your payment has been received and your order is being prepared.</p>
+        ${d.is_sale ? `<div style="background:#FEF9EC;border:1px solid #F5D87A;border-radius:8px;padding:14px 20px;margin-bottom:24px;text-align:center">
+          <p style="margin:0;color:#92640A;font-weight:bold">You ordered during our sale!</p>
+          <p style="margin:4px 0 0;color:#92640A;font-size:13px">Your sale prices are locked in. Congratulations on the deal!</p>
+        </div>` : ''}
         ${invoiceBlock}
         <table style="width:100%;border-collapse:collapse;margin-bottom:16px">${itemRows}</table>
         <table style="width:100%;border-collapse:collapse;margin-bottom:24px">

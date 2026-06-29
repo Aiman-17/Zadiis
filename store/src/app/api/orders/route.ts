@@ -190,6 +190,7 @@ export async function POST(req: NextRequest) {
       payment_method: order.payment_method,
       address: order.address,
       city: order.city,
+      is_sale: order.is_sale ?? false,
     })
 
     return NextResponse.json({ orderId: order.id }, { status: 201 })
