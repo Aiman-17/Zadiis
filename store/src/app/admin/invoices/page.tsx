@@ -113,9 +113,11 @@ export default function AdminInvoices() {
                 {filtered.map(inv => (
                   <tr key={inv.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
                     <td className="p-4 font-bold" style={{ color: '#A68B6E' }}>{inv.invoice_number}</td>
-                    <td className="p-4 font-medium">{inv.orders?.order_number}</td>
+                    <td className="p-4 font-medium">
+                      {inv.orders?.order_number ?? <span className="italic text-sm" style={{ color: '#9CA3AF' }}>Order deleted</span>}
+                    </td>
                     <td className="p-4">
-                      <p className="font-medium">{inv.orders?.customer_name}</p>
+                      <p className="font-medium">{inv.orders?.customer_name ?? <span className="italic text-sm" style={{ color: '#9CA3AF' }}>—</span>}</p>
                       <p className="text-xs" style={{ color: '#6B7280' }}>{inv.orders?.customer_phone}</p>
                     </td>
                     <td className="p-4 font-semibold">PKR {Number(inv.amount).toLocaleString()}</td>

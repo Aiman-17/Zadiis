@@ -177,16 +177,18 @@ export default function AdminProductsClient({
 
   const handleDelete = async (id: string) => {
     if (!confirm('Archive this product? It will be hidden from the store.')) return
-    await fetch('/api/admin/products', {
+    const res = await fetch('/api/admin/products', {
       method: 'DELETE',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id }),
     })
+    if (!res.ok) { alert('Failed to archive product — please try again'); return }
     const product = active.find(p => p.id === id)
     if (product) {
       setActive(prev => prev.filter(p => p.id !== id))
       setArchived(prev => [{ ...product, is_active: false }, ...prev])
     }
+    router.refresh()
   }
 
   const handleRestore = async (id: string) => {

@@ -34,6 +34,10 @@ export default function AdminSettings() {
 
   const addZone = async () => {
     if (!newCity.trim() || !newCharge) return
+    if (zones.some(z => z.city.toLowerCase() === newCity.trim().toLowerCase())) {
+      alert(`"${newCity.trim()}" already exists as a delivery zone.`)
+      return
+    }
     setSaving(true)
     const res = await fetch('/api/admin/delivery-zones', {
       method: 'POST',
@@ -87,11 +91,12 @@ export default function AdminSettings() {
 
   const toggleCod = async (enabled: boolean) => {
     setCodEnabled(enabled)
-    await fetch('/api/admin/settings', {
+    const res = await fetch('/api/admin/settings', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ key: 'cod_enabled', value: String(enabled) }),
     })
+    if (!res.ok) setCodEnabled(!enabled)
   }
 
   const savePaymentNumbers = async () => {

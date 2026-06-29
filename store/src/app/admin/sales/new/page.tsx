@@ -102,13 +102,15 @@ export default function NewSalePage() {
 
     const saleId = data.id
     const productEntries = Object.entries(selected).filter(([, price]) => price && Number(price) > 0)
-    await Promise.all(productEntries.map(([product_id, sale_price]) =>
+    const results = await Promise.all(productEntries.map(([product_id, sale_price]) =>
       fetch(`/api/admin/sales/${saleId}/products`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ product_id, sale_price: Number(sale_price) }),
       })
     ))
+    const failed = results.filter(r => !r.ok).length
+    if (failed > 0) setError(`Sale created but ${failed} product(s) failed to add. Review on the edit page.`)
     router.push(`/admin/sales/${saleId}/edit`)
   }
 

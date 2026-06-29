@@ -166,10 +166,12 @@ export default function AnalyticsClient({
   orders,
   products,
   range,
+  allCostPrices,
 }: {
   orders: Order[]
   products: Product[]
   range: string
+  allCostPrices?: { id: string; cost_price: number }[]
 }) {
   const [tab, setTab] = useState<Tab>('revenue')
   const router = useRouter()
@@ -196,7 +198,7 @@ export default function AnalyticsClient({
     )
 
   // Profit — only for paid non-COD orders and delivered COD orders
-  const costMap = Object.fromEntries(products.map(p => [p.id, p.cost_price || 0]))
+  const costMap = Object.fromEntries((allCostPrices ?? products).map(p => [p.id, p.cost_price || 0]))
   const qualifyingOrders = orders.filter(o =>
     o.order_status !== 'cancelled' &&
     o.order_status !== 'returned' &&
@@ -530,7 +532,7 @@ export default function AnalyticsClient({
               { label: 'Gross Revenue',       value: pkr(grossRevenue), color: '#1C1C1C' },
               { label: 'Net Revenue',         value: pkr(netRevenue),   color: '#10B981' },
               { label: 'Gross Profit',        value: pkr(grossProfit),  color: grossProfit >= 0 ? '#10B981' : '#EF4444',
-                sub: `${profitMarginPct}% margin` },
+                sub: `${profitMarginPct}% margin · COD counted on delivery` },
               { label: 'Unique Customers',    value: uniqueRangeCustomers.toString(), color: '#1C1C1C' },
               { label: 'Repeat Rate',         value: `${repeatRangeRate}%`,
                 color: repeatRangeRate > 0 ? '#A68B6E' : '#9CA3AF',
@@ -1032,7 +1034,10 @@ export default function AnalyticsClient({
           {/* Size Sell-Through */}
           {sizeSellThrough.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-              <h3 className="font-semibold mb-4">Size Sell-Through</h3>
+              <div className="flex items-baseline gap-2 mb-4">
+                <h3 className="font-semibold">Size Sell-Through</h3>
+                <span className="text-xs" style={{ color: '#9CA3AF' }}>% = sold in period ÷ (sold + current stock)</span>
+              </div>
               <div className="space-y-2.5">
                 {sizeSellThrough.map(s => (
                   <div key={s.sz} className="flex items-center gap-3">

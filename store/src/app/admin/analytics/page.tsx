@@ -23,18 +23,21 @@ export default async function AnalyticsPage({
 
   let orders: Order[] = []
   let products: Product[] = []
+  let allCostPrices: { id: string; cost_price: number }[] = []
 
   try {
-    const [ordersRes, productsRes] = await Promise.all([
+    const [ordersRes, productsRes, costRes] = await Promise.all([
       supabaseAdmin
         .from('orders')
         .select('*')
         .gte('created_at', from)
         .order('created_at', { ascending: false }),
       supabaseAdmin.from('products').select('*').eq('is_active', true),
+      supabaseAdmin.from('products').select('id, cost_price'),
     ])
     orders = (ordersRes.data || []) as Order[]
     products = (productsRes.data || []) as Product[]
+    allCostPrices = (costRes.data || []) as { id: string; cost_price: number }[]
   } catch {
     // Supabase not configured
   }
@@ -42,7 +45,7 @@ export default async function AnalyticsPage({
   return (
     <div>
       <h1 className="text-2xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Analytics</h1>
-      <AnalyticsClient orders={orders} products={products} range={range} />
+      <AnalyticsClient orders={orders} products={products} range={range} allCostPrices={allCostPrices} />
     </div>
   )
 }

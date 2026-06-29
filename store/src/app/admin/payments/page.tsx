@@ -17,6 +17,7 @@ export default function AdminPayments() {
   const [marking, setMarking]         = useState<string | null>(null)
   const [actioning, setActioning]     = useState<string | null>(null)
   const [showArchived, setShowArchived] = useState(false)
+  const [actionError, setActionError] = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -46,7 +47,8 @@ export default function AdminPayments() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, payment_status: 'paid' }),
     })
-    if (res.ok) setOrders(prev => prev.map(o => o.id === id ? { ...o, payment_status: 'paid' } : o))
+    if (res.ok) { setActionError(null); setOrders(prev => prev.map(o => o.id === id ? { ...o, payment_status: 'paid' } : o)) }
+    else setActionError('Failed to mark as paid — please try again')
     setMarking(null)
   }
 
@@ -57,7 +59,8 @@ export default function AdminPayments() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_archived: true }),
     })
-    if (res.ok) setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: true } : o))
+    if (res.ok) { setActionError(null); setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: true } : o)) }
+    else setActionError('Failed to archive — please try again')
     setActioning(null)
   }
 
@@ -68,7 +71,8 @@ export default function AdminPayments() {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_archived: false }),
     })
-    if (res.ok) setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: false } : o))
+    if (res.ok) { setActionError(null); setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: false } : o)) }
+    else setActionError('Failed to restore — please try again')
     setActioning(null)
   }
 
@@ -205,6 +209,13 @@ export default function AdminPayments() {
   return (
     <div>
       <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Payments</h1>
+
+      {actionError && (
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}>
+          <span>{actionError}</span>
+          <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
