@@ -73,7 +73,7 @@ export default function AdminPayments() {
   }
 
   const deletePayment = async (id: string, orderNumber: string) => {
-    if (!confirm(`Permanently delete payment record for ${orderNumber}?\n\nThis cannot be undone.`)) return
+    if (!confirm(`Permanently DELETE ORDER ${orderNumber}?\n\nThis removes the order from all reports and analytics history. Cannot be undone.`)) return
     setActioning(id)
     const res = await fetch('/api/admin/orders', {
       method: 'DELETE',
@@ -147,7 +147,7 @@ export default function AdminPayments() {
             <button
               onClick={() => deletePayment(order.id, order.order_number)}
               disabled={actioning === order.id}
-              title="Delete payment record"
+              title="Delete order permanently"
               className="transition-colors"
               style={{ color: '#9CA3AF' }}
               onMouseEnter={e => (e.currentTarget.style.color = '#DC2626')}

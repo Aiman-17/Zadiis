@@ -172,8 +172,8 @@ export default function AdminSettings() {
                     type="number"
                     className="border rounded px-2 py-1 text-sm w-24"
                     style={{ borderColor: '#E2E8F0' }}
-                    value={zone.delivery_charge}
-                    onChange={e => updateZone(zone.id, { delivery_charge: Number(e.target.value) })}
+                    defaultValue={zone.delivery_charge}
+                    key={zone.id}
                     onBlur={e => updateZone(zone.id, { delivery_charge: Number(e.target.value) })}
                   />
                 </td>

@@ -246,7 +246,7 @@ export default function AnalyticsClient({
 
   // Top products
   const productMap: Record<string, { units: number; revenue: number }> = {}
-  orders.filter(o => o.order_status !== 'cancelled').forEach(o =>
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o =>
     (o.items as OrderItem[]).forEach(i => {
       if (!productMap[i.product_name]) productMap[i.product_name] = { units: 0, revenue: 0 }
       productMap[i.product_name].units += i.quantity
@@ -260,7 +260,7 @@ export default function AnalyticsClient({
 
   // Per-product color + size breakdown (for tooltip on hover)
   const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
-  orders.filter(o => o.order_status !== 'cancelled').forEach(o =>
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o =>
     (o.items as OrderItem[]).forEach(i => {
       if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
       if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
@@ -272,7 +272,7 @@ export default function AnalyticsClient({
   const colorMap: Record<string, number> = {}
   const sizeMap:  Record<string, number> = {}
   const cityMap:  Record<string, number> = {}
-  orders.filter(o => o.order_status !== 'cancelled').forEach(o => {
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
     cityMap[o.city] = (cityMap[o.city] || 0) + 1
     ;(o.items as OrderItem[]).forEach(i => {
       if (i.color && i.color !== '_') colorMap[i.color] = (colorMap[i.color] || 0) + i.quantity

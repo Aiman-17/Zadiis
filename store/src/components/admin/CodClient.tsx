@@ -23,6 +23,7 @@ const COD_STYLES: Record<string, React.CSSProperties> = {
 export default function CodClient({ orders }: { orders: CodOrder[] }) {
   const [list, setList] = useState(orders)
   const [loading, setLoading] = useState<string | null>(null)
+  const [error, setError] = useState<string | null>(null)
 
   const update = async (id: string, cod_status: string) => {
     setLoading(id)
@@ -32,17 +33,23 @@ export default function CodClient({ orders }: { orders: CodOrder[] }) {
       body: JSON.stringify({ id, cod_status }),
     })
     if (res.ok) {
+      setError(null)
       setList(prev => prev.map(o =>
         o.id === id
           ? { ...o, cod_status, cod_collected_at: cod_status === 'received' ? new Date().toISOString() : null }
           : o
       ))
+    } else {
+      setError('Failed to update COD status — please try again')
     }
     setLoading(null)
   }
 
   return (
     <div className="space-y-3">
+      {error && (
+        <p className="text-sm mb-1" style={{ color: '#DC2626' }}>{error}</p>
+      )}
       {list.length === 0 && (
         <p className="text-sm" style={{ color: '#9CA3AF' }}>No COD orders yet.</p>
       )}

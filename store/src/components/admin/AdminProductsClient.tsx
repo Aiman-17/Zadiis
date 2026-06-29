@@ -122,7 +122,7 @@ function ArchivedRow({ p, onRestore }: { p: Product; onRestore: (id: string) => 
       <td className="p-4 text-sm" style={{ color: '#6B7280' }}>{p.name}</td>
       <td className="p-4 text-sm" style={{ color: '#9CA3AF' }}>{p.sku || '—'}</td>
       <td className="p-4 text-sm" style={{ color: '#9CA3AF' }}>PKR {p.price.toLocaleString()}</td>
-      <td className="p-4 text-sm" style={{ color: '#9CA3AF' }}>{p.stock_quantity}</td>
+      <td className="p-4 text-sm" style={{ color: '#9CA3AF' }}>{getProductStock(p)}</td>
       <td className="p-4">
         <button
           onClick={() => onRestore(p.id)}

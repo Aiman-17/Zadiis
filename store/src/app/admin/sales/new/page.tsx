@@ -83,6 +83,11 @@ export default function NewSalePage() {
     e.preventDefault()
     setLoading(true)
     setError('')
+    if (Object.keys(selected).length === 0) {
+      setError('Select at least one product before creating a sale.')
+      setLoading(false)
+      return
+    }
     const res = await fetch('/api/admin/sales', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },

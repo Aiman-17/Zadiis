@@ -58,6 +58,7 @@ export default function AdminOrders() {
   const [editForm,        setEditForm]         = useState({ phone: '', email: '', address: '' })
   const [editError,       setEditError]        = useState<string | null>(null)
   const [editSaving,      setEditSaving]       = useState(false)
+  const [actionError,     setActionError]      = useState<string | null>(null)
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -96,30 +97,36 @@ export default function AdminOrders() {
   )
 
   const updateStatus = async (id: string, order_status: string) => {
-    await fetch('/api/admin/orders', {
+    const res = await fetch('/api/admin/orders', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, order_status }),
     })
+    if (!res.ok) { setActionError('Failed to update order status — please try again'); return }
+    setActionError(null)
     setOrders(prev => prev.map(o => o.id === id ? { ...o, order_status: order_status as Order['order_status'] } : o))
   }
 
   const returnOrder = async (id: string, reason: string, notes: string) => {
-    await fetch('/api/admin/orders/return', {
+    const res = await fetch('/api/admin/orders/return', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, reason, notes }),
     })
+    if (!res.ok) { setActionError('Failed to mark order as returned — please try again'); return }
+    setActionError(null)
     setOrders(prev => prev.map(o => o.id === id ? { ...o, order_status: 'returned' as const } : o))
     setReturnId(null)
   }
 
   const cancelOrder = async (id: string, reason: string) => {
-    await fetch('/api/admin/orders', {
+    const res = await fetch('/api/admin/orders', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, order_status: 'cancelled', cancellation_reason: reason }),
     })
+    if (!res.ok) { setActionError('Failed to cancel order — please try again'); return }
+    setActionError(null)
     setOrders(prev => prev.map(o =>
       o.id === id ? { ...o, order_status: 'cancelled' as const, cancellation_reason: reason } : o
     ))
@@ -127,11 +134,13 @@ export default function AdminOrders() {
   }
 
   const archiveOrder = async (id: string) => {
-    await fetch('/api/admin/orders', {
+    const res = await fetch('/api/admin/orders', {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({ id, is_archived: true }),
     })
+    if (!res.ok) { setActionError('Failed to archive order — please try again'); return }
+    setActionError(null)
     setOrders(prev => prev.map(o => o.id === id ? { ...o, is_archived: true } : o))
     if (expanded === id) setExpanded(null)
   }
@@ -241,6 +250,13 @@ export default function AdminOrders() {
       )}
 
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Orders</h1>
+
+      {actionError && (
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}>
+          <span>{actionError}</span>
+          <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
+        </div>
+      )}
 
       {/* Tabs */}
       <div className="flex gap-2 mb-6 flex-wrap">
