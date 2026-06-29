@@ -24,6 +24,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   ]
 
   useEffect(() => {
+    if (pathname === '/admin/login') return
     const check = async () => {
       try {
         const res = await fetch('/api/admin/orders')
@@ -45,7 +46,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     check()
     const interval = setInterval(check, 30000)
     return () => clearInterval(interval)
-  }, [])
+  }, [pathname])
 
   const clearNotifications = () => {
     setNewOrders(0)
