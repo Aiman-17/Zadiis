@@ -1,12 +1,11 @@
 'use client'
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
+import { usePathname } from 'next/navigation'
 import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
-  const router = useRouter()
   const [open, setOpen] = useState(false)
   const [newOrders, setNewOrders] = useState(0)
   const lastCountRef = useRef<number | null>(null)
@@ -58,7 +57,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   const logout = async () => {
     await fetch('/api/admin/auth', { method: 'DELETE' })
-    router.push('/admin/login')
+    window.location.href = '/admin/login'
   }
 
   const NavContent = () => (

@@ -13,7 +13,7 @@ export function proxy(req: NextRequest) {
   if (isAuthEndpoint) return NextResponse.next()
 
   const cookie = req.cookies.get('admin-auth')
-  const authenticated = cookie?.value === process.env.ADMIN_PASSWORD
+  const authenticated = cookie?.value === 'zadiis-admin-session-v1'
 
   if (!authenticated) {
     if (isAdminApi) {
