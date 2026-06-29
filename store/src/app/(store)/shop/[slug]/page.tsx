@@ -7,7 +7,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import AddToCartButton from '@/components/products/AddToCartButton'
 import ProductImageGallery from '@/components/products/ProductImageGallery'
 import ReviewListWrapper from '@/components/products/ReviewListWrapper'
-import ProductCard from '@/components/products/ProductCard'
+import ProductSlider from '@/components/products/ProductSlider'
 import ProductSaleUrgency from '@/components/products/ProductSaleUrgency'
 import NotifyMeButton from '@/components/products/NotifyMeButton'
 import { Flame, Hourglass } from 'lucide-react'
@@ -78,7 +78,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .eq('is_active', true)
         .eq('category_id', product!.category_id)
         .neq('id', product!.id)
-        .limit(4),
+        .limit(7),
       // Fetch qualifying order IDs from last 24h — join happens at DB level
       supabaseAdmin
         .from('orders')
@@ -279,11 +279,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {relatedProducts.length > 0 && (
           <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
             <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>You May Also Like</h2>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {relatedProducts.map(p => (
-                <ProductCard key={p.id} product={p} />
-              ))}
-            </div>
+            <ProductSlider products={relatedProducts} />
           </div>
         )}
       </div>
