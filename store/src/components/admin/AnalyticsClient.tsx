@@ -293,7 +293,6 @@ export default function AnalyticsClient({
           sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
       : p.stock_quantity
     inventoryValue += p.price * totalStock
-    const vs = p.variant_stock
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) =>
         Object.entries(sizes).forEach(([size, qty]) => {
