@@ -1,8 +1,130 @@
 'use client'
-import { useState, useMemo } from 'react'
+import { useState, useMemo, useEffect } from 'react'
+import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { addToCart } from '@/lib/cart-store'
 import type { Product } from '@/types'
+
+const STITCHED_SIZES = [
+  { size: 'XS',  bust: '32–33', waist: '24–25', hips: '34–35', length: '52' },
+  { size: 'S',   bust: '34–35', waist: '26–27', hips: '36–37', length: '53' },
+  { size: 'M',   bust: '36–37', waist: '28–29', hips: '38–39', length: '53' },
+  { size: 'L',   bust: '38–39', waist: '30–32', hips: '40–41', length: '54' },
+  { size: 'XL',  bust: '40–42', waist: '33–35', hips: '42–44', length: '54' },
+  { size: 'XXL', bust: '43–45', waist: '36–38', hips: '45–47', length: '55' },
+]
+
+function SizeGuideModal({ onClose }: { onClose: () => void }) {
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => { if (e.key === 'Escape') onClose() }
+    document.addEventListener('keydown', onKey)
+    document.body.style.overflow = 'hidden'
+    return () => {
+      document.removeEventListener('keydown', onKey)
+      document.body.style.overflow = ''
+    }
+  }, [onClose])
+
+  return (
+    <div
+      className="fixed inset-0 z-50 flex items-end sm:items-center justify-center p-0 sm:p-4"
+      style={{ backgroundColor: 'rgba(0,0,0,0.45)' }}
+      onClick={onClose}
+    >
+      <div
+        className="w-full sm:max-w-lg bg-white rounded-t-2xl sm:rounded-xl overflow-y-auto"
+        style={{ maxHeight: '90vh' }}
+        onClick={e => e.stopPropagation()}
+      >
+        {/* Header */}
+        <div className="flex items-center justify-between px-6 py-4 border-b" style={{ borderColor: '#E8DDD4' }}>
+          <h2 className="text-lg font-semibold" style={{ fontFamily: 'Playfair Display, serif' }}>Size Guide</h2>
+          <button onClick={onClose} className="p-1 rounded hover:bg-gray-100 transition-colors">
+            <X size={18} />
+          </button>
+        </div>
+
+        <div className="px-6 py-5 space-y-6">
+          {/* How to measure */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: '#A68B6E' }}>How to Measure</h3>
+            <div className="grid grid-cols-2 gap-3">
+              {[
+                { label: 'Bust', tip: 'Measure around the fullest part of your chest, keeping the tape parallel to the floor.' },
+                { label: 'Waist', tip: 'Measure around the narrowest part of your waist, usually above the navel.' },
+                { label: 'Hips', tip: 'Measure around the fullest part of your hips, about 8 inches below your waist.' },
+                { label: 'Length', tip: 'Measure from shoulder to hem for the garment length.' },
+              ].map(({ label, tip }) => (
+                <div key={label} className="rounded-lg p-3" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
+                  <p className="text-xs font-bold mb-1" style={{ color: '#1C1C1C' }}>{label}</p>
+                  <p className="text-xs leading-relaxed" style={{ color: '#6B7280' }}>{tip}</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Stitched size chart */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest mb-3" style={{ color: '#A68B6E' }}>Stitched Sizes (inches)</h3>
+            <div className="overflow-x-auto rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+              <table className="w-full text-sm">
+                <thead>
+                  <tr style={{ backgroundColor: '#1C1C1C', color: 'white' }}>
+                    {['Size', 'Bust', 'Waist', 'Hips', 'Length'].map(h => (
+                      <th key={h} className="px-3 py-2.5 text-center text-xs font-semibold tracking-wide">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {STITCHED_SIZES.map((row, i) => (
+                    <tr key={row.size} style={{ backgroundColor: i % 2 === 0 ? 'white' : '#FAF8F5' }}>
+                      <td className="px-3 py-2.5 text-center font-semibold" style={{ color: '#A68B6E' }}>{row.size}</td>
+                      <td className="px-3 py-2.5 text-center text-xs" style={{ color: '#374151' }}>{row.bust}</td>
+                      <td className="px-3 py-2.5 text-center text-xs" style={{ color: '#374151' }}>{row.waist}</td>
+                      <td className="px-3 py-2.5 text-center text-xs" style={{ color: '#374151' }}>{row.hips}</td>
+                      <td className="px-3 py-2.5 text-center text-xs" style={{ color: '#374151' }}>{row.length}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <p className="text-xs mt-2" style={{ color: '#9CA3AF' }}>All measurements in inches. Size up if between sizes.</p>
+          </div>
+
+          {/* Unstitched note */}
+          <div className="rounded-lg p-4" style={{ backgroundColor: '#FEF9EC', border: '1px solid #F5D87A' }}>
+            <p className="text-xs font-bold mb-1" style={{ color: '#92640A' }}>Unstitched Fabric</p>
+            <p className="text-xs leading-relaxed" style={{ color: '#92640A' }}>
+              Unstitched suits come as raw fabric (typically 3–4 metres for a 3-piece set) and can be stitched to any custom measurement at your local tailor. No standard size applies.
+            </p>
+          </div>
+
+          {/* Tips */}
+          <div>
+            <h3 className="text-sm font-semibold uppercase tracking-widest mb-2" style={{ color: '#A68B6E' }}>Fit Tips</h3>
+            <ul className="space-y-1.5">
+              {[
+                'Use a flexible measuring tape for accurate results.',
+                'Measure over light clothing or undergarments.',
+                'If between sizes, size up for a more comfortable fit.',
+                'Pakistani kurtas run true to size — fitted through bust and hips.',
+              ].map(tip => (
+                <li key={tip} className="flex gap-2 text-xs" style={{ color: '#6B7280' }}>
+                  <span style={{ color: '#A68B6E', marginTop: 1 }}>•</span>
+                  <span>{tip}</span>
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          <p className="text-xs text-center pb-2" style={{ color: '#9CA3AF' }}>
+            Still unsure? WhatsApp us for a personal sizing recommendation.
+          </p>
+        </div>
+      </div>
+    </div>
+  )
+}
 
 const COLOR_MAP: Record<string, string> = {
   black: '#1a1a1a', white: '#FFFFFF', beige: '#F5F0E8',
@@ -25,6 +147,7 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
   const [selectedColor, setSelectedColor] = useState('')
   const [added, setAdded] = useState(false)
   const [error, setError] = useState('')
+  const [showSizeGuide, setShowSizeGuide] = useState(false)
 
   const hasSizes = product.sizes.length > 0 && !(product.sizes.length === 1 && product.sizes[0] === 'Unstitched')
   const hasTracking = Object.keys(product.variant_stock ?? {}).length > 0
@@ -78,12 +201,21 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
   const totalOutOfStock = product.stock_quantity === 0
 
   return (
+    <>
+      {showSizeGuide && <SizeGuideModal onClose={() => setShowSizeGuide(false)} />}
     <div className="space-y-4">
       {hasSizes && (
         <div>
           <div className="flex items-center justify-between mb-2">
             <p className="text-sm font-medium">Size</p>
-            <a href="/size-guide" className="text-xs underline hover:opacity-70 transition-opacity" style={{ color: '#A68B6E' }}>Size Guide</a>
+            <button
+              type="button"
+              onClick={() => setShowSizeGuide(true)}
+              className="text-xs underline hover:opacity-70 transition-opacity"
+              style={{ color: '#A68B6E' }}
+            >
+              Size Guide
+            </button>
           </div>
           <div className="flex flex-wrap gap-2">
             {product.sizes.map(size => {
@@ -171,5 +303,6 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
         {totalOutOfStock ? 'Sold Out' : added ? 'Added to Cart!' : 'Add to Cart'}
       </Button>
     </div>
+    </>
   )
 }
