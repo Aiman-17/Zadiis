@@ -1,0 +1,120 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link "1" [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+        - generic [ref=e14]: "1"
+  - main [ref=e15]:
+    - generic [ref=e16]:
+      - generic [ref=e17]:
+        - img "ZADIIS Hero Banner" [ref=e18]
+        - generic [ref=e19]:
+          - paragraph [ref=e20]: New Collection
+          - heading "Dressed in Confidence" [level=1] [ref=e21]:
+            - text: Dressed in
+            - text: Confidence
+          - paragraph [ref=e22]: Discover women's fashion crafted for the modern Pakistani woman.
+          - link "Shop Now" [ref=e23] [cursor=pointer]:
+            - /url: /shop
+      - generic [ref=e25]:
+        - generic [ref=e26]:
+          - img [ref=e27]
+          - text: Free delivery over PKR 10,000
+        - generic [ref=e32]:
+          - img [ref=e33]
+          - text: Easy 7-day returns
+        - generic [ref=e38]:
+          - img [ref=e39]
+          - text: Secure payments
+        - generic [ref=e41]:
+          - img [ref=e42]
+          - text: 100% authentic products
+        - generic [ref=e45]:
+          - img [ref=e46]
+          - text: 500+ happy customers
+      - generic [ref=e48]:
+        - paragraph [ref=e51]: Limited Time Sale
+        - paragraph [ref=e53]:
+          - text: Eid SALE
+          - generic [ref=e54]: — Upto 20%OFF
+        - link "Shop the Sale →" [ref=e55] [cursor=pointer]:
+          - /url: /sale
+      - generic [ref=e56]:
+        - generic [ref=e57]:
+          - heading "Trending Now" [level=2] [ref=e58]
+          - generic [ref=e59]: Hot This Week
+        - link "Elegant dress TRENDING Elegant dress PKR 5,990" [ref=e61] [cursor=pointer]:
+          - /url: /shop/elegant-dress
+          - generic [ref=e62]:
+            - img "Elegant dress" [ref=e63]
+            - generic [ref=e64]: TRENDING
+          - heading "Elegant dress" [level=3] [ref=e65]
+          - generic [ref=e67]: PKR 5,990
+      - generic [ref=e68]:
+        - heading "New Arrivals" [level=2] [ref=e69]
+        - generic [ref=e70]:
+          - link "Suit for women Suit for women PKR 1,500" [ref=e71] [cursor=pointer]:
+            - /url: /shop/suit-for-women
+            - img "Suit for women" [ref=e73]
+            - heading "Suit for women" [level=3] [ref=e74]
+            - generic [ref=e76]: PKR 1,500
+          - link "Elegant dress Elegant dress PKR 5,990" [ref=e77] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e79]
+            - heading "Elegant dress" [level=3] [ref=e80]
+            - generic [ref=e82]: PKR 5,990
+        - link "View All" [ref=e84] [cursor=pointer]:
+          - /url: /shop
+      - generic [ref=e85]:
+        - heading "Best Sellers" [level=2] [ref=e86]
+        - link "Elegant dress Elegant dress PKR 5,990" [ref=e88] [cursor=pointer]:
+          - /url: /shop/elegant-dress
+          - img "Elegant dress" [ref=e90]
+          - heading "Elegant dress" [level=3] [ref=e91]
+          - generic [ref=e93]: PKR 5,990
+  - contentinfo [ref=e94]:
+    - generic [ref=e95]:
+      - generic [ref=e96]:
+        - paragraph [ref=e97]: ZADIIS
+        - paragraph [ref=e98]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e99]:
+        - paragraph [ref=e100]: Quick Links
+        - list [ref=e101]:
+          - listitem [ref=e102]:
+            - link "Shop" [ref=e103] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e104]:
+            - link "Cart" [ref=e105] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e106]:
+            - link "Sale" [ref=e107] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e108]:
+        - paragraph [ref=e109]: Policies
+        - list [ref=e110]:
+          - listitem [ref=e111]:
+            - link "Returns & Exchanges" [ref=e112] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e113]:
+            - link "Shipping Info" [ref=e114] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e115]:
+            - link "Privacy Policy" [ref=e116] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e117]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e118] [cursor=pointer]:
+    - /url: https://wa.me/923001234567?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e119]
+  - button "Open Next.js Dev Tools" [ref=e126] [cursor=pointer]:
+    - img [ref=e127]
+  - alert [ref=e130]

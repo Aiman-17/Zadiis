@@ -1,0 +1,86 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Settings" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - heading "Hero Banner Image" [level=2] [ref=e50]
+          - generic [ref=e51] [cursor=pointer]: Upload Banner Image
+        - generic [ref=e52]:
+          - heading "Delivery Zones" [level=2] [ref=e53]
+          - table [ref=e55]:
+            - rowgroup [ref=e56]:
+              - row "City Charge (PKR) Active" [ref=e57]:
+                - columnheader "City" [ref=e58]
+                - columnheader "Charge (PKR)" [ref=e59]
+                - columnheader "Active" [ref=e60]
+                - columnheader [ref=e61]
+            - rowgroup
+          - generic [ref=e62]:
+            - generic [ref=e63]:
+              - generic [ref=e64]: City
+              - textbox "Lahore" [ref=e65]
+            - generic [ref=e66]:
+              - generic [ref=e67]: Charge (PKR)
+              - spinbutton [ref=e68]
+            - button "Add City" [ref=e69]
+        - generic [ref=e70]:
+          - heading "Payment Settings" [level=2] [ref=e71]
+          - generic [ref=e72]:
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: Cash on Delivery (COD)
+              - paragraph [ref=e75]: When enabled, COD option appears in checkout
+            - button [ref=e76]
+        - generic [ref=e78]:
+          - heading "Fallback Payment Numbers" [level=2] [ref=e79]
+          - paragraph [ref=e80]: Shown to customers when Safepay is down. Enter your personal number customers can transfer to.
+          - generic [ref=e81]:
+            - generic [ref=e82]:
+              - generic [ref=e83]: JazzCash Number
+              - textbox "03001234567" [ref=e84]
+            - generic [ref=e85]:
+              - generic [ref=e86]: Easypaisa Number
+              - textbox "03001234567" [ref=e87]
+            - button "Save Numbers" [ref=e88]
+  - alert [ref=e89]

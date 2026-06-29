@@ -2,7 +2,14 @@
   "permissions": {
     "allow": [
       "mcp__plugin_playwright_playwright__browser_snapshot",
-      "WebSearch"
+      "WebSearch",
+      "Bash(npm run *)",
+      "Bash(git add *)",
+      "Bash(git commit *)",
+      "Bash(mkdir -p \"C:/Users/QC/Desktop/ecom-business-project/store/src/app/api/admin/invoices/[id]\")",
+      "Bash(mkdir -p \"C:/Users/QC/Desktop/ecom-business-project/store/src/app/admin/invoices/[id]/print\")",
+      "Bash(git push *)",
+      "mcp__plugin_playwright_playwright__browser_take_screenshot"
     ]
   }
 }

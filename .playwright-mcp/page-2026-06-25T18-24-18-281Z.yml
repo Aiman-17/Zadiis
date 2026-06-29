@@ -1,0 +1,179 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Dashboard" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - 'link "14 New Orders status: new · last 7 days · tap to manage" [ref=e51] [cursor=pointer]':
+              - /url: /admin/orders
+              - paragraph [ref=e52]: "14"
+              - paragraph [ref=e53]: New Orders
+              - paragraph [ref=e54]: "status: new · last 7 days · tap to manage"
+            - link "1 Pending Shipment processing orders · tap to manage" [ref=e55] [cursor=pointer]:
+              - /url: /admin/orders
+              - paragraph [ref=e56]: "1"
+              - paragraph [ref=e57]: Pending Shipment
+              - paragraph [ref=e58]: processing orders · tap to manage
+          - generic [ref=e59]:
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: PKR 86,435
+              - paragraph [ref=e62]: This Week's Revenue
+            - generic [ref=e63]:
+              - paragraph [ref=e64]: PKR 113,219
+              - paragraph [ref=e65]: Revenue This Month
+            - generic [ref=e66]:
+              - paragraph [ref=e67]: "25"
+              - paragraph [ref=e68]: Orders This Month
+            - generic [ref=e69]:
+              - paragraph [ref=e70]: "35"
+              - paragraph [ref=e71]: 4 delivered
+              - paragraph [ref=e72]: Total Sales
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: "4"
+              - paragraph [ref=e75]: 71 units in stock
+              - paragraph [ref=e76]: Total Products
+            - generic [ref=e77]:
+              - paragraph [ref=e78]: "1"
+              - paragraph [ref=e79]: Low Stock Variants
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - heading "Order Status Breakdown" [level=3] [ref=e82]
+              - application [ref=e85]
+              - generic [ref=e86]:
+                - generic [ref=e89]: new (17)
+                - generic [ref=e92]: processing (1)
+                - generic [ref=e95]: shipped (2)
+                - generic [ref=e98]: delivered (3)
+                - generic [ref=e101]: returned (1)
+                - generic [ref=e104]: cancelled (1)
+            - generic [ref=e105]:
+              - heading "Sales Trend" [level=3] [ref=e106]
+              - paragraph [ref=e107]: Last 7 days + today
+              - application [ref=e110]:
+                - generic [ref=e118]:
+                  - generic [ref=e119]:
+                    - generic [ref=e121]: Fri
+                    - generic [ref=e123]: Sat
+                    - generic [ref=e125]: Sun
+                    - generic [ref=e127]: Mon
+                    - generic [ref=e129]: Tue
+                    - generic [ref=e131]: Wed
+                    - generic [ref=e133]: Today
+                  - generic [ref=e134]:
+                    - generic [ref=e136]: "0"
+                    - generic [ref=e138]: "4"
+                    - generic [ref=e140]: "8"
+                    - generic [ref=e142]: "12"
+                    - generic [ref=e144]: "16"
+          - generic [ref=e145]:
+            - heading "Inventory Health" [level=3] [ref=e146]
+            - generic [ref=e147]:
+              - generic [ref=e148]:
+                - paragraph [ref=e149]: "4"
+                - paragraph [ref=e150]: Active Products
+              - generic [ref=e151]:
+                - paragraph [ref=e152]: "3"
+                - paragraph [ref=e153]: In Stock
+              - generic [ref=e154]:
+                - paragraph [ref=e155]: "0"
+                - paragraph [ref=e156]: Last Chance
+                - paragraph [ref=e157]: 1–3 units total stock
+              - generic [ref=e158]:
+                - paragraph [ref=e159]: "1"
+                - paragraph [ref=e160]: Sold Out
+              - link "1 Returns (7d) → View orders" [ref=e161] [cursor=pointer]:
+                - /url: /admin/orders
+                - paragraph [ref=e162]: "1"
+                - paragraph [ref=e163]: Returns (7d)
+                - paragraph [ref=e164]: → View orders
+              - link "1 Cancelled (7d) → View orders" [ref=e165] [cursor=pointer]:
+                - /url: /admin/orders
+                - paragraph [ref=e166]: "1"
+                - paragraph [ref=e167]: Cancelled (7d)
+                - paragraph [ref=e168]: → View orders
+          - generic [ref=e169]:
+            - heading "Merchandising" [level=3] [ref=e170]
+            - generic [ref=e171]:
+              - generic [ref=e172]:
+                - generic [ref=e173]:
+                  - paragraph [ref=e174]: Best Sellers
+                  - generic [ref=e175]: by score
+                - list [ref=e176]:
+                  - listitem [ref=e177]:
+                    - generic [ref=e178]: "#1"
+                    - generic [ref=e179]: Elegant dress
+                    - generic [ref=e180]: 3 sold
+              - generic [ref=e181]:
+                - generic [ref=e182]:
+                  - paragraph [ref=e183]: Trending Now
+                  - generic [ref=e184]: this week
+                - list [ref=e185]:
+                  - listitem [ref=e186]:
+                    - generic [ref=e187]: "#1"
+                    - generic [ref=e188]: Elegant dress
+                    - generic [ref=e189]: ↑ 16.0
+              - generic [ref=e190]:
+                - generic [ref=e191]:
+                  - paragraph [ref=e192]: Just Dropped
+                  - generic [ref=e193]: last 7 days
+                - list [ref=e194]:
+                  - listitem [ref=e195]:
+                    - generic [ref=e196]: New suit
+                    - generic [ref=e197]: 5d ago
+                  - listitem [ref=e198]:
+                    - generic [ref=e199]: Girls Suit
+                    - generic [ref=e200]: 5d ago
+                  - listitem [ref=e201]:
+                    - generic [ref=e202]: Suit for women
+                    - generic [ref=e203]: 5d ago
+          - generic [ref=e204]:
+            - heading "Low Stock Alerts1" [level=3] [ref=e205]
+            - generic [ref=e207]:
+              - generic [ref=e208]:
+                - paragraph [ref=e209]: Girls Suit
+                - paragraph [ref=e210]: All sizes
+              - generic [ref=e211]: OUT OF STOCK
+  - alert [ref=e212]
+  - generic [ref=e213]: "0"

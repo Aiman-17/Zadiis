@@ -1,0 +1,278 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Payments" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - button "All (12)" [ref=e50]
+          - button "Pending (12)" [ref=e51]
+          - button "Paid (13)" [active] [ref=e52]
+        - table [ref=e55]:
+          - rowgroup [ref=e56]:
+            - row "Order Customer Amount Method Payment Date Action" [ref=e57]:
+              - columnheader "Order" [ref=e58]
+              - columnheader "Customer" [ref=e59]
+              - columnheader "Amount" [ref=e60]
+              - columnheader "Method" [ref=e61]
+              - columnheader "Payment" [ref=e62]
+              - columnheader "Date" [ref=e63]
+              - columnheader "Action" [ref=e64]
+          - rowgroup [ref=e65]:
+            - row "ZD-1023 COD Test Customer 03009876543 PKR 6,190 cod paid 6/23/2026 ✓ Confirmed" [ref=e266]:
+              - cell "ZD-1023" [ref=e267]
+              - cell "COD Test Customer 03009876543" [ref=e268]:
+                - paragraph [ref=e269]: COD Test Customer
+                - paragraph [ref=e270]: "03009876543"
+              - cell "PKR 6,190" [ref=e271]
+              - cell "cod" [ref=e272]
+              - cell "paid" [ref=e273]
+              - cell "6/23/2026" [ref=e274]
+              - cell "✓ Confirmed" [ref=e275]:
+                - generic [ref=e276]:
+                  - generic [ref=e277]: ✓ Confirmed
+                  - button "Archive payment" [ref=e278]:
+                    - img [ref=e279]
+                  - button "Delete payment record" [ref=e282]:
+                    - img [ref=e283]
+            - row "ZD-1022 Test Customer 03001234567 PKR 6,190 card paid txn_test_12345 6/23/2026 ✓ Confirmed" [ref=e286]:
+              - cell "ZD-1022" [ref=e287]
+              - cell "Test Customer 03001234567" [ref=e288]:
+                - paragraph [ref=e289]: Test Customer
+                - paragraph [ref=e290]: "03001234567"
+              - cell "PKR 6,190" [ref=e291]
+              - cell "card" [ref=e292]
+              - cell "paid txn_test_12345" [ref=e293]:
+                - text: paid
+                - paragraph [ref=e294]: txn_test_12345
+              - cell "6/23/2026" [ref=e295]
+              - cell "✓ Confirmed" [ref=e296]:
+                - generic [ref=e297]:
+                  - generic [ref=e298]: ✓ Confirmed
+                  - button "Archive payment" [ref=e299]:
+                    - img [ref=e300]
+                  - button "Delete payment record" [ref=e303]:
+                    - img [ref=e304]
+            - row "ZD-1021 Syeda doll Syeda doll 03337202028 PKR 6,190 easypaisa paid 6/23/2026 ✓ Confirmed" [ref=e307]:
+              - cell "ZD-1021" [ref=e308]
+              - cell "Syeda doll Syeda doll 03337202028" [ref=e309]:
+                - paragraph [ref=e310]: Syeda doll Syeda doll
+                - paragraph [ref=e311]: "03337202028"
+              - cell "PKR 6,190" [ref=e312]
+              - cell "easypaisa" [ref=e313]
+              - cell "paid" [ref=e314]
+              - cell "6/23/2026" [ref=e315]
+              - cell "✓ Confirmed" [ref=e316]:
+                - generic [ref=e317]:
+                  - generic [ref=e318]: ✓ Confirmed
+                  - button "Archive payment" [ref=e319]:
+                    - img [ref=e320]
+                  - button "Delete payment record" [ref=e323]:
+                    - img [ref=e324]
+            - row "ZD-1020 Syeda doll Syeda doll 03337202028 PKR 2,100 jazzcash paid 6/23/2026 ✓ Confirmed" [ref=e327]:
+              - cell "ZD-1020" [ref=e328]
+              - cell "Syeda doll Syeda doll 03337202028" [ref=e329]:
+                - paragraph [ref=e330]: Syeda doll Syeda doll
+                - paragraph [ref=e331]: "03337202028"
+              - cell "PKR 2,100" [ref=e332]
+              - cell "jazzcash" [ref=e333]
+              - cell "paid" [ref=e334]
+              - cell "6/23/2026" [ref=e335]
+              - cell "✓ Confirmed" [ref=e336]:
+                - generic [ref=e337]:
+                  - generic [ref=e338]: ✓ Confirmed
+                  - button "Archive payment" [ref=e339]:
+                    - img [ref=e340]
+                  - button "Delete payment record" [ref=e343]:
+                    - img [ref=e344]
+            - row "ZD-1019 Syeda doll Syeda doll 03337202028 PKR 6,190 card paid 6/23/2026 ✓ Confirmed" [ref=e347]:
+              - cell "ZD-1019" [ref=e348]
+              - cell "Syeda doll Syeda doll 03337202028" [ref=e349]:
+                - paragraph [ref=e350]: Syeda doll Syeda doll
+                - paragraph [ref=e351]: "03337202028"
+              - cell "PKR 6,190" [ref=e352]
+              - cell "card" [ref=e353]
+              - cell "paid" [ref=e354]
+              - cell "6/23/2026" [ref=e355]
+              - cell "✓ Confirmed" [ref=e356]:
+                - generic [ref=e357]:
+                  - generic [ref=e358]: ✓ Confirmed
+                  - button "Archive payment" [ref=e359]:
+                    - img [ref=e360]
+                  - button "Delete payment record" [ref=e363]:
+                    - img [ref=e364]
+            - row "ZD-1018 Syeda doll Syeda doll 345453227 PKR 2,100 jazzcash paid 6/23/2026 ✓ Confirmed" [ref=e367]:
+              - cell "ZD-1018" [ref=e368]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e369]:
+                - paragraph [ref=e370]: Syeda doll Syeda doll
+                - paragraph [ref=e371]: "345453227"
+              - cell "PKR 2,100" [ref=e372]
+              - cell "jazzcash" [ref=e373]
+              - cell "paid" [ref=e374]
+              - cell "6/23/2026" [ref=e375]
+              - cell "✓ Confirmed" [ref=e376]:
+                - generic [ref=e377]:
+                  - generic [ref=e378]: ✓ Confirmed
+                  - button "Archive payment" [ref=e379]:
+                    - img [ref=e380]
+                  - button "Delete payment record" [ref=e383]:
+                    - img [ref=e384]
+            - row "ZD-1014 Syeda doll Syeda doll 345453227 PKR 1,700 card paid 6/23/2026 ✓ Confirmed" [ref=e387]:
+              - cell "ZD-1014" [ref=e388]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e389]:
+                - paragraph [ref=e390]: Syeda doll Syeda doll
+                - paragraph [ref=e391]: "345453227"
+              - cell "PKR 1,700" [ref=e392]
+              - cell "card" [ref=e393]
+              - cell "paid" [ref=e394]
+              - cell "6/23/2026" [ref=e395]
+              - cell "✓ Confirmed" [ref=e396]:
+                - generic [ref=e397]:
+                  - generic [ref=e398]: ✓ Confirmed
+                  - button "Archive payment" [ref=e399]:
+                    - img [ref=e400]
+                  - button "Delete payment record" [ref=e403]:
+                    - img [ref=e404]
+            - row "ZD-1013 Syeda doll Syeda doll 345453227 PKR 3,199 card paid 6/23/2026 ✓ Confirmed" [ref=e407]:
+              - cell "ZD-1013" [ref=e408]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e409]:
+                - paragraph [ref=e410]: Syeda doll Syeda doll
+                - paragraph [ref=e411]: "345453227"
+              - cell "PKR 3,199" [ref=e412]
+              - cell "card" [ref=e413]
+              - cell "paid" [ref=e414]
+              - cell "6/23/2026" [ref=e415]
+              - cell "✓ Confirmed" [ref=e416]:
+                - generic [ref=e417]:
+                  - generic [ref=e418]: ✓ Confirmed
+                  - button "Archive payment" [ref=e419]:
+                    - img [ref=e420]
+                  - button "Delete payment record" [ref=e423]:
+                    - img [ref=e424]
+            - row "ZD-1012 Syeda doll Syeda doll 345453227 PKR 3,199 card paid 6/23/2026 ✓ Confirmed" [ref=e427]:
+              - cell "ZD-1012" [ref=e428]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e429]:
+                - paragraph [ref=e430]: Syeda doll Syeda doll
+                - paragraph [ref=e431]: "345453227"
+              - cell "PKR 3,199" [ref=e432]
+              - cell "card" [ref=e433]
+              - cell "paid" [ref=e434]
+              - cell "6/23/2026" [ref=e435]
+              - cell "✓ Confirmed" [ref=e436]:
+                - generic [ref=e437]:
+                  - generic [ref=e438]: ✓ Confirmed
+                  - button "Archive payment" [ref=e439]:
+                    - img [ref=e440]
+                  - button "Delete payment record" [ref=e443]:
+                    - img [ref=e444]
+            - row "ZD-1010 Syeda doll Syeda doll 345453227 PKR 2,100 card paid 6/21/2026 ✓ Confirmed" [ref=e447]:
+              - cell "ZD-1010" [ref=e448]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e449]:
+                - paragraph [ref=e450]: Syeda doll Syeda doll
+                - paragraph [ref=e451]: "345453227"
+              - cell "PKR 2,100" [ref=e452]
+              - cell "card" [ref=e453]
+              - cell "paid" [ref=e454]
+              - cell "6/21/2026" [ref=e455]
+              - cell "✓ Confirmed" [ref=e456]:
+                - generic [ref=e457]:
+                  - generic [ref=e458]: ✓ Confirmed
+                  - button "Archive payment" [ref=e459]:
+                    - img [ref=e460]
+                  - button "Delete payment record" [ref=e463]:
+                    - img [ref=e464]
+            - row "ZD-1009 Syeda doll Syeda doll 345453227 PKR 3,199 card paid 6/21/2026 ✓ Confirmed" [ref=e467]:
+              - cell "ZD-1009" [ref=e468]
+              - cell "Syeda doll Syeda doll 345453227" [ref=e469]:
+                - paragraph [ref=e470]: Syeda doll Syeda doll
+                - paragraph [ref=e471]: "345453227"
+              - cell "PKR 3,199" [ref=e472]
+              - cell "card" [ref=e473]
+              - cell "paid" [ref=e474]
+              - cell "6/21/2026" [ref=e475]
+              - cell "✓ Confirmed" [ref=e476]:
+                - generic [ref=e477]:
+                  - generic [ref=e478]: ✓ Confirmed
+                  - button "Archive payment" [ref=e479]:
+                    - img [ref=e480]
+                  - button "Delete payment record" [ref=e483]:
+                    - img [ref=e484]
+            - row "ZD-1008 Aurex +923703465516 PKR 6,399 card paid 6/20/2026 ✓ Confirmed" [ref=e487]:
+              - cell "ZD-1008" [ref=e488]
+              - cell "Aurex +923703465516" [ref=e489]:
+                - paragraph [ref=e490]: Aurex
+                - paragraph [ref=e491]: "+923703465516"
+              - cell "PKR 6,399" [ref=e492]
+              - cell "card" [ref=e493]
+              - cell "paid" [ref=e494]
+              - cell "6/20/2026" [ref=e495]
+              - cell "✓ Confirmed" [ref=e496]:
+                - generic [ref=e497]:
+                  - generic [ref=e498]: ✓ Confirmed
+                  - button "Archive payment" [ref=e499]:
+                    - img [ref=e500]
+                  - button "Delete payment record" [ref=e503]:
+                    - img [ref=e504]
+            - row "ZD-1005 Syeda doll Syeda doll 0333 7202028 PKR 6,190 card paid 6/19/2026 ✓ Confirmed" [ref=e507]:
+              - cell "ZD-1005" [ref=e508]
+              - cell "Syeda doll Syeda doll 0333 7202028" [ref=e509]:
+                - paragraph [ref=e510]: Syeda doll Syeda doll
+                - paragraph [ref=e511]: 0333 7202028
+              - cell "PKR 6,190" [ref=e512]
+              - cell "card" [ref=e513]
+              - cell "paid" [ref=e514]
+              - cell "6/19/2026" [ref=e515]
+              - cell "✓ Confirmed" [ref=e516]:
+                - generic [ref=e517]:
+                  - generic [ref=e518]: ✓ Confirmed
+                  - button "Archive payment" [ref=e519]:
+                    - img [ref=e520]
+                  - button "Delete payment record" [ref=e523]:
+                    - img [ref=e524]
+        - button "Archived Payments 1 Click to show" [ref=e259]:
+          - generic [ref=e260]:
+            - img [ref=e261]
+            - text: Archived Payments
+            - generic [ref=e263]: "1"
+          - generic [ref=e264]: Click to show
+  - alert [ref=e265]

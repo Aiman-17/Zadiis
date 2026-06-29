@@ -1,0 +1,12 @@
+[     646ms] [ERROR] Failed to load resource: the server responded with a status of 500 () @ https://zadiis.com.pk/admin/products?filter=slow-movers:0
+[    1045ms] ReferenceError: Cannot access 'S' before initialization
+    at https://zadiis.com.pk/_next/static/chunks/3exnl9rzt4h7l.js:1:5239
+    at Array.filter (<anonymous>)
+    at https://zadiis.com.pk/_next/static/chunks/3exnl9rzt4h7l.js:1:5225
+    at ay (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:63844)
+    at oJ (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:84101)
+    at iu (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:94693)
+    at sd (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:138943)
+    at https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:138788
+    at sf (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:138796)
+    at se (https://zadiis.com.pk/_next/static/chunks/18i9ng6nvi_kw.js:1:134717)

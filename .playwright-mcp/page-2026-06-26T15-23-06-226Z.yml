@@ -1,0 +1,87 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "COD Reconciliation" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - paragraph [ref=e51]: Total COD Out
+            - paragraph [ref=e52]: PKR 10,982
+          - generic [ref=e53]:
+            - paragraph [ref=e54]: Cash Received
+            - paragraph [ref=e55]: PKR 6,190
+          - generic [ref=e56]:
+            - paragraph [ref=e57]: Awaiting Cash
+            - paragraph [ref=e58]: PKR 0
+          - generic [ref=e59]:
+            - paragraph [ref=e60]: Lost / Uncollected
+            - paragraph [ref=e61]: PKR 4,792
+        - generic [ref=e62]:
+          - generic [ref=e63]:
+            - generic [ref=e64]:
+              - generic [ref=e65]:
+                - paragraph [ref=e66]: ZD-1026 — Maya Ali
+                - paragraph [ref=e67]: 345453227 · Karachi · 26/06/2026
+                - paragraph [ref=e68]: "Order status: new"
+              - generic [ref=e69]:
+                - generic [ref=e70]: PKR 4,792
+                - generic [ref=e71]: lost
+            - generic [ref=e72]:
+              - button "Mark Cash Received" [ref=e73]
+              - button "Reset to Pending" [ref=e74]
+          - generic [ref=e75]:
+            - generic [ref=e76]:
+              - generic [ref=e77]:
+                - paragraph [ref=e78]: ZD-1023 — COD Test Customer
+                - paragraph [ref=e79]: 03009876543 · Karachi · 23/06/2026
+                - paragraph [ref=e80]:
+                  - text: "Order status: delivered"
+                  - generic [ref=e81]: · Received 25/06/2026
+              - generic [ref=e82]:
+                - generic [ref=e83]: PKR 6,190
+                - generic [ref=e84]: received
+            - generic [ref=e85]:
+              - button "Mark as Lost" [ref=e86]
+              - button "Reset to Pending" [ref=e87]
+  - alert [ref=e88]

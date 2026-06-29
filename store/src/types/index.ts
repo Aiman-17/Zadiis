@@ -40,6 +40,7 @@ export type Product = {
   new_arrival_start?: string
   new_arrival_end?: string
   no_restock?: boolean
+  discount_percentage?: number | null
 }
 
 export type OrderItem = {

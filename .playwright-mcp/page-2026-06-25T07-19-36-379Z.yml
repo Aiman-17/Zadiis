@@ -1,0 +1,99 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - heading "ZADIIS Admin" [level=2] [ref=e5]
+      - button [ref=e7]:
+        - img [ref=e8]
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Edit Product" [level=1] [ref=e11]
+        - generic [ref=e12]:
+          - generic [ref=e13]:
+            - generic [ref=e14]:
+              - generic [ref=e15]: Product Name *
+              - textbox "Product Name *" [ref=e16]: Elegant dress
+            - generic [ref=e17]:
+              - generic [ref=e18]: SKU
+              - textbox "SKU" [ref=e19]:
+                - /placeholder: DRESS-BLK-M
+                - text: ZD-002
+          - generic [ref=e20]:
+            - generic [ref=e21]: Description
+            - textbox "Description" [ref=e22]: "\\ecom-business-project\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md) ⎿ Wrote 61 lines to ..\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md 1 --- 2 id: 038 3 title: Hydration Error Fix Locale Pinning 4 stage: green 5 date: 2026-06-24"
+          - generic [ref=e23]:
+            - generic [ref=e24]:
+              - generic [ref=e25]: Price (PKR) *
+              - spinbutton "Price (PKR) *" [ref=e26]: "5990"
+            - generic [ref=e27]:
+              - generic [ref=e28]: Cost Price (PKR)
+              - spinbutton "Cost Price (PKR)" [ref=e29]
+            - generic [ref=e30]:
+              - generic [ref=e31]:
+                - text: Total Stock
+                - generic [ref=e32]: (auto-calculated from grid)
+              - generic [ref=e33]: "3"
+          - generic [ref=e34]:
+            - generic [ref=e35]: Category
+            - combobox "Category" [ref=e36]:
+              - option "— No category —"
+              - option "Women's Clothing" [selected]
+          - generic [ref=e37]:
+            - generic [ref=e38]: Product Images
+            - generic [ref=e39]:
+              - generic [ref=e40]:
+                - generic [ref=e41]:
+                  - img "Product image 1" [ref=e42]
+                  - button [ref=e43]:
+                    - img [ref=e44]
+                - generic [ref=e47]:
+                  - img "Product image 2" [ref=e48]
+                  - button [ref=e49]:
+                    - img [ref=e50]
+              - button "Upload Images (max 8)" [ref=e53]:
+                - img [ref=e54]
+                - text: Upload Images (max 8)
+          - generic [ref=e57]:
+            - generic [ref=e58]: Colors (comma separated)
+            - textbox "Colors (comma separated)" [ref=e59]:
+              - /placeholder: Black, White, Navy Blue
+              - text: White
+          - generic [ref=e60]:
+            - generic [ref=e61]: Sizes
+            - generic [ref=e62]:
+              - button "XS" [ref=e63]
+              - button "S" [ref=e64]
+              - button "M" [ref=e65]
+              - button "L" [ref=e66]
+              - button "XL" [ref=e67]
+              - button "XXL" [ref=e68]
+              - generic [ref=e69]: "|"
+              - button "Unstitched" [ref=e70]
+          - generic [ref=e71]:
+            - generic [ref=e72]: Variant Stock
+            - table [ref=e74]:
+              - rowgroup [ref=e75]:
+                - row "Color L XL XXL" [ref=e76]:
+                  - columnheader "Color" [ref=e77]
+                  - columnheader "L" [ref=e78]
+                  - columnheader "XL" [ref=e79]
+                  - columnheader "XXL" [ref=e80]
+              - rowgroup [ref=e81]:
+                - row "White 3 0 0" [ref=e82]:
+                  - cell "White" [ref=e83]
+                  - cell "3" [ref=e84]:
+                    - spinbutton [ref=e85]: "3"
+                  - cell "0" [ref=e86]:
+                    - spinbutton [ref=e87]: "0"
+                  - cell "0" [ref=e88]:
+                    - spinbutton [ref=e89]: "0"
+          - generic [ref=e90]:
+            - checkbox "Mark as Bestseller" [checked] [ref=e91]
+            - generic [ref=e92]: Mark as Bestseller
+          - generic [ref=e93]:
+            - checkbox "Active (visible in store)" [checked] [ref=e94]
+            - generic [ref=e95]: Active (visible in store)
+          - generic [ref=e96]:
+            - button "Cancel" [ref=e97]
+            - button "Update Product" [ref=e98]
+  - button "Open Next.js Dev Tools" [ref=e104] [cursor=pointer]:
+    - img [ref=e105]

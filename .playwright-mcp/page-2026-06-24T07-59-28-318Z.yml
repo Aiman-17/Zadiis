@@ -1,0 +1,126 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Settings" [ref=e31] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e32]
+        - text: Settings
+      - button "Logout" [ref=e36]:
+        - img [ref=e37]
+        - text: Logout
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - heading "Edit Product" [level=1] [ref=e43]
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]:
+              - generic [ref=e47]: Product Name *
+              - textbox "Product Name *" [ref=e48]: Elegant dress
+            - generic [ref=e49]:
+              - generic [ref=e50]: SKU
+              - textbox "SKU" [ref=e51]:
+                - /placeholder: DRESS-BLK-M
+                - text: ZD-002
+          - generic [ref=e52]:
+            - generic [ref=e53]: Description
+            - textbox "Description" [ref=e54]
+          - generic [ref=e55]:
+            - generic [ref=e56]:
+              - generic [ref=e57]: Price (PKR) *
+              - spinbutton "Price (PKR) *" [ref=e58]: "5990"
+            - generic [ref=e59]:
+              - generic [ref=e60]:
+                - text: Total Stock
+                - generic [ref=e61]: (auto-calculated from grid)
+              - generic [ref=e62]: "0"
+          - generic [ref=e63]:
+            - generic [ref=e64]: Category
+            - combobox "Category" [ref=e65]:
+              - option "— No category —"
+              - option "Women's Clothing" [selected]
+          - generic [ref=e66]:
+            - generic [ref=e67]: Product Images
+            - generic [ref=e68]:
+              - generic [ref=e69]:
+                - generic [ref=e70]:
+                  - img "Product image 1" [ref=e71]
+                  - button [ref=e72]:
+                    - img [ref=e73]
+                - generic [ref=e76]:
+                  - img "Product image 2" [ref=e77]
+                  - button [ref=e78]:
+                    - img [ref=e79]
+              - button "Upload Images (max 8)" [ref=e82]:
+                - img [ref=e83]
+                - text: Upload Images (max 8)
+          - generic [ref=e86]:
+            - generic [ref=e87]: Colors (comma separated)
+            - textbox "Colors (comma separated)" [ref=e88]:
+              - /placeholder: Black, White, Navy Blue
+              - text: White
+          - generic [ref=e89]:
+            - generic [ref=e90]: Sizes
+            - generic [ref=e91]:
+              - button "XS" [ref=e92]
+              - button "S" [ref=e93]
+              - button "M" [ref=e94]
+              - button "L" [ref=e95]
+              - button "XL" [ref=e96]
+              - button "XXL" [ref=e97]
+              - generic [ref=e98]: "|"
+              - button "Unstitched" [ref=e99]
+          - generic [ref=e100]:
+            - generic [ref=e101]: Variant Stock
+            - table [ref=e103]:
+              - rowgroup [ref=e104]:
+                - row "Color L XL XXL" [ref=e105]:
+                  - columnheader "Color" [ref=e106]
+                  - columnheader "L" [ref=e107]
+                  - columnheader "XL" [ref=e108]
+                  - columnheader "XXL" [ref=e109]
+              - rowgroup [ref=e110]:
+                - row "White 0 0 0" [ref=e111]:
+                  - cell "White" [ref=e112]
+                  - cell "0" [ref=e113]:
+                    - spinbutton [ref=e114]: "0"
+                  - cell "0" [ref=e115]:
+                    - spinbutton [ref=e116]: "0"
+                  - cell "0" [ref=e117]:
+                    - spinbutton [ref=e118]: "0"
+          - generic [ref=e119]:
+            - checkbox "Mark as Bestseller" [ref=e120]
+            - generic [ref=e121]: Mark as Bestseller
+          - generic [ref=e122]:
+            - checkbox "Active (visible in store)" [checked] [ref=e123]
+            - generic [ref=e124]: Active (visible in store)
+          - generic [ref=e125]:
+            - button "Cancel" [ref=e126]
+            - button "Update Product" [ref=e127]
+  - button "Open Next.js Dev Tools" [ref=e133] [cursor=pointer]:
+    - img [ref=e134]
+  - alert [ref=e137]

@@ -1,0 +1,95 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [active] [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [ref=e59]
+            - button "Cancellations" [ref=e60]
+            - button "Returns" [ref=e61]
+          - generic [ref=e222]:
+            - generic [ref=e223]:
+              - heading "Revenue by Period" [level=3] [ref=e224]
+              - paragraph [ref=e225]: Monthly breakdown
+              - application [ref=e228]:
+                - generic [ref=e268]:
+                  - generic [ref=e441]: June 2026
+                  - generic [ref=e286]:
+                    - generic [ref=e288]: "0"
+                    - generic [ref=e443]: 30k
+                    - generic [ref=e445]: 60k
+                    - generic [ref=e447]: 90k
+                    - generic [ref=e449]: 120k
+            - generic [ref=e297]:
+              - heading "Period Breakdown" [level=3] [ref=e299]
+              - table [ref=e301]:
+                - rowgroup [ref=e302]:
+                  - row "Period Orders Revenue vs Prev" [ref=e303]:
+                    - columnheader "Period" [ref=e304]
+                    - columnheader "Orders" [ref=e305]
+                    - columnheader "Revenue" [ref=e306]
+                    - columnheader "vs Prev" [ref=e307]
+                - rowgroup [ref=e308]:
+                  - row "June 2026 23 PKR 108,020 —" [ref=e450]:
+                    - cell "June 2026" [ref=e451]
+                    - cell "23" [ref=e452]
+                    - cell "PKR 108,020" [ref=e453]
+                    - cell "—" [ref=e454]
+                - rowgroup [ref=e356]:
+                  - row "Total 23 PKR 108,020" [ref=e357]:
+                    - cell "Total" [ref=e358]
+                    - cell "23" [ref=e359]
+                    - cell "PKR 108,020" [ref=e360]
+                    - cell [ref=e361]
+  - alert [ref=e205]
+  - generic [ref=e206]: 90k

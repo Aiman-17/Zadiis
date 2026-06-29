@@ -1,0 +1,128 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Settings" [ref=e31] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e32]
+        - text: Settings
+      - button "Logout" [ref=e36]:
+        - img [ref=e37]
+        - text: Logout
+    - main [ref=e41]:
+      - generic [ref=e42]:
+        - generic [ref=e43]:
+          - heading "Products" [level=1] [ref=e44]
+          - link "Add Product" [ref=e45] [cursor=pointer]:
+            - /url: /admin/products/new
+            - img
+            - text: Add Product
+        - table [ref=e48]:
+          - rowgroup [ref=e49]:
+            - row "Name SKU Price Stock Status Actions" [ref=e50]:
+              - columnheader "Name" [ref=e51]
+              - columnheader "SKU" [ref=e52]
+              - columnheader "Price" [ref=e53]
+              - columnheader "Stock" [ref=e54]
+              - columnheader "Status" [ref=e55]
+              - columnheader "Actions" [ref=e56]
+          - rowgroup [ref=e57]:
+            - row "New suit ZD-3559 PKR 1,900 0 Active Edit" [ref=e58]:
+              - cell "New suit" [ref=e59]
+              - cell "ZD-3559" [ref=e60]
+              - cell "PKR 1,900" [ref=e61]
+              - cell "0" [ref=e62]
+              - cell "Active" [ref=e63]
+              - cell "Edit" [ref=e64]:
+                - generic [ref=e65]:
+                  - link "Edit" [ref=e66] [cursor=pointer]:
+                    - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                  - button "Delete product" [ref=e67]:
+                    - img [ref=e68]
+            - row "Girls Suit ZD-3222 PKR 1,200 0 Active Edit" [ref=e71]:
+              - cell "Girls Suit" [ref=e72]
+              - cell "ZD-3222" [ref=e73]
+              - cell "PKR 1,200" [ref=e74]
+              - cell "0" [ref=e75]
+              - cell "Active" [ref=e76]
+              - cell "Edit" [ref=e77]:
+                - generic [ref=e78]:
+                  - link "Edit" [ref=e79] [cursor=pointer]:
+                    - /url: /admin/products/340ac868-6703-4599-b94f-2f91a9c58472/edit
+                  - button "Delete product" [ref=e80]:
+                    - img [ref=e81]
+            - row "Suit for women ZD-345 PKR 1,500 0 Active Edit" [ref=e84]:
+              - cell "Suit for women" [ref=e85]
+              - cell "ZD-345" [ref=e86]
+              - cell "PKR 1,500" [ref=e87]
+              - cell "0" [ref=e88]
+              - cell "Active" [ref=e89]
+              - cell "Edit" [ref=e90]:
+                - generic [ref=e91]:
+                  - link "Edit" [ref=e92] [cursor=pointer]:
+                    - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                  - button "Delete product" [ref=e93]:
+                    - img [ref=e94]
+            - row "Elegant dress ZD-002 PKR 5,990 4 Active Edit" [ref=e97]:
+              - cell "Elegant dress" [ref=e98]
+              - cell "ZD-002" [ref=e99]
+              - cell "PKR 5,990" [ref=e100]
+              - cell "4" [ref=e101]
+              - cell "Active" [ref=e102]
+              - cell "Edit" [ref=e103]:
+                - generic [ref=e104]:
+                  - link "Edit" [ref=e105] [cursor=pointer]:
+                    - /url: /admin/products/6c7caf9b-ce1a-43a5-917c-267076a037c1/edit
+                  - button "Delete product" [ref=e106]:
+                    - img [ref=e107]
+            - row "Kmeez Dupatta ZD-001 PKR 4,999 0 Active Edit" [ref=e110]:
+              - cell "Kmeez Dupatta" [ref=e111]
+              - cell "ZD-001" [ref=e112]
+              - cell "PKR 4,999" [ref=e113]
+              - cell "0" [ref=e114]
+              - cell "Active" [ref=e115]
+              - cell "Edit" [ref=e116]:
+                - generic [ref=e117]:
+                  - link "Edit" [ref=e118] [cursor=pointer]:
+                    - /url: /admin/products/92a5f640-7cb9-4b5a-92f7-eb382391728a/edit
+                  - button "Delete product" [ref=e119]:
+                    - img [ref=e120]
+            - row "3 Pcs Suit — PKR 2,999 0 Active Edit" [ref=e123]:
+              - cell "3 Pcs Suit" [ref=e124]
+              - cell "—" [ref=e125]
+              - cell "PKR 2,999" [ref=e126]
+              - cell "0" [ref=e127]
+              - cell "Active" [ref=e128]
+              - cell "Edit" [ref=e129]:
+                - generic [ref=e130]:
+                  - link "Edit" [ref=e131] [cursor=pointer]:
+                    - /url: /admin/products/324863f5-db80-4b39-9940-516c223f7f9f/edit
+                  - button "Delete product" [ref=e132]:
+                    - img [ref=e133]
+  - button "Open Next.js Dev Tools" [ref=e141] [cursor=pointer]:
+    - img [ref=e142]
+  - alert [ref=e145]

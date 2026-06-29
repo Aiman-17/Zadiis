@@ -1,3 +1,5 @@
+export const dynamic = 'force-dynamic'
+
 import CartClient from './CartClient'
 import { getTrendingProducts } from '@/lib/products'
 import type { Product } from '@/types'

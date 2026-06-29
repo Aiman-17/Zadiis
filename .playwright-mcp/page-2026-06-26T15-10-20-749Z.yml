@@ -1,0 +1,114 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Orders" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - button "Active (4)" [ref=e50]
+          - button "Pending Shipment (15)" [ref=e51]
+          - button "Completed (4)" [ref=e52]
+          - button "Returns (1)" [ref=e53]
+          - button "Cancellations (1)" [ref=e54]
+          - button "Archived (1)" [ref=e55]
+        - generic [ref=e56]:
+          - generic [ref=e57]:
+            - generic [ref=e58] [cursor=pointer]:
+              - generic [ref=e59]:
+                - paragraph [ref=e60]: ZD-1026 — Maya Ali
+                - paragraph [ref=e61]: 345453227 · Karachi · 6/26/2026
+              - generic [ref=e62]:
+                - generic [ref=e63]: PKR 4,792
+                - generic [ref=e64]: new
+                - generic [ref=e65]: pending
+                - button "Cancel order" [ref=e66]:
+                  - img [ref=e67]
+            - generic [ref=e114]:
+              - paragraph [ref=e115]: "Items:"
+              - paragraph [ref=e116]:
+                - text: Elegant dress (ZD-002) × 1 (L, White) — PKR 4,792
+                - generic [ref=e117]: (was PKR 5,990)
+              - generic [ref=e118]:
+                - paragraph [ref=e119]:
+                  - text: "Subtotal: PKR 4,792 · Delivery: PKR 0 ·"
+                  - strong [ref=e120]: "Total: PKR 4,792"
+                - paragraph [ref=e121]: "taj medical · Payment: cod"
+              - generic [ref=e122]:
+                - paragraph [ref=e123]: "Update Status:"
+                - generic [ref=e124]:
+                  - button "new" [ref=e125]
+                  - button "processing" [ref=e126]
+                  - button "shipped" [ref=e127]
+                  - button "delivered" [ref=e128]
+                  - button "returned" [ref=e129]
+          - generic [ref=e72] [cursor=pointer]:
+            - generic [ref=e73]:
+              - paragraph [ref=e74]: ZD-1025 — Gul
+              - paragraph [ref=e75]: 3457645322 · Karachi · 6/25/2026
+            - generic [ref=e76]:
+              - generic [ref=e77]: PKR 11,400
+              - generic [ref=e78]: new
+              - generic [ref=e79]: pending
+              - button "Cancel order" [ref=e80]:
+                - img [ref=e81]
+          - generic [ref=e86] [cursor=pointer]:
+            - generic [ref=e87]:
+              - paragraph [ref=e88]: ZD-1003 — Aiman
+              - paragraph [ref=e89]: 0333 7202028 · Karachi · 6/18/2026
+            - generic [ref=e90]:
+              - generic [ref=e91]: PKR 6,198
+              - generic [ref=e92]: new
+              - generic [ref=e93]: pending
+              - button "Cancel order" [ref=e94]:
+                - img [ref=e95]
+          - generic [ref=e100] [cursor=pointer]:
+            - generic [ref=e101]:
+              - paragraph [ref=e102]: ZD-1002 — faiza
+              - paragraph [ref=e103]: 345453227 · Karachi · 6/18/2026
+            - generic [ref=e104]:
+              - generic [ref=e105]: PKR 6,198
+              - generic [ref=e106]: new
+              - generic [ref=e107]: pending
+              - button "Cancel order" [ref=e108]:
+                - img [ref=e109]
+  - alert [ref=e113]

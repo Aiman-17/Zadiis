@@ -1,0 +1,82 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Products" [ref=e57]
+            - button "Inventory" [ref=e58]
+            - button "Cancellations" [active] [ref=e59]
+            - button "Returns" [ref=e60]
+          - generic [ref=e374]:
+            - generic [ref=e375]:
+              - generic [ref=e376]:
+                - paragraph [ref=e377]: 3.8%
+                - paragraph [ref=e378]: Cancellation Rate
+              - generic [ref=e379]:
+                - paragraph [ref=e380]: "1"
+                - paragraph [ref=e381]: Orders Cancelled
+              - generic [ref=e382]:
+                - paragraph [ref=e383]: PKR 6,190
+                - paragraph [ref=e384]: Revenue Lost
+            - generic [ref=e385]:
+              - heading "Cancellation Reasons" [level=3] [ref=e386]
+              - application [ref=e389]:
+                - generic [ref=e402]:
+                  - generic [ref=e403]:
+                    - generic [ref=e405]: "0"
+                    - generic [ref=e407]: "1"
+                    - generic [ref=e409]: "2"
+                    - generic [ref=e411]: "3"
+                    - generic [ref=e413]: "4"
+                  - generic [ref=e416]: ChangedMind
+  - alert [ref=e156]
+  - generic [ref=e157]: Changed Mind

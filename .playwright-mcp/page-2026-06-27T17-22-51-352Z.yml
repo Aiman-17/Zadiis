@@ -1,0 +1,129 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "ZADIIS Admin" [level=2] [ref=e5]
+    - button [ref=e7]:
+      - img [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Products" [level=1] [ref=e12]
+        - link "Add Product" [ref=e13] [cursor=pointer]:
+          - /url: /admin/products/new
+          - img
+          - text: Add Product
+      - generic [ref=e14]:
+        - generic [ref=e15]:
+          - generic [ref=e16]:
+            - strong [ref=e17]: "1"
+            - text: Best Seller
+          - generic [ref=e18]:
+            - strong [ref=e19]: "1"
+            - text: Trending
+        - table [ref=e22]:
+          - rowgroup [ref=e23]:
+            - row "Name SKU Price Stock Days to Sellout Actions" [ref=e24]:
+              - columnheader "Name" [ref=e25]
+              - columnheader "SKU" [ref=e26]
+              - columnheader "Price" [ref=e27]
+              - columnheader "Stock" [ref=e28]
+              - columnheader "Days to Sellout" [ref=e29]
+              - columnheader "Actions" [ref=e30]
+          - rowgroup [ref=e31]:
+            - row "CO-ORDS 2pcs set Casual ZD-5110 PKR 7,989 10 — Edit" [ref=e32]:
+              - cell "CO-ORDS 2pcs set Casual" [ref=e33]:
+                - generic [ref=e34]:
+                  - generic [ref=e35]: CO-ORDS 2pcs set
+                  - generic [ref=e36]: Casual
+              - cell "ZD-5110" [ref=e37]
+              - cell "PKR 7,989" [ref=e38]
+              - cell "10" [ref=e39]
+              - cell "—" [ref=e40]
+              - cell "Edit" [ref=e41]:
+                - generic [ref=e42]:
+                  - link "Edit" [ref=e43] [cursor=pointer]:
+                    - /url: /admin/products/57250430-e94f-4322-ace9-c18f95c54579/edit
+                  - button "Archive product" [ref=e44]:
+                    - img [ref=e45]
+            - row "New suit best cotton quality with printed ↑ Trending ZD-3559 PKR 1,900 2 15d Edit" [ref=e48]:
+              - cell "New suit best cotton quality with printed ↑ Trending" [ref=e49]:
+                - generic [ref=e51]: New suit best cotton quality with printed
+                - generic [ref=e53]: ↑ Trending
+              - cell "ZD-3559" [ref=e54]
+              - cell "PKR 1,900" [ref=e55]
+              - cell "2" [ref=e56]
+              - cell "15d" [ref=e57]:
+                - generic [ref=e58]: 15d
+              - cell "Edit" [ref=e59]:
+                - generic [ref=e60]:
+                  - link "Edit" [ref=e61] [cursor=pointer]:
+                    - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                  - button "Archive product" [ref=e62]:
+                    - img [ref=e63]
+            - row "Girls Suit ZD-3222 PKR 1,200 35 — Edit" [ref=e66]:
+              - cell "Girls Suit" [ref=e67]:
+                - generic [ref=e69]: Girls Suit
+              - cell "ZD-3222" [ref=e70]
+              - cell "PKR 1,200" [ref=e71]
+              - cell "35" [ref=e72]
+              - cell "—" [ref=e73]
+              - cell "Edit" [ref=e74]:
+                - generic [ref=e75]:
+                  - link "Edit" [ref=e76] [cursor=pointer]:
+                    - /url: /admin/products/340ac868-6703-4599-b94f-2f91a9c58472/edit
+                  - button "Archive product" [ref=e77]:
+                    - img [ref=e78]
+            - row "Suit for women ZD-345 PKR 1,500 27 — Edit" [ref=e81]:
+              - cell "Suit for women" [ref=e82]:
+                - generic [ref=e84]: Suit for women
+              - cell "ZD-345" [ref=e85]
+              - cell "PKR 1,500" [ref=e86]
+              - cell "27" [ref=e87]
+              - cell "—" [ref=e88]
+              - cell "Edit" [ref=e89]:
+                - generic [ref=e90]:
+                  - link "Edit" [ref=e91] [cursor=pointer]:
+                    - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                  - button "Archive product" [ref=e92]:
+                    - img [ref=e93]
+            - row "Elegant dress ★ Best Seller ZD-002 PKR 5,990 29 110d Edit" [ref=e96]:
+              - cell "Elegant dress ★ Best Seller" [ref=e97]:
+                - generic [ref=e99]: Elegant dress
+                - generic [ref=e101]: ★ Best Seller
+              - cell "ZD-002" [ref=e102]
+              - cell "PKR 5,990" [ref=e103]
+              - cell "29" [ref=e104]
+              - cell "110d" [ref=e105]:
+                - generic [ref=e106]: 110d
+              - cell "Edit" [ref=e107]:
+                - generic [ref=e108]:
+                  - link "Edit" [ref=e109] [cursor=pointer]:
+                    - /url: /admin/products/6c7caf9b-ce1a-43a5-917c-267076a037c1/edit
+                  - button "Archive product" [ref=e110]:
+                    - img [ref=e111]
+            - row "Kmeez Dupatta ZD-001 PKR 4,999 12 — Edit" [ref=e114]:
+              - cell "Kmeez Dupatta" [ref=e115]:
+                - generic [ref=e117]: Kmeez Dupatta
+              - cell "ZD-001" [ref=e118]
+              - cell "PKR 4,999" [ref=e119]
+              - cell "12" [ref=e120]
+              - cell "—" [ref=e121]
+              - cell "Edit" [ref=e122]:
+                - generic [ref=e123]:
+                  - link "Edit" [ref=e124] [cursor=pointer]:
+                    - /url: /admin/products/92a5f640-7cb9-4b5a-92f7-eb382391728a/edit
+                  - button "Archive product" [ref=e125]:
+                    - img [ref=e126]
+            - row "3 Pcs Suit — PKR 2,999 19 230d Edit" [ref=e129]:
+              - cell "3 Pcs Suit" [ref=e130]:
+                - generic [ref=e132]: 3 Pcs Suit
+              - cell "—" [ref=e133]
+              - cell "PKR 2,999" [ref=e134]
+              - cell "19" [ref=e135]
+              - cell "230d" [ref=e136]:
+                - generic [ref=e137]: 230d
+              - cell "Edit" [ref=e138]:
+                - generic [ref=e139]:
+                  - link "Edit" [ref=e140] [cursor=pointer]:
+                    - /url: /admin/products/324863f5-db80-4b39-9940-516c223f7f9f/edit
+                  - button "Archive product" [ref=e141]:
+                    - img [ref=e142]

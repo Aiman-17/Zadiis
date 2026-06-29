@@ -1,0 +1,170 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - link "← Back to Shop" [ref=e16] [cursor=pointer]:
+        - /url: /shop
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - generic [ref=e19]:
+            - img "Elegant dress" [ref=e20]
+            - img [ref=e23]
+          - generic [ref=e26]:
+            - button "Elegant dress view 1" [ref=e27]:
+              - img "Elegant dress view 1" [ref=e28]
+            - button "Elegant dress view 2" [ref=e29]:
+              - img "Elegant dress view 2" [ref=e30]
+        - generic [ref=e31]:
+          - generic [ref=e32]:
+            - heading "Elegant dress" [level=1] [ref=e33]
+            - generic [ref=e34]:
+              - paragraph [ref=e35]: PKR 4,792
+              - paragraph [ref=e36]: PKR 5,990
+              - generic [ref=e37]: "-20%"
+              - generic [ref=e38]: Save PKR 1,198
+            - generic [ref=e40]:
+              - generic [ref=e41]:
+                - paragraph [ref=e42]: Sale On Now
+                - paragraph [ref=e43]: This offer expires when the timer ends
+              - generic [ref=e44]:
+                - generic [ref=e45]:
+                  - generic [ref=e46]: "17"
+                  - generic [ref=e47]: H
+                - generic [ref=e48]:
+                  - generic [ref=e49]: ":"
+                  - generic [ref=e50]: "32"
+                  - generic [ref=e51]: M
+                - generic [ref=e52]:
+                  - generic [ref=e53]: ":"
+                  - generic [ref=e54]: "03"
+                  - generic [ref=e55]: S
+          - paragraph [ref=e56]: "\\ecom-business-project\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md) ⎿ Wrote 61 lines to ..\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md 1 --- 2 id: 038 3 title: Hydration Error Fix Locale Pinning 4 stage: green 5 date: 2026-06-24"
+          - generic [ref=e57]:
+            - generic [ref=e58]:
+              - paragraph [ref=e59]: Size
+              - generic [ref=e60]:
+                - button "L" [ref=e61]
+                - button "XL" [ref=e62]
+                - button "XXL" [ref=e63]
+            - generic [ref=e64]:
+              - paragraph [ref=e65]: Color
+              - button "White" [ref=e67] [cursor=pointer]
+            - button "Add to Cart" [ref=e68]
+          - paragraph [ref=e69]: Free delivery on orders over PKR 10,000
+      - generic [ref=e70]:
+        - heading "Customer Reviews" [level=2] [ref=e71]
+        - generic [ref=e72]:
+          - generic [ref=e73]:
+            - generic [ref=e74]:
+              - generic [ref=e75]:
+                - img [ref=e76]
+                - img [ref=e78]
+                - img [ref=e80]
+                - img [ref=e82]
+                - img [ref=e84]
+              - generic [ref=e86]: 5.0 out of 5 · 1 review
+            - generic [ref=e87]:
+              - generic [ref=e88]:
+                - generic [ref=e89]:
+                  - img [ref=e90]
+                  - img [ref=e92]
+                  - img [ref=e94]
+                  - img [ref=e96]
+                  - img [ref=e98]
+                - generic [ref=e100]: Farzana
+                - generic [ref=e101]: 24 Jun 2026
+              - paragraph [ref=e102]: The best quality I have ever bought Amazing
+          - generic [ref=e103]:
+            - paragraph [ref=e104]: Write a Review
+            - generic [ref=e105]:
+              - button [ref=e106]:
+                - img [ref=e107]
+              - button [ref=e109]:
+                - img [ref=e110]
+              - button [ref=e112]:
+                - img [ref=e113]
+              - button [ref=e115]:
+                - img [ref=e116]
+              - button [ref=e118]:
+                - img [ref=e119]
+            - textbox "Your name" [ref=e121]
+            - textbox "Share your experience (optional)" [ref=e122]
+            - button "Submit Review" [ref=e123]
+            - paragraph [ref=e124]: 🔒 Your privacy matters to us. We only display your name and review — your personal information is never shared.
+      - generic [ref=e125]:
+        - heading "You May Also Like" [level=2] [ref=e126]
+        - generic [ref=e127]:
+          - link "Girls Suit Girls Suit JUST DROPPED PKR 1,200" [ref=e128] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - img "Girls Suit" [ref=e130]
+            - heading "Girls Suit" [level=3] [ref=e131]
+            - generic [ref=e132]: JUST DROPPED
+            - generic [ref=e134]: PKR 1,200
+          - link "Kmeez Dupatta Kmeez Dupatta NEW ARRIVAL PKR 4,999" [ref=e135] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e137]
+            - heading "Kmeez Dupatta" [level=3] [ref=e138]
+            - generic [ref=e139]: NEW ARRIVAL
+            - generic [ref=e141]: PKR 4,999
+          - link "3 Pcs Suit 3 Pcs Suit NEW ARRIVAL PKR 2,999" [ref=e142] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - img "3 Pcs Suit" [ref=e144]
+            - heading "3 Pcs Suit" [level=3] [ref=e145]
+            - generic [ref=e146]: NEW ARRIVAL
+            - generic [ref=e148]: PKR 2,999
+          - link "Suit for women Suit for women JUST DROPPED PKR 1,500" [ref=e149] [cursor=pointer]:
+            - /url: /shop/suit-for-women
+            - img "Suit for women" [ref=e151]
+            - heading "Suit for women" [level=3] [ref=e152]
+            - generic [ref=e153]: JUST DROPPED
+            - generic [ref=e155]: PKR 1,500
+  - contentinfo [ref=e156]:
+    - generic [ref=e157]:
+      - generic [ref=e158]:
+        - paragraph [ref=e159]: ZADIIS
+        - paragraph [ref=e160]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e161]:
+        - paragraph [ref=e162]: Quick Links
+        - list [ref=e163]:
+          - listitem [ref=e164]:
+            - link "Shop" [ref=e165] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e166]:
+            - link "Cart" [ref=e167] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e168]:
+            - link "Sale" [ref=e169] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e170]:
+        - paragraph [ref=e171]: Policies
+        - list [ref=e172]:
+          - listitem [ref=e173]:
+            - link "Returns & Exchanges" [ref=e174] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e175]:
+            - link "Cancel an Order" [ref=e176] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e177]:
+            - link "Shipping Info" [ref=e178] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e179]:
+            - link "Privacy Policy" [ref=e180] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e181]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e182] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e183]
+  - alert [ref=e185]

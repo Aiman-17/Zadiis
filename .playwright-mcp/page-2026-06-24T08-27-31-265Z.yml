@@ -1,0 +1,122 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Women's Collection" [level=1] [ref=e16]
+      - generic [ref=e17]:
+        - complementary [ref=e18]:
+          - generic [ref=e19]:
+            - generic [ref=e20]:
+              - heading "Filters" [level=3] [ref=e21]
+              - button "Clear all" [ref=e22]
+            - generic [ref=e23]:
+              - heading "Type" [level=3] [ref=e24]
+              - generic [ref=e25]:
+                - button "Stitched" [ref=e26]
+                - button "Unstitched" [ref=e27]
+            - generic [ref=e28]:
+              - heading "Size" [level=3] [ref=e29]
+              - generic [ref=e30]:
+                - button "XS" [ref=e31]
+                - button "S" [ref=e32]
+                - button "M" [ref=e33]
+                - button "L" [ref=e34]
+                - button "XL" [ref=e35]
+                - button "XXL" [ref=e36]
+            - generic [ref=e37]:
+              - heading "Price" [level=3] [ref=e38]
+              - generic [ref=e39]:
+                - button "Under PKR 2,000" [ref=e40]
+                - button "PKR 2,000 – 5,000" [ref=e41]
+                - button "PKR 5,000 – 10,000" [ref=e42]
+                - button "Over PKR 10,000" [ref=e43]
+        - generic [ref=e45]:
+          - link "New suit Sold Out New suit PKR 1,900" [ref=e46] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - generic [ref=e47]:
+              - img "New suit" [ref=e48]
+              - generic [ref=e50]: Sold Out
+            - heading "New suit" [level=3] [ref=e51]
+            - generic [ref=e53]: PKR 1,900
+          - link "Girls Suit Sold Out Girls Suit PKR 1,200" [ref=e54] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - generic [ref=e55]:
+              - img "Girls Suit" [ref=e56]
+              - generic [ref=e58]: Sold Out
+            - heading "Girls Suit" [level=3] [ref=e59]
+            - generic [ref=e61]: PKR 1,200
+          - link "Suit for women Sold Out Suit for women PKR 1,500" [ref=e62] [cursor=pointer]:
+            - /url: /shop/suit-for-women
+            - generic [ref=e63]:
+              - img "Suit for women" [ref=e64]
+              - generic [ref=e66]: Sold Out
+            - heading "Suit for women" [level=3] [ref=e67]
+            - generic [ref=e69]: PKR 1,500
+          - link "Elegant dress Elegant dress PKR 5,990" [ref=e70] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e72]
+            - heading "Elegant dress" [level=3] [ref=e73]
+            - generic [ref=e75]: PKR 5,990
+          - link "Kmeez Dupatta Sold Out Kmeez Dupatta PKR 4,999" [ref=e76] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - generic [ref=e77]:
+              - img "Kmeez Dupatta" [ref=e78]
+              - generic [ref=e80]: Sold Out
+            - heading "Kmeez Dupatta" [level=3] [ref=e81]
+            - generic [ref=e83]: PKR 4,999
+          - link "3 Pcs Suit Sold Out 3 Pcs Suit PKR 2,999" [ref=e84] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - generic [ref=e85]:
+              - img "3 Pcs Suit" [ref=e86]
+              - generic [ref=e88]: Sold Out
+            - heading "3 Pcs Suit" [level=3] [ref=e89]
+            - generic [ref=e91]: PKR 2,999
+  - contentinfo [ref=e92]:
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - paragraph [ref=e95]: ZADIIS
+        - paragraph [ref=e96]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e97]:
+        - paragraph [ref=e98]: Quick Links
+        - list [ref=e99]:
+          - listitem [ref=e100]:
+            - link "Shop" [ref=e101] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e102]:
+            - link "Cart" [ref=e103] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e104]:
+            - link "Sale" [ref=e105] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e106]:
+        - paragraph [ref=e107]: Policies
+        - list [ref=e108]:
+          - listitem [ref=e109]:
+            - link "Returns & Exchanges" [ref=e110] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e111]:
+            - link "Shipping Info" [ref=e112] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e113]:
+            - link "Privacy Policy" [ref=e114] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e115]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e116] [cursor=pointer]:
+    - /url: https://wa.me/923001234567?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e117]
+  - button "Open Next.js Dev Tools" [ref=e124] [cursor=pointer]:
+    - img [ref=e125]
+  - alert [ref=e128]

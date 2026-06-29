@@ -1,0 +1,61 @@
+- generic [ref=e2]:
+  - complementary [ref=e3]:
+    - heading "ZADIIS Admin" [level=2] [ref=e4]
+    - link "Dashboard" [ref=e5] [cursor=pointer]:
+      - /url: /admin
+      - img [ref=e6]
+      - text: Dashboard
+    - link "Products" [ref=e11] [cursor=pointer]:
+      - /url: /admin/products
+      - img [ref=e12]
+      - text: Products
+    - link "Orders" [ref=e16] [cursor=pointer]:
+      - /url: /admin/orders
+      - img [ref=e17]
+      - text: Orders
+    - link "Payments" [ref=e20] [cursor=pointer]:
+      - /url: /admin/payments
+      - img [ref=e21]
+      - text: Payments
+    - link "Invoices" [ref=e23] [cursor=pointer]:
+      - /url: /admin/invoices
+      - img [ref=e24]
+      - text: Invoices
+    - link "Sales" [ref=e27] [cursor=pointer]:
+      - /url: /admin/sales
+      - img [ref=e28]
+      - text: Sales
+    - link "Analytics" [ref=e31] [cursor=pointer]:
+      - /url: /admin/analytics
+      - img [ref=e32]
+      - text: Analytics
+    - link "COD" [ref=e33] [cursor=pointer]:
+      - /url: /admin/cod
+      - img [ref=e34]
+      - text: COD
+    - link "Settings" [ref=e36] [cursor=pointer]:
+      - /url: /admin/settings
+      - img [ref=e37]
+      - text: Settings
+    - button "Logout" [ref=e41]:
+      - img [ref=e42]
+      - text: Logout
+  - main [ref=e46]:
+    - generic [ref=e47]:
+      - heading "Payments" [level=1] [ref=e48]
+      - generic [ref=e49]:
+        - button "All (0)" [ref=e50]
+        - button "Pending (0)" [ref=e51]
+        - button "Paid (0)" [ref=e52]
+      - paragraph [ref=e53]: No orders in this category.
+      - table [ref=e56]:
+        - rowgroup [ref=e57]:
+          - row "Order Customer Amount Method Payment Date Action" [ref=e58]:
+            - columnheader "Order" [ref=e59]
+            - columnheader "Customer" [ref=e60]
+            - columnheader "Amount" [ref=e61]
+            - columnheader "Method" [ref=e62]
+            - columnheader "Payment" [ref=e63]
+            - columnheader "Date" [ref=e64]
+            - columnheader "Action" [ref=e65]
+        - rowgroup

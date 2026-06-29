@@ -1,0 +1,2 @@
+[   33011ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[   39467ms] [WARNING] Image with src "https://jjwhucdriwjwcdhatlcd.supabase.co/storage/v1/object/public/product-images/products/1781952170758-zp8shin0pz.jpg" has "fill" but is missing "sizes" prop. Please add it to improve page performance. Read more: https://nextjs.org/docs/api-reference/next/image#sizes @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477

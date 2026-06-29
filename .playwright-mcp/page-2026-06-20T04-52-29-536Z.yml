@@ -1,0 +1,53 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Get in Touch" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Have a question about an order or product? We're here to help.
+      - link "Chat on WhatsApp" [ref=e18] [cursor=pointer]:
+        - /url: https://wa.me/923001234567
+        - img [ref=e19]
+        - text: Chat on WhatsApp
+      - paragraph [ref=e21]: We usually reply within a few hours
+  - contentinfo [ref=e22]:
+    - generic [ref=e23]:
+      - generic [ref=e24]:
+        - heading "ZADIIS" [level=3] [ref=e25]
+        - paragraph [ref=e26]: Modern Pakistani women's fashion. Quality you can feel.
+      - generic [ref=e27]:
+        - heading "Shop" [level=4] [ref=e28]
+        - list [ref=e29]:
+          - listitem [ref=e30]:
+            - link "All Products" [ref=e31] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e32]:
+            - link "About Us" [ref=e33] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e34]:
+            - link "Contact" [ref=e35] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=e36]:
+        - heading "Help" [level=4] [ref=e37]
+        - list [ref=e38]:
+          - listitem [ref=e39]:
+            - link "WhatsApp Support" [ref=e40] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=e41]: Free delivery on orders over PKR 2,000
+    - generic [ref=e42]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e43] [cursor=pointer]:
+    - /url: https://wa.me/923001234567?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e44]
+  - alert [ref=e46]

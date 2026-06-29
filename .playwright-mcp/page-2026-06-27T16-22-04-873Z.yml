@@ -1,0 +1,95 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - paragraph [ref=e14]: Exclusive Sale Event
+        - heading "Eid SALE" [level=1] [ref=e15]
+        - paragraph [ref=e16]: Up to 20% Off
+        - paragraph [ref=e17]: ✓ Free Delivery on All Sale Orders
+        - paragraph [ref=e19]: Sale has ended
+        - link "Shop the Sale ↓" [ref=e20] [cursor=pointer]:
+          - /url: "#sale-products"
+      - paragraph [ref=e22]: ⚡ Sale stock will not be restocked — Grab yours before it's gone
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - heading "Best Sellers" [level=2] [ref=e25]
+          - generic [ref=e26]: Going Fast
+        - paragraph [ref=e27]: Our most-loved styles, now at sale prices
+        - generic [ref=e28]:
+          - link "Kmeez Dupatta -20% Kmeez Dupatta Bestseller PKR 3,999 PKR 4,999" [ref=e29] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - generic [ref=e30]:
+              - img "Kmeez Dupatta" [ref=e31]
+              - generic [ref=e33]: "-20%"
+            - heading "Kmeez Dupatta" [level=3] [ref=e34]
+            - generic [ref=e36]: Bestseller
+            - generic [ref=e37]:
+              - generic [ref=e38]: PKR 3,999
+              - generic [ref=e39]: PKR 4,999
+          - link "Elegant dress -20% Elegant dress Bestseller PKR 4,792 PKR 5,990" [ref=e40] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - generic [ref=e41]:
+              - img "Elegant dress" [ref=e42]
+              - generic [ref=e44]: "-20%"
+            - heading "Elegant dress" [level=3] [ref=e45]
+            - generic [ref=e47]: Bestseller
+            - generic [ref=e48]:
+              - generic [ref=e49]: PKR 4,792
+              - generic [ref=e50]: PKR 5,990
+          - link "Girls Suit -20% Girls Suit Bestseller PKR 960 PKR 1,200" [ref=e51] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - generic [ref=e52]:
+              - img "Girls Suit" [ref=e53]
+              - generic [ref=e55]: "-20%"
+            - heading "Girls Suit" [level=3] [ref=e56]
+            - generic [ref=e58]: Bestseller
+            - generic [ref=e59]:
+              - generic [ref=e60]: PKR 960
+              - generic [ref=e61]: PKR 1,200
+  - contentinfo [ref=e62]:
+    - generic [ref=e63]:
+      - generic [ref=e64]:
+        - paragraph [ref=e65]: ZADII'S
+        - paragraph [ref=e66]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e67]:
+        - paragraph [ref=e68]: Quick Links
+        - list [ref=e69]:
+          - listitem [ref=e70]:
+            - link "Shop" [ref=e71] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e72]:
+            - link "Cart" [ref=e73] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e74]:
+            - link "Sale" [ref=e75] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e76]:
+        - paragraph [ref=e77]: Policies
+        - list [ref=e78]:
+          - listitem [ref=e79]:
+            - link "Returns & Exchanges" [ref=e80] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e81]:
+            - link "Cancel an Order" [ref=e82] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e83]:
+            - link "Shipping Info" [ref=e84] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e85]:
+            - link "Privacy Policy" [ref=e86] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e87]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e88] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e89]
+  - alert [ref=e91]

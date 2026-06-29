@@ -1,0 +1,112 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - heading "Products" [level=1] [ref=e49]
+          - link "Add Product" [ref=e50] [cursor=pointer]:
+            - /url: /admin/products/new
+            - img
+            - text: Add Product
+        - generic [ref=e51]:
+          - table [ref=e54]:
+            - rowgroup [ref=e55]:
+              - row "Name SKU Price Stock Actions" [ref=e56]:
+                - columnheader "Name" [ref=e57]
+                - columnheader "SKU" [ref=e58]
+                - columnheader "Price" [ref=e59]
+                - columnheader "Stock" [ref=e60]
+                - columnheader "Actions" [ref=e61]
+            - rowgroup [ref=e62]:
+              - row "New suit ZD-3559 PKR 1,900 12 Edit" [ref=e63]:
+                - cell "New suit" [ref=e64]
+                - cell "ZD-3559" [ref=e65]
+                - cell "PKR 1,900" [ref=e66]
+                - cell "12" [ref=e67]
+                - cell "Edit" [ref=e68]:
+                  - generic [ref=e69]:
+                    - link "Edit" [ref=e70] [cursor=pointer]:
+                      - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                    - button "Archive product" [ref=e71]:
+                      - img [ref=e72]
+              - row "Girls Suit ZD-3222 PKR 1,200 Sold Out Edit" [ref=e75]:
+                - cell "Girls Suit" [ref=e76]
+                - cell "ZD-3222" [ref=e77]
+                - cell "PKR 1,200" [ref=e78]
+                - cell "Sold Out" [ref=e79]
+                - cell "Edit" [ref=e80]:
+                  - generic [ref=e81]:
+                    - link "Edit" [ref=e82] [cursor=pointer]:
+                      - /url: /admin/products/340ac868-6703-4599-b94f-2f91a9c58472/edit
+                    - button "Archive product" [ref=e83]:
+                      - img [ref=e84]
+              - row "Suit for women ZD-345 PKR 1,500 29 Edit" [ref=e87]:
+                - cell "Suit for women" [ref=e88]
+                - cell "ZD-345" [ref=e89]
+                - cell "PKR 1,500" [ref=e90]
+                - cell "29" [ref=e91]
+                - cell "Edit" [ref=e92]:
+                  - generic [ref=e93]:
+                    - link "Edit" [ref=e94] [cursor=pointer]:
+                      - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                    - button "Archive product" [ref=e95]:
+                      - img [ref=e96]
+              - row "Elegant dress ZD-002 PKR 5,990 30 Edit" [ref=e99]:
+                - cell "Elegant dress" [ref=e100]
+                - cell "ZD-002" [ref=e101]
+                - cell "PKR 5,990" [ref=e102]
+                - cell "30" [ref=e103]
+                - cell "Edit" [ref=e104]:
+                  - generic [ref=e105]:
+                    - link "Edit" [ref=e106] [cursor=pointer]:
+                      - /url: /admin/products/6c7caf9b-ce1a-43a5-917c-267076a037c1/edit
+                    - button "Archive product" [ref=e107]:
+                      - img [ref=e108]
+          - button "Archived Products 2 Click to show" [ref=e112]:
+            - generic [ref=e113]:
+              - img [ref=e114]
+              - text: Archived Products
+              - generic [ref=e116]: "2"
+            - generic [ref=e117]: Click to show
+  - alert [ref=e118]

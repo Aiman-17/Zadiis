@@ -1,0 +1,45 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]
+  - contentinfo [ref=e12]:
+    - generic [ref=e13]:
+      - generic [ref=e14]:
+        - paragraph [ref=e15]: ZADII'S
+        - paragraph [ref=e16]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: Quick Links
+        - list [ref=e19]:
+          - listitem [ref=e20]:
+            - link "Shop" [ref=e21] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e22]:
+            - link "Cart" [ref=e23] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e24]:
+        - paragraph [ref=e25]: Policies
+        - list [ref=e26]:
+          - listitem [ref=e27]:
+            - link "Returns & Exchanges" [ref=e28] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e29]:
+            - link "Cancel an Order" [ref=e30] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e31]:
+            - link "Shipping Info" [ref=e32] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e33]:
+            - link "Privacy Policy" [ref=e34] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e35]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e36] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e37]

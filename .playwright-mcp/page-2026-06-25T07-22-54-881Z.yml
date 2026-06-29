@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "ZADIIS Admin" [level=2] [ref=e5]
+    - button [ref=e7]:
+      - img [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - heading "Edit Product" [level=1] [ref=e11]
+      - generic [ref=e12]:
+        - generic [ref=e13]:
+          - generic [ref=e14]:
+            - generic [ref=e15]: Product Name *
+            - textbox "Product Name *" [ref=e16]: New suit
+          - generic [ref=e17]:
+            - generic [ref=e18]: SKU
+            - textbox "SKU" [ref=e19]:
+              - /placeholder: DRESS-BLK-M
+              - text: ZD-3559
+        - generic [ref=e20]:
+          - generic [ref=e21]: Description
+          - textbox "Description" [ref=e22]: Best
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e25]: Price (PKR) *
+            - spinbutton "Price (PKR) *" [ref=e26]: "1900"
+          - generic [ref=e27]:
+            - generic [ref=e28]: Cost Price (PKR)
+            - spinbutton "Cost Price (PKR)" [ref=e29]
+          - generic [ref=e30]:
+            - generic [ref=e31]: Total Stock
+            - spinbutton "Total Stock" [ref=e32]: "0"
+            - paragraph [ref=e33]: Fill in the variant grid below to enable auto-calculation
+        - generic [ref=e34]:
+          - generic [ref=e35]: Category
+          - combobox "Category" [ref=e36]:
+            - option "— No category —"
+            - option "Women's Clothing" [selected]
+        - generic [ref=e37]:
+          - generic [ref=e38]: Product Images
+          - generic [ref=e39]:
+            - generic [ref=e41]:
+              - img "Product image 1" [ref=e42]
+              - button [ref=e43]:
+                - img [ref=e44]
+            - button "Upload Images (max 8)" [ref=e47]:
+              - img [ref=e48]
+              - text: Upload Images (max 8)
+        - generic [ref=e51]:
+          - generic [ref=e52]: Colors (comma separated)
+          - textbox "Colors (comma separated)" [ref=e53]:
+            - /placeholder: Black, White, Navy Blue
+        - generic [ref=e54]:
+          - generic [ref=e55]: Sizes
+          - generic [ref=e56]:
+            - button "XS" [ref=e57]
+            - button "S" [ref=e58]
+            - button "M" [ref=e59]
+            - button "L" [ref=e60]
+            - button "XL" [ref=e61]
+            - button "XXL" [ref=e62]
+            - generic [ref=e63]: "|"
+            - button "Unstitched" [ref=e64]
+        - generic [ref=e65]:
+          - generic [ref=e66]: Variant Stock
+          - table [ref=e68]:
+            - rowgroup [ref=e69]:
+              - row "M L" [ref=e70]:
+                - columnheader "M" [ref=e71]
+                - columnheader "L" [ref=e72]
+            - rowgroup [ref=e73]:
+              - row "0 0" [ref=e74]:
+                - cell "0" [ref=e75]:
+                  - spinbutton [ref=e76]: "0"
+                - cell "0" [ref=e77]:
+                  - spinbutton [ref=e78]: "0"
+        - generic [ref=e79]:
+          - checkbox "Mark as Bestseller" [ref=e80]
+          - generic [ref=e81]: Mark as Bestseller
+        - generic [ref=e82]:
+          - checkbox "Active (visible in store)" [checked] [ref=e83]
+          - generic [ref=e84]: Active (visible in store)
+        - generic [ref=e85]:
+          - button "Cancel" [ref=e86]
+          - button "Update Product" [ref=e87]

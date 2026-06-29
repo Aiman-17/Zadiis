@@ -1,0 +1,162 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [ref=e59]
+            - button "Merchandising" [active] [ref=e60]
+            - button "Cancellations" [ref=e61]
+            - button "Returns" [ref=e62]
+          - generic [ref=e767]:
+            - generic [ref=e768]:
+              - heading "Category Performance" [level=3] [ref=e769]
+              - generic [ref=e772]:
+                - generic [ref=e773]: Uncategorized
+                - generic [ref=e774]: PKR 103,820 · 33 units · 23 orders
+            - generic [ref=e777]:
+              - heading "Price Range Performance" [level=3] [ref=e778]
+              - generic [ref=e779]:
+                - generic [ref=e780]:
+                  - paragraph [ref=e781]: Under 1.5k
+                  - paragraph [ref=e782]: "3"
+                  - paragraph [ref=e783]: units sold
+                  - paragraph [ref=e784]: PKR 4k
+                - generic [ref=e785]:
+                  - paragraph [ref=e786]: 1.5k – 3k
+                  - paragraph [ref=e787]: "21"
+                  - paragraph [ref=e788]: units sold
+                  - paragraph [ref=e789]: PKR 48k
+                - generic [ref=e790]:
+                  - paragraph [ref=e791]: 3k – 5k
+                  - paragraph [ref=e792]: "2"
+                  - paragraph [ref=e793]: units sold
+                  - paragraph [ref=e794]: PKR 10k
+                - generic [ref=e795]:
+                  - paragraph [ref=e796]: 5k+
+                  - paragraph [ref=e797]: "7"
+                  - paragraph [ref=e798]: units sold
+                  - paragraph [ref=e799]: PKR 42k
+            - generic [ref=e800]:
+              - heading "Size Sell-Through" [level=3] [ref=e801]
+              - generic [ref=e802]:
+                - generic [ref=e803]:
+                  - generic [ref=e804]: M
+                  - generic [ref=e807]: 33%
+                  - generic [ref=e808]: 23 sold / 47 left
+                - generic [ref=e809]:
+                  - generic [ref=e810]: L
+                  - generic [ref=e813]: 15%
+                  - generic [ref=e814]: 8 sold / 46 left
+                - generic [ref=e815]:
+                  - generic [ref=e816]: S
+                  - generic [ref=e819]: 5%
+                  - generic [ref=e820]: 1 sold / 21 left
+            - generic [ref=e821]:
+              - heading "New Arrivals (last 30 days)" [level=3] [ref=e823]
+              - table [ref=e824]:
+                - rowgroup [ref=e825]:
+                  - row "Product Age Sold Stock Velocity" [ref=e826]:
+                    - columnheader "Product" [ref=e827]
+                    - columnheader "Age" [ref=e828]
+                    - columnheader "Sold" [ref=e829]
+                    - columnheader "Stock" [ref=e830]
+                    - columnheader "Velocity" [ref=e831]
+                - rowgroup [ref=e832]:
+                  - row "New suit 5d ago 1 8 0.17/d" [ref=e833]:
+                    - cell "New suit" [ref=e834]
+                    - cell "5d ago" [ref=e835]
+                    - cell "1" [ref=e836]
+                    - cell "8" [ref=e837]
+                    - cell "0.17/d" [ref=e838]:
+                      - generic [ref=e839]: 0.17/d
+                  - row "Girls Suit 5d ago 0 36 no sales" [ref=e840]:
+                    - cell "Girls Suit" [ref=e841]
+                    - cell "5d ago" [ref=e842]
+                    - cell "0" [ref=e843]
+                    - cell "36" [ref=e844]
+                    - cell "no sales" [ref=e845]
+                  - row "Suit for women 5d ago 0 27 no sales" [ref=e846]:
+                    - cell "Suit for women" [ref=e847]
+                    - cell "5d ago" [ref=e848]
+                    - cell "0" [ref=e849]
+                    - cell "27" [ref=e850]
+                    - cell "no sales" [ref=e851]
+                  - row "Elegant dress 10d ago 3 30 0.30/d" [ref=e852]:
+                    - cell "Elegant dress" [ref=e853]
+                    - cell "10d ago" [ref=e854]
+                    - cell "3" [ref=e855]
+                    - cell "30" [ref=e856]
+                    - cell "0.30/d" [ref=e857]:
+                      - generic [ref=e858]: 0.30/d
+                  - row "Kmeez Dupatta 10d ago 0 12 no sales" [ref=e859]:
+                    - cell "Kmeez Dupatta" [ref=e860]
+                    - cell "10d ago" [ref=e861]
+                    - cell "0" [ref=e862]
+                    - cell "12" [ref=e863]
+                    - cell "no sales" [ref=e864]
+                  - row "3 Pcs Suit 10d ago 1 20 0.09/d" [ref=e865]:
+                    - cell "3 Pcs Suit" [ref=e866]
+                    - cell "10d ago" [ref=e867]
+                    - cell "1" [ref=e868]
+                    - cell "20" [ref=e869]
+                    - cell "0.09/d" [ref=e870]:
+                      - generic [ref=e871]: 0.09/d
+            - generic [ref=e872]:
+              - generic [ref=e873]:
+                - heading "Slow Movers" [level=3] [ref=e874]
+                - generic [ref=e875]: "0"
+                - generic [ref=e876]: < 0.3 units/day · 15+ days old · in stock
+              - paragraph [ref=e877]: No slow movers — all products are selling well.
+  - alert [ref=e266]
+  - generic [ref=e267]: Uncategorized

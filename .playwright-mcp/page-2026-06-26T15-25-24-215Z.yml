@@ -1,0 +1,159 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [active] [ref=e59]
+            - button "Merchandising" [ref=e60]
+            - button "Cancellations" [ref=e61]
+            - button "Returns" [ref=e62]
+          - generic [ref=e268]:
+            - generic [ref=e269]:
+              - generic [ref=e270]:
+                - paragraph [ref=e271]: PKR 381,178
+                - paragraph [ref=e272]: Inventory Value
+              - generic [ref=e273]:
+                - paragraph [ref=e274]: "3"
+                - paragraph [ref=e275]: Best Sellers tracked
+              - generic [ref=e276]:
+                - paragraph [ref=e277]: "2"
+                - paragraph [ref=e278]: Trending products
+              - generic [ref=e279]:
+                - paragraph [ref=e280]: "6"
+                - paragraph [ref=e281]: New Arrivals (30d)
+            - generic [ref=e282]:
+              - heading "Stock by Collection" [level=3] [ref=e283]
+              - paragraph [ref=e284]: Hover to see units sold vs remaining
+              - application [ref=e287]:
+                - generic [ref=e293]:
+                  - generic [ref=e294]:
+                    - generic [ref=e296]: "0"
+                    - generic [ref=e298]: "35"
+                    - generic [ref=e300]: "70"
+                    - generic [ref=e302]: "105"
+                    - generic [ref=e304]: "140"
+                  - generic [ref=e307]: Uncategorized
+            - generic [ref=e308]:
+              - generic [ref=e309]:
+                - generic [ref=e310]:
+                  - generic [ref=e311]: ★ Best Sellers
+                  - generic [ref=e312]: restock priority
+                - generic [ref=e313]:
+                  - generic [ref=e314]:
+                    - generic [ref=e315]:
+                      - paragraph [ref=e316]: Elegant dress
+                      - paragraph [ref=e317]: 3 sold
+                    - generic [ref=e318]: 29 left
+                  - generic [ref=e319]:
+                    - generic [ref=e320]:
+                      - paragraph [ref=e321]: 3 Pcs Suit
+                      - paragraph [ref=e322]: 1 sold
+                    - generic [ref=e323]: 20 left
+                  - generic [ref=e324]:
+                    - generic [ref=e325]:
+                      - paragraph [ref=e326]: New suit
+                      - paragraph [ref=e327]: 1 sold
+                    - generic [ref=e328]: 2 left
+              - generic [ref=e329]:
+                - generic [ref=e330]:
+                  - generic [ref=e331]: ↑ Trending
+                  - generic [ref=e332]: moving fast
+                - generic [ref=e333]:
+                  - generic [ref=e334]:
+                    - generic [ref=e335]:
+                      - paragraph [ref=e336]: New suit
+                      - paragraph [ref=e337]: 1 sold · ↑2.0
+                    - generic [ref=e338]: 2 left
+                  - generic [ref=e339]:
+                    - generic [ref=e340]:
+                      - paragraph [ref=e341]: Elegant dress
+                      - paragraph [ref=e342]: 3 sold · ↑16.0
+                    - generic [ref=e343]: 29 left
+              - generic [ref=e344]:
+                - generic [ref=e345]:
+                  - generic [ref=e346]: ✦ New Arrivals
+                  - generic [ref=e347]: last 30 days
+                - generic [ref=e348]:
+                  - generic [ref=e349]:
+                    - generic [ref=e350]:
+                      - paragraph [ref=e351]: New suit
+                      - paragraph [ref=e352]: 6d ago · 1 sold
+                    - generic [ref=e353]: 2 left
+                  - generic [ref=e354]:
+                    - generic [ref=e355]:
+                      - paragraph [ref=e356]: Girls Suit
+                      - paragraph [ref=e357]: 6d ago · 0 sold
+                    - generic [ref=e358]: 36 left
+                  - generic [ref=e359]:
+                    - generic [ref=e360]:
+                      - paragraph [ref=e361]: Suit for women
+                      - paragraph [ref=e362]: 6d ago · 0 sold
+                    - generic [ref=e363]: 27 left
+                  - generic [ref=e364]:
+                    - generic [ref=e365]:
+                      - paragraph [ref=e366]: Elegant dress
+                      - paragraph [ref=e367]: 10d ago · 3 sold
+                    - generic [ref=e368]: 29 left
+                  - generic [ref=e369]:
+                    - generic [ref=e370]:
+                      - paragraph [ref=e371]: Kmeez Dupatta
+                      - paragraph [ref=e372]: 10d ago · 0 sold
+                    - generic [ref=e373]: 12 left
+                  - generic [ref=e374]:
+                    - generic [ref=e375]:
+                      - paragraph [ref=e376]: 3 Pcs Suit
+                      - paragraph [ref=e377]: 11d ago · 1 sold
+                    - generic [ref=e378]: 20 left
+  - alert [ref=e266]
+  - generic [ref=e267]: Uncategorized

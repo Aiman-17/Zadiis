@@ -1,0 +1,120 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e120]:
+      - link "← Back to Shop" [ref=e121] [cursor=pointer]:
+        - /url: /shop
+      - generic [ref=e122]:
+        - generic [ref=e124]:
+          - img "New suit best cotton quality with printed" [ref=e125]
+          - img [ref=e128]
+        - generic [ref=e131]:
+          - generic [ref=e132]:
+            - generic [ref=e133]:
+              - img [ref=e134]
+              - generic [ref=e137]: Almost Gone — Final Stock
+            - heading "New suit best cotton quality with printed" [level=1] [ref=e138]
+            - paragraph [ref=e140]: PKR 1,900
+          - paragraph [ref=e141]: Best
+          - paragraph [ref=e142]: Hurry! Only 1 left in stock
+          - generic [ref=e143]:
+            - generic [ref=e144]:
+              - generic [ref=e145]:
+                - paragraph [ref=e146]: Size
+                - link "Size Guide" [ref=e147] [cursor=pointer]:
+                  - /url: /size-guide
+              - generic [ref=e148]:
+                - button "M" [active] [ref=e149]
+                - button "L" [ref=e150]
+            - paragraph [ref=e151]: Only 1 left in M
+            - button "Add to Cart" [ref=e152]
+      - generic [ref=e153]:
+        - heading "Customer Reviews" [level=2] [ref=e154]
+        - generic [ref=e155]:
+          - paragraph [ref=e156]: No reviews yet. Be the first!
+          - generic [ref=e157]:
+            - paragraph [ref=e158]: Write a Review
+            - generic [ref=e159]:
+              - button [ref=e160]:
+                - img [ref=e161]
+              - button [ref=e163]:
+                - img [ref=e164]
+              - button [ref=e166]:
+                - img [ref=e167]
+              - button [ref=e169]:
+                - img [ref=e170]
+              - button [ref=e172]:
+                - img [ref=e173]
+            - textbox "Your name" [ref=e175]
+            - textbox "Share your experience (optional)" [ref=e176]
+            - button "Submit Review" [ref=e177]
+            - paragraph [ref=e178]: 🔒 Your privacy matters to us. We only display your name and review — your personal information is never shared.
+      - generic [ref=e179]:
+        - heading "You May Also Like" [level=2] [ref=e180]
+        - generic [ref=e181]:
+          - link "CO-ORDS 2pcs set CO-ORDS 2pcs set PKR 7,989" [ref=e182] [cursor=pointer]:
+            - /url: /shop/co-ords-2pcs-set
+            - img "CO-ORDS 2pcs set" [ref=e184]
+            - heading "CO-ORDS 2pcs set" [level=3] [ref=e185]
+            - generic [ref=e187]: PKR 7,989
+          - link "Elegant dress Elegant dress Bestseller PKR 5,990" [ref=e188] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e190]
+            - heading "Elegant dress" [level=3] [ref=e191]
+            - generic [ref=e193]: Bestseller
+            - generic [ref=e195]: PKR 5,990
+          - link "Girls Suit Girls Suit Bestseller PKR 1,200" [ref=e196] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - img "Girls Suit" [ref=e198]
+            - heading "Girls Suit" [level=3] [ref=e199]
+            - generic [ref=e201]: Bestseller
+            - generic [ref=e203]: PKR 1,200
+          - link "Kmeez Dupatta Kmeez Dupatta Bestseller PKR 4,999" [ref=e204] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e206]
+            - heading "Kmeez Dupatta" [level=3] [ref=e207]
+            - generic [ref=e209]: Bestseller
+            - generic [ref=e211]: PKR 4,999
+  - contentinfo [ref=e92]:
+    - generic [ref=e93]:
+      - generic [ref=e94]:
+        - paragraph [ref=e95]: ZADII'S
+        - paragraph [ref=e96]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e97]:
+        - paragraph [ref=e98]: Quick Links
+        - list [ref=e99]:
+          - listitem [ref=e100]:
+            - link "Shop" [ref=e101] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e102]:
+            - link "Cart" [ref=e103] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e104]:
+        - paragraph [ref=e105]: Policies
+        - list [ref=e106]:
+          - listitem [ref=e107]:
+            - link "Returns & Exchanges" [ref=e108] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e109]:
+            - link "Cancel an Order" [ref=e110] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e111]:
+            - link "Shipping Info" [ref=e112] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e113]:
+            - link "Privacy Policy" [ref=e114] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e115]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e116] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e117]
+  - alert [ref=e119]: New suit best cotton quality with printed | ZADIIS

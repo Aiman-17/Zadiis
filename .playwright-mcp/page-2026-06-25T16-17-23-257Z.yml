@@ -1,0 +1,37 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e4]:
+    - banner [ref=e6]:
+      - generic [ref=e7]:
+        - link "Supabase" [ref=e9] [cursor=pointer]:
+          - /url: /dashboard/organizations
+          - img "Supabase" [ref=e10]
+        - generic [ref=e11]:
+          - generic [ref=e13] [cursor=pointer]: Feedback
+          - generic [ref=e14]:
+            - button "Search..." [ref=e15]:
+              - generic [ref=e16]:
+                - img [ref=e17]
+                - paragraph [ref=e20]: Search...
+              - generic [ref=e22]: Ctrl K
+            - button "Help" [ref=e23] [cursor=pointer]:
+              - generic [ref=e24]:
+                - img [ref=e25]
+                - generic [ref=e28]: Help
+            - button "Advisor Center" [ref=e30] [cursor=pointer]:
+              - generic [ref=e31]:
+                - img [ref=e32]
+                - generic [ref=e34]: Advisor Center
+          - button [ref=e35] [cursor=pointer]:
+            - img [ref=e38]
+    - generic [ref=e40]:
+      - button "Sidebar control" [ref=e48] [cursor=pointer]:
+        - img [ref=e50]
+      - main [ref=e57]:
+        - list [ref=e60]:
+          - generic [ref=e63]:
+            - paragraph [ref=e64]
+            - paragraph [ref=e65]
+          - generic [ref=e68]:
+            - paragraph [ref=e69]
+            - paragraph [ref=e70]
+  - alert [ref=e71]

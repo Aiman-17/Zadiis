@@ -1,0 +1,54 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Your cart is empty" [level=1] [ref=e13]
+      - paragraph [ref=e14]: Add some items to get started.
+      - link "Continue Shopping" [ref=e15] [cursor=pointer]:
+        - /url: /shop
+  - contentinfo [ref=e16]:
+    - generic [ref=e17]:
+      - generic [ref=e18]:
+        - paragraph [ref=e19]: ZADIIS
+        - paragraph [ref=e20]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e21]:
+        - paragraph [ref=e22]: Quick Links
+        - list [ref=e23]:
+          - listitem [ref=e24]:
+            - link "Shop" [ref=e25] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e26]:
+            - link "Cart" [ref=e27] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e28]:
+            - link "Sale" [ref=e29] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e30]:
+        - paragraph [ref=e31]: Policies
+        - list [ref=e32]:
+          - listitem [ref=e33]:
+            - link "Returns & Exchanges" [ref=e34] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e35]:
+            - link "Cancel an Order" [ref=e36] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e37]:
+            - link "Shipping Info" [ref=e38] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e39]:
+            - link "Privacy Policy" [ref=e40] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e41]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e42] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e43]
+  - alert [ref=e45]

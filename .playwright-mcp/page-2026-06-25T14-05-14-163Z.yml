@@ -1,0 +1,262 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Orders" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - button "Active (21)" [ref=e55]
+          - button "Completed (3)" [ref=e56]
+          - button "Archived (1)" [ref=e57]
+        - generic [ref=e58]:
+          - generic [ref=e60] [cursor=pointer]:
+            - generic [ref=e61]:
+              - paragraph [ref=e62]: ZD-1024 — Ali
+              - paragraph [ref=e63]: 0345453237 · Karachi · 6/24/2026
+            - generic [ref=e64]:
+              - generic [ref=e65]: PKR 6,190
+              - generic [ref=e66]: new
+              - generic [ref=e67]: pending
+              - button "Cancel order" [ref=e68]:
+                - img [ref=e69]
+          - generic [ref=e74] [cursor=pointer]:
+            - generic [ref=e75]:
+              - paragraph [ref=e76]: ZD-1023 — COD Test Customer
+              - paragraph [ref=e77]: 03009876543 · Karachi · 6/23/2026
+            - generic [ref=e78]:
+              - generic [ref=e79]: PKR 6,190
+              - generic [ref=e80]: new
+              - generic [ref=e81]: pending
+              - button "Cancel order" [ref=e82]:
+                - img [ref=e83]
+          - generic [ref=e88] [cursor=pointer]:
+            - generic [ref=e89]:
+              - paragraph [ref=e90]: ZD-1020 — Syeda doll Syeda doll
+              - paragraph [ref=e91]: 03337202028 · Karachi · 6/23/2026
+            - generic [ref=e92]:
+              - generic [ref=e93]: PKR 2,100
+              - generic [ref=e94]: shipped
+              - generic [ref=e95]: pending
+              - button "Cancel order" [ref=e96]:
+                - img [ref=e97]
+          - generic [ref=e102] [cursor=pointer]:
+            - generic [ref=e103]:
+              - paragraph [ref=e104]: ZD-1019 — Syeda doll Syeda doll
+              - paragraph [ref=e105]: 03337202028 · Karachi · 6/23/2026
+            - generic [ref=e106]:
+              - generic [ref=e107]: PKR 6,190
+              - generic [ref=e108]: new
+              - generic [ref=e109]: pending
+              - button "Cancel order" [ref=e110]:
+                - img [ref=e111]
+          - generic [ref=e116] [cursor=pointer]:
+            - generic [ref=e117]:
+              - paragraph [ref=e118]: ZD-1018 — Syeda doll Syeda doll
+              - paragraph [ref=e119]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e120]:
+              - generic [ref=e121]: PKR 2,100
+              - generic [ref=e122]: new
+              - generic [ref=e123]: pending
+              - button "Cancel order" [ref=e124]:
+                - img [ref=e125]
+          - generic [ref=e130] [cursor=pointer]:
+            - generic [ref=e131]:
+              - paragraph [ref=e132]: ZD-1017 — Syeda doll Syeda doll
+              - paragraph [ref=e133]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e134]:
+              - generic [ref=e135]: PKR 2,100
+              - generic [ref=e136]: new
+              - generic [ref=e137]: pending
+              - button "Cancel order" [ref=e138]:
+                - img [ref=e139]
+          - generic [ref=e144] [cursor=pointer]:
+            - generic [ref=e145]:
+              - paragraph [ref=e146]: ZD-1016 — Syeda doll Syeda doll
+              - paragraph [ref=e147]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e148]:
+              - generic [ref=e149]: PKR 2,100
+              - generic [ref=e150]: shipped
+              - generic [ref=e151]: pending
+              - button "Cancel order" [ref=e152]:
+                - img [ref=e153]
+          - generic [ref=e158] [cursor=pointer]:
+            - generic [ref=e159]:
+              - paragraph [ref=e160]: ZD-1015 — Syeda doll Syeda doll
+              - paragraph [ref=e161]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e162]:
+              - generic [ref=e163]: PKR 2,100
+              - generic [ref=e164]: new
+              - generic [ref=e165]: pending
+              - button "Cancel order" [ref=e166]:
+                - img [ref=e167]
+          - generic [ref=e172] [cursor=pointer]:
+            - generic [ref=e173]:
+              - paragraph [ref=e174]: ZD-1014 — Syeda doll Syeda doll
+              - paragraph [ref=e175]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e176]:
+              - generic [ref=e177]: PKR 1,700
+              - generic [ref=e178]: new
+              - generic [ref=e179]: pending
+              - button "Cancel order" [ref=e180]:
+                - img [ref=e181]
+          - generic [ref=e186] [cursor=pointer]:
+            - generic [ref=e187]:
+              - paragraph [ref=e188]: ZD-1013 — Syeda doll Syeda doll
+              - paragraph [ref=e189]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e190]:
+              - generic [ref=e191]: PKR 3,199
+              - generic [ref=e192]: new
+              - generic [ref=e193]: pending
+              - button "Cancel order" [ref=e194]:
+                - img [ref=e195]
+          - generic [ref=e200] [cursor=pointer]:
+            - generic [ref=e201]:
+              - paragraph [ref=e202]: ZD-1012 — Syeda doll Syeda doll
+              - paragraph [ref=e203]: 345453227 · Karachi · 6/23/2026
+            - generic [ref=e204]:
+              - generic [ref=e205]: PKR 3,199
+              - generic [ref=e206]: new
+              - generic [ref=e207]: pending
+              - button "Cancel order" [ref=e208]:
+                - img [ref=e209]
+          - generic [ref=e214] [cursor=pointer]:
+            - generic [ref=e215]:
+              - paragraph [ref=e216]: ZD-1011 — Syeda doll Syeda doll
+              - paragraph [ref=e217]: 345453227 · Karachi · 6/22/2026
+            - generic [ref=e218]:
+              - generic [ref=e219]: PKR 4,500
+              - generic [ref=e220]: new
+              - generic [ref=e221]: pending
+              - button "Cancel order" [ref=e222]:
+                - img [ref=e223]
+          - generic [ref=e228] [cursor=pointer]:
+            - generic [ref=e229]:
+              - paragraph [ref=e230]: ZD-1010 — Syeda doll Syeda doll
+              - paragraph [ref=e231]: 345453227 · Karachi · 6/21/2026
+            - generic [ref=e232]:
+              - generic [ref=e233]: PKR 2,100
+              - generic [ref=e234]: new
+              - generic [ref=e235]: pending
+              - button "Cancel order" [ref=e236]:
+                - img [ref=e237]
+          - generic [ref=e242] [cursor=pointer]:
+            - generic [ref=e243]:
+              - paragraph [ref=e244]: ZD-1009 — Syeda doll Syeda doll
+              - paragraph [ref=e245]: 345453227 · Karachi · 6/21/2026
+            - generic [ref=e246]:
+              - generic [ref=e247]: PKR 3,199
+              - generic [ref=e248]: new
+              - generic [ref=e249]: pending
+              - button "Cancel order" [ref=e250]:
+                - img [ref=e251]
+          - generic [ref=e256] [cursor=pointer]:
+            - generic [ref=e257]:
+              - paragraph [ref=e258]: ZD-1008 — Aurex
+              - paragraph [ref=e259]: +923703465516 · Karachi · 6/20/2026
+            - generic [ref=e260]:
+              - generic [ref=e261]: PKR 6,399
+              - generic [ref=e262]: new
+              - generic [ref=e263]: pending
+              - button "Cancel order" [ref=e264]:
+                - img [ref=e265]
+          - generic [ref=e270] [cursor=pointer]:
+            - generic [ref=e271]:
+              - paragraph [ref=e272]: ZD-1006 — Syeda doll Syeda doll
+              - paragraph [ref=e273]: 03337202028 · Karachi · 6/19/2026
+            - generic [ref=e274]:
+              - generic [ref=e275]: PKR 5,199
+              - generic [ref=e276]: new
+              - generic [ref=e277]: pending
+              - button "Cancel order" [ref=e278]:
+                - img [ref=e279]
+          - generic [ref=e284] [cursor=pointer]:
+            - generic [ref=e285]:
+              - paragraph [ref=e286]: ZD-1005 — Syeda doll Syeda doll
+              - paragraph [ref=e287]: 0333 7202028 · Karachi · 6/19/2026
+            - generic [ref=e288]:
+              - generic [ref=e289]: PKR 6,190
+              - generic [ref=e290]: new
+              - generic [ref=e291]: pending
+              - button "Cancel order" [ref=e292]:
+                - img [ref=e293]
+          - generic [ref=e298] [cursor=pointer]:
+            - generic [ref=e299]:
+              - paragraph [ref=e300]: ZD-1004 — Hani
+              - paragraph [ref=e301]: 0333 7202028 · Karachi · 6/18/2026
+            - generic [ref=e302]:
+              - generic [ref=e303]: PKR 5,199
+              - generic [ref=e304]: new
+              - generic [ref=e305]: pending
+              - button "Cancel order" [ref=e306]:
+                - img [ref=e307]
+          - generic [ref=e312] [cursor=pointer]:
+            - generic [ref=e313]:
+              - paragraph [ref=e314]: ZD-1003 — Aiman
+              - paragraph [ref=e315]: 0333 7202028 · Karachi · 6/18/2026
+            - generic [ref=e316]:
+              - generic [ref=e317]: PKR 6,198
+              - generic [ref=e318]: new
+              - generic [ref=e319]: pending
+              - button "Cancel order" [ref=e320]:
+                - img [ref=e321]
+          - generic [ref=e326] [cursor=pointer]:
+            - generic [ref=e327]:
+              - paragraph [ref=e328]: ZD-1002 — faiza
+              - paragraph [ref=e329]: 345453227 · Karachi · 6/18/2026
+            - generic [ref=e330]:
+              - generic [ref=e331]: PKR 6,198
+              - generic [ref=e332]: new
+              - generic [ref=e333]: pending
+              - button "Cancel order" [ref=e334]:
+                - img [ref=e335]
+          - generic [ref=e340] [cursor=pointer]:
+            - generic [ref=e341]:
+              - paragraph [ref=e342]: ZD-1001 — Syeda doll Syeda doll
+              - paragraph [ref=e343]: 0345453227 · Karachi · 6/18/2026
+            - generic [ref=e344]:
+              - generic [ref=e345]: PKR 6,190
+              - generic [ref=e346]: processing
+              - generic [ref=e347]: pending
+              - button "Cancel order" [ref=e348]:
+                - img [ref=e349]
+  - alert [ref=e54]

@@ -1,0 +1,84 @@
+- generic [ref=e3]:
+  - banner [ref=e4]:
+    - heading "ZADIIS Admin" [level=2] [ref=e5]
+    - button [ref=e7]:
+      - img [ref=e8]
+  - main [ref=e9]:
+    - generic [ref=e10]:
+      - generic [ref=e11]:
+        - heading "Products" [level=1] [ref=e12]
+        - link "Add Product" [ref=e13] [cursor=pointer]:
+          - /url: /admin/products/new
+          - img
+          - text: Add Product
+      - generic [ref=e14]:
+        - table [ref=e17]:
+          - rowgroup [ref=e18]:
+            - row "Name SKU Price Stock Actions" [ref=e19]:
+              - columnheader "Name" [ref=e20]
+              - columnheader "SKU" [ref=e21]
+              - columnheader "Price" [ref=e22]
+              - columnheader "Stock" [ref=e23]
+              - columnheader "Actions" [ref=e24]
+          - rowgroup [ref=e25]:
+            - row "New suit ZD-3559 PKR 1,900 20 Edit" [ref=e26]:
+              - cell "New suit" [ref=e27]
+              - cell "ZD-3559" [ref=e28]
+              - cell "PKR 1,900" [ref=e29]
+              - cell "20" [ref=e30]
+              - cell "Edit" [ref=e31]:
+                - generic [ref=e32]:
+                  - link "Edit" [ref=e33] [cursor=pointer]:
+                    - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                  - button "Archive product" [ref=e34]:
+                    - img [ref=e35]
+            - row "Girls Suit ZD-3222 PKR 1,200 0 Edit" [ref=e38]:
+              - cell "Girls Suit" [ref=e39]
+              - cell "ZD-3222" [ref=e40]
+              - cell "PKR 1,200" [ref=e41]
+              - cell "0" [ref=e42]
+              - cell "Edit" [ref=e43]:
+                - generic [ref=e44]:
+                  - link "Edit" [ref=e45] [cursor=pointer]:
+                    - /url: /admin/products/340ac868-6703-4599-b94f-2f91a9c58472/edit
+                  - button "Archive product" [ref=e46]:
+                    - img [ref=e47]
+            - row "Suit for women ZD-345 PKR 1,500 29 Edit" [ref=e50]:
+              - cell "Suit for women" [ref=e51]
+              - cell "ZD-345" [ref=e52]
+              - cell "PKR 1,500" [ref=e53]
+              - cell "29" [ref=e54]
+              - cell "Edit" [ref=e55]:
+                - generic [ref=e56]:
+                  - link "Edit" [ref=e57] [cursor=pointer]:
+                    - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                  - button "Archive product" [ref=e58]:
+                    - img [ref=e59]
+            - row "Elegant dress ZD-002 PKR 5,990 30 Edit" [ref=e62]:
+              - cell "Elegant dress" [ref=e63]
+              - cell "ZD-002" [ref=e64]
+              - cell "PKR 5,990" [ref=e65]
+              - cell "30" [ref=e66]
+              - cell "Edit" [ref=e67]:
+                - generic [ref=e68]:
+                  - link "Edit" [ref=e69] [cursor=pointer]:
+                    - /url: /admin/products/6c7caf9b-ce1a-43a5-917c-267076a037c1/edit
+                  - button "Archive product" [ref=e70]:
+                    - img [ref=e71]
+            - row "3 Pcs Suit — PKR 2,999 0 Edit" [ref=e74]:
+              - cell "3 Pcs Suit" [ref=e75]
+              - cell "—" [ref=e76]
+              - cell "PKR 2,999" [ref=e77]
+              - cell "0" [ref=e78]
+              - cell "Edit" [ref=e79]:
+                - generic [ref=e80]:
+                  - link "Edit" [ref=e81] [cursor=pointer]:
+                    - /url: /admin/products/324863f5-db80-4b39-9940-516c223f7f9f/edit
+                  - button "Archive product" [ref=e82]:
+                    - img [ref=e83]
+        - button "Archived Products 1 Click to show" [ref=e87]:
+          - generic [ref=e88]:
+            - img [ref=e89]
+            - text: Archived Products
+            - generic [ref=e91]: "1"
+          - generic [ref=e92]: Click to show

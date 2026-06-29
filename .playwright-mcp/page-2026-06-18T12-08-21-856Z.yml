@@ -1,0 +1,85 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Women's Collection" [level=1] [ref=e16]
+      - generic [ref=e17]:
+        - complementary [ref=e18]:
+          - generic [ref=e19]:
+            - generic [ref=e20]:
+              - heading "Filters" [level=3] [ref=e21]
+              - button "Clear all" [ref=e22]
+            - generic [ref=e23]:
+              - heading "Size" [level=3] [ref=e24]
+              - generic [ref=e25]:
+                - button "XS" [ref=e26]
+                - button "S" [ref=e27]
+                - button "M" [ref=e28]
+                - button "L" [ref=e29]
+                - button "XL" [ref=e30]
+                - button "XXL" [ref=e31]
+            - generic [ref=e32]:
+              - heading "Price" [level=3] [ref=e33]
+              - generic [ref=e34]:
+                - button "Under PKR 2,000" [ref=e35]
+                - button "PKR 2,000 – 5,000" [ref=e36]
+                - button "PKR 5,000 – 10,000" [ref=e37]
+                - button "Over PKR 10,000" [ref=e38]
+        - generic [ref=e40]:
+          - link "Elegant dress Elegant dress PKR 5,990" [ref=e41] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e43]
+            - heading "Elegant dress" [level=3] [ref=e44]
+            - paragraph [ref=e45]: PKR 5,990
+          - link "Kmeez Dupatta Kmeez Dupatta PKR 4,999" [ref=e46] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e48]
+            - heading "Kmeez Dupatta" [level=3] [ref=e49]
+            - paragraph [ref=e50]: PKR 4,999
+          - link "3 Pcs Suit 3 Pcs Suit PKR 2,999" [ref=e51] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - img "3 Pcs Suit" [ref=e53]
+            - heading "3 Pcs Suit" [level=3] [ref=e54]
+            - paragraph [ref=e55]: PKR 2,999
+  - contentinfo [ref=e56]:
+    - generic [ref=e57]:
+      - generic [ref=e58]:
+        - heading "ZADIIS" [level=3] [ref=e59]
+        - paragraph [ref=e60]: Modern Pakistani women's fashion. Quality you can feel.
+      - generic [ref=e61]:
+        - heading "Shop" [level=4] [ref=e62]
+        - list [ref=e63]:
+          - listitem [ref=e64]:
+            - link "All Products" [ref=e65] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e66]:
+            - link "About Us" [ref=e67] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e68]:
+            - link "Contact" [ref=e69] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=e70]:
+        - heading "Help" [level=4] [ref=e71]
+        - list [ref=e72]:
+          - listitem [ref=e73]:
+            - link "WhatsApp Support" [ref=e74] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=e75]: Free delivery on orders over PKR 2,000
+    - generic [ref=e76]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e77] [cursor=pointer]:
+    - /url: https://wa.me/923001234567?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e78]
+  - alert [ref=e80]

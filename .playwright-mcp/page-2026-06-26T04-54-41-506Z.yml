@@ -1,0 +1,168 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [active] [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [ref=e59]
+            - button "Cancellations" [ref=e60]
+            - button "Returns" [ref=e61]
+          - generic [ref=e267]:
+            - generic [ref=e268]:
+              - heading "Revenue by Period" [level=3] [ref=e269]
+              - paragraph [ref=e270]: Weekly breakdown
+              - application [ref=e273]:
+                - generic [ref=e316]:
+                  - generic [ref=e317]:
+                    - generic [ref=e574]: Week of Mar 29
+                    - generic [ref=e576]: Week of Apr 12
+                    - generic [ref=e578]: Week of Apr 26
+                    - generic [ref=e580]: Week of May 10
+                    - generic [ref=e582]: Week of May 24
+                    - generic [ref=e584]: Week of Jun 7
+                    - generic [ref=e586]: Week of Jun 21
+                  - generic [ref=e338]:
+                    - generic [ref=e340]: "0"
+                    - generic [ref=e588]: 20k
+                    - generic [ref=e590]: 40k
+                    - generic [ref=e592]: 60k
+                    - generic [ref=e594]: 80k
+            - generic [ref=e349]:
+              - heading "Period Breakdown" [level=3] [ref=e351]
+              - table [ref=e353]:
+                - rowgroup [ref=e354]:
+                  - row "Period Orders Revenue vs Prev" [ref=e355]:
+                    - columnheader "Period" [ref=e356]
+                    - columnheader "Orders" [ref=e357]
+                    - columnheader "Revenue" [ref=e358]
+                    - columnheader "vs Prev" [ref=e359]
+                - rowgroup [ref=e360]:
+                  - row "Week of Jun 21 16 PKR 68,647 ↑ 74%" [ref=e595]:
+                    - cell "Week of Jun 21" [ref=e596]
+                    - cell "16" [ref=e597]
+                    - cell "PKR 68,647" [ref=e598]
+                    - cell "↑ 74%" [ref=e599]:
+                      - generic [ref=e366]: ↑ 74%
+                  - row "Week of Jun 14 7 PKR 39,373 —" [ref=e600]:
+                    - cell "Week of Jun 14" [ref=e601]
+                    - cell "7" [ref=e602]
+                    - cell "PKR 39,373" [ref=e603]
+                    - cell "—" [ref=e604]
+                  - row "Week of Jun 7 0 PKR 0 —" [ref=e605]:
+                    - cell "Week of Jun 7" [ref=e606]
+                    - cell "0" [ref=e607]
+                    - cell "PKR 0" [ref=e608]
+                    - cell "—" [ref=e609]
+                  - row "Week of May 31 0 PKR 0 —" [ref=e610]:
+                    - cell "Week of May 31" [ref=e611]
+                    - cell "0" [ref=e612]
+                    - cell "PKR 0" [ref=e613]
+                    - cell "—" [ref=e614]
+                  - row "Week of May 24 0 PKR 0 —" [ref=e615]:
+                    - cell "Week of May 24" [ref=e616]
+                    - cell "0" [ref=e617]
+                    - cell "PKR 0" [ref=e618]
+                    - cell "—" [ref=e619]
+                  - row "Week of May 17 0 PKR 0 —" [ref=e620]:
+                    - cell "Week of May 17" [ref=e621]
+                    - cell "0" [ref=e622]
+                    - cell "PKR 0" [ref=e623]
+                    - cell "—" [ref=e624]
+                  - row "Week of May 10 0 PKR 0 —" [ref=e625]:
+                    - cell "Week of May 10" [ref=e626]
+                    - cell "0" [ref=e627]
+                    - cell "PKR 0" [ref=e628]
+                    - cell "—" [ref=e562]
+                  - row "Week of May 3 0 PKR 0 —" [ref=e629]:
+                    - cell "Week of May 3" [ref=e630]
+                    - cell "0" [ref=e631]
+                    - cell "PKR 0" [ref=e632]
+                    - cell "—" [ref=e633]
+                  - row "Week of Apr 26 0 PKR 0 —" [ref=e634]:
+                    - cell "Week of Apr 26" [ref=e635]
+                    - cell "0" [ref=e636]
+                    - cell "PKR 0" [ref=e637]
+                    - cell "—" [ref=e638]
+                  - row "Week of Apr 19 0 PKR 0 —" [ref=e639]:
+                    - cell "Week of Apr 19" [ref=e640]
+                    - cell "0" [ref=e641]
+                    - cell "PKR 0" [ref=e642]
+                    - cell "—" [ref=e643]
+                  - row "Week of Apr 12 0 PKR 0 —" [ref=e644]:
+                    - cell "Week of Apr 12" [ref=e645]
+                    - cell "0" [ref=e646]
+                    - cell "PKR 0" [ref=e647]
+                    - cell "—" [ref=e648]
+                  - row "Week of Apr 5 0 PKR 0 —" [ref=e649]:
+                    - cell "Week of Apr 5" [ref=e650]
+                    - cell "0" [ref=e651]
+                    - cell "PKR 0" [ref=e652]
+                    - cell "—" [ref=e653]
+                  - row "Week of Mar 29 0 PKR 0 —" [ref=e654]:
+                    - cell "Week of Mar 29" [ref=e655]
+                    - cell "0" [ref=e656]
+                    - cell "PKR 0" [ref=e657]
+                    - cell "—" [ref=e658]
+                  - row "Week of Mar 22 0 PKR 0 —" [ref=e659]:
+                    - cell "Week of Mar 22" [ref=e660]
+                    - cell "0" [ref=e661]
+                    - cell "PKR 0" [ref=e662]
+                    - cell "—" [ref=e663]
+                - rowgroup [ref=e519]:
+                  - row "Total 23 PKR 108,020" [ref=e664]:
+                    - cell "Total" [ref=e521]
+                    - cell "23" [ref=e665]
+                    - cell "PKR 108,020" [ref=e666]
+                    - cell [ref=e524]
+  - alert [ref=e265]: Analytics
+  - generic [ref=e266]: 20k

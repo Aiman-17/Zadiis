@@ -1,0 +1,124 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - link "← Back to Shop" [ref=e13] [cursor=pointer]:
+        - /url: /shop
+      - generic [ref=e14]:
+        - generic [ref=e16]:
+          - img "Kmeez Dupatta" [ref=e17]
+          - img [ref=e20]
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - generic [ref=e26]: ★ Our Most Loved Piece
+            - heading "Kmeez Dupatta" [level=1] [ref=e27]
+            - paragraph [ref=e29]: PKR 4,999
+          - paragraph [ref=e30]: Beautiful and elegant Kameez Shilwar and Dupatta
+          - paragraph [ref=e32]: 15 people viewing this right now
+          - generic [ref=e34]:
+            - generic [ref=e35]:
+              - generic [ref=e36]:
+                - paragraph [ref=e37]: Size
+                - link "Size Guide" [ref=e38] [cursor=pointer]:
+                  - /url: /size-guide
+              - generic [ref=e39]:
+                - button "M" [ref=e40]
+                - button "L" [ref=e41]
+                - button "XL" [ref=e42]
+            - generic [ref=e43]:
+              - paragraph [ref=e44]: Color
+              - button "White" [ref=e46] [cursor=pointer]
+            - button "Add to Cart" [ref=e47]
+      - generic [ref=e48]:
+        - heading "Customer Reviews" [level=2] [ref=e49]
+        - generic [ref=e50]:
+          - paragraph [ref=e51]: No reviews yet. Be the first!
+          - generic [ref=e52]:
+            - paragraph [ref=e53]: Write a Review
+            - generic [ref=e54]:
+              - button [ref=e55]:
+                - img [ref=e56]
+              - button [ref=e58]:
+                - img [ref=e59]
+              - button [ref=e61]:
+                - img [ref=e62]
+              - button [ref=e64]:
+                - img [ref=e65]
+              - button [ref=e67]:
+                - img [ref=e68]
+            - textbox "Your name" [ref=e70]
+            - textbox "Share your experience (optional)" [ref=e71]
+            - button "Submit Review" [ref=e72]
+            - paragraph [ref=e73]: 🔒 Your privacy matters to us. We only display your name and review — your personal information is never shared.
+      - generic [ref=e74]:
+        - heading "You May Also Like" [level=2] [ref=e75]
+        - generic [ref=e76]:
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed Bestseller PKR 1,900" [ref=e77] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - img "New suit best cotton quality with printed" [ref=e79]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e80]
+            - generic [ref=e81]:
+              - img [ref=e83]
+              - img [ref=e86]
+              - generic [ref=e89]: Bestseller
+            - generic [ref=e91]: PKR 1,900
+          - link "Elegant dress Elegant dress Bestseller PKR 5,990" [ref=e92] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e94]
+            - heading "Elegant dress" [level=3] [ref=e95]
+            - generic [ref=e97]: Bestseller
+            - generic [ref=e99]: PKR 5,990
+          - link "CO-ORDS 2pcs set CO-ORDS 2pcs set PKR 7,989" [ref=e100] [cursor=pointer]:
+            - /url: /shop/co-ords-2pcs-set
+            - img "CO-ORDS 2pcs set" [ref=e102]
+            - heading "CO-ORDS 2pcs set" [level=3] [ref=e103]
+            - generic [ref=e105]: PKR 7,989
+          - link "Girls Suit Girls Suit Bestseller PKR 1,200" [ref=e106] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - img "Girls Suit" [ref=e108]
+            - heading "Girls Suit" [level=3] [ref=e109]
+            - generic [ref=e111]: Bestseller
+            - generic [ref=e113]: PKR 1,200
+  - contentinfo [ref=e114]:
+    - generic [ref=e115]:
+      - generic [ref=e116]:
+        - paragraph [ref=e117]: ZADII'S
+        - paragraph [ref=e118]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e119]:
+        - paragraph [ref=e120]: Quick Links
+        - list [ref=e121]:
+          - listitem [ref=e122]:
+            - link "Shop" [ref=e123] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e124]:
+            - link "Cart" [ref=e125] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e126]:
+        - paragraph [ref=e127]: Policies
+        - list [ref=e128]:
+          - listitem [ref=e129]:
+            - link "Returns & Exchanges" [ref=e130] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e131]:
+            - link "Cancel an Order" [ref=e132] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e133]:
+            - link "Shipping Info" [ref=e134] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e135]:
+            - link "Privacy Policy" [ref=e136] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e137]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e138] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e139]
+  - alert [ref=e141]

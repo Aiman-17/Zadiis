@@ -139,7 +139,7 @@ export default function CartClient({ suggestions }: Props) {
       <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
         <div className="flex justify-between text-sm mb-2">
           <span>Subtotal</span>
-          <span>PKR {subtotal.toLocaleString()}</span>
+          <span>PKR {subtotal.toLocaleString('en-US')}</span>
         </div>
         <div className="flex justify-between text-sm pb-4 mb-4 border-b" style={{ borderColor: '#E8DDD4' }}>
           <span>Shipping</span>

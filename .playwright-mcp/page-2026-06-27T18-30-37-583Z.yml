@@ -1,0 +1,100 @@
+- generic [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link "1" [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+          - generic [ref=e10]: "1"
+        - button [ref=e11]:
+          - img
+  - main [ref=e12]:
+    - generic [ref=e41]:
+      - heading "Checkout" [level=1] [ref=e42]
+      - generic [ref=e43]:
+        - generic [ref=e44]:
+          - generic [ref=e45]:
+            - generic [ref=e46]: Full Name *
+            - textbox "Full Name *" [ref=e47]: Test Customer
+          - generic [ref=e48]:
+            - generic [ref=e49]: Phone *
+            - textbox "Phone *" [ref=e50]: "123"
+            - paragraph [ref=e91]: Must be 11 digits starting with 03 (e.g. 03001234567)
+        - generic [ref=e51]:
+          - generic [ref=e52]: Email * (for order confirmation & updates)
+          - textbox "Email * (for order confirmation & updates)" [ref=e53]: bademail
+          - paragraph [ref=e92]: Please enter a valid email address
+        - generic [ref=e54]:
+          - generic [ref=e55]: Delivery Address *
+          - textbox "Delivery Address *" [active] [ref=e56]
+        - generic [ref=e57]:
+          - generic [ref=e58]: City *
+          - combobox "City *" [ref=e59]:
+            - option "Select city" [selected]
+            - option "Karachi"
+        - generic [ref=e60]:
+          - generic [ref=e61]: Payment Method *
+          - generic [ref=e62]:
+            - generic [ref=e63] [cursor=pointer]:
+              - radio "JazzCash" [ref=e64]
+              - generic [ref=e65]: JazzCash
+            - generic [ref=e66] [cursor=pointer]:
+              - radio "Easypaisa" [ref=e67]
+              - generic [ref=e68]: Easypaisa
+            - generic [ref=e69] [cursor=pointer]:
+              - radio "Credit / Debit Card" [ref=e70]
+              - generic [ref=e71]: Credit / Debit Card
+            - generic [ref=e72] [cursor=pointer]:
+              - radio "Cash on Delivery" [ref=e73]
+              - generic [ref=e74]: Cash on Delivery
+        - generic [ref=e75]:
+          - generic [ref=e77]:
+            - generic [ref=e78]: New suit best cotton quality with printed × 1
+            - generic [ref=e79]: PKR 1,900
+          - generic [ref=e80]:
+            - generic [ref=e81]:
+              - generic [ref=e82]: Subtotal
+              - generic [ref=e83]: PKR 1,900
+            - generic [ref=e84]:
+              - generic [ref=e85]: Delivery
+              - generic [ref=e86]: —
+            - generic [ref=e87]:
+              - generic [ref=e88]: Total
+              - generic [ref=e89]: PKR 1,900
+        - button "Place Order" [ref=e90]
+  - contentinfo [ref=e13]:
+    - generic [ref=e14]:
+      - generic [ref=e15]:
+        - paragraph [ref=e16]: ZADII'S
+        - paragraph [ref=e17]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e18]:
+        - paragraph [ref=e19]: Quick Links
+        - list [ref=e20]:
+          - listitem [ref=e21]:
+            - link "Shop" [ref=e22] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e23]:
+            - link "Cart" [ref=e24] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e25]:
+        - paragraph [ref=e26]: Policies
+        - list [ref=e27]:
+          - listitem [ref=e28]:
+            - link "Returns & Exchanges" [ref=e29] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e30]:
+            - link "Cancel an Order" [ref=e31] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e32]:
+            - link "Shipping Info" [ref=e33] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e34]:
+            - link "Privacy Policy" [ref=e35] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e36]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e37] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e38]
+  - alert [ref=e40]

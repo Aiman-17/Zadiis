@@ -1,0 +1,102 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Women's Collection" [level=1] [ref=e13]
+      - generic [ref=e15]:
+        - button "Trending" [ref=e16]
+        - button "New Arrivals" [ref=e17]
+        - button "Just Dropped" [ref=e18]
+        - button "Best Sellers" [ref=e19]
+        - button "Last Chance" [ref=e20]
+      - generic [ref=e22]:
+        - img
+        - searchbox "Search products…" [ref=e23]
+      - generic [ref=e24]:
+        - complementary [ref=e25]:
+          - button "Filters" [ref=e27]:
+            - img [ref=e28]
+            - text: Filters
+        - generic [ref=e30]:
+          - link "Elegant dress Elegant dress Bestseller PKR 5,990" [ref=e31] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e33]
+            - heading "Elegant dress" [level=3] [ref=e34]
+            - generic [ref=e36]: Bestseller
+            - generic [ref=e38]: PKR 5,990
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed Bestseller PKR 1,900" [ref=e39] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - img "New suit best cotton quality with printed" [ref=e41]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e42]
+            - generic [ref=e43]:
+              - img [ref=e45]
+              - img [ref=e48]
+              - generic [ref=e51]: Bestseller
+            - generic [ref=e53]: PKR 1,900
+          - link "3 Pcs Suit 3 Pcs Suit Bestseller PKR 2,999" [ref=e54] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - img "3 Pcs Suit" [ref=e56]
+            - heading "3 Pcs Suit" [level=3] [ref=e57]
+            - generic [ref=e59]: Bestseller
+            - generic [ref=e61]: PKR 2,999
+          - link "Girls Suit Girls Suit Bestseller PKR 1,200" [ref=e62] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - img "Girls Suit" [ref=e64]
+            - heading "Girls Suit" [level=3] [ref=e65]
+            - generic [ref=e67]: Bestseller
+            - generic [ref=e69]: PKR 1,200
+          - link "Kmeez Dupatta Kmeez Dupatta Bestseller PKR 4,999" [ref=e70] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e72]
+            - heading "Kmeez Dupatta" [level=3] [ref=e73]
+            - generic [ref=e75]: Bestseller
+            - generic [ref=e77]: PKR 4,999
+          - link "Suit for women Suit for women Bestseller PKR 1,500" [ref=e78] [cursor=pointer]:
+            - /url: /shop/suit-for-women
+            - img "Suit for women" [ref=e80]
+            - heading "Suit for women" [level=3] [ref=e81]
+            - generic [ref=e83]: Bestseller
+            - generic [ref=e85]: PKR 1,500
+  - contentinfo [ref=e86]:
+    - generic [ref=e87]:
+      - generic [ref=e88]:
+        - paragraph [ref=e89]: ZADII'S
+        - paragraph [ref=e90]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e91]:
+        - paragraph [ref=e92]: Quick Links
+        - list [ref=e93]:
+          - listitem [ref=e94]:
+            - link "Shop" [ref=e95] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e96]:
+            - link "Cart" [ref=e97] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e98]:
+        - paragraph [ref=e99]: Policies
+        - list [ref=e100]:
+          - listitem [ref=e101]:
+            - link "Returns & Exchanges" [ref=e102] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e103]:
+            - link "Cancel an Order" [ref=e104] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e105]:
+            - link "Shipping Info" [ref=e106] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e107]:
+            - link "Privacy Policy" [ref=e108] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e109]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e110] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e111]
+  - alert [ref=e113]

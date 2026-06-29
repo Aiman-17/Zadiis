@@ -1,0 +1,58 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Your cart is empty" [level=1] [ref=e16]
+      - paragraph [ref=e17]: Add some items to get started.
+      - link "Continue Shopping" [ref=e18] [cursor=pointer]:
+        - /url: /shop
+  - contentinfo [ref=e19]:
+    - generic [ref=e20]:
+      - generic [ref=e21]:
+        - paragraph [ref=e22]: ZADIIS
+        - paragraph [ref=e23]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e24]:
+        - paragraph [ref=e25]: Quick Links
+        - list [ref=e26]:
+          - listitem [ref=e27]:
+            - link "Shop" [ref=e28] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e29]:
+            - link "Cart" [ref=e30] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e31]:
+            - link "Sale" [ref=e32] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e33]:
+        - paragraph [ref=e34]: Policies
+        - list [ref=e35]:
+          - listitem [ref=e36]:
+            - link "Returns & Exchanges" [ref=e37] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e38]:
+            - link "Cancel an Order" [ref=e39] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e40]:
+            - link "Shipping Info" [ref=e41] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e42]:
+            - link "Privacy Policy" [ref=e43] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e44]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e45] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e46]
+  - alert [ref=e48]

@@ -1,0 +1,103 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e295] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e296]
+        - text: Dashboard
+      - link "Products" [ref=e301] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e302]
+        - text: Products
+      - link "Orders" [ref=e306] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e307]
+        - text: Orders
+      - link "Payments" [ref=e310] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e311]
+        - text: Payments
+      - link "Invoices" [ref=e313] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e314]
+        - text: Invoices
+      - link "Sales" [ref=e317] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e318]
+        - text: Sales
+      - link "Analytics" [ref=e321] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e322]
+        - text: Analytics
+      - link "COD" [ref=e323] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e324]
+        - text: COD
+      - link "Settings" [ref=e326] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e327]
+        - text: Settings
+      - button "Logout" [ref=e331]:
+        - img [ref=e332]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e335]:
+        - generic [ref=e336]:
+          - heading "Products" [level=1] [ref=e337]
+          - link "Add Product" [ref=e338] [cursor=pointer]:
+            - /url: /admin/products/new
+            - img
+            - text: Add Product
+        - generic [ref=e339]:
+          - generic [ref=e340]:
+            - generic [ref=e341]:
+              - strong [ref=e342]: "1"
+              - text: Best Seller
+            - generic [ref=e343]:
+              - strong [ref=e344]: "1"
+              - text: Trending
+          - generic [ref=e345]:
+            - generic [ref=e346]: Showing 2 products with low stock (1–3 units)
+            - link "Clear filter" [ref=e347] [cursor=pointer]:
+              - /url: /admin/products
+          - table [ref=e350]:
+            - rowgroup [ref=e351]:
+              - row "Name SKU Price Stock Days to Sellout Actions" [ref=e352]:
+                - columnheader "Name" [ref=e353]
+                - columnheader "SKU" [ref=e354]
+                - columnheader "Price" [ref=e355]
+                - columnheader "Stock" [ref=e356]
+                - columnheader "Days to Sellout" [ref=e357]
+                - columnheader "Actions" [ref=e358]
+            - rowgroup [ref=e359]:
+              - row "New suit ↑ Trending ZD-3559 PKR 1,900 2 12d Edit" [ref=e360]:
+                - cell "New suit ↑ Trending" [ref=e361]:
+                  - generic [ref=e363]: New suit
+                  - generic [ref=e365]: ↑ Trending
+                - cell "ZD-3559" [ref=e366]
+                - cell "PKR 1,900" [ref=e367]
+                - cell "2" [ref=e368]
+                - cell "12d" [ref=e369]:
+                  - generic [ref=e370]: 12d
+                - cell "Edit" [ref=e371]:
+                  - generic [ref=e372]:
+                    - link "Edit" [ref=e373] [cursor=pointer]:
+                      - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                    - button "Archive product" [ref=e374]:
+                      - img [ref=e375]
+              - row "Suit for women ZD-345 PKR 1,500 27 — Edit" [ref=e378]:
+                - cell "Suit for women" [ref=e379]:
+                  - generic [ref=e381]: Suit for women
+                - cell "ZD-345" [ref=e382]
+                - cell "PKR 1,500" [ref=e383]
+                - cell "27" [ref=e384]
+                - cell "—" [ref=e385]
+                - cell "Edit" [ref=e386]:
+                  - generic [ref=e387]:
+                    - link "Edit" [ref=e388] [cursor=pointer]:
+                      - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                    - button "Archive product" [ref=e389]:
+                      - img [ref=e390]
+  - alert [ref=e293]
+  - generic [ref=e294]: "0"

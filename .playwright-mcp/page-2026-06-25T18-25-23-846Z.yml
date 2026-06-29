@@ -1,0 +1,115 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Products" [ref=e57]
+            - button "Inventory" [ref=e58]
+            - button "Cancellations" [ref=e59]
+            - button "Returns" [ref=e60]
+          - generic [ref=e61]:
+            - generic [ref=e62]:
+              - generic [ref=e63]:
+                - paragraph [ref=e64]: PKR 94,725
+                - paragraph [ref=e65]: Gross Revenue
+              - generic [ref=e66]:
+                - paragraph [ref=e67]: PKR 86,435
+                - paragraph [ref=e68]: Net Revenue
+              - generic [ref=e69]:
+                - paragraph [ref=e70]: PKR 44,247
+                - paragraph [ref=e71]: Gross Profit
+                - paragraph [ref=e72]: 51% margin
+            - generic [ref=e73]:
+              - heading "Revenue Trend" [level=3] [ref=e74]
+              - application [ref=e77]:
+                - generic [ref=e101]:
+                  - generic [ref=e102]:
+                    - generic [ref=e104]: Jun 20
+                    - generic [ref=e106]: Jun 21
+                    - generic [ref=e108]: Jun 21
+                    - generic [ref=e110]: Jun 23
+                    - generic [ref=e112]: Jun 24
+                    - generic [ref=e114]: Jun 25
+                  - generic [ref=e115]:
+                    - generic [ref=e117]: 0k
+                    - generic [ref=e119]: 15k
+                    - generic [ref=e121]: 30k
+                    - generic [ref=e123]: 45k
+                    - generic [ref=e125]: 60k
+            - generic [ref=e126]:
+              - generic [ref=e127]:
+                - heading "Orders Trend" [level=3] [ref=e128]
+                - application [ref=e131]:
+                  - generic [ref=e155]:
+                    - generic [ref=e156]:
+                      - generic [ref=e158]: Jun 20
+                      - generic [ref=e160]: Jun 21
+                      - generic [ref=e162]: Jun 21
+                      - generic [ref=e164]: Jun 23
+                      - generic [ref=e166]: Jun 24
+                      - generic [ref=e168]: Jun 25
+                    - generic [ref=e169]:
+                      - generic [ref=e171]: "0"
+                      - generic [ref=e173]: "3"
+                      - generic [ref=e175]: "6"
+                      - generic [ref=e177]: "9"
+                      - generic [ref=e179]: "12"
+              - generic [ref=e180]:
+                - heading "Payment Methods" [level=3] [ref=e181]
+                - application [ref=e184]
+                - generic [ref=e200]:
+                  - generic [ref=e203]: easypaisa (2)
+                  - generic [ref=e206]: jazzcash (4)
+                  - generic [ref=e209]: cod (1)
+                  - generic [ref=e212]: card (13)
+  - alert [ref=e213]
+  - generic [ref=e214]: "0"

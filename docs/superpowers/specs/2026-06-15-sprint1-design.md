@@ -165,8 +165,9 @@ WhatsApp along with any questions about your order"
 **Delivery Zones panel:**
 - Table: City | Charge (PKR) | Status | Actions
 - Add city: text input + charge input + Save button
-- Per-row: edit charge inline, toggle active/inactive, delete
+- Per-row: edit charge inline at any time, toggle active/inactive, delete
 - Inactive cities hidden from checkout city dropdown
+- Karachi PKR 200 is only a starting default — change it anytime from this panel, no code change or redeployment needed
 
 **Payments panel:**
 - COD toggle (on/off)

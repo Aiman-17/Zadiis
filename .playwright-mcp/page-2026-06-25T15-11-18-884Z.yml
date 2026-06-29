@@ -1,0 +1,238 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Dashboard" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - paragraph [ref=e52]: "2"
+              - paragraph [ref=e53]: Today's Orders
+            - generic [ref=e54]:
+              - paragraph [ref=e55]: PKR 17,590
+              - paragraph [ref=e56]: Today's Revenue
+            - generic [ref=e57]:
+              - paragraph [ref=e58]: PKR 113,219
+              - paragraph [ref=e59]: Revenue This Month
+            - generic [ref=e60]:
+              - paragraph [ref=e61]: "25"
+              - paragraph [ref=e62]: Orders This Month
+            - generic [ref=e63]:
+              - paragraph [ref=e64]: "35"
+              - paragraph [ref=e65]: 4 delivered
+              - paragraph [ref=e66]: Total Sales
+            - generic [ref=e67]:
+              - paragraph [ref=e68]: "4"
+              - paragraph [ref=e69]: 79 units in stock
+              - paragraph [ref=e70]: Total Products
+            - generic [ref=e71]:
+              - paragraph [ref=e72]: "18"
+              - paragraph [ref=e73]: Pending Action
+            - generic [ref=e74]:
+              - paragraph [ref=e75]: "1"
+              - paragraph [ref=e76]: Low Stock Variants
+          - generic [ref=e77]:
+            - generic [ref=e78]:
+              - img [ref=e79]
+              - generic [ref=e81]:
+                - paragraph [ref=e82]: Cancelled This Month — PKR 6,190
+                - paragraph [ref=e83]: 1 order cancelled
+            - generic [ref=e84]:
+              - img [ref=e85]
+              - generic [ref=e87]:
+                - paragraph [ref=e88]: Returned This Month — PKR 2,100
+                - paragraph [ref=e89]: 1 order returned
+          - generic [ref=e90]:
+            - generic [ref=e91]:
+              - heading "Order Status Breakdown" [level=3] [ref=e92]
+              - application [ref=e242]
+              - generic [ref=e94]:
+                - generic [ref=e97]: new (17)
+                - generic [ref=e100]: processing (1)
+                - generic [ref=e103]: shipped (2)
+                - generic [ref=e106]: delivered (3)
+                - generic [ref=e109]: returned (1)
+                - generic [ref=e112]: cancelled (1)
+            - generic [ref=e113]:
+              - heading "Sales Trend" [level=3] [ref=e114]
+              - paragraph [ref=e115]: Last 7 days + today
+              - application [ref=e244]:
+                - generic [ref=e274]:
+                  - generic [ref=e275]:
+                    - generic [ref=e277]: Fri
+                    - generic [ref=e279]: Sat
+                    - generic [ref=e281]: Sun
+                    - generic [ref=e283]: Mon
+                    - generic [ref=e285]: Tue
+                    - generic [ref=e287]: Wed
+                    - generic [ref=e289]: Today
+                  - generic [ref=e290]:
+                    - generic [ref=e292]: "0"
+                    - generic [ref=e294]: "4"
+                    - generic [ref=e296]: "8"
+                    - generic [ref=e298]: "12"
+                    - generic [ref=e300]: "16"
+          - generic [ref=e117]:
+            - heading "Inventory Health" [level=3] [ref=e118]
+            - generic [ref=e119]:
+              - generic [ref=e120]:
+                - paragraph [ref=e121]: "4"
+                - paragraph [ref=e122]: Active Products
+              - generic [ref=e123]:
+                - paragraph [ref=e124]: "3"
+                - paragraph [ref=e125]: In Stock
+              - generic [ref=e126]:
+                - paragraph [ref=e127]: "0"
+                - paragraph [ref=e128]: Last Chance
+              - generic [ref=e129]:
+                - paragraph [ref=e130]: "1"
+                - paragraph [ref=e131]: Sold Out
+          - generic [ref=e132]:
+            - heading "Merchandising" [level=3] [ref=e133]
+            - generic [ref=e134]:
+              - generic [ref=e135]:
+                - generic [ref=e136]:
+                  - paragraph [ref=e137]: Best Sellers
+                  - generic [ref=e138]: by score
+                - list [ref=e139]:
+                  - listitem [ref=e140]:
+                    - generic [ref=e141]: "#1"
+                    - generic [ref=e142]: Elegant dress
+                    - generic [ref=e143]: 3 sold
+              - generic [ref=e144]:
+                - generic [ref=e145]:
+                  - paragraph [ref=e146]: Trending Now
+                  - generic [ref=e147]: this week
+                - list [ref=e148]:
+                  - listitem [ref=e149]:
+                    - generic [ref=e150]: "#1"
+                    - generic [ref=e151]: Elegant dress
+                    - generic [ref=e152]: ↑ 16.0
+              - generic [ref=e153]:
+                - generic [ref=e154]:
+                  - paragraph [ref=e155]: Just Dropped
+                  - generic [ref=e156]: last 7 days
+                - list [ref=e157]:
+                  - listitem [ref=e158]:
+                    - generic [ref=e159]: New suit
+                    - generic [ref=e160]: 5d ago
+                  - listitem [ref=e161]:
+                    - generic [ref=e162]: Girls Suit
+                    - generic [ref=e163]: 5d ago
+                  - listitem [ref=e164]:
+                    - generic [ref=e165]: Suit for women
+                    - generic [ref=e166]: 5d ago
+          - generic [ref=e167]:
+            - heading "Low Stock Alerts1" [level=3] [ref=e168]
+            - generic [ref=e170]:
+              - generic [ref=e171]:
+                - paragraph [ref=e172]: Girls Suit
+                - paragraph [ref=e173]: All sizes
+              - generic [ref=e174]: OUT OF STOCK
+          - generic [ref=e175]:
+            - heading "Recent Orders10" [level=3] [ref=e177]
+            - table [ref=e179]:
+              - rowgroup [ref=e180]:
+                - row "ZD-1025 Gul PKR 11,400 new 6/25/2026" [ref=e181]:
+                  - cell "ZD-1025" [ref=e182]
+                  - cell "Gul" [ref=e183]
+                  - cell "PKR 11,400" [ref=e184]
+                  - cell "new" [ref=e185]
+                  - cell "6/25/2026" [ref=e186]
+                - row "ZD-1024 Ali PKR 6,190 shipped 6/24/2026" [ref=e187]:
+                  - cell "ZD-1024" [ref=e188]
+                  - cell "Ali" [ref=e189]
+                  - cell "PKR 6,190" [ref=e190]
+                  - cell "shipped" [ref=e191]
+                  - cell "6/24/2026" [ref=e192]
+                - row "ZD-1023 COD Test Customer PKR 6,190 delivered 6/23/2026" [ref=e193]:
+                  - cell "ZD-1023" [ref=e194]
+                  - cell "COD Test Customer" [ref=e195]
+                  - cell "PKR 6,190" [ref=e196]
+                  - cell "delivered" [ref=e197]
+                  - cell "6/23/2026" [ref=e198]
+                - row "ZD-1022 Test Customer PKR 6,190 delivered 6/23/2026" [ref=e199]:
+                  - cell "ZD-1022" [ref=e200]
+                  - cell "Test Customer" [ref=e201]
+                  - cell "PKR 6,190" [ref=e202]
+                  - cell "delivered" [ref=e203]
+                  - cell "6/23/2026" [ref=e204]
+                - row "ZD-1021 Syeda doll Syeda doll PKR 6,190 delivered 6/23/2026" [ref=e205]:
+                  - cell "ZD-1021" [ref=e206]
+                  - cell "Syeda doll Syeda doll" [ref=e207]
+                  - cell "PKR 6,190" [ref=e208]
+                  - cell "delivered" [ref=e209]
+                  - cell "6/23/2026" [ref=e210]
+                - row "ZD-1020 Syeda doll Syeda doll PKR 2,100 returned 6/23/2026" [ref=e211]:
+                  - cell "ZD-1020" [ref=e212]
+                  - cell "Syeda doll Syeda doll" [ref=e213]
+                  - cell "PKR 2,100" [ref=e214]
+                  - cell "returned" [ref=e215]
+                  - cell "6/23/2026" [ref=e216]
+                - row "ZD-1019 Syeda doll Syeda doll PKR 6,190 new 6/23/2026" [ref=e217]:
+                  - cell "ZD-1019" [ref=e218]
+                  - cell "Syeda doll Syeda doll" [ref=e219]
+                  - cell "PKR 6,190" [ref=e220]
+                  - cell "new" [ref=e221]
+                  - cell "6/23/2026" [ref=e222]
+                - row "ZD-1018 Syeda doll Syeda doll PKR 2,100 new 6/23/2026" [ref=e223]:
+                  - cell "ZD-1018" [ref=e224]
+                  - cell "Syeda doll Syeda doll" [ref=e225]
+                  - cell "PKR 2,100" [ref=e226]
+                  - cell "new" [ref=e227]
+                  - cell "6/23/2026" [ref=e228]
+                - row "ZD-1017 Syeda doll Syeda doll PKR 2,100 new 6/23/2026" [ref=e229]:
+                  - cell "ZD-1017" [ref=e230]
+                  - cell "Syeda doll Syeda doll" [ref=e231]
+                  - cell "PKR 2,100" [ref=e232]
+                  - cell "new" [ref=e233]
+                  - cell "6/23/2026" [ref=e234]
+                - row "ZD-1016 Syeda doll Syeda doll PKR 2,100 shipped 6/23/2026" [ref=e235]:
+                  - cell "ZD-1016" [ref=e236]
+                  - cell "Syeda doll Syeda doll" [ref=e237]
+                  - cell "PKR 2,100" [ref=e238]
+                  - cell "shipped" [ref=e239]
+                  - cell "6/23/2026" [ref=e240]
+  - alert [ref=e301]
+  - generic [ref=e302]: "0"

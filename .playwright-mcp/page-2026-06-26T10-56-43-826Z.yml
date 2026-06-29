@@ -1,0 +1,46 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e59] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e60]
+        - text: Dashboard
+      - link "Products" [ref=e65] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e66]
+        - text: Products
+      - link "Orders" [ref=e70] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e71]
+        - text: Orders
+      - link "Payments" [ref=e74] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e75]
+        - text: Payments
+      - link "Invoices" [ref=e77] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e78]
+        - text: Invoices
+      - link "Sales" [ref=e81] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e82]
+        - text: Sales
+      - link "Analytics" [ref=e85] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e86]
+        - text: Analytics
+      - link "COD" [ref=e87] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e88]
+        - text: COD
+      - link "Settings" [ref=e90] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e91]
+        - text: Settings
+      - button "Logout" [ref=e95]:
+        - img [ref=e96]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e99]: Loading...
+  - alert [ref=e58]

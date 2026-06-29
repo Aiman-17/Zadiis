@@ -1,0 +1,12 @@
+[    1371ms] [VERBOSE] [DOM] Input elements should have autocomplete attributes (suggested: "new-password"): (More info: https://goo.gl/9p2vKq) %o @ https://zadiis.com.pk/admin/login?from=%2Fadmin%2Fcod:0
+[    4653ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[   34341ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[   64335ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[   94395ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  124341ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  154357ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  184341ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  214490ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  244321ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  274334ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0
+[  304334ms] [ERROR] Failed to load resource: the server responded with a status of 401 () @ https://zadiis.com.pk/api/admin/orders:0

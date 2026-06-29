@@ -58,7 +58,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   const revenueThisMonth  = thisMonth
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) => s + o.total, 0)
-  const ordersThisMonth   = thisMonth.filter(o => o.order_status !== 'cancelled').length
+  const ordersThisMonth   = thisMonth.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').length
   const deliveredThisMonth = thisMonth.filter(o => o.order_status === 'delivered').length
 
   // Fix #5 — AOV

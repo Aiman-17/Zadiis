@@ -1,0 +1,113 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "New Sale" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - heading "Sale Details" [level=2] [ref=e51]
+            - generic [ref=e52]:
+              - generic [ref=e53]: Sale Title *
+              - textbox "Sale Title *" [ref=e54]:
+                - /placeholder: Eid Sale 2026
+            - generic [ref=e55]:
+              - generic [ref=e56]: Description
+              - textbox "Description" [ref=e57]:
+                - /placeholder: Up to 40% off on selected items
+            - generic [ref=e58]:
+              - generic [ref=e59]: Delivery Charge Override (PKR, optional)
+              - spinbutton "Delivery Charge Override (PKR, optional)" [ref=e60]
+            - generic [ref=e61]:
+              - generic [ref=e62]:
+                - generic [ref=e63]: Starts At
+                - textbox "Starts At" [ref=e64]
+              - generic [ref=e65]:
+                - generic [ref=e66]: Ends At
+                - textbox "Ends At" [ref=e67]
+            - generic [ref=e68]:
+              - checkbox "Activate immediately" [ref=e69]
+              - generic [ref=e70]: Activate immediately
+          - generic [ref=e71]:
+            - heading "Select Products" [level=2] [ref=e73]
+            - generic [ref=e74]:
+              - generic [ref=e75]: Discount %
+              - spinbutton [ref=e76]: "20"
+              - generic [ref=e77]: off original price
+              - button "Apply to All" [disabled] [ref=e78]
+            - generic [ref=e79]:
+              - generic [ref=e85] [cursor=pointer]:
+                - checkbox [ref=e86]
+                - generic [ref=e87]:
+                  - paragraph [ref=e89]: 3 Pcs Suit
+                  - paragraph [ref=e90]: PKR 2,999 · undefined in stock
+              - generic [ref=e91] [cursor=pointer]:
+                - checkbox [ref=e92]
+                - generic [ref=e93]:
+                  - paragraph [ref=e95]: Elegant dress
+                  - paragraph [ref=e96]: PKR 5,990 · undefined in stock
+              - generic [ref=e97] [cursor=pointer]:
+                - checkbox [ref=e98]
+                - generic [ref=e99]:
+                  - paragraph [ref=e101]: Girls Suit
+                  - paragraph [ref=e102]: PKR 1,200 · undefined in stock
+              - generic [ref=e103] [cursor=pointer]:
+                - checkbox [ref=e104]
+                - generic [ref=e105]:
+                  - paragraph [ref=e107]: Kmeez Dupatta
+                  - paragraph [ref=e108]: PKR 4,999 · undefined in stock
+              - generic [ref=e109] [cursor=pointer]:
+                - checkbox [ref=e110]
+                - generic [ref=e111]:
+                  - paragraph [ref=e113]: New suit
+                  - paragraph [ref=e114]: PKR 1,900 · undefined in stock
+              - generic [ref=e115] [cursor=pointer]:
+                - checkbox [ref=e116]
+                - generic [ref=e117]:
+                  - paragraph [ref=e119]: Suit for women
+                  - paragraph [ref=e120]: PKR 1,500 · undefined in stock
+            - paragraph [ref=e121]: Slow movers listed first — discount these to clear stock. Tap a product to add it.
+          - generic [ref=e81]:
+            - button "Cancel" [ref=e82]
+            - button "Create Sale" [ref=e83]
+  - alert [ref=e84]

@@ -1,10 +1,10 @@
-import { supabaseAdmin } from '@/lib/supabase/server'
+export const dynamic = 'force-dynamic'
+
+import { supabase } from '@/lib/supabase/client'
 import ProductCard from '@/components/products/ProductCard'
 import Link from 'next/link'
 import type { Metadata } from 'next'
 import type { Product } from '@/types'
-
-export const dynamic = 'force-dynamic'
 
 export const metadata: Metadata = {
   title: 'New Arrivals',
@@ -12,9 +12,10 @@ export const metadata: Metadata = {
 }
 
 export default async function NewArrivalsPage() {
-  const today = new Date().toISOString().split('T')[0]
+  const now = new Date()
+  const today = new Date(now.getTime() + 5 * 60 * 60 * 1000).toISOString().split('T')[0]
 
-  const { data } = await supabaseAdmin
+  const { data } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)

@@ -1,0 +1,76 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - heading "Returns & Exchanges" [level=1] [ref=e16]
+      - generic [ref=e17]:
+        - generic [ref=e18]:
+          - heading "7-Day Return Policy" [level=2] [ref=e19]
+          - paragraph [ref=e20]: We accept returns within 7 days of your order date. Items must be unworn, unwashed, and in original packaging with all tags attached.
+        - generic [ref=e21]:
+          - heading "How to Return" [level=2] [ref=e22]
+          - list [ref=e23]:
+            - listitem [ref=e24]: Submit your return request using the form below
+            - listitem [ref=e25]: We will confirm your return within 24 hours and provide the return address
+            - listitem [ref=e26]: Ship the item back (do not ship before receiving our confirmation)
+            - listitem [ref=e27]: Refund or exchange is processed within 3–5 business days of receiving the item
+        - generic [ref=e28]:
+          - heading "Non-Returnable Items" [level=2] [ref=e29]
+          - paragraph [ref=e30]: Sale items, customised orders, and items marked as final sale cannot be returned.
+      - generic [ref=e31]:
+        - heading "Submit a Return Request" [level=2] [ref=e32]
+        - paragraph [ref=e33]: Fill in the details below. We will review your request and respond within 24 hours.
+        - generic [ref=e108]:
+          - generic [ref=e109]: ✓
+          - heading "Exchange Request Received" [level=3] [ref=e110]
+          - paragraph [ref=e111]:
+            - text: We have received your exchange request for order
+            - strong [ref=e112]: ZD-1025
+            - text: . Our team will prepare your replacement and you will receive an email when it is dispatched. Please do not send back the original item until we confirm.
+  - contentinfo [ref=e76]:
+    - generic [ref=e77]:
+      - generic [ref=e78]:
+        - paragraph [ref=e79]: ZADIIS
+        - paragraph [ref=e80]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e81]:
+        - paragraph [ref=e82]: Quick Links
+        - list [ref=e83]:
+          - listitem [ref=e84]:
+            - link "Shop" [ref=e85] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e86]:
+            - link "Cart" [ref=e87] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e88]:
+            - link "Sale" [ref=e89] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e90]:
+        - paragraph [ref=e91]: Policies
+        - list [ref=e92]:
+          - listitem [ref=e93]:
+            - link "Returns & Exchanges" [ref=e94] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e95]:
+            - link "Shipping Info" [ref=e96] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e97]:
+            - link "Privacy Policy" [ref=e98] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e99]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e100] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e101]
+  - alert [ref=e103]

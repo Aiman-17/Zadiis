@@ -1,0 +1,67 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Women's Collection" [level=1] [ref=e13]
+      - generic [ref=e15]:
+        - button "Trending" [ref=e16]
+        - button "New Arrivals" [ref=e17]
+        - button "Just Dropped" [ref=e18]
+        - button "Best Sellers" [ref=e19]
+        - button "Last Chance" [ref=e20]
+      - generic [ref=e22]:
+        - img
+        - searchbox "Search products…" [ref=e23]
+      - generic [ref=e24]:
+        - complementary [ref=e25]:
+          - button "Filters (2)" [ref=e27]:
+            - img [ref=e28]
+            - text: Filters (2)
+        - link "CO-ORDS 2pcs set CO-ORDS 2pcs set PKR 7,989" [ref=e31] [cursor=pointer]:
+          - /url: /shop/co-ords-2pcs-set
+          - img "CO-ORDS 2pcs set" [ref=e33]
+          - heading "CO-ORDS 2pcs set" [level=3] [ref=e34]
+          - generic [ref=e36]: PKR 7,989
+  - contentinfo [ref=e37]:
+    - generic [ref=e38]:
+      - generic [ref=e39]:
+        - paragraph [ref=e40]: ZADII'S
+        - paragraph [ref=e41]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e42]:
+        - paragraph [ref=e43]: Quick Links
+        - list [ref=e44]:
+          - listitem [ref=e45]:
+            - link "Shop" [ref=e46] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e47]:
+            - link "Cart" [ref=e48] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e49]:
+        - paragraph [ref=e50]: Policies
+        - list [ref=e51]:
+          - listitem [ref=e52]:
+            - link "Returns & Exchanges" [ref=e53] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e54]:
+            - link "Cancel an Order" [ref=e55] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e56]:
+            - link "Shipping Info" [ref=e57] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e58]:
+            - link "Privacy Policy" [ref=e59] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e60]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e61] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e62]
+  - alert [ref=e64]

@@ -1,0 +1,150 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Edit Product" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - generic [ref=e52]: Product Name *
+              - textbox "Product Name *" [ref=e53]: Elegant dress
+            - generic [ref=e54]:
+              - generic [ref=e55]: SKU
+              - textbox "SKU" [ref=e56]:
+                - /placeholder: DRESS-BLK-M
+                - text: ZD-002
+          - generic [ref=e57]:
+            - generic [ref=e58]: Description
+            - textbox "Description" [ref=e59]: "\\ecom-business-project\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md) ⎿ Wrote 61 lines to ..\\history\\prompts\\general\\038-hydration-fix-locale-pinning.general.prompt.md 1 --- 2 id: 038 3 title: Hydration Error Fix Locale Pinning 4 stage: green 5 date: 2026-06-24"
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Price (PKR) *
+              - spinbutton "Price (PKR) *" [ref=e63]: "5990"
+            - generic [ref=e64]:
+              - generic [ref=e65]: Cost Price (PKR)
+              - spinbutton "Cost Price (PKR)" [ref=e66]
+            - generic [ref=e67]:
+              - generic [ref=e68]:
+                - text: Total Stock
+                - generic [ref=e69]: (auto-calculated from grid)
+              - generic [ref=e70]: "29"
+          - generic [ref=e71]:
+            - generic [ref=e72]: Collection (FK)
+            - combobox "Collection (FK)" [ref=e73]:
+              - option "— No collection —"
+              - option "Women's Clothing" [selected]
+          - generic [ref=e74]:
+            - generic [ref=e75]: Season / Type
+            - combobox [ref=e76]:
+              - option "— Select season / type —" [selected]
+              - option "Summer"
+              - option "Winter"
+              - option "Formal"
+              - option "Casual"
+              - option "Eid"
+              - option "Sale"
+              - option "Other (type below)"
+          - generic [ref=e77]:
+            - generic [ref=e78]: Product Images
+            - generic [ref=e79]:
+              - generic [ref=e80]:
+                - generic [ref=e81]:
+                  - img "Product image 1" [ref=e82]
+                  - button [ref=e83]:
+                    - img [ref=e84]
+                - generic [ref=e87]:
+                  - img "Product image 2" [ref=e88]
+                  - button [ref=e89]:
+                    - img [ref=e90]
+              - button "Upload Images (max 8)" [ref=e93]:
+                - img [ref=e94]
+                - text: Upload Images (max 8)
+          - generic [ref=e97]:
+            - generic [ref=e98]: Colors (comma separated)
+            - textbox "Colors (comma separated)" [ref=e99]:
+              - /placeholder: Black, White, Navy Blue
+              - text: White
+          - generic [ref=e100]:
+            - generic [ref=e101]: Sizes
+            - generic [ref=e102]:
+              - button "XS" [ref=e103]
+              - button "S" [ref=e104]
+              - button "M" [ref=e105]
+              - button "L" [ref=e106]
+              - button "XL" [ref=e107]
+              - button "XXL" [ref=e108]
+              - generic [ref=e109]: "|"
+              - button "Unstitched" [ref=e110]
+          - generic [ref=e111]:
+            - generic [ref=e112]: Variant Stock
+            - table [ref=e114]:
+              - rowgroup [ref=e115]:
+                - row "Color L XL XXL" [ref=e116]:
+                  - columnheader "Color" [ref=e117]
+                  - columnheader "L" [ref=e118]
+                  - columnheader "XL" [ref=e119]
+                  - columnheader "XXL" [ref=e120]
+              - rowgroup [ref=e121]:
+                - row "White 14 10 5" [ref=e122]:
+                  - cell "White" [ref=e123]
+                  - cell "14" [ref=e124]:
+                    - spinbutton [ref=e125]: "14"
+                  - cell "10" [ref=e126]:
+                    - spinbutton [ref=e127]: "10"
+                  - cell "5" [ref=e128]:
+                    - spinbutton [ref=e129]: "5"
+          - generic [ref=e130]:
+            - generic [ref=e131]: Product Flags
+            - generic [ref=e132]:
+              - button "★ Best Seller" [ref=e133]
+              - button "↑ Trending" [ref=e134]
+              - button "✦ New Arrival" [ref=e135]
+            - paragraph [ref=e136]: Auto-scoring also runs in the background — these are manual overrides
+          - generic [ref=e137]:
+            - checkbox "Active (visible in store)" [checked] [ref=e138]
+            - generic [ref=e139]: Active (visible in store)
+          - generic [ref=e140]:
+            - button "Cancel" [ref=e141]
+            - button "Saving..." [disabled]
+  - alert [ref=e143]

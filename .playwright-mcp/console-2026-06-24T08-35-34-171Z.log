@@ -1,0 +1,1005 @@
+[    5158ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[    5421ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[  574550ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[  574568ms] [LOG] [Fast Refresh] done in 132ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1116773ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1116996ms] [LOG] [Fast Refresh] done in 326ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1126562ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1126801ms] [LOG] [Fast Refresh] done in 345ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1242546ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1242633ms] [LOG] [Fast Refresh] done in 199ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1243582ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1245229ms] [LOG] [Fast Refresh] done in 1797ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1247161ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1247404ms] [LOG] [Fast Refresh] done in 354ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1247634ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1248401ms] [LOG] [Fast Refresh] done in 874ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1249045ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1249110ms] [LOG] [Fast Refresh] done in 173ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1296577ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1296604ms] [LOG] [Fast Refresh] done in 140ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1534306ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 1534316ms] [LOG] [Fast Refresh] done in 111ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9599945ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9600359ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9601770ms] [LOG] [Fast Refresh] done in 1516ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9624013ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9624016ms] [LOG] [Fast Refresh] done in 107ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9626939ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9626947ms] [LOG] [Fast Refresh] done in 109ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9627054ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9627055ms] [LOG] [Fast Refresh] done in 105ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9767493ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9767563ms] [LOG] [Fast Refresh] done in 173ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9767894ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9769452ms] [LOG] [Fast Refresh] done in 1670ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9774513ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9776236ms] [LOG] [Fast Refresh] done in 1828ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9785264ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9787567ms] [LOG] [Fast Refresh] done in 2433ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9834104ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9844963ms] [LOG] [Fast Refresh] done in 10963ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9846056ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9846766ms] [LOG] [Fast Refresh] done in 830ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9849276ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9858495ms] [LOG] [Fast Refresh] done in 9343ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9863222ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9864210ms] [LOG] [Fast Refresh] done in 1092ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9866239ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9866388ms] [LOG] [Fast Refresh] done in 257ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9874124ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[ 9879372ms] [LOG] [Fast Refresh] done in 5358ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[12097786ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[12098993ms] [LOG] [Fast Refresh] done in 1320ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[12486541ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[12486558ms] [LOG] [Fast Refresh] done in 118ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[13566553ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[13566561ms] [LOG] [Fast Refresh] done in 118ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[13773854ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[13773878ms] [LOG] [Fast Refresh] done in 133ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14675856ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14679869ms] [LOG] [Fast Refresh] done in 4118ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14683340ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14685933ms] [LOG] [Fast Refresh] done in 2696ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14692112ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14692398ms] [LOG] [Fast Refresh] done in 401ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14703465ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14769115ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14769478ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14777711ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14778018ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14778984ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14783534ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/api/admin/orders:0
+[14798311ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14799745ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14800266ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14802711ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=sfA7Dkwq5TKmib31:0
+[14803275ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[14806529ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14807219ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14883841ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[14898326ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[14900769ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14901686ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14948638ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[14966125ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[14971300ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14972557ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14986318ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[14992599ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[14994078ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[14994166ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15020046ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15021365ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15023252ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15024497ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15024565ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15075847ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15076716ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15078216ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15079000ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15079074ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15110830ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15120804ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15121917ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15122009ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15176688ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15179424ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15183448ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15185894ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15185971ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15189549ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15198211ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15201533ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15203356ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15203456ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15294718ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15296169ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15300530ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15305861ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15306239ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15386333ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15509144ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15608158ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[15611757ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[15619784ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[15620617ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[18853584ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/admin:0
+[18855288ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[18855441ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[18856331ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:3000/favicon.ico?favicon.2vob68tjqpejf.ico:0
+[20093869ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20099327ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20099331ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20103884ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20104383ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20105024ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20105049ms] [ERROR] Failed to fetch RSC payload for http://localhost:3000/admin. Falling back to browser navigation. TypeError: Failed to fetch
+    at createFetch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8207:21)
+    at async fetchServerResponse (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8051:21)
+    at async fetchMissingDynamicData (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:9464:24) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[20105079ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20105079ms] [ERROR] Failed to fetch RSC payload for http://localhost:3000/admin. Falling back to browser navigation. TypeError: Failed to fetch
+    at createFetch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8207:21)
+    at async fetchServerResponse (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:8051:21)
+    at async fetchMissingDynamicData (http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:9464:24) @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:3318
+[20105083ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/admin?_rsc=gJvLbHS0Udr_qZza:0
+[20105113ms] [ERROR] WebSocket is already in CLOSING or CLOSED state. @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2836
+[20220969ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[20221191ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[20224691ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+            <SegmentViewNode type="page" pagePath="admin/page...">
+              <SegmentTrieNode>
+              <AdminDashboard>
+                <div>
+                  <h1>
+                  <DashboardCharts orders={[...]} products={[...]}>
+                    <div className="space-y-6">
+                      <div>
+                      <div>
+                      <div>
+                      <div className="bg-white r..." style={{...}}>
+                        <div>
+                        <div className="overflow-x...">
+                          <table className="w-full tex...">
+                            <tbody>
+                              <tr className="border-b l..." style={{...}}>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="px-5 py-3 text-xs" style={{color:"#9CA3AF"}}>
++                                 6/23/2026
+-                                 23/06/2026
+                              ...
+            ...
+          ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3318:56)
+    at prepareToHydrateHostInstance (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3372:23)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6922:60)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[20363986ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[20381820ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[20412846ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[20441676ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[21658302ms] ReferenceError: topProducts is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js?id=%255Bproject%255D%252Fsrc%252Fcomponents%252Fadmin%252FDashboardCharts.tsx+%255Bapp-client%255D+%2528ecmascript%2529:469:29)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performSyncWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at processRootScheduleInMicrotask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10200:106)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10274:158
+[21669346ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21669645ms] ReferenceError: topProducts is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js?id=%255Bproject%255D%252Fsrc%252Fcomponents%252Fadmin%252FDashboardCharts.tsx+%255Bapp-client%255D+%2528ecmascript%2529:470:29)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6665:639)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9098:47)
+    at performSyncWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at flushSyncWork$1 (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9230:86)
+    at Object.scheduleRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:299:13)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:391:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:384:38)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:878:31)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:886:13
+[21677205ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin:0
+[21677965ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21678082ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21680106ms] ReferenceError: topProducts is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js:471:29)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6665:639)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9098:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[21694975ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21699402ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin:0
+[21699816ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21699891ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21701137ms] ReferenceError: topProducts is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js:483:29)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6665:639)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9098:47)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[21711193ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21723221ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21723315ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[21725064ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+            <SegmentViewNode type="page" pagePath="admin/page...">
+              <SegmentTrieNode>
+              <AdminDashboard>
+                <div>
+                  <h1>
+                  <DashboardCharts orders={[...]} products={[...]}>
+                    <div className="space-y-6">
+                      <div>
+                      <div>
+                      <div>
+                      <div className="bg-white r..." style={{...}}>
+                        <div>
+                        <div className="overflow-x...">
+                          <table className="w-full tex...">
+                            <tbody>
+                              <tr className="border-b l..." style={{...}}>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="px-5 py-3 text-xs" style={{color:"#9CA3AF"}}>
++                                 6/23/2026
+-                                 23/06/2026
+                              ...
+            ...
+          ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3318:56)
+    at prepareToHydrateHostInstance (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3372:23)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6922:60)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[23534488ms] ReferenceError: totalSales is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js?id=%255Bproject%255D%252Fsrc%252Fcomponents%252Fadmin%252FDashboardCharts.tsx+%255Bapp-client%255D+%2528ecmascript%2529:158:24)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:186)
+    at performSyncWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at processRootScheduleInMicrotask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10200:106)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10274:158
+[23549232ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[23562104ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[23562235ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[23563553ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+            <SegmentViewNode type="page" pagePath="admin/page...">
+              <SegmentTrieNode>
+              <AdminDashboard>
+                <div>
+                  <h1>
+                  <DashboardCharts orders={[...]} products={[...]}>
+                    <div className="space-y-6">
+                      <div>
+                      <div>
+                      <div>
+                      <div className="bg-white r..." style={{...}}>
+                        <div>
+                        <div className="overflow-x...">
+                          <table className="w-full tex...">
+                            <tbody>
+                              <tr className="border-b l..." style={{...}}>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="px-5 py-3 text-xs" style={{color:"#9CA3AF"}}>
++                                 6/23/2026
+-                                 23/06/2026
+                              ...
+            ...
+          ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3318:56)
+    at prepareToHydrateHostInstance (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3372:23)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6922:60)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[24677192ms] ReferenceError: unitsSold is not defined
+    at DashboardCharts (http://localhost:3000/_next/static/chunks/src_components_admin_DashboardCharts_tsx_20ys976._.js?id=%255Bproject%255D%252Fsrc%252Fcomponents%252Fadmin%252FDashboardCharts.tsx+%255Bapp-client%255D+%2528ecmascript%2529:159:20)
+    at Object.react_stack_bottom_frame (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:15037:24)
+    at renderWithHooks (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:4620:24)
+    at updateFunctionComponent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6081:21)
+    at beginWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6691:24)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9555:97)
+    at workLoopSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9449:40)
+    at renderRootSync (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9433:13)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9098:47)
+    at performSyncWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10263:9)
+    at flushSyncWorkAcrossRoots_impl (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10179:316)
+    at flushSyncWork$1 (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9230:86)
+    at Object.scheduleRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:299:13)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:391:33
+    at Set.forEach (<anonymous>)
+    at Object.performReactRefresh (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:384:38)
+    at applyUpdate (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:878:31)
+    at http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:886:13
+[24688685ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[24701751ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[24701866ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[24707737ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+            <SegmentViewNode type="page" pagePath="admin/page...">
+              <SegmentTrieNode>
+              <AdminDashboard>
+                <div>
+                  <h1>
+                  <DashboardCharts orders={[...]} products={[...]}>
+                    <div className="space-y-6">
+                      <div>
+                      <div>
+                      <div>
+                      <div className="bg-white r..." style={{...}}>
+                        <div>
+                        <div className="overflow-x...">
+                          <table className="w-full tex...">
+                            <tbody>
+                              <tr className="border-b l..." style={{...}}>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="px-5 py-3 text-xs" style={{color:"#9CA3AF"}}>
++                                 6/24/2026
+-                                 24/06/2026
+                              ...
+            ...
+          ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3318:56)
+    at prepareToHydrateHostInstance (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3372:23)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6922:60)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[25447434ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[25447628ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[25450063ms] Error: Hydration failed because the server rendered text didn't match the client. As a result this tree will be regenerated on the client. This can happen if a SSR-ed Client Component used:
+
+- A server/client branch `if (typeof window !== 'undefined')`.
+- Variable input such as `Date.now()` or `Math.random()` which changes each time it's called.
+- Date formatting in a user's locale which doesn't match the server.
+- External changing data without sending a snapshot of it along with the HTML.
+- Invalid HTML tag nesting.
+
+It can also happen if the client has a browser extension installed which messes with the HTML before React loaded.
+
+https://react.dev/link/hydration-mismatch
+
+  ...
+    <HTTPAccessFallbackBoundary notFound={undefined} forbidden={undefined} unauthorized={undefined}>
+      <RedirectBoundary>
+        <RedirectErrorBoundary router={{...}}>
+          <InnerLayoutRouter url="/admin" tree={[...]} params={{}} cacheNode={{rsc:{...}, ...}} segmentPath={[...]} ...>
+            <SegmentViewNode type="page" pagePath="admin/page...">
+              <SegmentTrieNode>
+              <AdminDashboard>
+                <div>
+                  <h1>
+                  <DashboardCharts orders={[...]} products={[...]}>
+                    <div className="space-y-6">
+                      <div>
+                      <div>
+                      <div>
+                      <div className="bg-white r..." style={{...}}>
+                        <div>
+                        <div className="overflow-x...">
+                          <table className="w-full tex...">
+                            <tbody>
+                              <tr className="border-b l..." style={{...}}>
+                                <td>
+                                <td>
+                                <td>
+                                <td>
+                                <td className="px-5 py-3 text-xs" style={{color:"#9CA3AF"}}>
++                                 6/24/2026
+-                                 24/06/2026
+                              ...
+            ...
+          ...
+
+    at throwOnHydrationMismatch (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3318:56)
+    at prepareToHydrateHostInstance (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:3372:23)
+    at completeWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:6922:60)
+    at runWithFiberInDEV (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:965:74)
+    at completeUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9622:23)
+    at performUnitOfWork (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9557:28)
+    at workLoopConcurrentByScheduler (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9551:58)
+    at renderRootConcurrent (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9534:71)
+    at performWorkOnRoot (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:9061:150)
+    at performWorkOnRootViaSchedulerTask (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_react-dom_096_9a-._.js:10255:9)
+    at MessagePort.performWorkUntilDeadline (http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_1amofcm._.js:2647:64)
+[27856067ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/api/admin/orders:0
+[27857242ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=smwFxMvNlxi7aMv660HyP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13422
+[27860977ms] [ERROR] WebSocket connection to 'ws://localhost:3000/_next/webpack-hmr?id=smwFxMvNlxi7aMv660HyP' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_0r5nbpw._.js:13422
+[27876336ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[27894386ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[27894727ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[28567610ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[28592631ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[28622527ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[28652576ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[28682486ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[28712974ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[32799605ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[33118018ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[34076671ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[34107103ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[34137807ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[34737669ms] [LOG] [Fast Refresh] done in 1513688ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[34737870ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1ybzpk2._.js:2477
+[35033942ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products?_rsc=nKVPXQhJAOLTvaYP:0
+[35033948ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/api/admin/orders:0
+[35043622ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products?_rsc=nKVPXQhJAOLTvaYP:0
+[35045527ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[35084979ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[35085499ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[35085524ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[35264714ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[35267638ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[35267693ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[35267667ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[35293163ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[35296292ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[35296585ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[35296331ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[35300921ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[35304332ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[35304488ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[35304568ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[35379585ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36770055ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36770512ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36770720ms] Error: ./src/app/admin/products/page.tsx:5:1
+Module not found: Can't resolve '@/components/admin/AdminProductsClient'
+  3 | import { Button } from '@/components/ui/button'
+  4 | import { Plus } from 'lucide-react'
+> 5 | import AdminProductsClient from '@/components/admin/AdminProductsClient'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import type { Product } from '@/types'
+  7 |
+  8 | export const dynamic = 'force-dynamic'
+
+Import map: aliased to relative './src/components/admin/AdminProductsClient' inside of [project]/
+
+
+https://nextjs.org/docs/messages/module-not-found
+
+
+    at <unknown> (Error: ./src/app/admin/products/page.tsx:5:1)
+    at <unknown> (https://nextjs.org/docs/messages/module-not-found)
+    at Object.getCompilationErrors (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\hot-reloader-turbopack.js:1186:59)
+    at DevBundlerService.getCompilationError (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\dev-bundler-service.js:44:55)
+    at DevServer.getCompilationError (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:720:42)
+    at DevServer.findPageComponents (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:690:43)
+    at async DevServer.renderErrorToResponseImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:1753:26)
+[36770627ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36770718ms] [ERROR] ./src/app/admin/products/page.tsx:5:1
+Module not found: Can't resolve '@/components/admin/AdminProductsClient'
+  3 | import { Button } from '@/components/ui/button'
+  4 | import { Plus } from 'lucide-react'
+> 5 | import AdminProductsClient from '@/components/admin/AdminProductsClient'
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  6 | import type { Product } from '@/types'
+  7 |
+  8 | export const dynamic = 'force-dynamic'
+
+Import map: aliased to relative './src/components/admin/AdminProductsClient' inside of [project]/
+
+https://nextjs.org/docs/messages/module-not-found @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1945
+[36799152ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36799849ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36800182ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[36799914ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36808301ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36810752ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36810819ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[36810793ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36818518ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36820922ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36821032ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[36820966ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36828226ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36830667ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36830736ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[36830702ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[36836030ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[36838423ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:15305
+[36838818ms] Error: Could not parse module '[project]/src/proxy.ts', file not found
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[root-of-the-server]__1dcu62t._.js:70:11)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at getOrInstantiateModuleFromParent (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1593:23)
+    at Context.esmImport [as i] (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:281:20)
+    at module evaluation (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\node_modules_next_dist_0_u511_._.js:13532:138)
+    at <unknown> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1291:27)
+    at runWithHooks (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1554:9)
+    at instantiateModuleShared (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1289:9)
+    at instantiateModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1557:23)
+    at instantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1564:12)
+    at getOrInstantiateRuntimeModule (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1577:12)
+    at Object.m (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\chunks\[turbopack]_runtime.js:1599:18)
+    at Object.<anonymous> (file://C:\Users\QC\Desktop\ecom-business-project\store\.next\dev\server\middleware.js:4:3)
+    at Module._compile (node:internal/modules/cjs/loader:1761:14)
+    at Object..js (node:internal/modules/cjs/loader:1893:10)
+    at Module.load (node:internal/modules/cjs/loader:1481:32)
+    at Module._load (node:internal/modules/cjs/loader:1300:12)
+    at TracingChannel.traceSync (node:diagnostics_channel:328:14)
+    at wrapModuleLoad (node:internal/modules/cjs/loader:245:24)
+    at Module.<anonymous> (node:internal/modules/cjs/loader:1504:12)
+    at mod.require (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\require-hook.js:79:28)
+    at require (node:internal/modules/helpers:152:16)
+    at DevServer.loadNodeMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1072:28)
+    at DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:1182:43)
+    at async DevServer.runMiddleware (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:278:28)
+    at async NextNodeServer.handleCatchallMiddlewareRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\next-server.js:392:26)
+    at async DevServer.handleRequestImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\base-server.js:941:28)
+    at async (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:394:20)
+    at async Span.traceAsyncFn (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\trace\trace.js:164:20)
+    at async DevServer.handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\dev\next-dev-server.js:390:24)
+    at async handleRoute (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:366:33)
+    at async resolveRoutes (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-utils\resolve-routes.js:622:28)
+    at async handleRequest (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:314:96)
+    at async requestHandlerImpl (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\router-server.js:514:13)
+    at async Server.requestListener (file://C:\Users\QC\Desktop\ecom-business-project\store\node_modules\next\dist\server\lib\start-server.js:225:13)
+[36838802ms] [LOG] [HMR] connected @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[37137066ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[37368876ms] [LOG] [Fast Refresh] done in 231894ms @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[37369020ms] [LOG] [Fast Refresh] rebuilding @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:1226
+[38161880ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:3000/admin/products:0
+[38168606ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1gdrd03._.js:0
+[38170193ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/chunks/%5Bnext%5D_entry_page-loader_ts_0z3haqk._.js:0
+[38170200ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_client_16lnmlo._.js:0
+[38170205ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_compiled_14ibvna._.js:0
+[38170274ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_RESET @ http://localhost:3000/_next/static/chunks/node_modules_next_app_0yrdk3r.js:0
+[38171260ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_react-dom_0kla17-._.js:0
+[38172957ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_shared_lib_12jmhie._.js:0
+[38172971ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__0l4r13l._.js:0
+[38172973ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/pages__app_0du2_q-._.js:0
+[38173173ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_10e2-xo._.js:0
+[38173174ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/turbopack-pages__app_1ouknez._.js:0
+[38174078ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_shared_lib_0pizcwv._.js:0
+[38175582ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/node_modules_next_dist_1atto1n._.js:0
+[38175655ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/%5Broot-of-the-server%5D__02sxxph._.js:0
+[38175656ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/%5Bnext%5D_entry_page-loader_ts_1aoli7m._.js:0
+[38175877ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/pages__error_0du2_q-._.js:0
+[38175877ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/chunks/turbopack-pages__error_18oj9bx._.js:0
+[38176763ms] [ERROR] Failed to load resource: net::ERR_CONNECTION_REFUSED @ http://localhost:3000/_next/static/development/_buildManifest.js:0

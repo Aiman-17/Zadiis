@@ -1,0 +1,138 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Add Product" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - generic [ref=e51]:
+              - generic [ref=e52]: Product Name *
+              - textbox "Product Name *" [ref=e53]
+            - generic [ref=e54]:
+              - generic [ref=e55]: SKU
+              - textbox "SKU" [ref=e56]:
+                - /placeholder: DRESS-BLK-M
+          - generic [ref=e57]:
+            - generic [ref=e58]: Description
+            - textbox "Description" [ref=e59]
+          - generic [ref=e60]:
+            - generic [ref=e61]:
+              - generic [ref=e62]: Price (PKR) *
+              - spinbutton "Price (PKR) *" [ref=e63]
+            - generic [ref=e64]:
+              - generic [ref=e65]: Cost Price (PKR)
+              - spinbutton "Cost Price (PKR)" [ref=e66]
+            - generic [ref=e67]:
+              - generic [ref=e68]: Total Stock
+              - spinbutton "Total Stock" [ref=e69]
+              - paragraph [ref=e70]: Fill in the variant grid below to enable auto-calculation
+          - generic [ref=e115]:
+            - generic [ref=e116]: Collection (FK)
+            - combobox "Collection (FK)" [ref=e117]:
+              - option "No collection (optional)" [selected]
+              - option "Women's Clothing"
+          - generic [ref=e71]:
+            - generic [ref=e72]: Season / Type
+            - combobox [ref=e73]:
+              - option "— Select season / type —" [selected]
+              - option "Summer"
+              - option "Winter"
+              - option "Formal"
+              - option "Casual"
+              - option "Eid"
+              - option "Sale"
+              - option "Other (type below)"
+          - generic [ref=e74]:
+            - generic [ref=e75]: Product Images
+            - button "Upload Images (max 8)" [ref=e77]:
+              - img [ref=e78]
+              - text: Upload Images (max 8)
+          - generic [ref=e81]:
+            - generic [ref=e82]: Colors (comma separated)
+            - textbox "Colors (comma separated)" [ref=e83]:
+              - /placeholder: Black, White, Navy Blue
+          - generic [ref=e84]:
+            - generic [ref=e85]: Sizes
+            - generic [ref=e86]:
+              - button "XS" [ref=e87]
+              - button "S" [ref=e88]
+              - button "M" [ref=e89]
+              - button "L" [ref=e90]
+              - button "XL" [ref=e91]
+              - button "XXL" [ref=e92]
+              - generic [ref=e93]: "|"
+              - button "Unstitched" [ref=e94]
+          - generic [ref=e95]:
+            - generic [ref=e96]: Variant Stock
+            - generic [ref=e97]: Add colors or sizes above to enable per-variant stock
+          - generic [ref=e98]:
+            - generic [ref=e99]: Product Flags
+            - generic [ref=e100]:
+              - button "★ Best Seller" [ref=e101]
+              - button "↑ Trending" [ref=e102]
+              - button "✦ New Arrival" [active] [ref=e103]
+            - paragraph [ref=e104]: Auto-scoring also runs in the background — these are manual overrides
+            - generic [ref=e118]:
+              - paragraph [ref=e119]: New Arrival Settings
+              - generic [ref=e120]:
+                - generic [ref=e121]: Collection Name
+                - textbox "e.g. Eid Collection 2026" [ref=e122]
+              - generic [ref=e123]:
+                - generic [ref=e124]:
+                  - generic [ref=e125]: Launch Date
+                  - textbox [ref=e126]
+                - generic [ref=e127]:
+                  - generic [ref=e128]: Expiry Date
+                  - textbox [ref=e129]
+                  - paragraph [ref=e130]: Leave blank — stays active until manually retired
+          - generic [ref=e105]:
+            - checkbox "No restock planned" [ref=e106]
+            - generic [ref=e107]:
+              - generic [ref=e108]: No restock planned
+              - paragraph [ref=e109]: Enables "Last Chance" badge when stock ≤ 3
+          - generic [ref=e110]:
+            - checkbox "Active (visible in store)" [checked] [ref=e111]
+            - generic [ref=e112]: Active (visible in store)
+          - button "Save Product" [ref=e113]
+  - alert [ref=e114]

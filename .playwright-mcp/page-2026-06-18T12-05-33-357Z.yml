@@ -1,0 +1,84 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e17]:
+        - paragraph [ref=e18]: New Collection
+        - heading "Dressed in Confidence" [level=1] [ref=e19]:
+          - text: Dressed in
+          - text: Confidence
+        - paragraph [ref=e20]: Discover women's fashion crafted for the modern Pakistani woman.
+        - link "Shop Now" [ref=e21] [cursor=pointer]:
+          - /url: /shop
+      - generic [ref=e23]:
+        - generic [ref=e24]:
+          - img [ref=e25]
+          - text: Free delivery over PKR 10,000
+        - generic [ref=e30]:
+          - img [ref=e31]
+          - text: Easy returns
+        - generic [ref=e36]:
+          - img [ref=e37]
+          - text: Secure payments
+      - generic [ref=e39]:
+        - heading "New Arrivals" [level=2] [ref=e40]
+        - generic [ref=e41]:
+          - link "Elegant dress Elegant dress PKR 5,990" [ref=e42] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e44]
+            - heading "Elegant dress" [level=3] [ref=e45]
+            - paragraph [ref=e46]: PKR 5,990
+          - link "Kmeez Dupatta Kmeez Dupatta PKR 4,999" [ref=e47] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e49]
+            - heading "Kmeez Dupatta" [level=3] [ref=e50]
+            - paragraph [ref=e51]: PKR 4,999
+          - link "3 Pcs Suit 3 Pcs Suit PKR 2,999" [ref=e52] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - img "3 Pcs Suit" [ref=e54]
+            - heading "3 Pcs Suit" [level=3] [ref=e55]
+            - paragraph [ref=e56]: PKR 2,999
+        - link "View All" [ref=e58] [cursor=pointer]:
+          - /url: /shop
+  - contentinfo [ref=e59]:
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - heading "ZADIIS" [level=3] [ref=e62]
+        - paragraph [ref=e63]: Modern Pakistani women's fashion. Quality you can feel.
+      - generic [ref=e64]:
+        - heading "Shop" [level=4] [ref=e65]
+        - list [ref=e66]:
+          - listitem [ref=e67]:
+            - link "All Products" [ref=e68] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e69]:
+            - link "About Us" [ref=e70] [cursor=pointer]:
+              - /url: /about
+          - listitem [ref=e71]:
+            - link "Contact" [ref=e72] [cursor=pointer]:
+              - /url: /contact
+      - generic [ref=e73]:
+        - heading "Help" [level=4] [ref=e74]
+        - list [ref=e75]:
+          - listitem [ref=e76]:
+            - link "WhatsApp Support" [ref=e77] [cursor=pointer]:
+              - /url: /contact
+          - listitem [ref=e78]: Free delivery on orders over PKR 2,000
+    - generic [ref=e79]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e80] [cursor=pointer]:
+    - /url: https://wa.me/923001234567?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e81]
+  - alert [ref=e83]

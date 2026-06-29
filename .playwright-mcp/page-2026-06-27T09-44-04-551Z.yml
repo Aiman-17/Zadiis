@@ -1,0 +1,195 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - generic [ref=e13]:
+        - img "ZADIIS Hero Banner" [ref=e14]
+        - generic [ref=e15]:
+          - paragraph [ref=e16]: New Collection
+          - heading "Dressed in Confidence" [level=1] [ref=e17]:
+            - text: Dressed in
+            - text: Confidence
+          - paragraph [ref=e18]: Discover women's fashion crafted for the modern Pakistani woman.
+          - link "Shop Now" [ref=e19] [cursor=pointer]:
+            - /url: /shop
+      - generic [ref=e21]:
+        - generic [ref=e22]:
+          - img [ref=e23]
+          - text: Free delivery over PKR 10,000
+        - generic [ref=e28]:
+          - img [ref=e29]
+          - text: Easy 7-day returns
+        - generic [ref=e34]:
+          - img [ref=e35]
+          - text: Secure payments
+        - generic [ref=e37]:
+          - img [ref=e38]
+          - text: 100% authentic products
+        - generic [ref=e41]:
+          - img [ref=e42]
+          - text: 500+ happy customers
+      - generic [ref=e44]:
+        - paragraph [ref=e47]: Limited Time Sale
+        - paragraph [ref=e49]:
+          - text: Eid SALE
+          - generic [ref=e50]: — Upto 20%OFF
+        - link "Shop the Sale →" [ref=e51] [cursor=pointer]:
+          - /url: /sale
+      - generic [ref=e53]:
+        - generic [ref=e54]:
+          - heading "Trending" [level=2] [ref=e55]
+          - link "View All →" [ref=e57] [cursor=pointer]:
+            - /url: /shop
+        - generic [ref=e58]:
+          - link "Elegant dress -20% Elegant dress PKR 4,792 PKR 5,990" [ref=e59] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - generic [ref=e60]:
+              - img "Elegant dress" [ref=e61]
+              - generic [ref=e63]: "-20%"
+              - img [ref=e65]
+            - heading "Elegant dress" [level=3] [ref=e67]
+            - generic [ref=e68]:
+              - generic [ref=e69]: PKR 4,792
+              - generic [ref=e70]: PKR 5,990
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed LAST CHANCE PKR 1,900" [ref=e71] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - generic [ref=e72]:
+              - img "New suit best cotton quality with printed" [ref=e73]
+              - img [ref=e75]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e77]
+            - generic [ref=e78]: LAST CHANCE
+            - generic [ref=e80]: PKR 1,900
+          - link "3 Pcs Suit 3 Pcs Suit TRENDING PKR 2,999" [ref=e81] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - generic [ref=e82]:
+              - img "3 Pcs Suit" [ref=e83]
+              - img [ref=e85]
+            - heading "3 Pcs Suit" [level=3] [ref=e87]
+            - generic [ref=e88]: TRENDING
+            - generic [ref=e90]: PKR 2,999
+          - link "Girls Suit -20% Girls Suit PKR 960 PKR 1,200" [ref=e91] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - generic [ref=e92]:
+              - img "Girls Suit" [ref=e93]
+              - generic [ref=e95]: "-20%"
+              - img [ref=e97]
+            - heading "Girls Suit" [level=3] [ref=e99]
+            - generic [ref=e100]:
+              - generic [ref=e101]: PKR 960
+              - generic [ref=e102]: PKR 1,200
+      - generic [ref=e104]:
+        - generic [ref=e105]:
+          - heading "New Arrivals" [level=2] [ref=e106]
+          - link "View All →" [ref=e108] [cursor=pointer]:
+            - /url: /new-arrivals
+        - link "Girls Suit -20% Girls Suit PKR 960 PKR 1,200" [ref=e110] [cursor=pointer]:
+          - /url: /shop/girls-suit
+          - generic [ref=e111]:
+            - img "Girls Suit" [ref=e112]
+            - generic [ref=e114]: "-20%"
+            - img [ref=e116]
+          - heading "Girls Suit" [level=3] [ref=e118]
+          - generic [ref=e119]:
+            - generic [ref=e120]: PKR 960
+            - generic [ref=e121]: PKR 1,200
+      - generic [ref=e123]:
+        - generic [ref=e124]:
+          - heading "Best Sellers" [level=2] [ref=e125]
+          - link "View All →" [ref=e127] [cursor=pointer]:
+            - /url: /shop
+        - generic [ref=e128]:
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed LAST CHANCE PKR 1,900" [ref=e129] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - generic [ref=e130]:
+              - img "New suit best cotton quality with printed" [ref=e131]
+              - img [ref=e133]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e135]
+            - generic [ref=e136]: LAST CHANCE
+            - generic [ref=e138]: PKR 1,900
+          - link "Elegant dress -20% Elegant dress PKR 4,792 PKR 5,990" [ref=e139] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - generic [ref=e140]:
+              - img "Elegant dress" [ref=e141]
+              - generic [ref=e143]: "-20%"
+              - img [ref=e145]
+            - heading "Elegant dress" [level=3] [ref=e147]
+            - generic [ref=e148]:
+              - generic [ref=e149]: PKR 4,792
+              - generic [ref=e150]: PKR 5,990
+          - link "3 Pcs Suit 3 Pcs Suit BESTSELLER PKR 2,999" [ref=e151] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - generic [ref=e152]:
+              - img "3 Pcs Suit" [ref=e153]
+              - img [ref=e155]
+            - heading "3 Pcs Suit" [level=3] [ref=e157]
+            - generic [ref=e158]: BESTSELLER
+            - generic [ref=e160]: PKR 2,999
+          - link "Girls Suit -20% Girls Suit PKR 960 PKR 1,200" [ref=e161] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - generic [ref=e162]:
+              - img "Girls Suit" [ref=e163]
+              - generic [ref=e165]: "-20%"
+              - img [ref=e167]
+            - heading "Girls Suit" [level=3] [ref=e169]
+            - generic [ref=e170]:
+              - generic [ref=e171]: PKR 960
+              - generic [ref=e172]: PKR 1,200
+      - generic [ref=e174]:
+        - generic [ref=e175]:
+          - heading "Last Chance" [level=2] [ref=e176]
+          - link "View All →" [ref=e178] [cursor=pointer]:
+            - /url: /shop
+        - link "New suit best cotton quality with printed New suit best cotton quality with printed LAST CHANCE PKR 1,900" [ref=e180] [cursor=pointer]:
+          - /url: /shop/new-suit
+          - generic [ref=e181]:
+            - img "New suit best cotton quality with printed" [ref=e182]
+            - img [ref=e184]
+          - heading "New suit best cotton quality with printed" [level=3] [ref=e186]
+          - generic [ref=e187]: LAST CHANCE
+          - generic [ref=e189]: PKR 1,900
+  - contentinfo [ref=e190]:
+    - generic [ref=e191]:
+      - generic [ref=e192]:
+        - paragraph [ref=e193]: ZADII'S
+        - paragraph [ref=e194]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e195]:
+        - paragraph [ref=e196]: Quick Links
+        - list [ref=e197]:
+          - listitem [ref=e198]:
+            - link "Shop" [ref=e199] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e200]:
+            - link "Cart" [ref=e201] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e202]:
+            - link "Sale" [ref=e203] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e204]:
+        - paragraph [ref=e205]: Policies
+        - list [ref=e206]:
+          - listitem [ref=e207]:
+            - link "Returns & Exchanges" [ref=e208] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e209]:
+            - link "Cancel an Order" [ref=e210] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e211]:
+            - link "Shipping Info" [ref=e212] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e213]:
+            - link "Privacy Policy" [ref=e214] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e215]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e216] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e217]
+  - alert [ref=e219]

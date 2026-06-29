@@ -1,0 +1,161 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - heading "ZADIIS Admin" [level=2] [ref=e5]
+      - button [ref=e7]:
+        - img [ref=e8]
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Orders" [level=1] [ref=e11]
+        - generic [ref=e12]:
+          - button "Active (9)" [ref=e21]
+          - button "Pending Shipment (15)" [ref=e22]
+          - button "Completed (4)" [ref=e23]
+          - button "Returns (1)" [ref=e24]
+          - button "Cancellations (1)" [ref=e25]
+          - button "Archived (1)" [ref=e26]
+        - generic [ref=e27]:
+          - generic [ref=e28]:
+            - generic [ref=e29] [cursor=pointer]:
+              - generic [ref=e30]:
+                - paragraph [ref=e31]:
+                  - generic [ref=e32]: ZD-1031
+                  - text: — Smcow
+                - paragraph [ref=e33]: 03454532272 · Karachi · 6/27/2026
+              - generic [ref=e34]:
+                - generic [ref=e35]: PKR 2,100
+                - generic [ref=e36]: new
+                - generic [ref=e37]: pending
+                - button "Cancel order" [ref=e38]:
+                  - img [ref=e39]
+            - generic [ref=e163]:
+              - paragraph [ref=e164]: "Items:"
+              - paragraph [ref=e165]: New suit best cotton quality with printed (ZD-3559) × 1 (L, ) — PKR 1,900
+              - generic [ref=e166]:
+                - paragraph [ref=e167]:
+                  - text: "Subtotal: PKR 1,900 · Delivery: PKR 200 ·"
+                  - strong [ref=e168]: "Total: PKR 2,100"
+                - paragraph [ref=e169]: "taj medical · Payment: cod"
+              - generic [ref=e183]:
+                - paragraph [ref=e184]: Edit Contact Details
+                - generic [ref=e185]:
+                  - text: Phone
+                  - textbox "03001234567" [ref=e186]: "03454532272"
+                - generic [ref=e187]:
+                  - text: Email
+                  - textbox "customer@email.com" [ref=e188]: n82ndws2@gmail.com
+                - generic [ref=e189]:
+                  - text: Address
+                  - textbox [ref=e190]: taj medical
+                - generic [ref=e191]:
+                  - button "Save" [ref=e192]:
+                    - img [ref=e193]
+                    - text: Save
+                  - button "Cancel" [ref=e195]:
+                    - img [ref=e196]
+                    - text: Cancel
+              - generic [ref=e175]:
+                - paragraph [ref=e176]: "Update Status:"
+                - generic [ref=e177]:
+                  - button "new" [ref=e178]
+                  - button "processing" [ref=e179]
+                  - button "shipped" [ref=e180]
+                  - button "delivered" [ref=e181]
+                  - button "returned" [ref=e182]
+          - generic [ref=e44] [cursor=pointer]:
+            - generic [ref=e45]:
+              - paragraph [ref=e46]:
+                - generic [ref=e47]: ZD-1030
+                - text: — Syed
+              - paragraph [ref=e48]: 03454532272 · Karachi · 6/27/2026
+            - generic [ref=e49]:
+              - generic [ref=e50]: PKR 6,190
+              - generic [ref=e51]: new
+              - generic [ref=e52]: pending
+              - button "Cancel order" [ref=e53]:
+                - img [ref=e54]
+          - generic [ref=e59] [cursor=pointer]:
+            - generic [ref=e60]:
+              - paragraph [ref=e61]:
+                - generic [ref=e62]: ZD-1029
+                - text: — Syeda doll Syeda d
+              - paragraph [ref=e63]: 03454532272 · Karachi · 6/27/2026
+            - generic [ref=e64]:
+              - generic [ref=e65]: PKR 8,189
+              - generic [ref=e66]: new
+              - generic [ref=e67]: pending
+              - button "Cancel order" [ref=e68]:
+                - img [ref=e69]
+          - generic [ref=e74] [cursor=pointer]:
+            - generic [ref=e75]:
+              - paragraph [ref=e76]:
+                - generic [ref=e77]: ZD-1028
+                - text: — jjjj
+              - paragraph [ref=e78]: 345453227 · Karachi · 6/27/2026
+            - generic [ref=e79]:
+              - generic [ref=e80]: PKR 2,999
+              - generic [ref=e81]: new
+              - generic [ref=e82]: pending
+              - button "Cancel order" [ref=e83]:
+                - img [ref=e84]
+          - generic [ref=e89] [cursor=pointer]:
+            - generic [ref=e90]:
+              - paragraph [ref=e91]:
+                - generic [ref=e92]: ZD-1027
+                - text: — Syeda doll Syeda doll
+              - paragraph [ref=e93]: 345453227 · Karachi · 6/27/2026
+            - generic [ref=e94]:
+              - generic [ref=e95]: PKR 960
+              - generic [ref=e96]: new
+              - generic [ref=e97]: pending
+              - button "Cancel order" [ref=e98]:
+                - img [ref=e99]
+          - generic [ref=e104] [cursor=pointer]:
+            - generic [ref=e105]:
+              - paragraph [ref=e106]:
+                - generic [ref=e107]: ZD-1026
+                - text: — Maya Ali
+              - paragraph [ref=e108]: 345453227 · Karachi · 6/26/2026
+            - generic [ref=e109]:
+              - generic [ref=e110]: PKR 4,792
+              - generic [ref=e111]: new
+              - generic [ref=e112]: pending
+              - button "Cancel order" [ref=e113]:
+                - img [ref=e114]
+          - generic [ref=e119] [cursor=pointer]:
+            - generic [ref=e120]:
+              - paragraph [ref=e121]:
+                - generic [ref=e122]: ZD-1025
+                - text: — Gul
+              - paragraph [ref=e123]: 3457645322 · Karachi · 6/25/2026
+            - generic [ref=e124]:
+              - generic [ref=e125]: PKR 11,400
+              - generic [ref=e126]: new
+              - generic [ref=e127]: pending
+              - button "Cancel order" [ref=e128]:
+                - img [ref=e129]
+          - generic [ref=e134] [cursor=pointer]:
+            - generic [ref=e135]:
+              - paragraph [ref=e136]:
+                - generic [ref=e137]: ZD-1003
+                - text: — Aiman
+              - paragraph [ref=e138]: 0333 7202028 · Karachi · 6/18/2026
+            - generic [ref=e139]:
+              - generic [ref=e140]: PKR 6,198
+              - generic [ref=e141]: new
+              - generic [ref=e142]: pending
+              - button "Cancel order" [ref=e143]:
+                - img [ref=e144]
+          - generic [ref=e149] [cursor=pointer]:
+            - generic [ref=e150]:
+              - paragraph [ref=e151]:
+                - generic [ref=e152]: ZD-1002
+                - text: — faiza
+              - paragraph [ref=e153]: 345453227 · Karachi · 6/18/2026
+            - generic [ref=e154]:
+              - generic [ref=e155]: PKR 6,198
+              - generic [ref=e156]: new
+              - generic [ref=e157]: pending
+              - button "Cancel order" [ref=e158]:
+                - img [ref=e159]
+  - alert [ref=e20]

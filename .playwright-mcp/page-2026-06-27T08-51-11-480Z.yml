@@ -1,0 +1,131 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - heading "Women's Collection" [level=1] [ref=e13]
+      - generic [ref=e14]:
+        - img
+        - searchbox "Search products…" [ref=e15]
+      - generic [ref=e16]:
+        - complementary [ref=e17]:
+          - generic [ref=e18]:
+            - generic [ref=e19]:
+              - heading "Filters" [level=3] [ref=e20]
+              - button "Clear all" [ref=e21]
+            - generic [ref=e22]:
+              - heading "Category" [level=3] [ref=e23]
+              - generic [ref=e24]:
+                - button "Summer" [ref=e25]
+                - button "Winter" [ref=e26]
+                - button "Formal" [ref=e27]
+                - button "Casual" [ref=e28]
+                - button "Eid" [ref=e29]
+                - button "Sale" [ref=e30]
+            - generic [ref=e31]:
+              - heading "Type" [level=3] [ref=e32]
+              - generic [ref=e33]:
+                - button "Stitched" [ref=e34]
+                - button "Unstitched" [ref=e35]
+            - generic [ref=e36]:
+              - heading "Size" [level=3] [ref=e37]
+              - generic [ref=e38]:
+                - button "XS" [ref=e39]
+                - button "S" [ref=e40]
+                - button "M" [ref=e41]
+                - button "L" [ref=e42]
+                - button "XL" [ref=e43]
+                - button "XXL" [ref=e44]
+            - generic [ref=e45]:
+              - heading "Price" [level=3] [ref=e46]
+              - generic [ref=e47]:
+                - button "Under PKR 2,000" [ref=e48]
+                - button "PKR 2,000 – 5,000" [ref=e49]
+                - button "PKR 5,000 – 10,000" [ref=e50]
+                - button "Over PKR 10,000" [ref=e51]
+        - generic [ref=e53]:
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed LAST CHANCE PKR 1,900" [ref=e54] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - generic [ref=e55]:
+              - img "New suit best cotton quality with printed" [ref=e56]
+              - img [ref=e58]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e60]
+            - generic [ref=e61]: LAST CHANCE
+            - generic [ref=e63]: PKR 1,900
+          - link "Suit for women Suit for women BESTSELLER PKR 1,500" [ref=e64] [cursor=pointer]:
+            - /url: /shop/suit-for-women
+            - generic [ref=e65]:
+              - img "Suit for women" [ref=e66]
+              - img [ref=e68]
+            - heading "Suit for women" [level=3] [ref=e70]
+            - generic [ref=e71]: BESTSELLER
+            - generic [ref=e73]: PKR 1,500
+          - link "Elegant dress Elegant dress BESTSELLER PKR 5,990" [ref=e74] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - generic [ref=e75]:
+              - img "Elegant dress" [ref=e76]
+              - img [ref=e78]
+            - heading "Elegant dress" [level=3] [ref=e80]
+            - generic [ref=e81]: BESTSELLER
+            - generic [ref=e83]: PKR 5,990
+          - link "Kmeez Dupatta Kmeez Dupatta BESTSELLER PKR 4,999" [ref=e84] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - generic [ref=e85]:
+              - img "Kmeez Dupatta" [ref=e86]
+              - img [ref=e88]
+            - heading "Kmeez Dupatta" [level=3] [ref=e90]
+            - generic [ref=e91]: BESTSELLER
+            - generic [ref=e93]: PKR 4,999
+          - link "3 Pcs Suit 3 Pcs Suit BESTSELLER PKR 2,999" [ref=e94] [cursor=pointer]:
+            - /url: /shop/3-pcs-suit
+            - generic [ref=e95]:
+              - img "3 Pcs Suit" [ref=e96]
+              - img [ref=e98]
+            - heading "3 Pcs Suit" [level=3] [ref=e100]
+            - generic [ref=e101]: BESTSELLER
+            - generic [ref=e103]: PKR 2,999
+  - contentinfo [ref=e104]:
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - paragraph [ref=e107]: ZADIIS
+        - paragraph [ref=e108]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e109]:
+        - paragraph [ref=e110]: Quick Links
+        - list [ref=e111]:
+          - listitem [ref=e112]:
+            - link "Shop" [ref=e113] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e114]:
+            - link "Cart" [ref=e115] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e116]:
+            - link "Sale" [ref=e117] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e118]:
+        - paragraph [ref=e119]: Policies
+        - list [ref=e120]:
+          - listitem [ref=e121]:
+            - link "Returns & Exchanges" [ref=e122] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e123]:
+            - link "Cancel an Order" [ref=e124] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e125]:
+            - link "Shipping Info" [ref=e126] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e127]:
+            - link "Privacy Policy" [ref=e128] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e129]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e130] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e131]
+  - alert [ref=e133]

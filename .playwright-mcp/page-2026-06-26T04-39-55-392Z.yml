@@ -1,0 +1,152 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [active] [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [ref=e59]
+            - button "Cancellations" [ref=e60]
+            - button "Returns" [ref=e61]
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - heading "Revenue by Period" [level=3] [ref=e213]
+              - paragraph [ref=e214]: Daily breakdown
+              - application [ref=e217]:
+                - generic [ref=e260]:
+                  - generic [ref=e261]:
+                    - generic [ref=e263]: Mon, Jun 15
+                    - generic [ref=e265]: Thu, Jun 18
+                    - generic [ref=e267]: Fri, Jun 19
+                    - generic [ref=e269]: Sat, Jun 20
+                    - generic [ref=e271]: Sun, Jun 21
+                    - generic [ref=e273]: Mon, Jun 22
+                    - generic [ref=e275]: Tue, Jun 23
+                    - generic [ref=e277]: Wed, Jun 24
+                    - generic [ref=e279]: Thu, Jun 25
+                  - generic [ref=e280]:
+                    - generic [ref=e282]: "0"
+                    - generic [ref=e284]: 15k
+                    - generic [ref=e286]: 30k
+                    - generic [ref=e288]: 45k
+                    - generic [ref=e290]: 60k
+            - generic [ref=e291]:
+              - heading "Period Breakdown" [level=3] [ref=e293]
+              - table [ref=e295]:
+                - rowgroup [ref=e296]:
+                  - row "Period Orders Revenue vs Prev" [ref=e297]:
+                    - columnheader "Period" [ref=e298]
+                    - columnheader "Orders" [ref=e299]
+                    - columnheader "Revenue" [ref=e300]
+                    - columnheader "vs Prev" [ref=e301]
+                - rowgroup [ref=e302]:
+                  - row "Thu, Jun 25 1 PKR 11,400 ↑ 84%" [ref=e303]:
+                    - cell "Thu, Jun 25" [ref=e304]
+                    - cell "1" [ref=e305]
+                    - cell "PKR 11,400" [ref=e306]
+                    - cell "↑ 84%" [ref=e307]:
+                      - generic [ref=e308]: ↑ 84%
+                  - row "Wed, Jun 24 1 PKR 6,190 ↓ 85%" [ref=e309]:
+                    - cell "Wed, Jun 24" [ref=e310]
+                    - cell "1" [ref=e311]
+                    - cell "PKR 6,190" [ref=e312]
+                    - cell "↓ 85%" [ref=e313]:
+                      - generic [ref=e314]: ↓ 85%
+                  - row "Tue, Jun 23 11 PKR 41,258 ↑ 817%" [ref=e315]:
+                    - cell "Tue, Jun 23" [ref=e316]
+                    - cell "11" [ref=e317]
+                    - cell "PKR 41,258" [ref=e318]
+                    - cell "↑ 817%" [ref=e319]:
+                      - generic [ref=e320]: ↑ 817%
+                  - row "Mon, Jun 22 1 PKR 4,500 ↓ 15%" [ref=e321]:
+                    - cell "Mon, Jun 22" [ref=e322]
+                    - cell "1" [ref=e323]
+                    - cell "PKR 4,500" [ref=e324]
+                    - cell "↓ 15%" [ref=e325]:
+                      - generic [ref=e326]: ↓ 15%
+                  - row "Sun, Jun 21 2 PKR 5,299 ↓ 17%" [ref=e327]:
+                    - cell "Sun, Jun 21" [ref=e328]
+                    - cell "2" [ref=e329]
+                    - cell "PKR 5,299" [ref=e330]
+                    - cell "↓ 17%" [ref=e331]:
+                      - generic [ref=e332]: ↓ 17%
+                  - row "Sat, Jun 20 1 PKR 6,399 ↓ 44%" [ref=e333]:
+                    - cell "Sat, Jun 20" [ref=e334]
+                    - cell "1" [ref=e335]
+                    - cell "PKR 6,399" [ref=e336]
+                    - cell "↓ 44%" [ref=e337]:
+                      - generic [ref=e338]: ↓ 44%
+                  - row "Fri, Jun 19 2 PKR 11,389 ↓ 39%" [ref=e339]:
+                    - cell "Fri, Jun 19" [ref=e340]
+                    - cell "2" [ref=e341]
+                    - cell "PKR 11,389" [ref=e342]
+                    - cell "↓ 39%" [ref=e343]:
+                      - generic [ref=e344]: ↓ 39%
+                  - row "Thu, Jun 18 3 PKR 18,586 ↑ 520%" [ref=e345]:
+                    - cell "Thu, Jun 18" [ref=e346]
+                    - cell "3" [ref=e347]
+                    - cell "PKR 18,586" [ref=e348]
+                    - cell "↑ 520%" [ref=e349]:
+                      - generic [ref=e350]: ↑ 520%
+                  - row "Mon, Jun 15 1 PKR 2,999 —" [ref=e351]:
+                    - cell "Mon, Jun 15" [ref=e352]
+                    - cell "1" [ref=e353]
+                    - cell "PKR 2,999" [ref=e354]
+                    - cell "—" [ref=e355]
+                - rowgroup [ref=e356]:
+                  - row "Total 23 PKR 108,020" [ref=e357]:
+                    - cell "Total" [ref=e358]
+                    - cell "23" [ref=e359]
+                    - cell "PKR 108,020" [ref=e360]
+                    - cell [ref=e361]
+  - alert [ref=e209]
+  - generic [ref=e210]: "0"

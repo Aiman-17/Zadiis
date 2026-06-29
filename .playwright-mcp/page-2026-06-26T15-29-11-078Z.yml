@@ -1,0 +1,111 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]:
+    - generic [ref=e15]:
+      - generic [ref=e16]:
+        - paragraph [ref=e17]: Exclusive Sale Event
+        - heading "Eid SALE" [level=1] [ref=e18]
+        - paragraph [ref=e19]: Up to 20% Off
+        - paragraph [ref=e20]: ✓ Free Delivery on All Sale Orders
+        - generic [ref=e22]:
+          - generic [ref=e23]: Ends in
+          - generic [ref=e24]:
+            - generic [ref=e25]:
+              - generic [ref=e26]: "17"
+              - generic [ref=e27]: h
+            - generic [ref=e28]:
+              - generic [ref=e29]: "36"
+              - generic [ref=e30]: m
+            - generic [ref=e31]:
+              - generic [ref=e32]: "49"
+              - generic [ref=e33]: s
+        - link "Shop the Sale ↓" [ref=e34] [cursor=pointer]:
+          - /url: "#sale-products"
+      - paragraph [ref=e36]: ⚡ Sale stock will not be restocked — Grab yours before it's gone
+      - generic [ref=e37]:
+        - generic [ref=e38]:
+          - heading "Best Sellers" [level=2] [ref=e39]
+          - generic [ref=e40]: Going Fast
+        - paragraph [ref=e41]: Our most-loved styles, now at sale prices
+        - link "Elegant dress -20% Elegant dress PKR 4,792 PKR 5,990" [ref=e43] [cursor=pointer]:
+          - /url: /shop/elegant-dress
+          - generic [ref=e44]:
+            - img "Elegant dress" [ref=e45]
+            - generic [ref=e47]: "-20%"
+          - heading "Elegant dress" [level=3] [ref=e48]
+          - generic [ref=e49]:
+            - generic [ref=e50]: PKR 4,792
+            - generic [ref=e51]: PKR 5,990
+      - generic [ref=e52]:
+        - heading "New Sale Drops" [level=2] [ref=e53]
+        - paragraph [ref=e54]: Freshly added to the sale
+        - generic [ref=e55]:
+          - link "Kmeez Dupatta -20% Kmeez Dupatta PKR 3,999 PKR 4,999" [ref=e56] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - generic [ref=e57]:
+              - img "Kmeez Dupatta" [ref=e58]
+              - generic [ref=e60]: "-20%"
+            - heading "Kmeez Dupatta" [level=3] [ref=e61]
+            - generic [ref=e62]:
+              - generic [ref=e63]: PKR 3,999
+              - generic [ref=e64]: PKR 4,999
+          - link "Girls Suit -20% Girls Suit JUST DROPPED PKR 960 PKR 1,200" [ref=e65] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - generic [ref=e66]:
+              - img "Girls Suit" [ref=e67]
+              - generic [ref=e69]: "-20%"
+            - heading "Girls Suit" [level=3] [ref=e70]
+            - generic [ref=e71]: JUST DROPPED
+            - generic [ref=e72]:
+              - generic [ref=e73]: PKR 960
+              - generic [ref=e74]: PKR 1,200
+  - contentinfo [ref=e75]:
+    - generic [ref=e76]:
+      - generic [ref=e77]:
+        - paragraph [ref=e78]: ZADIIS
+        - paragraph [ref=e79]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e80]:
+        - paragraph [ref=e81]: Quick Links
+        - list [ref=e82]:
+          - listitem [ref=e83]:
+            - link "Shop" [ref=e84] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e85]:
+            - link "Cart" [ref=e86] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e87]:
+            - link "Sale" [ref=e88] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e89]:
+        - paragraph [ref=e90]: Policies
+        - list [ref=e91]:
+          - listitem [ref=e92]:
+            - link "Returns & Exchanges" [ref=e93] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e94]:
+            - link "Cancel an Order" [ref=e95] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e96]:
+            - link "Shipping Info" [ref=e97] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e98]:
+            - link "Privacy Policy" [ref=e99] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e100]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e101] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e102]
+  - alert [ref=e104]

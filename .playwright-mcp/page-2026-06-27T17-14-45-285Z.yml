@@ -1,0 +1,116 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - generic [ref=e5]:
+        - link [ref=e6] [cursor=pointer]:
+          - /url: /cart
+          - img [ref=e7]
+        - button [ref=e10]:
+          - img
+  - main [ref=e11]:
+    - generic [ref=e12]:
+      - link "← Back to Shop" [ref=e13] [cursor=pointer]:
+        - /url: /shop
+      - generic [ref=e14]:
+        - generic [ref=e16]:
+          - img "CO-ORDS 2pcs set" [ref=e17]
+          - img [ref=e20]
+        - generic [ref=e23]:
+          - generic [ref=e24]:
+            - heading "CO-ORDS 2pcs set" [level=1] [ref=e25]
+            - paragraph [ref=e27]: PKR 7,989
+          - paragraph [ref=e28]: Only 10 left in stock
+          - generic [ref=e29]:
+            - generic [ref=e30]:
+              - paragraph [ref=e31]: Color
+              - generic [ref=e32]:
+                - button "Red" [ref=e33] [cursor=pointer]
+                - button "Pink" [ref=e34] [cursor=pointer]
+            - button "Add to Cart" [ref=e35]
+      - generic [ref=e36]:
+        - heading "Customer Reviews" [level=2] [ref=e37]
+        - generic [ref=e38]:
+          - paragraph [ref=e39]: No reviews yet. Be the first!
+          - generic [ref=e40]:
+            - paragraph [ref=e41]: Write a Review
+            - generic [ref=e42]:
+              - button [ref=e43]:
+                - img [ref=e44]
+              - button [ref=e46]:
+                - img [ref=e47]
+              - button [ref=e49]:
+                - img [ref=e50]
+              - button [ref=e52]:
+                - img [ref=e53]
+              - button [ref=e55]:
+                - img [ref=e56]
+            - textbox "Your name" [ref=e58]
+            - textbox "Share your experience (optional)" [ref=e59]
+            - button "Submit Review" [ref=e60]
+            - paragraph [ref=e61]: 🔒 Your privacy matters to us. We only display your name and review — your personal information is never shared.
+      - generic [ref=e62]:
+        - heading "You May Also Like" [level=2] [ref=e63]
+        - generic [ref=e64]:
+          - link "New suit best cotton quality with printed New suit best cotton quality with printed Bestseller PKR 1,900" [ref=e65] [cursor=pointer]:
+            - /url: /shop/new-suit
+            - img "New suit best cotton quality with printed" [ref=e67]
+            - heading "New suit best cotton quality with printed" [level=3] [ref=e68]
+            - generic [ref=e69]:
+              - img [ref=e71]
+              - img [ref=e74]
+              - generic [ref=e77]: Bestseller
+            - generic [ref=e79]: PKR 1,900
+          - link "Elegant dress Elegant dress Bestseller PKR 5,990" [ref=e80] [cursor=pointer]:
+            - /url: /shop/elegant-dress
+            - img "Elegant dress" [ref=e82]
+            - heading "Elegant dress" [level=3] [ref=e83]
+            - generic [ref=e85]: Bestseller
+            - generic [ref=e87]: PKR 5,990
+          - link "Girls Suit Girls Suit Bestseller PKR 1,200" [ref=e88] [cursor=pointer]:
+            - /url: /shop/girls-suit
+            - img "Girls Suit" [ref=e90]
+            - heading "Girls Suit" [level=3] [ref=e91]
+            - generic [ref=e93]: Bestseller
+            - generic [ref=e95]: PKR 1,200
+          - link "Kmeez Dupatta Kmeez Dupatta Bestseller PKR 4,999" [ref=e96] [cursor=pointer]:
+            - /url: /shop/kmeez-dupatta
+            - img "Kmeez Dupatta" [ref=e98]
+            - heading "Kmeez Dupatta" [level=3] [ref=e99]
+            - generic [ref=e101]: Bestseller
+            - generic [ref=e103]: PKR 4,999
+  - contentinfo [ref=e104]:
+    - generic [ref=e105]:
+      - generic [ref=e106]:
+        - paragraph [ref=e107]: ZADII'S
+        - paragraph [ref=e108]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e109]:
+        - paragraph [ref=e110]: Quick Links
+        - list [ref=e111]:
+          - listitem [ref=e112]:
+            - link "Shop" [ref=e113] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e114]:
+            - link "Cart" [ref=e115] [cursor=pointer]:
+              - /url: /cart
+      - generic [ref=e116]:
+        - paragraph [ref=e117]: Policies
+        - list [ref=e118]:
+          - listitem [ref=e119]:
+            - link "Returns & Exchanges" [ref=e120] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e121]:
+            - link "Cancel an Order" [ref=e122] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e123]:
+            - link "Shipping Info" [ref=e124] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e125]:
+            - link "Privacy Policy" [ref=e126] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e127]: © 2026ZADII'S. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e128] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e129]
+  - alert [ref=e131]

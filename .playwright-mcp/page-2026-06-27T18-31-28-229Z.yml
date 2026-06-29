@@ -1,0 +1,18 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e3]:
+    - banner [ref=e4]:
+      - heading "ZADIIS Admin" [level=2] [ref=e5]
+      - button [ref=e7]:
+        - img [ref=e8]
+    - main [ref=e9]:
+      - generic [ref=e10]:
+        - heading "Orders" [level=1] [ref=e11]
+        - generic [ref=e12]:
+          - button "Active (0)" [ref=e13]
+          - button "Pending Shipment (0)" [ref=e14]
+          - button "Completed (0)" [ref=e15]
+          - button "Returns (0)" [ref=e16]
+          - button "Cancellations (0)" [ref=e17]
+          - button "Archived (0)" [ref=e18]
+        - paragraph [ref=e19]: No orders in this category.
+  - alert [ref=e20]

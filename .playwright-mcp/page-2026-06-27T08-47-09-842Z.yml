@@ -1,0 +1,53 @@
+- generic [active] [ref=e1]:
+  - banner [ref=e2]:
+    - generic [ref=e3]:
+      - link "ZADII'S" [ref=e4] [cursor=pointer]:
+        - /url: /
+      - navigation [ref=e5]:
+        - link "Shop" [ref=e6] [cursor=pointer]:
+          - /url: /shop
+        - link "About" [ref=e7] [cursor=pointer]:
+          - /url: /about
+        - link "Contact" [ref=e8] [cursor=pointer]:
+          - /url: /contact
+      - link [ref=e10] [cursor=pointer]:
+        - /url: /cart
+        - img [ref=e11]
+  - main [ref=e14]
+  - contentinfo [ref=e47]:
+    - generic [ref=e48]:
+      - generic [ref=e49]:
+        - paragraph [ref=e50]: ZADIIS
+        - paragraph [ref=e51]: Dressed in Confidence. Women's fashion crafted for the modern Pakistani woman.
+      - generic [ref=e52]:
+        - paragraph [ref=e53]: Quick Links
+        - list [ref=e54]:
+          - listitem [ref=e55]:
+            - link "Shop" [ref=e56] [cursor=pointer]:
+              - /url: /shop
+          - listitem [ref=e57]:
+            - link "Cart" [ref=e58] [cursor=pointer]:
+              - /url: /cart
+          - listitem [ref=e59]:
+            - link "Sale" [ref=e60] [cursor=pointer]:
+              - /url: /sale
+      - generic [ref=e61]:
+        - paragraph [ref=e62]: Policies
+        - list [ref=e63]:
+          - listitem [ref=e64]:
+            - link "Returns & Exchanges" [ref=e65] [cursor=pointer]:
+              - /url: /returns
+          - listitem [ref=e66]:
+            - link "Cancel an Order" [ref=e67] [cursor=pointer]:
+              - /url: /cancel-order
+          - listitem [ref=e68]:
+            - link "Shipping Info" [ref=e69] [cursor=pointer]:
+              - /url: /shipping
+          - listitem [ref=e70]:
+            - link "Privacy Policy" [ref=e71] [cursor=pointer]:
+              - /url: /privacy
+    - generic [ref=e72]: © 2026 ZADIIS. All rights reserved.
+  - link "Chat on WhatsApp" [ref=e73] [cursor=pointer]:
+    - /url: https://wa.me/+923703465516?text=Hi!%20I%20have%20a%20question%20about%20my%20order.
+    - img [ref=e74]
+  - alert [ref=e76]

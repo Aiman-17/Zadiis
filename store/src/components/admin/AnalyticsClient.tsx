@@ -188,7 +188,7 @@ export default function AnalyticsClient({
   const returnedRev    = returnedOrders.reduce((s, o) => s + o.total, 0)
   const netRevenue     = grossRevenue - cancelledRev - returnedRev
   const discountsGiven = orders
-    .filter(o => o.order_status !== 'cancelled')
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .reduce((s, o) =>
       s + (o.items as OrderItem[]).reduce((si, i) =>
         si + ((i.original_price ?? i.price) - i.price) * i.quantity, 0

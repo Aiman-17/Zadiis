@@ -1,0 +1,103 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [active] [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Sales Trend" [ref=e57]
+            - button "Products" [ref=e58]
+            - button "Inventory" [ref=e59]
+            - button "Cancellations" [ref=e60]
+            - button "Returns" [ref=e61]
+          - generic [ref=e211]:
+            - generic [ref=e212]:
+              - heading "Revenue by Period" [level=3] [ref=e213]
+              - paragraph [ref=e214]: Weekly breakdown
+              - application [ref=e217]:
+                - generic [ref=e260]:
+                  - generic [ref=e261]:
+                    - generic [ref=e411]: Week of Jun 14
+                    - generic [ref=e413]: Week of Jun 21
+                  - generic [ref=e280]:
+                    - generic [ref=e282]: "0"
+                    - generic [ref=e415]: 20k
+                    - generic [ref=e417]: 40k
+                    - generic [ref=e419]: 60k
+                    - generic [ref=e421]: 80k
+            - generic [ref=e291]:
+              - heading "Period Breakdown" [level=3] [ref=e293]
+              - table [ref=e295]:
+                - rowgroup [ref=e296]:
+                  - row "Period Orders Revenue vs Prev" [ref=e297]:
+                    - columnheader "Period" [ref=e298]
+                    - columnheader "Orders" [ref=e299]
+                    - columnheader "Revenue" [ref=e300]
+                    - columnheader "vs Prev" [ref=e301]
+                - rowgroup [ref=e302]:
+                  - row "Week of Jun 21 16 PKR 68,647 ↑ 74%" [ref=e422]:
+                    - cell "Week of Jun 21" [ref=e423]
+                    - cell "16" [ref=e424]
+                    - cell "PKR 68,647" [ref=e425]
+                    - cell "↑ 74%" [ref=e426]:
+                      - generic [ref=e308]: ↑ 74%
+                  - row "Week of Jun 14 7 PKR 39,373 —" [ref=e427]:
+                    - cell "Week of Jun 14" [ref=e428]
+                    - cell "7" [ref=e429]
+                    - cell "PKR 39,373" [ref=e430]
+                    - cell "—" [ref=e431]
+                - rowgroup [ref=e356]:
+                  - row "Total 23 PKR 108,020" [ref=e432]:
+                    - cell "Total" [ref=e358]
+                    - cell "23" [ref=e433]
+                    - cell "PKR 108,020" [ref=e434]
+                    - cell [ref=e361]
+  - alert [ref=e209]: Analytics
+  - generic [ref=e210]: 20k

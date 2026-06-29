@@ -1,0 +1,125 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - heading "Analytics" [level=1] [ref=e48]
+        - generic [ref=e49]:
+          - generic [ref=e50]:
+            - button "7 Days" [ref=e51]
+            - button "30 Days" [ref=e52]
+            - button "90 Days" [ref=e53]
+            - button "12 Months" [ref=e54]
+          - generic [ref=e55]:
+            - button "Revenue" [ref=e56]
+            - button "Products" [active] [ref=e57]
+            - button "Inventory" [ref=e58]
+            - button "Cancellations" [ref=e59]
+            - button "Returns" [ref=e60]
+          - generic [ref=e173]:
+            - generic [ref=e174]:
+              - heading "Top Selling Products" [level=3] [ref=e175]
+              - generic [ref=e177]:
+                - generic:
+                  - status:
+                    - paragraph: Girls Suit
+                    - list:
+                      - listitem: "Units Sold : 3 units"
+                - application [ref=e178]:
+                  - generic [ref=e209]:
+                    - generic [ref=e210]:
+                      - generic [ref=e212]: "0"
+                      - generic [ref=e214]: "4"
+                      - generic [ref=e216]: "8"
+                      - generic [ref=e218]: "12"
+                      - generic [ref=e220]: "16"
+                    - generic [ref=e221]:
+                      - generic [ref=e223]: Elegant dress
+                      - generic [ref=e225]: New suit
+                      - generic [ref=e227]: 3 Pcs Suit
+                      - generic [ref=e229]: KmeezDupatta
+                      - generic [ref=e231]: Girls Suit
+                      - generic [ref=e233]: Suit forwomen
+            - generic [ref=e234]:
+              - generic [ref=e235]:
+                - heading "Top Colors" [level=3] [ref=e236]
+                - application [ref=e239]:
+                  - generic [ref=e263]:
+                    - generic [ref=e264]:
+                      - generic [ref=e266]: "0"
+                      - generic [ref=e268]: "2"
+                      - generic [ref=e270]: "4"
+                      - generic [ref=e272]: "6"
+                      - generic [ref=e274]: "8"
+                    - generic [ref=e275]:
+                      - generic [ref=e277]: White
+                      - generic [ref=e279]: Black
+                      - generic [ref=e281]: pink
+                      - generic [ref=e283]: black
+              - generic [ref=e284]:
+                - heading "Top Sizes" [level=3] [ref=e285]
+                - application [ref=e288]:
+                  - generic [ref=e309]:
+                    - generic [ref=e310]:
+                      - generic [ref=e312]: "0"
+                      - generic [ref=e314]: "6"
+                      - generic [ref=e316]: "12"
+                      - generic [ref=e318]: "18"
+                      - generic [ref=e320]: "24"
+                    - generic [ref=e321]:
+                      - generic [ref=e323]: M
+                      - generic [ref=e325]: L
+                      - generic [ref=e327]: S
+              - generic [ref=e328]:
+                - heading "Top Cities" [level=3] [ref=e329]
+                - application [ref=e332]:
+                  - generic [ref=e345]:
+                    - generic [ref=e346]:
+                      - generic [ref=e348]: "0"
+                      - generic [ref=e350]: "7"
+                      - generic [ref=e352]: "14"
+                      - generic [ref=e354]: "21"
+                      - generic [ref=e356]: "28"
+                    - generic [ref=e359]: Karachi
+  - alert [ref=e156]
+  - generic [ref=e157]: Karachi

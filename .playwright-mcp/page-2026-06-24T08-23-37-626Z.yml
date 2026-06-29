@@ -1,0 +1,78 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e126] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e127]
+        - text: Dashboard
+      - link "Products" [ref=e132] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e133]
+        - text: Products
+      - link "Orders" [ref=e137] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e138]
+        - text: Orders
+      - link "Payments" [ref=e141] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e142]
+        - text: Payments
+      - link "Invoices" [ref=e144] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e145]
+        - text: Invoices
+      - link "Sales" [ref=e148] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e149]
+        - text: Sales
+      - link "Settings" [ref=e152] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e153]
+        - text: Settings
+      - button "Logout" [ref=e157]:
+        - img [ref=e158]
+        - text: Logout
+    - main [ref=e41]:
+      - generic [ref=e161]:
+        - heading "Edit Sale" [level=1] [ref=e162]
+        - generic [ref=e163]:
+          - generic [ref=e164]:
+            - generic [ref=e165]: Sale Title *
+            - textbox "Sale Title *" [ref=e166]: Test Sale
+          - generic [ref=e167]:
+            - generic [ref=e168]: Description
+            - textbox "Description" [ref=e169]
+          - generic [ref=e170]:
+            - generic [ref=e171]: Delivery Charge Override (PKR, optional)
+            - spinbutton "Delivery Charge Override (PKR, optional)" [ref=e172]
+          - generic [ref=e173]:
+            - generic [ref=e174]:
+              - generic [ref=e175]: Starts At
+              - textbox "Starts At" [ref=e176]
+            - generic [ref=e177]:
+              - generic [ref=e178]: Ends At
+              - textbox "Ends At" [ref=e179]
+          - generic [ref=e180]:
+            - checkbox "Active" [ref=e181]
+            - generic [ref=e182]: Active
+          - generic [ref=e183]:
+            - button "Save Changes" [ref=e184]
+            - button "Delete Sale" [ref=e185]
+        - generic [ref=e186]:
+          - heading "Products in this Sale" [level=2] [ref=e187]
+          - generic [ref=e188]:
+            - combobox [active] [ref=e189]:
+              - option "Select product to add..." [selected]
+              - option "3 Pcs Suit (PKR 2999)"
+              - option "Elegant dress (PKR 5990)"
+              - option "Girls Suit (PKR 1200)"
+              - option "Kmeez Dupatta (PKR 4999)"
+              - option "New suit (PKR 1900)"
+              - option "Suit for women (PKR 1500)"
+            - spinbutton [ref=e190]
+            - button "Add" [ref=e191]
+          - paragraph [ref=e193]: No products added yet.
+  - button "Open Next.js Dev Tools" [ref=e53] [cursor=pointer]:
+    - img [ref=e54]
+  - alert [ref=e57]

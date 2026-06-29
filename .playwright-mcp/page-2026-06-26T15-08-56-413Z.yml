@@ -1,0 +1,153 @@
+- generic [active] [ref=e1]:
+  - generic [ref=e2]:
+    - complementary [ref=e3]:
+      - heading "ZADIIS Admin" [level=2] [ref=e4]
+      - link "Dashboard" [ref=e5] [cursor=pointer]:
+        - /url: /admin
+        - img [ref=e6]
+        - text: Dashboard
+      - link "Products" [ref=e11] [cursor=pointer]:
+        - /url: /admin/products
+        - img [ref=e12]
+        - text: Products
+      - link "Orders" [ref=e16] [cursor=pointer]:
+        - /url: /admin/orders
+        - img [ref=e17]
+        - text: Orders
+      - link "Payments" [ref=e20] [cursor=pointer]:
+        - /url: /admin/payments
+        - img [ref=e21]
+        - text: Payments
+      - link "Invoices" [ref=e23] [cursor=pointer]:
+        - /url: /admin/invoices
+        - img [ref=e24]
+        - text: Invoices
+      - link "Sales" [ref=e27] [cursor=pointer]:
+        - /url: /admin/sales
+        - img [ref=e28]
+        - text: Sales
+      - link "Analytics" [ref=e31] [cursor=pointer]:
+        - /url: /admin/analytics
+        - img [ref=e32]
+        - text: Analytics
+      - link "COD" [ref=e33] [cursor=pointer]:
+        - /url: /admin/cod
+        - img [ref=e34]
+        - text: COD
+      - link "Settings" [ref=e36] [cursor=pointer]:
+        - /url: /admin/settings
+        - img [ref=e37]
+        - text: Settings
+      - button "Logout" [ref=e41]:
+        - img [ref=e42]
+        - text: Logout
+    - main [ref=e46]:
+      - generic [ref=e47]:
+        - generic [ref=e48]:
+          - heading "Products" [level=1] [ref=e49]
+          - link "Add Product" [ref=e50] [cursor=pointer]:
+            - /url: /admin/products/new
+            - img
+            - text: Add Product
+        - generic [ref=e51]:
+          - generic [ref=e52]:
+            - generic [ref=e53]:
+              - strong [ref=e54]: "1"
+              - text: Best Seller
+            - generic [ref=e55]:
+              - strong [ref=e56]: "1"
+              - text: Trending
+          - table [ref=e59]:
+            - rowgroup [ref=e60]:
+              - row "Name SKU Price Stock Days to Sellout Actions" [ref=e61]:
+                - columnheader "Name" [ref=e62]
+                - columnheader "SKU" [ref=e63]
+                - columnheader "Price" [ref=e64]
+                - columnheader "Stock" [ref=e65]
+                - columnheader "Days to Sellout" [ref=e66]
+                - columnheader "Actions" [ref=e67]
+            - rowgroup [ref=e68]:
+              - row "New suit ↑ Trending ZD-3559 PKR 1,900 2 12d Edit" [ref=e69]:
+                - cell "New suit ↑ Trending" [ref=e70]:
+                  - generic [ref=e72]: New suit
+                  - generic [ref=e74]: ↑ Trending
+                - cell "ZD-3559" [ref=e75]
+                - cell "PKR 1,900" [ref=e76]
+                - cell "2" [ref=e77]
+                - cell "12d" [ref=e78]:
+                  - generic [ref=e79]: 12d
+                - cell "Edit" [ref=e80]:
+                  - generic [ref=e81]:
+                    - link "Edit" [ref=e82] [cursor=pointer]:
+                      - /url: /admin/products/8c69067c-2442-47c2-a68f-4c2d6dc27d78/edit
+                    - button "Archive product" [ref=e83]:
+                      - img [ref=e84]
+              - row "Girls Suit ZD-3222 PKR 1,200 36 — Edit" [ref=e87]:
+                - cell "Girls Suit" [ref=e88]:
+                  - generic [ref=e90]: Girls Suit
+                - cell "ZD-3222" [ref=e91]
+                - cell "PKR 1,200" [ref=e92]
+                - cell "36" [ref=e93]
+                - cell "—" [ref=e94]
+                - cell "Edit" [ref=e95]:
+                  - generic [ref=e96]:
+                    - link "Edit" [ref=e97] [cursor=pointer]:
+                      - /url: /admin/products/340ac868-6703-4599-b94f-2f91a9c58472/edit
+                    - button "Archive product" [ref=e98]:
+                      - img [ref=e99]
+              - row "Suit for women ZD-345 PKR 1,500 27 — Edit" [ref=e102]:
+                - cell "Suit for women" [ref=e103]:
+                  - generic [ref=e105]: Suit for women
+                - cell "ZD-345" [ref=e106]
+                - cell "PKR 1,500" [ref=e107]
+                - cell "27" [ref=e108]
+                - cell "—" [ref=e109]
+                - cell "Edit" [ref=e110]:
+                  - generic [ref=e111]:
+                    - link "Edit" [ref=e112] [cursor=pointer]:
+                      - /url: /admin/products/a0e42971-6b8a-44ea-a6df-79fa0ce170ed/edit
+                    - button "Archive product" [ref=e113]:
+                      - img [ref=e114]
+              - row "Elegant dress ★ Best Seller ZD-002 PKR 5,990 29 99d Edit" [ref=e117]:
+                - cell "Elegant dress ★ Best Seller" [ref=e118]:
+                  - generic [ref=e120]: Elegant dress
+                  - generic [ref=e122]: ★ Best Seller
+                - cell "ZD-002" [ref=e123]
+                - cell "PKR 5,990" [ref=e124]
+                - cell "29" [ref=e125]
+                - cell "99d" [ref=e126]:
+                  - generic [ref=e127]: 99d
+                - cell "Edit" [ref=e128]:
+                  - generic [ref=e129]:
+                    - link "Edit" [ref=e130] [cursor=pointer]:
+                      - /url: /admin/products/6c7caf9b-ce1a-43a5-917c-267076a037c1/edit
+                    - button "Archive product" [ref=e131]:
+                      - img [ref=e132]
+              - row "Kmeez Dupatta ZD-001 PKR 4,999 12 — Edit" [ref=e135]:
+                - cell "Kmeez Dupatta" [ref=e136]:
+                  - generic [ref=e138]: Kmeez Dupatta
+                - cell "ZD-001" [ref=e139]
+                - cell "PKR 4,999" [ref=e140]
+                - cell "12" [ref=e141]
+                - cell "—" [ref=e142]
+                - cell "Edit" [ref=e143]:
+                  - generic [ref=e144]:
+                    - link "Edit" [ref=e145] [cursor=pointer]:
+                      - /url: /admin/products/92a5f640-7cb9-4b5a-92f7-eb382391728a/edit
+                    - button "Archive product" [ref=e146]:
+                      - img [ref=e147]
+              - row "3 Pcs Suit — PKR 2,999 20 220d Edit" [ref=e150]:
+                - cell "3 Pcs Suit" [ref=e151]:
+                  - generic [ref=e153]: 3 Pcs Suit
+                - cell "—" [ref=e154]
+                - cell "PKR 2,999" [ref=e155]
+                - cell "20" [ref=e156]
+                - cell "220d" [ref=e157]:
+                  - generic [ref=e158]: 220d
+                - cell "Edit" [ref=e159]:
+                  - generic [ref=e160]:
+                    - link "Edit" [ref=e161] [cursor=pointer]:
+                      - /url: /admin/products/324863f5-db80-4b39-9940-516c223f7f9f/edit
+                    - button "Archive product" [ref=e162]:
+                      - img [ref=e163]
+  - alert [ref=e166]
