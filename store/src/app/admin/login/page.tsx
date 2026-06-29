@@ -1,10 +1,10 @@
 'use client'
-import { useState } from 'react'
+import { useState, Suspense } from 'react'
 import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
-export default function AdminLogin() {
+function LoginForm() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
@@ -20,8 +20,8 @@ export default function AdminLogin() {
       body: JSON.stringify({ password }),
     })
     if (res.ok) {
-      // Full page reload so the browser sends the newly-set cookie
-      // on the next request — soft router.push() can miss httpOnly cookies
+      // Full page reload so the browser commits the Set-Cookie before
+      // the next request — soft router.push() can miss httpOnly cookies
       const from = searchParams.get('from') || '/admin'
       window.location.href = from
     } else {
@@ -54,5 +54,13 @@ export default function AdminLogin() {
         </form>
       </div>
     </div>
+  )
+}
+
+export default function AdminLogin() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   )
 }
