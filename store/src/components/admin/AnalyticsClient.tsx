@@ -219,6 +219,21 @@ export default function AnalyticsClient({
     }, 0), 0
   )
 
+  // Repeat customers (within selected range)
+  const activeRangeOrders = orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+  const rangePhoneMap: Record<string, number> = {}
+  activeRangeOrders.forEach(o => {
+    rangePhoneMap[o.customer_phone] = (rangePhoneMap[o.customer_phone] || 0) + 1
+  })
+  const uniqueRangeCustomers = Object.keys(rangePhoneMap).length
+  const repeatRangeCustomers = Object.values(rangePhoneMap).filter(c => c > 1).length
+  const repeatRangeRate = uniqueRangeCustomers > 0
+    ? Math.round((repeatRangeCustomers / uniqueRangeCustomers) * 100)
+    : 0
+  const avgOrdersPerCustomer = uniqueRangeCustomers > 0
+    ? (activeRangeOrders.length / uniqueRangeCustomers).toFixed(1)
+    : '0'
+
   const trendData      = buildTrendData(orders, range)
   const salesTrendRows = buildSalesTrendTable(orders, range)
 
@@ -272,7 +287,12 @@ export default function AnalyticsClient({
   const lowStockItems: { name: string; variant: string; qty: number }[] = []
   let inventoryValue = 0
   products.forEach(p => {
-    inventoryValue += p.price * p.stock_quantity
+    const vs = p.variant_stock
+    const totalStock = vs && Object.keys(vs).length > 0
+      ? Object.values(vs).reduce((sum, sizes) =>
+          sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
+      : p.stock_quantity
+    inventoryValue += p.price * totalStock
     const vs = p.variant_stock
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) =>
@@ -508,10 +528,15 @@ export default function AnalyticsClient({
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: 'Gross Revenue', value: pkr(grossRevenue), color: '#1C1C1C' },
-              { label: 'Net Revenue',   value: pkr(netRevenue),   color: '#10B981' },
-              { label: 'Gross Profit',  value: pkr(grossProfit),  color: grossProfit >= 0 ? '#10B981' : '#EF4444',
+              { label: 'Gross Revenue',       value: pkr(grossRevenue), color: '#1C1C1C' },
+              { label: 'Net Revenue',         value: pkr(netRevenue),   color: '#10B981' },
+              { label: 'Gross Profit',        value: pkr(grossProfit),  color: grossProfit >= 0 ? '#10B981' : '#EF4444',
                 sub: `${profitMarginPct}% margin` },
+              { label: 'Unique Customers',    value: uniqueRangeCustomers.toString(), color: '#1C1C1C' },
+              { label: 'Repeat Rate',         value: `${repeatRangeRate}%`,
+                color: repeatRangeRate > 0 ? '#A68B6E' : '#9CA3AF',
+                sub: `${repeatRangeCustomers} repeat customers` },
+              { label: 'Avg Orders / Customer', value: avgOrdersPerCustomer, color: '#1C1C1C' },
             ].map(k => (
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
                 <p className="text-lg font-bold" style={{ color: k.color }}>{k.value}</p>

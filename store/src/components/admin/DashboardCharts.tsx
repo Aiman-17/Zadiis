@@ -87,6 +87,32 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     ? Math.round(((netRevenue7d - prevNet7d) / prevNet7d) * 100)
     : null
 
+  // Year-over-Year revenue
+  const currentYear = new Date().getFullYear()
+  const thisYearRevenue = orders
+    .filter(o => new Date(o.created_at).getFullYear() === currentYear &&
+      o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .reduce((s, o) => s + o.total, 0)
+  const lastYearRevenue = orders
+    .filter(o => new Date(o.created_at).getFullYear() === currentYear - 1 &&
+      o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .reduce((s, o) => s + o.total, 0)
+  const yoyChangePct = lastYearRevenue > 0
+    ? Math.round(((thisYearRevenue - lastYearRevenue) / lastYearRevenue) * 100)
+    : null
+
+  // Repeat customer rate (all-time, non-cancelled/returned)
+  const activeOrdersAllTime = orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+  const phoneCountMap: Record<string, number> = {}
+  activeOrdersAllTime.forEach(o => {
+    phoneCountMap[o.customer_phone] = (phoneCountMap[o.customer_phone] || 0) + 1
+  })
+  const uniqueCustomerCount = Object.keys(phoneCountMap).length
+  const repeatCustomerCount = Object.values(phoneCountMap).filter(c => c > 1).length
+  const repeatCustomerRate = uniqueCustomerCount > 0
+    ? Math.round((repeatCustomerCount / uniqueCustomerCount) * 100)
+    : 0
+
   // Slow movers — relative: below 50% of store average sell-through, 15+ days old
   function dashStock(p: Product): number {
     const vs = p.variant_stock
@@ -327,6 +353,27 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
             {totalStock.toLocaleString('en-US')} units in stock
           </p>
           <p className="text-xs text-gray-500 mt-1">Total Products</p>
+        </div>
+
+        {/* Revenue This Year with YoY */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{pkr(thisYearRevenue)}</p>
+          {yoyChangePct !== null && (
+            <p className="text-xs mt-0.5 font-medium"
+              style={{ color: yoyChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+              {yoyChangePct >= 0 ? '↑' : '↓'} {Math.abs(yoyChangePct)}% vs {currentYear - 1}
+            </p>
+          )}
+          <p className="text-xs text-gray-500 mt-1">Revenue This Year</p>
+        </div>
+
+        {/* Repeat Customer Rate */}
+        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <p className="text-2xl font-bold">{repeatCustomerRate}%</p>
+          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+            {repeatCustomerCount} of {uniqueCustomerCount} customers
+          </p>
+          <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
         </div>
       </div>
 

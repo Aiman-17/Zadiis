@@ -52,11 +52,14 @@ export default async function AdminDashboard() {
         const items = (order.items || []) as OrderItem[]
         const saleId = items.map(i => productToSale[i.product_id]).find(sid => sid && summaries[sid])
         if (!saleId) continue
+        const saleRevenue = items
+          .filter(i => productToSale[i.product_id] === saleId)
+          .reduce((s, i) => s + i.price * i.quantity, 0)
         const dateKey = order.created_at.slice(0, 10)
-        summaries[saleId].revenue += order.total
+        summaries[saleId].revenue += saleRevenue
         summaries[saleId].orders++
-        if (dateKey === today) summaries[saleId].todayRevenue += order.total
-        if (dateKey === yesterday) summaries[saleId].yesterdayRevenue += order.total
+        if (dateKey === today) summaries[saleId].todayRevenue += saleRevenue
+        if (dateKey === yesterday) summaries[saleId].yesterdayRevenue += saleRevenue
       }
 
       activeSales = Object.values(summaries)

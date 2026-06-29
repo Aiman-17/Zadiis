@@ -8,6 +8,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [newOrders, setNewOrders] = useState(0)
+  const [pendingCod, setPendingCod] = useState(0)
   const lastCountRef = useRef<number | null>(null)
 
   const NAV = [
@@ -38,6 +39,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           setNewOrders(count - lastCountRef.current)
           lastCountRef.current = count
         }
+        // COD badge — all COD orders not yet cancelled or returned
+        const codCount = Array.isArray(data)
+          ? data.filter((o: { payment_method: string; order_status: string }) =>
+              o.payment_method === 'cod' &&
+              o.order_status !== 'cancelled' &&
+              o.order_status !== 'returned'
+            ).length
+          : 0
+        setPendingCod(codCount)
       } catch {
         // network error — ignore
       }
