@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter } from 'next/navigation'
+import { useSearchParams } from 'next/navigation'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 
@@ -8,7 +8,7 @@ export default function AdminLogin() {
   const [password, setPassword] = useState('')
   const [error, setError] = useState('')
   const [loading, setLoading] = useState(false)
-  const router = useRouter()
+  const searchParams = useSearchParams()
 
   const handleLogin = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -20,7 +20,10 @@ export default function AdminLogin() {
       body: JSON.stringify({ password }),
     })
     if (res.ok) {
-      router.push('/admin')
+      // Full page reload so the browser sends the newly-set cookie
+      // on the next request — soft router.push() can miss httpOnly cookies
+      const from = searchParams.get('from') || '/admin'
+      window.location.href = from
     } else {
       setError('Invalid password')
       setLoading(false)
