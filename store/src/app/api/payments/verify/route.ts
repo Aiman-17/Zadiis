@@ -14,7 +14,7 @@ export async function POST(req: NextRequest) {
 
   const { data: order } = await supabaseAdmin
     .from('orders')
-    .select('id, order_number, customer_name, customer_phone, customer_email, safepay_tracker, safepay_transaction_id, payment_status, payment_method, total, subtotal, delivery_charge, items, address, city')
+    .select('id, order_number, customer_name, customer_phone, customer_email, safepay_tracker, safepay_transaction_id, payment_status, payment_method, total, subtotal, delivery_charge, items, address, city, is_sale')
     .eq('id', orderId)
     .single()
 

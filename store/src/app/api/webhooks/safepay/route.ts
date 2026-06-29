@@ -61,7 +61,7 @@ export async function POST(req: NextRequest) {
 
   const { data: order, error: findError } = await supabaseAdmin
     .from('orders')
-    .select('id, order_number, customer_name, customer_phone, customer_email, total, subtotal, delivery_charge, items, address, city, payment_method, payment_status')
+    .select('id, order_number, customer_name, customer_phone, customer_email, total, subtotal, delivery_charge, items, address, city, payment_method, payment_status, is_sale')
     .eq('safepay_tracker', trackerToken)
     .single()
 
