@@ -39,6 +39,9 @@ export async function POST(req: NextRequest) {
       .eq('id', id)
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
+    // Migration-safe timestamp (fails silently before returned_at column exists)
+    void supabaseAdmin.from('orders').update({ returned_at: new Date().toISOString() }).eq('id', id)
+
     const items = (order.items || []) as OrderItem[]
     const movements = []
 

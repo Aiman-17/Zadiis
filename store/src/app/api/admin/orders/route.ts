@@ -79,8 +79,6 @@ export async function PUT(req: NextRequest) {
     }
     if (cancellation_reason !== undefined) update.cancellation_reason = cancellation_reason
     if (is_archived !== undefined) update.is_archived = is_archived
-    if (order_status === 'cancelled') update.cancelled_at = new Date().toISOString()
-    if (order_status === 'returned')  update.returned_at  = new Date().toISOString()
 
     let orderData: {
       order_number: string
@@ -110,6 +108,15 @@ export async function PUT(req: NextRequest) {
 
     const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+    // Stamp action timestamps in a separate call — migration-safe (fails silently before columns exist).
+    // Also clears timestamps on status reversal to prevent stale field inflation.
+    if (order_status !== undefined) {
+      void supabaseAdmin.from('orders').update({
+        cancelled_at: order_status === 'cancelled' ? new Date().toISOString() : null,
+        returned_at:  order_status === 'returned'  ? new Date().toISOString() : null,
+      }).eq('id', id)
+    }
 
     // Increment total_sold when delivered
     if (order_status === 'delivered' && orderData && 'items' in orderData && orderData.items) {

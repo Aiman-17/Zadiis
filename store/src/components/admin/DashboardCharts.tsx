@@ -82,12 +82,12 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     ? Math.round((deliveredThisMonth / ordersThisMonth) * 100)
     : 0
 
-  // 7-day cancellations & returns (by action date when available, fallback to creation date)
+  // 7-day cancellations & returns — action date when populated, creation date before migration
   const cancelled7d = orders.filter(o =>
-    o.cancelled_at != null ? isWithinDays(o.cancelled_at, 7) : (o.order_status === 'cancelled' && isWithinDays(o.created_at, 7))
+    o.order_status === 'cancelled' && isWithinDays(o.cancelled_at ?? o.created_at, 7)
   ).length
   const returned7d = orders.filter(o =>
-    o.returned_at != null ? isWithinDays(o.returned_at, 7) : (o.order_status === 'returned' && isWithinDays(o.created_at, 7))
+    o.order_status === 'returned' && isWithinDays(o.returned_at ?? o.created_at, 7)
   ).length
 
   // COD Success Rate (resolved COD orders only — excludes in-transit)
