@@ -24,7 +24,7 @@ export default async function AdminDashboard() {
     const [ordersRes, productsRes, salesRes, saleProductsRes, saleOrdersRes] = await Promise.all([
       supabaseAdmin.from('orders').select('*').order('created_at', { ascending: false }),
       supabaseAdmin.from('products').select('*').eq('is_active', true),
-      supabaseAdmin.from('sales').select('id, title').eq('is_active', true),
+      supabaseAdmin.from('sales').select('id, title, ends_at').eq('is_active', true),
       supabaseAdmin.from('sale_products').select('sale_id, product_id'),
       supabaseAdmin.from('orders').select('id, created_at, items, total')
         .eq('is_sale', true)
@@ -35,9 +35,19 @@ export default async function AdminDashboard() {
     allOrders = (ordersRes.data || []) as Order[]
     products = (productsRes.data || []) as Product[]
 
-    const sales = salesRes.data || []
+    const allActiveSales = salesRes.data || []
     const saleProducts = saleProductsRes.data || []
     const saleOrders = (saleOrdersRes.data || []) as Order[]
+
+    // Lazy deactivation: any active sale past its ends_at gets deactivated immediately on dashboard load
+    const now = new Date()
+    const expiredIds = allActiveSales
+      .filter(s => s.ends_at && new Date(s.ends_at) < now)
+      .map(s => s.id)
+    if (expiredIds.length > 0) {
+      void supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
+    }
+    const sales = allActiveSales.filter(s => !expiredIds.includes(s.id))
 
     if (sales.length > 0) {
       const productToSale: Record<string, string> = {}

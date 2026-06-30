@@ -97,12 +97,20 @@ function buildTrendData(orders: Order[], range: string) {
     })
   }
 
+  const isWeekly = range === '90d'
   orders.forEach(o => {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
-    const key = isMonthly
-      ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      : localDateKey(d)
+    let key: string
+    if (isMonthly) {
+      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    } else if (isWeekly) {
+      const ws = new Date(d)
+      ws.setDate(d.getDate() - d.getDay())
+      key = localDateKey(ws)
+    } else {
+      key = localDateKey(d)
+    }
     if (map[key]) {
       map[key].revenue += o.total
       map[key].orders  += 1
@@ -260,6 +268,23 @@ export default function AnalyticsClient({
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 8)
 
+  // Per-product repeat customer rate
+  const productRepeatMap: Record<string, Record<string, number>> = {}
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+    ;(o.items as OrderItem[]).forEach(i => {
+      if (!productRepeatMap[i.product_name]) productRepeatMap[i.product_name] = {}
+      productRepeatMap[i.product_name][o.customer_phone] =
+        (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
+    })
+  })
+  const productRepeatRates = Object.fromEntries(
+    Object.entries(productRepeatMap).map(([name, phones]) => {
+      const unique = Object.keys(phones).length
+      const repeat = Object.values(phones).filter(c => c > 1).length
+      return [name, unique > 1 ? Math.round((repeat / unique) * 100) : null]
+    })
+  ) as Record<string, number | null>
+
   // Per-product color + size breakdown (for tooltip on hover)
   const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
   orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o =>
@@ -294,17 +319,17 @@ export default function AnalyticsClient({
       ? Object.values(vs).reduce((sum, sizes) =>
           sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
       : p.stock_quantity
-    inventoryValue += p.price * totalStock
+    inventoryValue += (p.cost_price || 0) * totalStock
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) =>
         Object.entries(sizes).forEach(([size, qty]) => {
-          if (qty <= 3) {
+          if (qty > 0 && qty <= 3) {
             const variant = [color !== '_' ? color : '', size !== '_' ? size : ''].filter(Boolean).join(' / ')
             lowStockItems.push({ name: p.name, variant, qty })
           }
         })
       )
-    } else if (p.stock_quantity <= 3) {
+    } else if (p.stock_quantity > 0 && p.stock_quantity <= 3) {
       lowStockItems.push({ name: p.name, variant: 'All sizes', qty: p.stock_quantity })
     }
   })
@@ -731,35 +756,63 @@ export default function AnalyticsClient({
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <h3 className="font-semibold mb-4">Top Selling Products</h3>
             {topProducts.length > 0 ? (
-              <ResponsiveContainer width="100%" height={280}>
-                <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110}
-                    tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 13) + '…' : v} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as { name: string; units: number; revenue: number }
-                      const detail = productSizeColorMap[d.name]
-                      const topColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
-                      const topSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+              <>
+                <ResponsiveContainer width="100%" height={280}>
+                  <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110}
+                      tickFormatter={(v: string) => v.length > 14 ? v.slice(0, 13) + '…' : v} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null
+                        const d = payload[0]?.payload as { name: string; units: number; revenue: number }
+                        const detail = productSizeColorMap[d.name]
+                        const topColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                        const topSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                        return (
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-1" style={{ borderColor: '#E8DDD4' }}>
+                            <p className="font-semibold">{d.name}</p>
+                            <p style={{ color: '#A68B6E' }}>{d.units} units · {pkr(d.revenue)}</p>
+                            {topColors.length > 0 && (
+                              <p style={{ color: '#6B7280' }}>Colors: {topColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
+                            )}
+                            {topSizes.length > 0 && (
+                              <p style={{ color: '#6B7280' }}>Sizes: {topSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
+                            )}
+                          </div>
+                        )
+                      }}
+                    />
+                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="units" />
+                  </BarChart>
+                </ResponsiveContainer>
+                <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                      <th className="text-left py-1.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Units</th>
+                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
+                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Repeat %</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topProducts.map(p => {
+                      const rr = productRepeatRates[p.name]
                       return (
-                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-1" style={{ borderColor: '#E8DDD4' }}>
-                          <p className="font-semibold">{d.name}</p>
-                          <p style={{ color: '#A68B6E' }}>{d.units} units · {pkr(d.revenue)}</p>
-                          {topColors.length > 0 && (
-                            <p style={{ color: '#6B7280' }}>Colors: {topColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
-                          )}
-                          {topSizes.length > 0 && (
-                            <p style={{ color: '#6B7280' }}>Sizes: {topSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
-                          )}
-                        </div>
+                        <tr key={p.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                          <td className="py-1.5 pr-2 truncate max-w-[140px]">{p.name}</td>
+                          <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{p.units}</td>
+                          <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{pkr(p.revenue)}</td>
+                          <td className="py-1.5 text-right font-medium"
+                            style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : '#374151' }}>
+                            {rr == null ? '—' : `${rr}%`}
+                          </td>
+                        </tr>
                       )
-                    }}
-                  />
-                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="units" />
-                </BarChart>
-              </ResponsiveContainer>
+                    })}
+                  </tbody>
+                </table>
+              </>
             ) : (
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
             )}
@@ -833,7 +886,7 @@ export default function AnalyticsClient({
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
               <p className="text-xl font-bold">{pkr(inventoryValue)}</p>
-              <p className="text-xs text-gray-500 mt-1">Inventory Value</p>
+              <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
               <p className="text-xl font-bold">{invBestSellers.length}</p>

@@ -3,8 +3,9 @@
   "buildCommand": "npm run build",
   "outputDirectory": ".next",
   "crons": [
-    { "path": "/api/cron/scores",  "schedule": "0 2 * * *" },
-    { "path": "/api/cron/archive", "schedule": "0 3 * * *" },
-    { "path": "/api/cron/cleanup", "schedule": "0 4 * * *" }
+    { "path": "/api/cron/scores",            "schedule": "0 2 * * *" },
+    { "path": "/api/cron/archive",           "schedule": "0 3 * * *" },
+    { "path": "/api/cron/cleanup",           "schedule": "0 4 * * *" },
+    { "path": "/api/cron/deactivate-sales",  "schedule": "0 * * * *" }
   ]
 }

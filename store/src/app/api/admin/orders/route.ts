@@ -79,6 +79,8 @@ export async function PUT(req: NextRequest) {
     }
     if (cancellation_reason !== undefined) update.cancellation_reason = cancellation_reason
     if (is_archived !== undefined) update.is_archived = is_archived
+    if (order_status === 'cancelled') update.cancelled_at = new Date().toISOString()
+    if (order_status === 'returned')  update.returned_at  = new Date().toISOString()
 
     let orderData: {
       order_number: string

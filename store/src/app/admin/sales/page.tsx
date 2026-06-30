@@ -3,6 +3,13 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
 import type { Sale, Order, OrderItem } from '@/types'
 
+function fmtSaleDate(d: string | null) {
+  if (!d) return null
+  return new Date(d).toLocaleDateString('en-PK', {
+    day: 'numeric', month: 'short', year: 'numeric',
+  })
+}
+
 async function getSaleRevenue(saleIds: string[]): Promise<Record<string, { revenue: number; orders: number }>> {
   if (saleIds.length === 0) return {}
 
@@ -66,6 +73,9 @@ export default async function AdminSalesPage() {
       <div className="space-y-3">
         {allSales.map(sale => {
           const rev = revenueMap[sale.id]
+          const isCompleted = !sale.is_active && sale.ends_at != null && new Date(sale.ends_at) < new Date()
+          const statusLabel = sale.is_active ? 'Running' : isCompleted ? 'Completed' : 'Inactive'
+          const statusIcon  = sale.is_active ? '🟢' : isCompleted ? '✅' : '⚫'
           return (
             <div key={sale.id} className="flex items-center justify-between p-4 bg-white border rounded-lg"
               style={{ borderColor: sale.is_active ? '#A68B6E' : '#E8DDD4' }}>
@@ -76,9 +86,13 @@ export default async function AdminSalesPage() {
                     <span className="text-xs px-2 py-0.5 rounded-full font-medium"
                       style={{ backgroundColor: '#DCFCE7', color: '#166534' }}>Active</span>
                   )}
+                  {isCompleted && (
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
+                      style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>Completed</span>
+                  )}
                 </div>
                 <p className="text-sm" style={{ color: '#6B7280' }}>
-                  {sale.is_active ? '🟢' : '⚫'} {sale.is_active ? 'Running' : 'Inactive'}
+                  {statusIcon} {statusLabel}
                   {sale.delivery_charge_override != null && ` · Delivery override: PKR ${sale.delivery_charge_override}`}
                   {rev && rev.orders > 0 && (
                     <span className="ml-2 font-medium" style={{ color: '#1C1C1C' }}>
@@ -86,6 +100,11 @@ export default async function AdminSalesPage() {
                     </span>
                   )}
                 </p>
+                {(sale.starts_at || sale.ends_at) && (
+                  <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                    {fmtSaleDate(sale.starts_at) ?? '—'} → {fmtSaleDate(sale.ends_at) ?? 'No end date'}
+                  </p>
+                )}
               </div>
               <div className="flex gap-2 shrink-0">
                 {(rev?.orders ?? 0) > 0 && (

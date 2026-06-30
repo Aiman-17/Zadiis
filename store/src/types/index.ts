@@ -71,6 +71,8 @@ export type Order = {
   order_status: 'new' | 'processing' | 'shipped' | 'delivered' | 'returned' | 'cancelled'
   cancellation_reason?: string | null
   return_reason?: string | null
+  cancelled_at?: string | null
+  returned_at?: string | null
   cod_status?: 'pending' | 'received' | 'lost' | null
   cod_collected_at?: string | null
   is_archived: boolean

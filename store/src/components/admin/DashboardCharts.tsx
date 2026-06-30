@@ -40,6 +40,19 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
 
+  // Last month comparison
+  const now = new Date()
+  const lastMonthStart = new Date(now.getFullYear(), now.getMonth() - 1, 1)
+  const lastMonthEnd   = new Date(now.getFullYear(), now.getMonth(), 1)
+  const lastMonth = orders.filter(o => {
+    const d = new Date(o.created_at)
+    return d >= lastMonthStart && d < lastMonthEnd &&
+      o.order_status !== 'cancelled' && o.order_status !== 'returned'
+  })
+  const revenueLastMonth = lastMonth.reduce((s, o) => s + o.total, 0)
+  const ordersLastMonth  = lastMonth.length
+  const aovLastMonth     = ordersLastMonth > 0 ? Math.round(revenueLastMonth / ordersLastMonth) : 0
+
   // Fix #2 — Action cards match orders page counts (all-time, not 7-day)
   const newOrders       = orders.filter(o => !o.is_archived && o.order_status === 'new').length
   const pendingShipment = orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped')).length
@@ -69,9 +82,32 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     ? Math.round((deliveredThisMonth / ordersThisMonth) * 100)
     : 0
 
-  // 7-day cancellations & returns
-  const cancelled7d = last7days.filter(o => o.order_status === 'cancelled').length
-  const returned7d  = last7days.filter(o => o.order_status === 'returned').length
+  // 7-day cancellations & returns (by action date when available, fallback to creation date)
+  const cancelled7d = orders.filter(o =>
+    o.cancelled_at != null ? isWithinDays(o.cancelled_at, 7) : (o.order_status === 'cancelled' && isWithinDays(o.created_at, 7))
+  ).length
+  const returned7d = orders.filter(o =>
+    o.returned_at != null ? isWithinDays(o.returned_at, 7) : (o.order_status === 'returned' && isWithinDays(o.created_at, 7))
+  ).length
+
+  // COD Success Rate (resolved COD orders only — excludes in-transit)
+  const resolvedCod = orders.filter(o =>
+    o.payment_method === 'cod' &&
+    (o.order_status === 'delivered' || o.order_status === 'returned' || o.order_status === 'cancelled')
+  )
+  const codDelivered   = resolvedCod.filter(o => o.order_status === 'delivered').length
+  const codSuccessRate = resolvedCod.length > 0
+    ? Math.round((codDelivered / resolvedCod.length) * 100)
+    : null
+
+  // Cash Collected vs Booked Revenue (MTD)
+  const cashCollectedMTD = thisMonth.filter(o =>
+    o.order_status !== 'cancelled' && o.order_status !== 'returned' &&
+    (o.payment_method === 'cod'
+      ? o.order_status === 'delivered'
+      : o.payment_status === 'paid')
+  ).reduce((s, o) => s + o.total, 0)
+  const inTransitMTD = revenueThisMonth - cashCollectedMTD
 
   // Previous 7d for comparison
   const prev7dStart = new Date(Date.now() - 14 * 86400000)
@@ -185,13 +221,13 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) => {
         Object.entries(sizes).forEach(([size, qty]) => {
-          if (qty <= 3) {
+          if (qty > 0 && qty <= 3) {
             const variant = [color !== '_' ? color : '', size !== '_' ? size : ''].filter(Boolean).join(' / ')
             lowStockItems.push({ name: p.name, variant, qty })
           }
         })
       })
-    } else if (p.stock_quantity <= 3) {
+    } else if (p.stock_quantity > 0 && p.stock_quantity <= 3) {
       lowStockItems.push({ name: p.name, variant: 'All sizes', qty: p.stock_quantity })
     }
   })
@@ -315,6 +351,14 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         {/* Revenue This Month */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
+          {revenueLastMonth > 0 ? (
+            <p className="text-xs mt-0.5 font-medium"
+              style={{ color: revenueThisMonth >= revenueLastMonth ? '#10B981' : '#EF4444' }}>
+              {revenueThisMonth >= revenueLastMonth ? '↑' : '↓'} vs last month: {pkr(revenueLastMonth)}
+            </p>
+          ) : (
+            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>first month on record</p>
+          )}
           <p className="text-xs text-gray-500 mt-1">Revenue This Month</p>
         </div>
 
@@ -324,12 +368,18 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
           <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? '#10B981' : '#F59E0B' }}>
             {fulfillmentRate}% fulfilled
           </p>
+          {ordersLastMonth > 0 && (
+            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {ordersLastMonth} orders</p>
+          )}
           <p className="text-xs text-gray-500 mt-1">Orders This Month</p>
         </div>
 
         {/* AOV */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
           <p className="text-2xl font-bold">{pkr(aov)}</p>
+          {aovLastMonth > 0 && (
+            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {pkr(aovLastMonth)}</p>
+          )}
           <p className="text-xs text-gray-500 mt-1">Avg. Order Value</p>
         </div>
 
@@ -375,7 +425,38 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
           </p>
           <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
         </div>
+
+        {/* COD Success Rate */}
+        {codSuccessRate !== null && (
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <p className="text-2xl font-bold"
+              style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
+              {codSuccessRate}%
+            </p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+              {codDelivered} of {resolvedCod.length} resolved COD orders
+            </p>
+            <p className="text-xs text-gray-500 mt-1">COD Success Rate</p>
+          </div>
+        )}
       </div>
+
+      {/* Cash Position (MTD) */}
+      {(cashCollectedMTD > 0 || inTransitMTD > 0) && (
+        <div className="flex gap-4 px-5 py-3 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAFAFA' }}>
+          <div className="flex-1">
+            <p className="text-xs font-medium" style={{ color: '#6B7280' }}>Cash Collected (MTD)</p>
+            <p className="text-sm font-semibold mt-0.5">{pkr(cashCollectedMTD)}</p>
+          </div>
+          <div className="w-px" style={{ backgroundColor: '#E8DDD4' }} />
+          <div className="flex-1">
+            <p className="text-xs font-medium" style={{ color: '#6B7280' }}>COD In Transit</p>
+            <p className="text-sm font-semibold mt-0.5" style={{ color: inTransitMTD > 0 ? '#F59E0B' : '#9CA3AF' }}>
+              {pkr(inTransitMTD)}
+            </p>
+          </div>
+        </div>
+      )}
 
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -441,8 +522,8 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
             { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining',                                                       linkLabel: '→ View products' },
             { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',     sub: null,                                                                        linkLabel: '→ View products' },
             { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well', linkLabel: '→ View products' },
-            { label: 'Returns (7d)',   value: returned7d,      color: '#DC2626', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
-            { label: 'Cancelled (7d)', value: cancelled7d,     color: '#6B7280', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+            { label: 'Returns (last 7d)',   value: returned7d,  color: '#DC2626', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+            { label: 'Cancelled (last 7d)', value: cancelled7d, color: '#6B7280', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
           ].map(({ label, value, color, href, sub, linkLabel }) => {
             const inner = (
               <>
