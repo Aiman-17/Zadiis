@@ -251,7 +251,7 @@ export default function AnalyticsClient({
     (o.payment_method === 'cod' ? o.order_status === 'delivered' : o.payment_status === 'paid')
   )
   const grossProfit = qualifyingOrders.reduce((s, o) =>
-    s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0), 0
+    s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0) - o.delivery_charge, 0
   )
   const qualifyingRevenue  = qualifyingOrders.reduce((s, o) => s + o.total, 0)
   const profitMarginPct    = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
