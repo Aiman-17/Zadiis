@@ -47,6 +47,12 @@ function localDateKey(d: Date): string {
   return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`
 }
 
+function toWeeklySundayKey(d: Date): string {
+  const ws = new Date(d)
+  ws.setDate(d.getDate() - d.getDay())
+  return localDateKey(ws)
+}
+
 function buildAllBuckets(range: string, longMonthLabel = false) {
   const today = new Date()
   const map: Record<string, { label: string; revenue: number; orders: number }> = {}
@@ -105,9 +111,7 @@ function buildTrendData(orders: Order[], range: string) {
     if (isMonthly) {
       key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     } else if (isWeekly) {
-      const ws = new Date(d)
-      ws.setDate(d.getDate() - d.getDay())
-      key = localDateKey(ws)
+      key = toWeeklySundayKey(d)
     } else {
       key = localDateKey(d)
     }
@@ -144,9 +148,7 @@ function buildSalesTrendTable(orders: Order[], range: string) {
     if (isMonthly) {
       key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     } else if (isWeekly) {
-      const ws = new Date(d)
-      ws.setDate(d.getDate() - d.getDay())
-      key = localDateKey(ws)
+      key = toWeeklySundayKey(d)
     } else {
       key = localDateKey(d)
     }
@@ -254,29 +256,30 @@ export default function AnalyticsClient({
   })
   const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }))
 
-  // Top products
-  const productMap: Record<string, { units: number; revenue: number }> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o =>
-    (o.items as OrderItem[]).forEach(i => {
-      if (!productMap[i.product_name]) productMap[i.product_name] = { units: 0, revenue: 0 }
-      productMap[i.product_name].units += i.quantity
+  // Top products, repeat rates, and color/size breakdown — single pass over qualifying orders
+  const productMap:          Record<string, { units: number; revenue: number }> = {}
+  const productRepeatMap:    Record<string, Record<string, number>> = {}
+  const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
+  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+    ;(o.items as OrderItem[]).forEach(i => {
+      if (!productMap[i.product_name])          productMap[i.product_name]          = { units: 0, revenue: 0 }
+      if (!productRepeatMap[i.product_name])    productRepeatMap[i.product_name]    = {}
+      if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
+
+      productMap[i.product_name].units   += i.quantity
       productMap[i.product_name].revenue += i.price * i.quantity
+
+      productRepeatMap[i.product_name][o.customer_phone] =
+        (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
+
+      if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
+      if (i.size  && i.size  !== '_') productSizeColorMap[i.product_name].sizes[i.size]   = (productSizeColorMap[i.product_name].sizes[i.size]   || 0) + i.quantity
     })
-  )
+  })
   const topProducts = Object.entries(productMap)
     .map(([name, d]) => ({ name, ...d }))
     .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 8)
-
-  // Per-product repeat customer rate
-  const productRepeatMap: Record<string, Record<string, number>> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
-    ;(o.items as OrderItem[]).forEach(i => {
-      if (!productRepeatMap[i.product_name]) productRepeatMap[i.product_name] = {}
-      productRepeatMap[i.product_name][o.customer_phone] =
-        (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
-    })
-  })
   const productRepeatRates = Object.fromEntries(
     Object.entries(productRepeatMap).map(([name, phones]) => {
       const unique = Object.keys(phones).length
@@ -284,16 +287,6 @@ export default function AnalyticsClient({
       return [name, unique > 1 ? Math.round((repeat / unique) * 100) : null]
     })
   ) as Record<string, number | null>
-
-  // Per-product color + size breakdown (for tooltip on hover)
-  const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o =>
-    (o.items as OrderItem[]).forEach(i => {
-      if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
-      if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
-      if (i.size  && i.size  !== '_') productSizeColorMap[i.product_name].sizes[i.size]   = (productSizeColorMap[i.product_name].sizes[i.size]   || 0) + i.quantity
-    })
-  )
 
   // Colors, Sizes, Cities
   const colorMap: Record<string, number> = {}

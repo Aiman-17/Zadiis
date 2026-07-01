@@ -2,6 +2,10 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 
 export async function GET(request: NextRequest) {
+  if (!process.env.CRON_SECRET) {
+    console.error('[deactivate-sales] CRON_SECRET env var is not set')
+    return NextResponse.json({ error: 'Server misconfiguration' }, { status: 500 })
+  }
   const auth = request.headers.get('authorization')
   if (auth !== `Bearer ${process.env.CRON_SECRET}`) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })

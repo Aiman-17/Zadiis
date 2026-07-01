@@ -39,8 +39,9 @@ export async function POST(req: NextRequest) {
       .eq('id', id)
     if (updateErr) return NextResponse.json({ error: updateErr.message }, { status: 500 })
 
-    // Migration-safe timestamp (fails silently before returned_at column exists)
-    void supabaseAdmin.from('orders').update({ returned_at: new Date().toISOString() }).eq('id', id)
+    // Migration-safe timestamps (fail silently before columns exist).
+    // Clears cancelled_at in case order was previously cancelled before being returned.
+    void supabaseAdmin.from('orders').update({ cancelled_at: null, returned_at: new Date().toISOString() }).eq('id', id)
 
     const items = (order.items || []) as OrderItem[]
     const movements = []

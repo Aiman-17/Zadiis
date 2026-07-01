@@ -109,9 +109,9 @@ export async function PUT(req: NextRequest) {
     const { error } = await supabaseAdmin.from('orders').update(update).eq('id', id)
     if (error) return NextResponse.json({ error: error.message }, { status: 500 })
 
-    // Stamp action timestamps in a separate call — migration-safe (fails silently before columns exist).
-    // Also clears timestamps on status reversal to prevent stale field inflation.
-    if (order_status !== undefined) {
+    // Stamp action timestamps — migration-safe (fails silently before columns exist).
+    // Only fires for terminal statuses; switching between them clears the other field.
+    if (order_status === 'cancelled' || order_status === 'returned') {
       void supabaseAdmin.from('orders').update({
         cancelled_at: order_status === 'cancelled' ? new Date().toISOString() : null,
         returned_at:  order_status === 'returned'  ? new Date().toISOString() : null,
