@@ -40,14 +40,6 @@ const RETURN_REASON_LABELS: Record<string, string> = {
 
 type Tab = 'revenue' | 'performance' | 'products' | 'inventory' | 'orders'
 
-const TAB_COLORS: Record<Tab, string> = {
-  revenue:     '#0D9488',
-  performance: '#4F46E5',
-  products:    '#DB2777',
-  inventory:   '#D97706',
-  orders:      '#DC2626',
-}
-
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
 function localDateKey(d: Date): string {
@@ -229,53 +221,6 @@ export default function AnalyticsClient({
   const trendData      = buildTrendData(orders, range)
   const salesTrendRows = buildSalesTrendTable(orders, range)
 
-  // ── Repeat Rate Trend ─────────────────────────────────────────────────────
-  const _isMonthly = range === '12m'
-  const _isWeekly  = range === '90d'
-  const custFirstPeriod: Record<string, string> = {}
-  activeOrders.forEach(o => {
-    const d = new Date(o.created_at)
-    const k = _isMonthly
-      ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      : _isWeekly ? toWeeklySundayKey(d) : localDateKey(d)
-    if (!custFirstPeriod[o.customer_phone] || k < custFirstPeriod[o.customer_phone])
-      custFirstPeriod[o.customer_phone] = k
-  })
-  const periodCustMap: Record<string, { newC: Set<string>; repeat: Set<string> }> = {}
-  activeOrders.forEach(o => {
-    const d = new Date(o.created_at)
-    const k = _isMonthly
-      ? `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-      : _isWeekly ? toWeeklySundayKey(d) : localDateKey(d)
-    if (!periodCustMap[k]) periodCustMap[k] = { newC: new Set(), repeat: new Set() }
-    if (custFirstPeriod[o.customer_phone] === k)
-      periodCustMap[k].newC.add(o.customer_phone)
-    else
-      periodCustMap[k].repeat.add(o.customer_phone)
-  })
-  const rrBuckets = buildAllBuckets(range, false)
-  if (!_isMonthly && !_isWeekly) {
-    Object.keys(rrBuckets).forEach(key => {
-      const [y, m, day] = key.split('-').map(Number)
-      const d = new Date(y, m - 1, day)
-      rrBuckets[key].label = d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
-    })
-  }
-  const repeatRateTrendData = Object.entries(rrBuckets)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([key, bucket]) => {
-      const cust = periodCustMap[key]
-      const newC = cust?.newC.size || 0
-      const rep  = cust?.repeat.size || 0
-      const total = newC + rep
-      return {
-        label: bucket.label || key,
-        rate: total > 0 ? Math.round((rep / total) * 100) : 0,
-        newCustomers: newC,
-        repeatCustomers: rep,
-      }
-    })
-
   const paymentMap: Record<string, number> = {}
   activeOrders.forEach(o => { paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1 })
   const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }))
@@ -360,18 +305,6 @@ export default function AnalyticsClient({
     })
   })
   const topColors = Object.entries(colorMap).map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
-
-  // Per-color detail: sizes, products, customers (for rich tooltip)
-  const colorDetailMap: Record<string, { sizes: Record<string, number>; products: Record<string, number>; customers: Record<string, number> }> = {}
-  activeOrders.forEach(o => {
-    ;(o.items as OrderItem[]).forEach(i => {
-      if (!i.color || i.color === '_') return
-      if (!colorDetailMap[i.color]) colorDetailMap[i.color] = { sizes: {}, products: {}, customers: {} }
-      if (i.size && i.size !== '_') colorDetailMap[i.color].sizes[i.size] = (colorDetailMap[i.color].sizes[i.size] || 0) + i.quantity
-      colorDetailMap[i.color].products[i.product_name] = (colorDetailMap[i.color].products[i.product_name] || 0) + i.quantity
-      colorDetailMap[i.color].customers[o.customer_phone] = (colorDetailMap[i.color].customers[o.customer_phone] || 0) + 1
-    })
-  })
 
   // Cities with revenue + AOV
   const cityDataMap: Record<string, { orders: number; revenue: number }> = {}
@@ -596,8 +529,6 @@ export default function AnalyticsClient({
     { key: 'orders',      label: 'Orders' },
   ]
 
-  const primaryColor = TAB_COLORS[tab]
-
   return (
     <div className="space-y-6">
       {/* Range selector */}
@@ -614,12 +545,12 @@ export default function AnalyticsClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b overflow-x-auto hide-scrollbar" style={{ borderColor: '#E8DDD4' }}>
+      <div className="flex gap-1 border-b overflow-x-auto" style={{ borderColor: '#E8DDD4' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0"
             style={tab === t.key
-              ? { borderColor: TAB_COLORS[t.key], color: '#1C1C1C' }
+              ? { borderColor: '#A68B6E', color: '#1C1C1C' }
               : { borderColor: 'transparent', color: '#9CA3AF' }}>
             {t.label}
           </button>
@@ -668,7 +599,7 @@ export default function AnalyticsClient({
                   interval={trendData.length > 10 ? Math.ceil(trendData.length / 6) - 1 : 0} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={50} />
                 <Tooltip formatter={(v) => pkr(Number(v))} />
-                <Line type="monotone" dataKey="revenue" stroke={primaryColor} strokeWidth={2.5} dot={{ fill: primaryColor, r: 3 }} name="Revenue" />
+                <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5} dot={{ fill: '#A68B6E', r: 3 }} name="Revenue" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -697,38 +628,6 @@ export default function AnalyticsClient({
             ) : (
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
             )}
-          </div>
-
-          {/* Repeat Customer Rate Trend */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-baseline justify-between mb-4">
-              <h3 className="font-semibold">Repeat Customer Rate</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>
-                {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} · hover for details
-              </span>
-            </div>
-            <ResponsiveContainer width="100%" height={220}>
-              <LineChart data={repeatRateTrendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }}
-                  interval={repeatRateTrendData.length > 10 ? Math.ceil(repeatRateTrendData.length / 6) - 1 : 0} />
-                <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${v}%`} width={40} domain={[0, 100]} />
-                <Tooltip
-                  content={({ active, payload, label }) => {
-                    if (!active || !payload?.length) return null
-                    const d = payload[0]?.payload as { rate: number; newCustomers: number; repeatCustomers: number }
-                    return (
-                      <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
-                        <p className="font-semibold mb-1">{label}</p>
-                        <p style={{ color: primaryColor }}>{d.rate}% repeat rate</p>
-                        <p style={{ color: '#6B7280' }}>{d.repeatCustomers} returning · {d.newCustomers} new</p>
-                      </div>
-                    )
-                  }}
-                />
-                <Line type="monotone" dataKey="rate" stroke={primaryColor} strokeWidth={2.5} dot={{ fill: primaryColor, r: 3 }} name="Repeat Rate %" />
-              </LineChart>
-            </ResponsiveContainer>
           </div>
         </div>
       )}
@@ -769,7 +668,7 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="Orders">
-                    {salesTrendRows.map((entry, i) => <Cell key={i} fill={entry.orders > 0 ? primaryColor : '#E8DDD4'} />)}
+                    {salesTrendRows.map((entry, i) => <Cell key={i} fill={entry.orders > 0 ? '#A68B6E' : '#E8DDD4'} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -870,7 +769,7 @@ export default function AnalyticsClient({
                         )
                       }}
                     />
-                    <Bar dataKey="revenue" fill={primaryColor} radius={[0, 4, 4, 0]} name="Revenue" />
+                    <Bar dataKey="revenue" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Revenue" />
                   </BarChart>
                 </ResponsiveContainer>
                 <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
@@ -944,7 +843,7 @@ export default function AnalyticsClient({
                         )
                       }}
                     />
-                    <Bar dataKey="units" fill={primaryColor} radius={[0, 4, 4, 0]} name="Units" />
+                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
                   </BarChart>
                 </ResponsiveContainer>
 
@@ -1042,7 +941,47 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 3 · Category Performance chart */}
+          {/* 3 · Trending chart */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="flex items-baseline justify-between mb-4">
+              <h3 className="font-semibold">↑ Trending Now</h3>
+              <span className="text-xs" style={{ color: '#9CA3AF' }}>by trending score · hover for details</span>
+            </div>
+            {trendingChartData.length === 0 ? (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No trending products right now.</p>
+            ) : (
+              <ResponsiveContainer width="100%" height={Math.max(160, trendingChartData.length * 42)}>
+                <BarChart data={trendingChartData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} tickFormatter={v => v.toFixed(1)} />
+                  <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={120} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as typeof trendingChartData[0]
+                      return (
+                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold mb-1">{d.name}</p>
+                          <p style={{ color: '#9CA3AF' }}>{d.category}</p>
+                          <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
+                          <p style={{ color: '#6B7280' }}>{d.units} units sold · score {d.score.toFixed(1)}</p>
+                          <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                            {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
+                          </p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="score" fill="#9D174D" radius={[0, 4, 4, 0]} name="Trend Score">
+                    {trendingChartData.map((entry, i) => (
+                      <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
+                    ))}
+                  </Bar>
+                </BarChart>
+              </ResponsiveContainer>
+            )}
+          </div>
+
+          {/* 4 · Category Performance chart */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Category Performance</h3>
@@ -1079,7 +1018,7 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 4 · Sizes & Colors by Product */}
+          {/* 5 · Sizes & Colors by Product */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <h3 className="font-semibold mb-1">Sizes & Colors by Product</h3>
             <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Top 8 by revenue · sold in period · remaining stock · sell-through %</p>
@@ -1144,46 +1083,6 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 5 · Trending Now */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-baseline justify-between mb-4">
-              <h3 className="font-semibold">↑ Trending Now</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>by trending score · hover for details</span>
-            </div>
-            {trendingChartData.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No trending products right now.</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={Math.max(160, trendingChartData.length * 42)}>
-                <BarChart data={trendingChartData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} tickFormatter={v => v.toFixed(1)} />
-                  <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={120} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as typeof trendingChartData[0]
-                      return (
-                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
-                          <p className="font-semibold mb-1">{d.name}</p>
-                          <p style={{ color: '#9CA3AF' }}>{d.category}</p>
-                          <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units sold · score {d.score.toFixed(1)}</p>
-                          <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
-                            {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
-                          </p>
-                        </div>
-                      )
-                    }}
-                  />
-                  <Bar dataKey="score" fill="#9D174D" radius={[0, 4, 4, 0]} name="Trend Score">
-                    {trendingChartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
           {/* 6 · Top Colors */}
           {topColors.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
@@ -1192,36 +1091,27 @@ export default function AnalyticsClient({
                 <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 24 }}>
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as typeof topColors[0]
-                      const details = colorDetailMap[d.name]
-                      const topSizes = details ? Object.entries(details.sizes).sort((a, b) => b[1] - a[1]).slice(0, 4).map(([s]) => s) : []
-                      const topProds = details ? Object.entries(details.products).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
-                      const uniqueCust = details ? Object.keys(details.customers).length : 0
-                      const repeatCust = details ? Object.values(details.customers).filter(c => c > 1).length : 0
-                      const rr = uniqueCust > 0 ? Math.round((repeatCust / uniqueCust) * 100) : 0
-                      return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
-                          <p className="font-semibold mb-1">{d.name}</p>
-                          <p style={{ color: '#1C1C1C' }}>{d.units} units sold</p>
-                          {topSizes.length > 0 && <p style={{ color: '#6B7280' }}>Sizes: {topSizes.join(', ')}</p>}
-                          {topProds.length > 0 && (
-                            <p style={{ color: '#6B7280' }}>
-                              In: {topProds.map(([p]) => p.length > 14 ? p.slice(0, 13) + '…' : p).join(', ')}
-                            </p>
-                          )}
-                          <p style={{ color: primaryColor }}>{rr}% repeat · {uniqueCust} unique customers</p>
-                        </div>
-                      )
-                    }}
-                  />
-                  <Bar dataKey="units" fill={primaryColor} radius={[0, 4, 4, 0]} name="Units" />
+                  <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
+                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
                 </BarChart>
               </ResponsiveContainer>
             </div>
           )}
+
+          {/* 7 · Price Range Performance */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Price Range Performance</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {priceRangeStats.map(r => (
+                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
+                  <p className="text-lg font-bold mt-1">{r.units}</p>
+                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
+                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>PKR {Math.round(r.revenue / 1000)}k</p>
+                </div>
+              ))}
+            </div>
+          </div>
 
         </div>
       )}
@@ -1287,7 +1177,7 @@ export default function AnalyticsClient({
                       )
                     }}
                   />
-                  <Bar dataKey="stock" fill={primaryColor} radius={[0, 4, 4, 0]} name="Stock" />
+                  <Bar dataKey="stock" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Stock" />
                 </BarChart>
               </ResponsiveContainer>
             </div>

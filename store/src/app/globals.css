@@ -138,9 +138,6 @@ h1, h2, h3 {
   font-family: 'Playfair Display', serif;
 }
 
-.hide-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
-.hide-scrollbar::-webkit-scrollbar { display: none; }
-
 @keyframes fire-flicker {
   0%   { transform: scale(1)    rotate(-1.5deg); opacity: 1; }
   20%  { transform: scale(1.2)  rotate(2.5deg);  opacity: 0.9; }

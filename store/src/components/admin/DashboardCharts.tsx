@@ -184,6 +184,43 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
+  // Trending products (from product scores)
+  function getMerchStockDash(p: Product): number {
+    const vs = p.variant_stock
+    if (vs && Object.keys(vs).length > 0) {
+      return Object.values(vs).reduce(
+        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+      )
+    }
+    return p.stock_quantity
+  }
+  const trendingProducts = products
+    .filter(p => p.trending_score > 0)
+    .sort((a, b) => b.trending_score - a.trending_score)
+    .slice(0, 8)
+    .map(p => ({
+      name: p.name,
+      shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
+      score: p.trending_score,
+      category: p.product_category || 'Uncategorized',
+      stock: getMerchStockDash(p),
+      total_sold: p.total_sold,
+    }))
+
+  // Top Colors (all-time, from active orders)
+  const colorMapDash: Record<string, number> = {}
+  orders
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .forEach(o => {
+      ;(o.items as OrderItem[]).forEach(i => {
+        if (i.color && i.color !== '_') colorMapDash[i.color] = (colorMapDash[i.color] || 0) + i.quantity
+      })
+    })
+  const topColorsDash = Object.entries(colorMapDash)
+    .map(([name, units]) => ({ name, units }))
+    .sort((a, b) => b.units - a.units)
+    .slice(0, 8)
+
   // Product stock helpers
   const totalProducts = products.length
   const totalStock = products.reduce((sum, p) => {
@@ -535,6 +572,63 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         </div>
       </div>
 
+
+      {/* Merchandise — Trending Now + Top Colors */}
+      {(trendingProducts.length > 0 || topColorsDash.length > 0) && (
+        <div>
+          <h3 className="font-semibold mb-3">Merchandise</h3>
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {trendingProducts.length > 0 && (
+              <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+                <div className="flex items-baseline justify-between mb-4">
+                  <p className="font-semibold text-sm">↑ Trending Now</p>
+                  <span className="text-xs" style={{ color: '#9CA3AF' }}>by score</span>
+                </div>
+                <ResponsiveContainer width="100%" height={Math.max(160, trendingProducts.length * 38)}>
+                  <BarChart data={trendingProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} tickFormatter={(v: number) => v.toFixed(1)} />
+                    <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={100} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null
+                        const d = payload[0]?.payload as typeof trendingProducts[0]
+                        return (
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                            <p className="font-semibold mb-1">{d.name}</p>
+                            <p style={{ color: '#9CA3AF' }}>{d.category}</p>
+                            <p style={{ color: '#6B7280' }}>{d.total_sold} total sold · score {d.score.toFixed(1)}</p>
+                            <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                              {d.stock === 0 ? '⚠ OUT OF STOCK' : d.stock <= 5 ? `⚠ Only ${d.stock} left` : `${d.stock} in stock`}
+                            </p>
+                          </div>
+                        )
+                      }}
+                    />
+                    <Bar dataKey="score" radius={[0, 4, 4, 0]} name="Trend Score">
+                      {trendingProducts.map((entry, i) => (
+                        <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
+                      ))}
+                    </Bar>
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+            {topColorsDash.length > 0 && (
+              <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+                <p className="font-semibold text-sm mb-4">Top Colors</p>
+                <ResponsiveContainer width="100%" height={Math.max(160, topColorsDash.length * 38)}>
+                  <BarChart data={topColorsDash} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                    <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
+                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
+                  </BarChart>
+                </ResponsiveContainer>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
     </div>
   )
