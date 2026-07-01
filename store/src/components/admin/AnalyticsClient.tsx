@@ -501,10 +501,10 @@ export default function AnalyticsClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b" style={{ borderColor: '#E8DDD4' }}>
+      <div className="flex gap-1 border-b overflow-x-auto" style={{ borderColor: '#E8DDD4' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
-            className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px"
+            className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0"
             style={tab === t.key
               ? { borderColor: '#A68B6E', color: '#1C1C1C' }
               : { borderColor: 'transparent', color: '#9CA3AF' }}>
@@ -539,7 +539,7 @@ export default function AnalyticsClient({
           </div>
 
           {profitLostToDiscounts > 0 && (
-            <div className="rounded-lg px-4 py-3 flex items-center justify-between text-sm"
+            <div className="rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm"
               style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
               <span style={{ color: '#6B7280' }}>Profit reduced by discounts/sales this period:</span>
               <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(profitLostToDiscounts)}</span>
@@ -551,7 +551,8 @@ export default function AnalyticsClient({
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={trendData}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
-                <XAxis dataKey="label" tick={{ fontSize: 11 }} />
+                <XAxis dataKey="label" tick={{ fontSize: 11 }}
+                  interval={trendData.length > 10 ? Math.ceil(trendData.length / 6) - 1 : 0} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={50} />
                 <Tooltip formatter={(v) => pkr(Number(v))} />
                 <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5} dot={{ fill: '#A68B6E', r: 3 }} name="Revenue" />
@@ -605,7 +606,8 @@ export default function AnalyticsClient({
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={salesTrendRows} margin={{ left: 0, right: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }}
+                    interval={salesTrendRows.length > 10 ? Math.ceil(salesTrendRows.length / 6) - 1 : 0} />
                   <YAxis tick={{ fontSize: 10 }} width={28} allowDecimals={false} />
                   <Tooltip
                     content={({ active, payload, label }) => {
@@ -805,7 +807,7 @@ export default function AnalyticsClient({
                                 style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? '#10B981' : pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
                             </div>
                             <span className="text-xs shrink-0 w-8 text-right font-medium" style={{ color: '#6B7280' }}>{pct}%</span>
-                            <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{sold} sold · {remaining} left</span>
+                            <span className="text-xs shrink-0 hidden sm:inline" style={{ color: '#9CA3AF' }}>{sold} sold · {remaining} left</span>
                           </div>
                         )
                       })
@@ -907,10 +909,11 @@ export default function AnalyticsClient({
                   const barPct = maxRev > 0 ? Math.round((c.revenue / maxRev) * 100) : 0
                   return (
                     <div key={c.cat}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium">{c.cat}</span>
-                        <span style={{ color: '#6B7280' }}>
-                          {pkr(c.revenue)} · {c.units} units · {c.orderCount} orders
+                      <div className="flex justify-between items-baseline gap-2 mb-1">
+                        <span className="font-medium text-sm truncate">{c.cat}</span>
+                        <span className="text-xs shrink-0 text-right" style={{ color: '#6B7280' }}>
+                          <span className="hidden sm:inline">{pkr(c.revenue)} · {c.units} units · {c.orderCount} orders</span>
+                          <span className="sm:hidden">{pkr(c.revenue)}</span>
                         </span>
                       </div>
                       <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
@@ -1117,7 +1120,7 @@ export default function AnalyticsClient({
                         style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? '#10B981' : s.pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
                     </div>
                     <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: '#6B7280' }}>{s.pct}%</span>
-                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{s.sold} sold · {s.remaining} left</span>
+                    <span className="text-xs shrink-0 hidden sm:inline" style={{ color: '#9CA3AF' }}>{s.sold} sold · {s.remaining} left</span>
                   </div>
                 ))}
               </div>
@@ -1130,6 +1133,7 @@ export default function AnalyticsClient({
               <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
                 <h3 className="font-semibold text-sm">New Arrivals — last 30 days</h3>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
                   <tr>
@@ -1162,6 +1166,7 @@ export default function AnalyticsClient({
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -1176,6 +1181,7 @@ export default function AnalyticsClient({
               <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>
             ) : (
               <>
+                <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
                     <tr>
@@ -1203,6 +1209,7 @@ export default function AnalyticsClient({
                     ))}
                   </tbody>
                 </table>
+                </div>
                 {slowMovers.length > 15 && (
                   <p className="px-5 py-2.5 text-xs border-t" style={{ color: '#9CA3AF', borderColor: '#F3F4F6' }}>
                     …and {slowMovers.length - 15} more
@@ -1220,6 +1227,7 @@ export default function AnalyticsClient({
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{deadInventory.length}</span>
                 <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
               </div>
+              <div className="overflow-x-auto">
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
                   <tr>
@@ -1253,6 +1261,7 @@ export default function AnalyticsClient({
                   })}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
 
@@ -1268,7 +1277,7 @@ export default function AnalyticsClient({
       {tab === 'orders' && (
         <div className="space-y-6">
 
-          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {[
               { label: 'Cancellation Rate', value: `${cancellationRate}%`, color: '#EF4444' },
               { label: 'Return Rate',        value: `${returnRate}%`,        color: '#EF4444' },
@@ -1277,7 +1286,7 @@ export default function AnalyticsClient({
               { label: 'Revenue Leakage',    value: pkr(cancelledRev + returnedRev), color: '#EF4444' },
             ].map(k => (
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-                <p className="text-xl font-bold" style={{ color: k.color }}>{k.value}</p>
+                <p className="text-base sm:text-xl font-bold break-all" style={{ color: k.color }}>{k.value}</p>
                 <p className="text-xs text-gray-500 mt-1">{k.label}</p>
               </div>
             ))}
