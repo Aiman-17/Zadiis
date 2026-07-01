@@ -182,11 +182,10 @@ function buildRepeatRateTrend(orders: Order[], range: string) {
   orders
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .forEach(o => {
+      if (!o.customer_phone) return
       if (!phoneDates[o.customer_phone]) phoneDates[o.customer_phone] = []
       phoneDates[o.customer_phone].push(o.created_at)
     })
-  Object.values(phoneDates).forEach(d => d.sort())
-
   const bucketMap: Record<string, { label: string; total: number; repeat: number }> = {}
   Object.entries(allBuckets).forEach(([k, v]) => { bucketMap[k] = { label: v.label, total: 0, repeat: 0 } })
 
@@ -253,7 +252,7 @@ export default function AnalyticsClient({
   const grossProfit = qualifyingOrders.reduce((s, o) =>
     s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0) - o.delivery_charge, 0
   )
-  const qualifyingRevenue  = qualifyingOrders.reduce((s, o) => s + o.total, 0)
+  const qualifyingRevenue  = qualifyingOrders.reduce((s, o) => s + o.subtotal, 0)
   const profitMarginPct    = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
   const profitLostToDiscounts = qualifyingOrders.reduce((s, o) =>
     s + (o.items as OrderItem[]).reduce((si, i) => si + ((i.original_price ?? i.price) - i.price) * i.quantity, 0), 0
@@ -693,7 +692,7 @@ export default function AnalyticsClient({
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
                   <XAxis dataKey="label" tick={{ fontSize: 10 }}
                     interval={repeatRateTrend.length > 10 ? Math.ceil(repeatRateTrend.length / 6) - 1 : 0} />
-                  <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} width={38} domain={[0, 'dataMax']} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} width={38} domain={[0, 100]} />
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null

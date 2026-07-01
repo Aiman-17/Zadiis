@@ -185,15 +185,6 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     .filter(s => s.value > 0)
 
   // Trending products (from product scores)
-  function getMerchStockDash(p: Product): number {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return p.stock_quantity
-  }
   const trendingProducts = products
     .filter(p => p.trending_score > 0)
     .sort((a, b) => b.trending_score - a.trending_score)
@@ -203,7 +194,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
       score: p.trending_score,
       category: p.product_category || 'Uncategorized',
-      stock: getMerchStockDash(p),
+      stock: dashStock(p),
       total_sold: p.total_sold,
     }))
 
