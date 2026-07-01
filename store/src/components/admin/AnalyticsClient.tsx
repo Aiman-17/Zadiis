@@ -1,6 +1,6 @@
 'use client'
 import { useState } from 'react'
-import { useRouter, usePathname } from 'next/navigation'
+import { useRouter, usePathname, useSearchParams } from 'next/navigation'
 import {
   LineChart, Line, BarChart, Bar, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
@@ -17,17 +17,16 @@ const RANGE_OPTIONS = [
 const PAYMENT_COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355']
 
 const CANCEL_REASON_LABELS: Record<string, string> = {
-  customer_changed_mind: 'Changed Mind',
-  changed_mind:          'Changed Mind',
-  no_response:           'No Response',
-  wrong_address:         'Wrong Address',
-  duplicate_order:       'Duplicate',
-  out_of_stock:          'Out of Stock',
-  delivery_delay:        'Delivery Delay',
-  delivery_too_slow:     'Delivery Too Slow',
-  ordered_by_mistake:    'Ordered by Mistake',
-  found_better_price:    'Found Better Price',
-  other:                 'Other',
+  changed_mind:       'Changed Mind',
+  no_response:        'No Response',
+  wrong_address:      'Wrong Address',
+  duplicate_order:    'Duplicate',
+  out_of_stock:       'Out of Stock',
+  delivery_delay:     'Delivery Delay',
+  delivery_too_slow:  'Delivery Too Slow',
+  ordered_by_mistake: 'Ordered by Mistake',
+  found_better_price: 'Found Better Price',
+  other:              'Other',
 }
 
 const RETURN_REASON_LABELS: Record<string, string> = {
@@ -51,6 +50,17 @@ function toWeeklySundayKey(d: Date): string {
   const ws = new Date(d)
   ws.setDate(d.getDate() - d.getDay())
   return localDateKey(ws)
+}
+
+// Module-scope so both the inventory loop and merchandising computations can use it
+function getMerchStock(p: Product): number {
+  const vs = p.variant_stock
+  if (vs && Object.keys(vs).length > 0) {
+    return Object.values(vs).reduce(
+      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
+    )
+  }
+  return p.stock_quantity
 }
 
 function buildAllBuckets(range: string, longMonthLabel = false) {
@@ -92,10 +102,10 @@ function buildAllBuckets(range: string, longMonthLabel = false) {
 
 function buildTrendData(orders: Order[], range: string) {
   const isMonthly = range === '12m'
+  const isWeekly  = range === '90d'
   const map = buildAllBuckets(range, false)
 
-  // Fill in daily labels (need locale formatting per-day)
-  if (!isMonthly && range !== '90d') {
+  if (!isMonthly && !isWeekly) {
     Object.keys(map).forEach(key => {
       const [y, m, day] = key.split('-').map(Number)
       const d = new Date(y, m - 1, day)
@@ -103,7 +113,6 @@ function buildTrendData(orders: Order[], range: string) {
     })
   }
 
-  const isWeekly = range === '90d'
   orders.forEach(o => {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
@@ -131,7 +140,6 @@ function buildSalesTrendTable(orders: Order[], range: string) {
   const isWeekly  = range === '90d'
   const map = buildAllBuckets(range, true)
 
-  // Fill in daily labels with weekday
   if (!isMonthly && !isWeekly) {
     Object.keys(map).forEach(key => {
       const [y, m, day] = key.split('-').map(Number)
@@ -144,7 +152,6 @@ function buildSalesTrendTable(orders: Order[], range: string) {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
     let key: string
-
     if (isMonthly) {
       key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
     } else if (isWeekly) {
@@ -152,7 +159,6 @@ function buildSalesTrendTable(orders: Order[], range: string) {
     } else {
       key = localDateKey(d)
     }
-
     if (map[key]) {
       map[key].revenue += o.total
       map[key].orders  += 1
@@ -183,31 +189,29 @@ export default function AnalyticsClient({
   range: string
   allCostPrices?: { id: string; cost_price: number }[]
 }) {
-  const [tab, setTab] = useState<Tab>('revenue')
+  const searchParams = useSearchParams()
+  const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'revenue')
   const router = useRouter()
   const pathname = usePathname()
 
+  // Preserve active tab across range changes so the admin doesn't lose their place
   const setRange = (r: string) => {
-    router.push(`${pathname}?range=${r}`, { scroll: false })
+    router.push(`${pathname}?range=${r}&tab=${tab}`, { scroll: false })
     router.refresh()
   }
 
-  // Revenue
-  const grossRevenue   = orders.reduce((s, o) => s + o.total, 0)
+  // Single source — non-cancelled, non-returned orders
+  const activeOrders = orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+
+  // ── Revenue ────────────────────────────────────────────────────────────────
+  const grossRevenue    = orders.reduce((s, o) => s + o.total, 0)
   const cancelledOrders = orders.filter(o => o.order_status === 'cancelled')
   const returnedOrders  = orders.filter(o => o.order_status === 'returned')
-  const cancelledRev   = cancelledOrders.reduce((s, o) => s + o.total, 0)
-  const returnedRev    = returnedOrders.reduce((s, o) => s + o.total, 0)
-  const netRevenue     = grossRevenue - cancelledRev - returnedRev
-  const discountsGiven = orders
-    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
-    .reduce((s, o) =>
-      s + (o.items as OrderItem[]).reduce((si, i) =>
-        si + ((i.original_price ?? i.price) - i.price) * i.quantity, 0
-      ), 0
-    )
+  const cancelledRev    = cancelledOrders.reduce((s, o) => s + o.total, 0)
+  const returnedRev     = returnedOrders.reduce((s, o) => s + o.total, 0)
+  const netRevenue      = grossRevenue - cancelledRev - returnedRev
 
-  // Profit — only for paid non-COD orders and delivered COD orders
+  // ── Profit — qualifying orders: delivered COD + paid online ────────────────
   const costMap = Object.fromEntries((allCostPrices ?? products).map(p => [p.id, p.cost_price || 0]))
   const qualifyingOrders = orders.filter(o =>
     o.order_status !== 'cancelled' &&
@@ -222,8 +226,9 @@ export default function AnalyticsClient({
       return si + (i.price - cost) * i.quantity
     }, 0), 0
   )
-  const profitMarginPct = netRevenue > 0 ? Math.round((grossProfit / netRevenue) * 100) : 0
-  // How much profit was sacrificed by giving sale/manual discounts on qualifying orders
+  const qualifyingRevenue = qualifyingOrders.reduce((s, o) => s + o.total, 0)
+  // Margin against qualifying revenue so numerator and denominator cover the same order set
+  const profitMarginPct = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
   const profitLostToDiscounts = qualifyingOrders.reduce((s, o) =>
     s + (o.items as OrderItem[]).reduce((si, i) => {
       const originalPrice = i.original_price ?? i.price
@@ -231,47 +236,43 @@ export default function AnalyticsClient({
     }, 0), 0
   )
 
-  // Repeat customers (within selected range)
-  const activeRangeOrders = orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
-  const rangePhoneMap: Record<string, number> = {}
-  activeRangeOrders.forEach(o => {
-    rangePhoneMap[o.customer_phone] = (rangePhoneMap[o.customer_phone] || 0) + 1
+  // ── Repeat customers — qualifying orders only (no in-transit COD) ──────────
+  const qualifyingPhoneMap: Record<string, number> = {}
+  qualifyingOrders.forEach(o => {
+    qualifyingPhoneMap[o.customer_phone] = (qualifyingPhoneMap[o.customer_phone] || 0) + 1
   })
-  const uniqueRangeCustomers = Object.keys(rangePhoneMap).length
-  const repeatRangeCustomers = Object.values(rangePhoneMap).filter(c => c > 1).length
-  const repeatRangeRate = uniqueRangeCustomers > 0
+  const uniqueRangeCustomers  = Object.keys(qualifyingPhoneMap).length
+  const repeatRangeCustomers  = Object.values(qualifyingPhoneMap).filter(c => c > 1).length
+  const repeatRangeRate       = uniqueRangeCustomers > 0
     ? Math.round((repeatRangeCustomers / uniqueRangeCustomers) * 100)
     : 0
-  const avgOrdersPerCustomer = uniqueRangeCustomers > 0
-    ? (activeRangeOrders.length / uniqueRangeCustomers).toFixed(1)
+  const avgOrdersPerCustomer  = uniqueRangeCustomers > 0
+    ? (qualifyingOrders.length / uniqueRangeCustomers).toFixed(1)
     : '0'
 
   const trendData      = buildTrendData(orders, range)
   const salesTrendRows = buildSalesTrendTable(orders, range)
 
-  // Payment methods
+  // ── Payment methods — exclude both cancelled and returned ──────────────────
   const paymentMap: Record<string, number> = {}
-  orders.filter(o => o.order_status !== 'cancelled').forEach(o => {
+  activeOrders.forEach(o => {
     paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1
   })
   const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }))
 
-  // Top products, repeat rates, and color/size breakdown — single pass over qualifying orders
+  // ── Top products, repeat rates, color/size breakdown — single pass ─────────
   const productMap:          Record<string, { units: number; revenue: number }> = {}
   const productRepeatMap:    Record<string, Record<string, number>> = {}
   const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+  activeOrders.forEach(o => {
     ;(o.items as OrderItem[]).forEach(i => {
       if (!productMap[i.product_name])          productMap[i.product_name]          = { units: 0, revenue: 0 }
       if (!productRepeatMap[i.product_name])    productRepeatMap[i.product_name]    = {}
       if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
-
       productMap[i.product_name].units   += i.quantity
       productMap[i.product_name].revenue += i.price * i.quantity
-
       productRepeatMap[i.product_name][o.customer_phone] =
         (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
-
       if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
       if (i.size  && i.size  !== '_') productSizeColorMap[i.product_name].sizes[i.size]   = (productSizeColorMap[i.product_name].sizes[i.size]   || 0) + i.quantity
     })
@@ -288,11 +289,11 @@ export default function AnalyticsClient({
     })
   ) as Record<string, number | null>
 
-  // Colors, Sizes, Cities
+  // ── Colors and Cities (Top Sizes removed — Size Sell-Through in Merchandising is the complete view) ──
   const colorMap: Record<string, number> = {}
-  const sizeMap:  Record<string, number> = {}
+  const sizeMap:  Record<string, number> = {} // still needed for sizeSellThrough
   const cityMap:  Record<string, number> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+  activeOrders.forEach(o => {
     cityMap[o.city] = (cityMap[o.city] || 0) + 1
     ;(o.items as OrderItem[]).forEach(i => {
       if (i.color && i.color !== '_') colorMap[i.color] = (colorMap[i.color] || 0) + i.quantity
@@ -300,18 +301,14 @@ export default function AnalyticsClient({
     })
   })
   const topColors = Object.entries(colorMap).map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
-  const topSizes  = Object.entries(sizeMap) .map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
   const topCities = Object.entries(cityMap) .map(([name, count]) => ({ name, units: count })).sort((a, b) => b.units - a.units).slice(0, 8)
 
-  // Inventory
+  // ── Inventory ──────────────────────────────────────────────────────────────
   const lowStockItems: { name: string; variant: string; qty: number }[] = []
   let inventoryValue = 0
   products.forEach(p => {
     const vs = p.variant_stock
-    const totalStock = vs && Object.keys(vs).length > 0
-      ? Object.values(vs).reduce((sum, sizes) =>
-          sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
-      : p.stock_quantity
+    const totalStock = getMerchStock(p)
     inventoryValue += (p.cost_price || 0) * totalStock
     if (vs && Object.keys(vs).length > 0) {
       Object.entries(vs).forEach(([color, sizes]) =>
@@ -328,10 +325,11 @@ export default function AnalyticsClient({
   })
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
-  // Cancellations
+  // ── Cancellations — normalize customer_changed_mind → changed_mind ─────────
   const reasonMap: Record<string, number> = {}
   cancelledOrders.forEach(o => {
-    const r = o.cancellation_reason || 'other'
+    let r = o.cancellation_reason || 'other'
+    if (r === 'customer_changed_mind') r = 'changed_mind'
     reasonMap[r] = (reasonMap[r] || 0) + 1
   })
   const reasonData = Object.entries(reasonMap)
@@ -341,7 +339,7 @@ export default function AnalyticsClient({
     ? ((cancelledOrders.length / orders.length) * 100).toFixed(1)
     : '0.0'
 
-  // Returns
+  // ── Returns ────────────────────────────────────────────────────────────────
   const returnReasonMap: Record<string, number> = {}
   returnedOrders.forEach(o => {
     const r = (o as Order & { return_reason?: string }).return_reason || 'other'
@@ -355,20 +353,10 @@ export default function AnalyticsClient({
     : '0.0'
 
   // ── Merchandising ──────────────────────────────────────────────────────────
-  function getMerchStock(p: Product): number {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return p.stock_quantity
-  }
-
-  // Category performance (from range orders)
+  // Category performance — single source of truth (removed from Products tab)
   const productCategoryMap = Object.fromEntries(products.map(p => [p.id, p.product_category || 'Uncategorized']))
   const categoryPerfMap: Record<string, { revenue: number; units: number; orderCount: number }> = {}
-  orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+  activeOrders.forEach(o => {
     const catsInOrder = new Set<string>()
     ;(o.items as OrderItem[]).forEach(item => {
       const cat = productCategoryMap[item.product_id] || 'Uncategorized'
@@ -393,7 +381,7 @@ export default function AnalyticsClient({
   const priceRefMap = Object.fromEntries(products.map(p => [p.id, p.price]))
   const priceRangeStats = priceRangeBuckets.map(r => {
     let rev = 0, units = 0, cnt = 0
-    orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned').forEach(o => {
+    activeOrders.forEach(o => {
       let inRange = false
       ;(o.items as OrderItem[]).forEach(item => {
         const price = priceRefMap[item.product_id] ?? item.price
@@ -404,7 +392,7 @@ export default function AnalyticsClient({
     return { label: r.label, revenue: rev, units, orderCount: cnt }
   })
 
-  // Size sell-through (sold vs remaining stock)
+  // Size sell-through (sold in period vs current stock)
   const sizeInventory: Record<string, number> = {}
   products.forEach(p => {
     const vs = p.variant_stock
@@ -426,7 +414,7 @@ export default function AnalyticsClient({
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 10)
 
-  // Slow movers — relative: below 50% of store average sell-through, 15+ days old, in stock
+  // Slow movers
   const eligibleMerch = products.filter(p => {
     const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
     return age >= 15 && getMerchStock(p) > 0
@@ -454,7 +442,7 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => a.velocity - b.velocity)
 
-  // Dead inventory (no sales + stock ≥ 10 + older than 15 days)
+  // Dead inventory (moved to Inventory tab)
   const deadInventory = products
     .filter(p => {
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
@@ -463,7 +451,7 @@ export default function AnalyticsClient({
     .map(p => ({ ...p, stock: getMerchStock(p), ageDays: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) }))
     .sort((a, b) => b.stock - a.stock)
 
-  // New arrivals (last 30 days)
+  // New arrivals (single source in Merchandising)
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
   const newArrivals = products
     .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
@@ -473,7 +461,7 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  // ── Inventory tab: category breakdown + flag signals ──────────────────────
+  // ── Inventory tab ──────────────────────────────────────────────────────────
   const categoryStockMap: Record<string, { stock: number; sold: number; count: number }> = {}
   products.forEach(p => {
     const cat = p.product_category || 'Uncategorized'
@@ -486,6 +474,7 @@ export default function AnalyticsClient({
     .map(([cat, d]) => ({ cat, ...d }))
     .sort((a, b) => b.stock - a.stock)
 
+  // Restock signals — moved to Merchandising tab
   const invBestSellers = products
     .filter(p => p.is_bestseller || p.best_seller_score > 0)
     .sort((a, b) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0) || b.best_seller_score - a.best_seller_score)
@@ -495,12 +484,6 @@ export default function AnalyticsClient({
   const invTrending = products
     .filter(p => p.is_trending || p.trending_score > 0)
     .sort((a, b) => (b.is_trending ? 1 : 0) - (a.is_trending ? 1 : 0) || b.trending_score - a.trending_score)
-    .slice(0, 8)
-    .map(p => ({ ...p, stock: getMerchStock(p) }))
-
-  const invNewArrivals = products
-    .filter(p => p.is_new_arrival || new Date(p.created_at) >= thirtyDaysAgo)
-    .sort((a, b) => (b.is_new_arrival ? 1 : 0) - (a.is_new_arrival ? 1 : 0) || new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
     .slice(0, 8)
     .map(p => ({ ...p, stock: getMerchStock(p) }))
 
@@ -542,17 +525,17 @@ export default function AnalyticsClient({
         ))}
       </div>
 
-      {/* Revenue Tab */}
+      {/* ── Revenue Tab ──────────────────────────────────────────────────────── */}
       {tab === 'revenue' && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: 'Gross Revenue',       value: pkr(grossRevenue), color: '#1C1C1C' },
-              { label: 'Net Revenue',         value: pkr(netRevenue),   color: '#10B981' },
-              { label: 'Gross Profit',        value: pkr(grossProfit),  color: grossProfit >= 0 ? '#10B981' : '#EF4444',
+              { label: 'Gross Revenue',         value: pkr(grossRevenue),   color: '#1C1C1C' },
+              { label: 'Net Revenue',           value: pkr(netRevenue),     color: '#10B981' },
+              { label: 'Gross Profit',          value: pkr(grossProfit),    color: grossProfit >= 0 ? '#10B981' : '#EF4444',
                 sub: `${profitMarginPct}% margin · COD counted on delivery` },
-              { label: 'Unique Customers',    value: uniqueRangeCustomers.toString(), color: '#1C1C1C' },
-              { label: 'Repeat Rate',         value: `${repeatRangeRate}%`,
+              { label: 'Unique Customers',      value: uniqueRangeCustomers.toString(), color: '#1C1C1C' },
+              { label: 'Repeat Rate',           value: `${repeatRangeRate}%`,
                 color: repeatRangeRate > 0 ? '#A68B6E' : '#9CA3AF',
                 sub: `${repeatRangeCustomers} repeat customers` },
               { label: 'Avg Orders / Customer', value: avgOrdersPerCustomer, color: '#1C1C1C' },
@@ -567,16 +550,11 @@ export default function AnalyticsClient({
             ))}
           </div>
 
-          {/* Discount impact — only shown when discounts were given */}
           {profitLostToDiscounts > 0 && (
             <div className="rounded-lg px-4 py-3 flex items-center justify-between text-sm"
               style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
-              <span style={{ color: '#6B7280' }}>
-                Profit reduced by discounts/sales this period:
-              </span>
-              <span className="font-semibold" style={{ color: '#C62828' }}>
-                −{pkr(profitLostToDiscounts)}
-              </span>
+              <span style={{ color: '#6B7280' }}>Profit reduced by discounts/sales this period:</span>
+              <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(profitLostToDiscounts)}</span>
             </div>
           )}
 
@@ -594,58 +572,41 @@ export default function AnalyticsClient({
             </ResponsiveContainer>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-              <h3 className="font-semibold mb-4">Orders Trend</h3>
-              <ResponsiveContainer width="100%" height={200}>
-                <LineChart data={trendData}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
-                  <XAxis dataKey="label" tick={{ fontSize: 11 }} />
-                  <YAxis tick={{ fontSize: 11 }} allowDecimals={false} width={30} />
-                  <Tooltip />
-                  <Line type="monotone" dataKey="orders" stroke="#1C1C1C" strokeWidth={2}
-                    dot={{ fill: '#1C1C1C', r: 3 }} name="Orders" />
-                </LineChart>
-              </ResponsiveContainer>
-            </div>
-
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-              <h3 className="font-semibold mb-4">Payment Methods</h3>
-              {paymentData.length > 0 ? (
-                <>
-                  <ResponsiveContainer width="100%" height={160}>
-                    <PieChart>
-                      <Pie data={paymentData} dataKey="value" nameKey="name"
-                        cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
-                        {paymentData.map((_, i) => (
-                          <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />
-                        ))}
-                      </Pie>
-                      <Tooltip />
-                    </PieChart>
-                  </ResponsiveContainer>
-                  <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
-                    {paymentData.map((p, i) => (
-                      <div key={p.name} className="flex items-center gap-1.5 text-xs">
-                        <span className="w-2.5 h-2.5 rounded-full inline-block"
-                          style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
-                        <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
-                      </div>
-                    ))}
-                  </div>
-                </>
-              ) : (
-                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
-              )}
-            </div>
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Payment Methods</h3>
+            {paymentData.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={160}>
+                  <PieChart>
+                    <Pie data={paymentData} dataKey="value" nameKey="name"
+                      cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
+                      {paymentData.map((_, i) => (
+                        <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+                <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
+                  {paymentData.map((p, i) => (
+                    <div key={p.name} className="flex items-center gap-1.5 text-xs">
+                      <span className="w-2.5 h-2.5 rounded-full inline-block"
+                        style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
+                      <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
+                    </div>
+                  ))}
+                </div>
+              </>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+            )}
           </div>
         </div>
       )}
 
-      {/* Sales Trend Tab */}
+      {/* ── Sales Trend Tab ───────────────────────────────────────────────────── */}
       {tab === 'trend' && (
         <div className="space-y-6">
-          {/* Chart — orders per period, revenue on hover */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Sales Trend</h3>
@@ -684,7 +645,6 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* Period breakdown table */}
           <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
             <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
               <h3 className="font-semibold text-sm">Period Breakdown</h3>
@@ -707,9 +667,7 @@ export default function AnalyticsClient({
                       <tr key={i} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
                         <td className="px-5 py-3">{row.label}</td>
                         <td className="px-5 py-3 text-right" style={{ color: '#6B7280' }}>{row.orders}</td>
-                        <td className="px-5 py-3 text-right font-medium">
-                          PKR {row.revenue.toLocaleString()}
-                        </td>
+                        <td className="px-5 py-3 text-right font-medium">PKR {row.revenue.toLocaleString()}</td>
                         <td className="px-5 py-3 text-right">
                           {row.growth === null ? (
                             <span style={{ color: '#D1D5DB' }}>—</span>
@@ -743,7 +701,7 @@ export default function AnalyticsClient({
         </div>
       )}
 
-      {/* Products Tab */}
+      {/* ── Products Tab — what sold, by product / color / city ──────────────── */}
       {tab === 'products' && (
         <div className="space-y-6">
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
@@ -760,17 +718,17 @@ export default function AnalyticsClient({
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as { name: string; units: number; revenue: number }
                         const detail = productSizeColorMap[d.name]
-                        const topColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
-                        const topSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                        const dColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
+                        const dSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
                         return (
                           <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-1" style={{ borderColor: '#E8DDD4' }}>
                             <p className="font-semibold">{d.name}</p>
                             <p style={{ color: '#A68B6E' }}>{d.units} units · {pkr(d.revenue)}</p>
-                            {topColors.length > 0 && (
-                              <p style={{ color: '#6B7280' }}>Colors: {topColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
+                            {dColors.length > 0 && (
+                              <p style={{ color: '#6B7280' }}>Colors: {dColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
                             )}
-                            {topSizes.length > 0 && (
-                              <p style={{ color: '#6B7280' }}>Sizes: {topSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
+                            {dSizes.length > 0 && (
+                              <p style={{ color: '#6B7280' }}>Sizes: {dSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
                             )}
                           </div>
                         )
@@ -797,7 +755,7 @@ export default function AnalyticsClient({
                           <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{p.units}</td>
                           <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{pkr(p.revenue)}</td>
                           <td className="py-1.5 text-right font-medium"
-                            style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : '#374151' }}>
+                            style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : rr === 0 ? '#EF4444' : '#374151' }}>
                             {rr == null ? '—' : `${rr}%`}
                           </td>
                         </tr>
@@ -811,44 +769,10 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* Category Sales Chart */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-1">Sales by Category</h3>
-            <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Which categories are selling fastest this period</p>
-            {categoryPerf.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No category data — assign product_category to products first.</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={Math.max(160, categoryPerf.length * 44)}>
-                <BarChart data={categoryPerf} layout="vertical" margin={{ left: 8, right: 40 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
-                  <YAxis type="category" dataKey="cat" tick={{ fontSize: 11 }} width={80} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as { cat: string; revenue: number; units: number; orderCount: number }
-                      return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
-                          <p className="font-semibold mb-1">{d.cat}</p>
-                          <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)}</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units · {d.orderCount} orders</p>
-                        </div>
-                      )
-                    }}
-                  />
-                  <Bar dataKey="revenue" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Revenue">
-                    {categoryPerf.map((_, i) => (
-                      <Cell key={i} fill={i === 0 ? '#1C1C1C' : i === 1 ? '#A68B6E' : '#C9A87C'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          {/* Colors + Cities — Sizes live in Merchandising → Size Sell-Through */}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {[
               { title: 'Top Colors', data: topColors },
-              { title: 'Top Sizes',  data: topSizes },
               { title: 'Top Cities', data: topCities },
             ].map(chart => (
               <div key={chart.title} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
@@ -871,31 +795,45 @@ export default function AnalyticsClient({
         </div>
       )}
 
-      {/* Inventory Tab */}
+      {/* ── Inventory Tab — stock health only ────────────────────────────────── */}
       {tab === 'inventory' && (
         <div className="space-y-6">
 
-          {/* Summary KPIs */}
+          {/* KPIs: stock-health metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold">{pkr(inventoryValue)}</p>
-              <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
+              {inventoryValue === 0 && products.length > 0 ? (
+                <>
+                  <p className="text-xl font-bold">PKR 0</p>
+                  <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
+                  <p className="text-xs mt-0.5" style={{ color: '#F59E0B' }}>Set cost prices on products to calculate</p>
+                </>
+              ) : (
+                <>
+                  <p className="text-xl font-bold">{pkr(inventoryValue)}</p>
+                  <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
+                </>
+              )}
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold">{invBestSellers.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#92400E' }}>Best Sellers tracked</p>
+              <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? '#F59E0B' : '#10B981' }}>
+                {lowStockItems.length}
+              </p>
+              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Low Stock variants</p>
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold">{invTrending.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#9D174D' }}>Trending products</p>
+              <p className="text-xl font-bold" style={{ color: deadInventory.length > 0 ? '#EF4444' : '#10B981' }}>
+                {deadInventory.length}
+              </p>
+              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Dead Stock items</p>
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold">{invNewArrivals.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#5B21B6' }}>New Arrivals (30d)</p>
+              <p className="text-xl font-bold">{products.length}</p>
+              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Total SKUs</p>
             </div>
           </div>
 
-          {/* Category inventory bar chart */}
+          {/* Stock by Collection */}
           {categoryStockData.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <h3 className="font-semibold mb-1">Stock by Collection</h3>
@@ -926,88 +864,99 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* Flag-based restock signals */}
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-            {/* ★ Best Sellers */}
+          {/* Low Stock list */}
+          {lowStockItems.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
-                <span className="text-sm font-semibold" style={{ color: '#92400E' }}>★ Best Sellers</span>
-                <span className="text-xs ml-auto" style={{ color: '#B45309' }}>restock priority</span>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
+                <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>⚠ Low Stock</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full ml-1"
+                  style={{ backgroundColor: '#FEF9C3', color: '#92400E' }}>{lowStockItems.length}</span>
+                <span className="text-xs ml-auto" style={{ color: '#B45309' }}>1–3 units remaining</span>
               </div>
-              {invBestSellers.length === 0 ? (
-                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No best sellers yet. Flag products or let scoring run.</p>
-              ) : (
-                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                  {invBestSellers.map(p => (
-                    <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium truncate">{p.name}</p>
-                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</p>
-                      </div>
-                      <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
-                        style={p.stock === 0
-                          ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                          : p.stock <= 5
-                          ? { backgroundColor: '#FEF9C3', color: '#92400E' }
-                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
-                        {p.stock === 0 ? 'OUT' : `${p.stock} left`}
-                      </span>
+              <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                {lowStockItems.map((item, i) => (
+                  <div key={i} className="px-5 py-2.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium truncate">{item.name}</p>
+                      {item.variant && (
+                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{item.variant}</p>
+                      )}
                     </div>
-                  ))}
-                </div>
-              )}
-            </div>
-
-            {/* ↑ Trending */}
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FDF2F8' }}>
-                <span className="text-sm font-semibold" style={{ color: '#9D174D' }}>↑ Trending</span>
-                <span className="text-xs ml-auto" style={{ color: '#BE185D' }}>moving fast</span>
+                    <span className="text-xs font-semibold shrink-0 px-2 py-0.5 rounded"
+                      style={{ backgroundColor: item.qty === 1 ? '#FEE2E2' : '#FEF9C3', color: item.qty === 1 ? '#DC2626' : '#92400E' }}>
+                      {item.qty} left
+                    </span>
+                  </div>
+                ))}
               </div>
-              {invTrending.length === 0 ? (
-                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No trending products yet. Scoring updates after orders.</p>
-              ) : (
-                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                  {invTrending.map(p => (
-                    <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-medium truncate">{p.name}</p>
-                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold · ↑{p.trending_score.toFixed(1)}</p>
-                      </div>
-                      <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
-                        style={p.stock === 0
-                          ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                          : p.stock <= 5
-                          ? { backgroundColor: '#FEF9C3', color: '#92400E' }
-                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
-                        {p.stock === 0 ? 'OUT' : `${p.stock} left`}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              )}
             </div>
+          )}
 
-            {/* ✦ New Arrivals */}
+          {/* Dead Inventory */}
+          {deadInventory.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#F5F3FF' }}>
-                <span className="text-sm font-semibold" style={{ color: '#5B21B6' }}>✦ New Arrivals</span>
-                <span className="text-xs ml-auto" style={{ color: '#6D28D9' }}>last 30 days</span>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Dead Inventory</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full"
+                  style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
+                  {deadInventory.length}
+                </span>
+                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
               </div>
-              {invNewArrivals.length === 0 ? (
-                <p className="px-4 py-3 text-xs" style={{ color: '#9CA3AF' }}>No new arrivals in the last 30 days.</p>
-              ) : (
-                <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                  {invNewArrivals.map(p => {
-                    const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000)
-                    return (
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deadInventory.map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && (
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
+                        )}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
+                      <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {lowStockItems.length === 0 && deadInventory.length === 0 && (
+            <p className="text-sm py-4" style={{ color: '#10B981' }}>No stock health issues detected.</p>
+          )}
+        </div>
+      )}
+
+      {/* ── Merchandising Tab — demand signals + actionable priorities ─────────── */}
+      {tab === 'merchandising' && (
+        <div className="space-y-6">
+
+          {/* Restock Signals — Best Sellers + Trending (moved from Inventory) */}
+          {(invBestSellers.length > 0 || invTrending.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+
+              {invBestSellers.length > 0 && (
+                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
+                    <span className="text-sm font-semibold" style={{ color: '#92400E' }}>★ Best Sellers</span>
+                    <span className="text-xs ml-auto" style={{ color: '#B45309' }}>restock priority</span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                    {invBestSellers.map(p => (
                       <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
                         <div className="min-w-0 flex-1">
                           <p className="text-xs font-medium truncate">{p.name}</p>
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>
-                            {ageDays === 0 ? 'today' : `${ageDays}d ago`} · {p.total_sold} sold
-                          </p>
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</p>
                         </div>
                         <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
                           style={p.stock === 0
@@ -1018,21 +967,41 @@ export default function AnalyticsClient({
                           {p.stock === 0 ? 'OUT' : `${p.stock} left`}
                         </span>
                       </div>
-                    )
-                  })}
+                    ))}
+                  </div>
+                </div>
+              )}
+
+              {invTrending.length > 0 && (
+                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FDF2F8' }}>
+                    <span className="text-sm font-semibold" style={{ color: '#9D174D' }}>↑ Trending</span>
+                    <span className="text-xs ml-auto" style={{ color: '#BE185D' }}>moving fast</span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                    {invTrending.map(p => (
+                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{p.name}</p>
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold · ↑{p.trending_score.toFixed(1)}</p>
+                        </div>
+                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                          style={p.stock === 0
+                            ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                            : p.stock <= 5
+                            ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
                 </div>
               )}
             </div>
+          )}
 
-          </div>
-        </div>
-      )}
-
-      {/* Merchandising Tab */}
-      {tab === 'merchandising' && (
-        <div className="space-y-6">
-
-          {/* Category Performance */}
+          {/* Category Performance — single source of truth for category revenue */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <h3 className="font-semibold mb-4">Category Performance</h3>
             {categoryPerf.length === 0 ? (
@@ -1077,7 +1046,7 @@ export default function AnalyticsClient({
             </div>
           </div>
 
-          {/* Size Sell-Through */}
+          {/* Size Sell-Through — single source for size data (replaces Top Sizes chart in Products) */}
           {sizeSellThrough.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <div className="flex items-baseline gap-2 mb-4">
@@ -1100,7 +1069,7 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* New Arrivals Performance */}
+          {/* New Arrivals Performance — single source */}
           {newArrivals.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
               <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
@@ -1152,81 +1121,48 @@ export default function AnalyticsClient({
             {slowMovers.length === 0 ? (
               <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>
             ) : (
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
-                  <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {slowMovers.slice(0, 15).map(p => (
-                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="px-5 py-3">
-                        <p className="font-medium">{p.name}</p>
-                        {p.product_category && (
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
-                      <td className="px-4 py-3 text-right">{p.total_sold}</td>
-                      <td className="px-4 py-3 text-right">{p.stock}</td>
-                      <td className="px-5 py-3 text-right text-xs font-medium" style={{ color: '#DC2626' }}>
-                        {p.velocity > 0 ? `${p.velocity.toFixed(2)}/d` : 'no sales'}
-                      </td>
+              <>
+                <table className="w-full text-sm">
+                  <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                    <tr>
+                      <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                      <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {slowMovers.slice(0, 15).map(p => (
+                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                        <td className="px-5 py-3">
+                          <p className="font-medium">{p.name}</p>
+                          {p.product_category && (
+                            <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
+                          )}
+                        </td>
+                        <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                        <td className="px-4 py-3 text-right">{p.total_sold}</td>
+                        <td className="px-4 py-3 text-right">{p.stock}</td>
+                        <td className="px-5 py-3 text-right text-xs font-medium" style={{ color: '#DC2626' }}>
+                          {p.velocity > 0 ? `${p.velocity.toFixed(2)}/d` : 'no sales'}
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+                {slowMovers.length > 15 && (
+                  <p className="px-5 py-2.5 text-xs border-t" style={{ color: '#9CA3AF', borderColor: '#F3F4F6' }}>
+                    …and {slowMovers.length - 15} more slow movers not shown
+                  </p>
+                )}
+              </>
             )}
           </div>
-
-          {/* Dead Inventory */}
-          {deadInventory.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold text-sm">Dead Inventory</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
-                  {deadInventory.length}
-                </span>
-                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
-                  <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deadInventory.map(p => (
-                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="px-5 py-3">
-                        <p className="font-medium">{p.name}</p>
-                        {p.product_category && (
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
-                      <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
-                      <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
         </div>
       )}
 
-      {/* Cancellations Tab */}
+      {/* ── Cancellations Tab ─────────────────────────────────────────────────── */}
       {tab === 'cancellations' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -1262,14 +1198,14 @@ export default function AnalyticsClient({
         </div>
       )}
 
-      {/* Returns Tab */}
+      {/* ── Returns Tab ───────────────────────────────────────────────────────── */}
       {tab === 'returns' && (
         <div className="space-y-6">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             {[
-              { label: 'Return Rate',     value: `${returnRate}%`,          color: '#EF4444' },
-              { label: 'Orders Returned', value: returnedOrders.length,     color: '#1C1C1C' },
-              { label: 'Revenue Lost',    value: pkr(returnedRev),          color: '#EF4444' },
+              { label: 'Return Rate',     value: `${returnRate}%`,     color: '#EF4444' },
+              { label: 'Orders Returned', value: returnedOrders.length, color: '#1C1C1C' },
+              { label: 'Revenue Lost',    value: pkr(returnedRev),     color: '#EF4444' },
             ].map(k => (
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
                 <p className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</p>
