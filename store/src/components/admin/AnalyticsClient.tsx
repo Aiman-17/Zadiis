@@ -164,6 +164,56 @@ function buildSalesTrendTable(orders: Order[], range: string) {
   })
 }
 
+function buildRepeatRateTrend(orders: Order[], range: string) {
+  const isMonthly = range === '12m'
+  const isWeekly  = range === '90d'
+  const allBuckets = buildAllBuckets(range, false)
+
+  if (!isMonthly && !isWeekly) {
+    Object.keys(allBuckets).forEach(key => {
+      const [y, m, day] = key.split('-').map(Number)
+      const d = new Date(y, m - 1, day)
+      allBuckets[key].label = d.toLocaleDateString('default', { month: 'short', day: 'numeric' })
+    })
+  }
+
+  // Sorted order dates per customer (active orders only)
+  const phoneDates: Record<string, string[]> = {}
+  orders
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .forEach(o => {
+      if (!phoneDates[o.customer_phone]) phoneDates[o.customer_phone] = []
+      phoneDates[o.customer_phone].push(o.created_at)
+    })
+  Object.values(phoneDates).forEach(d => d.sort())
+
+  const bucketMap: Record<string, { label: string; total: number; repeat: number }> = {}
+  Object.entries(allBuckets).forEach(([k, v]) => { bucketMap[k] = { label: v.label, total: 0, repeat: 0 } })
+
+  orders
+    .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
+    .forEach(o => {
+      const d = new Date(o.created_at)
+      let key: string
+      if (isMonthly)     key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+      else if (isWeekly) key = toWeeklySundayKey(d)
+      else               key = localDateKey(d)
+      if (!bucketMap[key]) return
+      bucketMap[key].total++
+      const hasEarlier = (phoneDates[o.customer_phone] || []).some(dt => dt < o.created_at)
+      if (hasEarlier) bucketMap[key].repeat++
+    })
+
+  return Object.entries(bucketMap)
+    .sort(([a], [b]) => a.localeCompare(b))
+    .map(([, v]) => ({
+      label:  v.label,
+      rate:   v.total > 0 ? Math.round((v.repeat / v.total) * 100) : 0,
+      total:  v.total,
+      repeat: v.repeat,
+    }))
+}
+
 export default function AnalyticsClient({
   orders,
   products,
@@ -219,8 +269,9 @@ export default function AnalyticsClient({
   const avgOrdersPerCustomer = uniqueRangeCustomers > 0 ? (qualifyingOrders.length / uniqueRangeCustomers).toFixed(1) : '0'
 
   const trendData      = buildTrendData(orders, range)
-  const salesTrendRows = buildSalesTrendTable(orders, range)
-  const salesMaxOrders = Math.max(...salesTrendRows.map(r => r.orders), 1)
+  const salesTrendRows   = buildSalesTrendTable(orders, range)
+  const salesMaxOrders   = Math.max(...salesTrendRows.map(r => r.orders), 1)
+  const repeatRateTrend  = buildRepeatRateTrend(orders, range)
 
   const paymentMap: Record<string, number> = {}
   activeOrders.forEach(o => { paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1 })
@@ -605,30 +656,62 @@ export default function AnalyticsClient({
             </ResponsiveContainer>
           </div>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Payment Methods</h3>
-            {paymentData.length > 0 ? (
-              <>
-                <ResponsiveContainer width="100%" height={160}>
-                  <PieChart>
-                    <Pie data={paymentData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
-                      {paymentData.map((_, i) => <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />)}
-                    </Pie>
-                    <Tooltip />
-                  </PieChart>
-                </ResponsiveContainer>
-                <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
-                  {paymentData.map((p, i) => (
-                    <div key={p.name} className="flex items-center gap-1.5 text-xs">
-                      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
-                      <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
-                    </div>
-                  ))}
-                </div>
-              </>
-            ) : (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
-            )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            {/* Payment Methods */}
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-4">Payment Methods</h3>
+              {paymentData.length > 0 ? (
+                <>
+                  <ResponsiveContainer width="100%" height={160}>
+                    <PieChart>
+                      <Pie data={paymentData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
+                        {paymentData.map((_, i) => <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />)}
+                      </Pie>
+                      <Tooltip />
+                    </PieChart>
+                  </ResponsiveContainer>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
+                    {paymentData.map((p, i) => (
+                      <div key={p.name} className="flex items-center gap-1.5 text-xs">
+                        <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
+                        <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
+                      </div>
+                    ))}
+                  </div>
+                </>
+              ) : (
+                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+              )}
+            </div>
+
+            {/* Repeat Rate Trend */}
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-1">Repeat Rate Trend</h3>
+              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>% of orders from returning customers per period</p>
+              <ResponsiveContainer width="100%" height={180}>
+                <LineChart data={repeatRateTrend}>
+                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
+                  <XAxis dataKey="label" tick={{ fontSize: 10 }}
+                    interval={repeatRateTrend.length > 10 ? Math.ceil(repeatRateTrend.length / 6) - 1 : 0} />
+                  <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} width={38} domain={[0, 'dataMax']} />
+                  <Tooltip
+                    content={({ active, payload, label }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as typeof repeatRateTrend[0]
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                          <p className="font-semibold mb-1">{label}</p>
+                          <p style={{ color: '#A68B6E' }}>{d.rate}% repeat rate</p>
+                          <p style={{ color: '#6B7280' }}>{d.repeat} repeat · {d.total} total orders</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Line type="monotone" dataKey="rate" stroke="#C9956C" strokeWidth={2.5}
+                    dot={{ fill: '#C9956C', r: 3 }} name="Repeat Rate %" />
+                </LineChart>
+              </ResponsiveContainer>
+            </div>
           </div>
         </div>
       )}
