@@ -38,7 +38,7 @@ const RETURN_REASON_LABELS: Record<string, string> = {
   other:           'Other',
 }
 
-type Tab = 'revenue' | 'trend' | 'products' | 'inventory' | 'merchandising' | 'cancellations' | 'returns'
+type Tab = 'revenue' | 'performance' | 'inventory' | 'orders'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString()}` }
 
@@ -52,7 +52,6 @@ function toWeeklySundayKey(d: Date): string {
   return localDateKey(ws)
 }
 
-// Module-scope so both the inventory loop and merchandising computations can use it
 function getMerchStock(p: Product): number {
   const vs = p.variant_stock
   if (vs && Object.keys(vs).length > 0) {
@@ -65,7 +64,7 @@ function getMerchStock(p: Product): number {
 
 function buildAllBuckets(range: string, longMonthLabel = false) {
   const today = new Date()
-  const map: Record<string, { label: string; revenue: number; orders: number }> = {}
+  const map: Record<string, { label: string; revenue: number; orders: number; units: number }> = {}
 
   if (range === '12m') {
     for (let i = 11; i >= 0; i--) {
@@ -74,7 +73,7 @@ function buildAllBuckets(range: string, longMonthLabel = false) {
       const label = longMonthLabel
         ? d.toLocaleString('default', { month: 'long', year: 'numeric' })
         : d.toLocaleString('default', { month: 'short', year: '2-digit' })
-      map[key] = { label, revenue: 0, orders: 0 }
+      map[key] = { label, revenue: 0, orders: 0, units: 0 }
     }
   } else if (range === '90d') {
     const start = new Date(today)
@@ -85,7 +84,7 @@ function buildAllBuckets(range: string, longMonthLabel = false) {
     while (cur <= today) {
       const key = localDateKey(cur)
       const label = `Week of ${cur.toLocaleDateString('default', { month: 'short', day: 'numeric' })}`
-      map[key] = { label, revenue: 0, orders: 0 }
+      map[key] = { label, revenue: 0, orders: 0, units: 0 }
       cur.setDate(cur.getDate() + 7)
     }
   } else {
@@ -94,7 +93,7 @@ function buildAllBuckets(range: string, longMonthLabel = false) {
       const d = new Date(today)
       d.setDate(today.getDate() - i)
       const key = localDateKey(d)
-      map[key] = { label: '', revenue: 0, orders: 0 }
+      map[key] = { label: '', revenue: 0, orders: 0, units: 0 }
     }
   }
   return map
@@ -117,22 +116,13 @@ function buildTrendData(orders: Order[], range: string) {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
     let key: string
-    if (isMonthly) {
-      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    } else if (isWeekly) {
-      key = toWeeklySundayKey(d)
-    } else {
-      key = localDateKey(d)
-    }
-    if (map[key]) {
-      map[key].revenue += o.total
-      map[key].orders  += 1
-    }
+    if (isMonthly)      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    else if (isWeekly)  key = toWeeklySundayKey(d)
+    else                key = localDateKey(d)
+    if (map[key]) { map[key].revenue += o.total; map[key].orders += 1 }
   })
 
-  return Object.entries(map)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, v]) => v)
+  return Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v)
 }
 
 function buildSalesTrendTable(orders: Order[], range: string) {
@@ -152,29 +142,25 @@ function buildSalesTrendTable(orders: Order[], range: string) {
     if (o.order_status === 'cancelled' || o.order_status === 'returned') return
     const d = new Date(o.created_at)
     let key: string
-    if (isMonthly) {
-      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
-    } else if (isWeekly) {
-      key = toWeeklySundayKey(d)
-    } else {
-      key = localDateKey(d)
-    }
+    if (isMonthly)      key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`
+    else if (isWeekly)  key = toWeeklySundayKey(d)
+    else                key = localDateKey(d)
     if (map[key]) {
       map[key].revenue += o.total
       map[key].orders  += 1
+      map[key].units   += (o.items as OrderItem[]).reduce((s, i) => s + i.quantity, 0)
     }
   })
 
-  const rows = Object.entries(map)
-    .sort(([a], [b]) => a.localeCompare(b))
-    .map(([, v]) => v)
+  const rows = Object.entries(map).sort(([a], [b]) => a.localeCompare(b)).map(([, v]) => v)
 
   return rows.map((row, i) => {
     const prev   = rows[i - 1]
     const growth = prev && prev.revenue > 0
       ? Math.round(((row.revenue - prev.revenue) / prev.revenue) * 100)
       : null
-    return { ...row, growth }
+    const aov = row.orders > 0 ? Math.round(row.revenue / row.orders) : 0
+    return { ...row, growth, aov }
   })
 }
 
@@ -194,13 +180,11 @@ export default function AnalyticsClient({
   const router = useRouter()
   const pathname = usePathname()
 
-  // Preserve active tab across range changes so the admin doesn't lose their place
   const setRange = (r: string) => {
     router.push(`${pathname}?range=${r}&tab=${tab}`, { scroll: false })
     router.refresh()
   }
 
-  // Single source — non-cancelled, non-returned orders
   const activeOrders = orders.filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
 
   // ── Revenue ────────────────────────────────────────────────────────────────
@@ -211,56 +195,37 @@ export default function AnalyticsClient({
   const returnedRev     = returnedOrders.reduce((s, o) => s + o.total, 0)
   const netRevenue      = grossRevenue - cancelledRev - returnedRev
 
-  // ── Profit — qualifying orders: delivered COD + paid online ────────────────
   const costMap = Object.fromEntries((allCostPrices ?? products).map(p => [p.id, p.cost_price || 0]))
   const qualifyingOrders = orders.filter(o =>
-    o.order_status !== 'cancelled' &&
-    o.order_status !== 'returned' &&
-    (o.payment_method === 'cod'
-      ? o.order_status === 'delivered'
-      : o.payment_status === 'paid')
+    o.order_status !== 'cancelled' && o.order_status !== 'returned' &&
+    (o.payment_method === 'cod' ? o.order_status === 'delivered' : o.payment_status === 'paid')
   )
   const grossProfit = qualifyingOrders.reduce((s, o) =>
-    s + (o.items as OrderItem[]).reduce((si, i) => {
-      const cost = costMap[i.product_id] || 0
-      return si + (i.price - cost) * i.quantity
-    }, 0), 0
+    s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0), 0
   )
-  const qualifyingRevenue = qualifyingOrders.reduce((s, o) => s + o.total, 0)
-  // Margin against qualifying revenue so numerator and denominator cover the same order set
-  const profitMarginPct = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
+  const qualifyingRevenue  = qualifyingOrders.reduce((s, o) => s + o.total, 0)
+  const profitMarginPct    = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
   const profitLostToDiscounts = qualifyingOrders.reduce((s, o) =>
-    s + (o.items as OrderItem[]).reduce((si, i) => {
-      const originalPrice = i.original_price ?? i.price
-      return si + (originalPrice - i.price) * i.quantity
-    }, 0), 0
+    s + (o.items as OrderItem[]).reduce((si, i) => si + ((i.original_price ?? i.price) - i.price) * i.quantity, 0), 0
   )
 
-  // ── Repeat customers — qualifying orders only (no in-transit COD) ──────────
   const qualifyingPhoneMap: Record<string, number> = {}
   qualifyingOrders.forEach(o => {
     qualifyingPhoneMap[o.customer_phone] = (qualifyingPhoneMap[o.customer_phone] || 0) + 1
   })
-  const uniqueRangeCustomers  = Object.keys(qualifyingPhoneMap).length
-  const repeatRangeCustomers  = Object.values(qualifyingPhoneMap).filter(c => c > 1).length
-  const repeatRangeRate       = uniqueRangeCustomers > 0
-    ? Math.round((repeatRangeCustomers / uniqueRangeCustomers) * 100)
-    : 0
-  const avgOrdersPerCustomer  = uniqueRangeCustomers > 0
-    ? (qualifyingOrders.length / uniqueRangeCustomers).toFixed(1)
-    : '0'
+  const uniqueRangeCustomers = Object.keys(qualifyingPhoneMap).length
+  const repeatRangeCustomers = Object.values(qualifyingPhoneMap).filter(c => c > 1).length
+  const repeatRangeRate      = uniqueRangeCustomers > 0 ? Math.round((repeatRangeCustomers / uniqueRangeCustomers) * 100) : 0
+  const avgOrdersPerCustomer = uniqueRangeCustomers > 0 ? (qualifyingOrders.length / uniqueRangeCustomers).toFixed(1) : '0'
 
   const trendData      = buildTrendData(orders, range)
   const salesTrendRows = buildSalesTrendTable(orders, range)
 
-  // ── Payment methods — exclude both cancelled and returned ──────────────────
   const paymentMap: Record<string, number> = {}
-  activeOrders.forEach(o => {
-    paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1
-  })
+  activeOrders.forEach(o => { paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1 })
   const paymentData = Object.entries(paymentMap).map(([name, value]) => ({ name, value }))
 
-  // ── Top products, repeat rates, color/size breakdown — single pass ─────────
+  // ── Products — single pass ─────────────────────────────────────────────────
   const productMap:          Record<string, { units: number; revenue: number }> = {}
   const productRepeatMap:    Record<string, Record<string, number>> = {}
   const productSizeColorMap: Record<string, { colors: Record<string, number>; sizes: Record<string, number> }> = {}
@@ -271,8 +236,7 @@ export default function AnalyticsClient({
       if (!productSizeColorMap[i.product_name]) productSizeColorMap[i.product_name] = { colors: {}, sizes: {} }
       productMap[i.product_name].units   += i.quantity
       productMap[i.product_name].revenue += i.price * i.quantity
-      productRepeatMap[i.product_name][o.customer_phone] =
-        (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
+      productRepeatMap[i.product_name][o.customer_phone] = (productRepeatMap[i.product_name][o.customer_phone] || 0) + 1
       if (i.color && i.color !== '_') productSizeColorMap[i.product_name].colors[i.color] = (productSizeColorMap[i.product_name].colors[i.color] || 0) + i.quantity
       if (i.size  && i.size  !== '_') productSizeColorMap[i.product_name].sizes[i.size]   = (productSizeColorMap[i.product_name].sizes[i.size]   || 0) + i.quantity
     })
@@ -289,19 +253,70 @@ export default function AnalyticsClient({
     })
   ) as Record<string, number | null>
 
-  // ── Colors and Cities (Top Sizes removed — Size Sell-Through in Merchandising is the complete view) ──
+  // Product lookup helpers
+  const productByName: Record<string, Product> = {}
+  products.forEach(p => { productByName[p.name] = p })
+  const productStockMap: Record<string, number> = {}
+  products.forEach(p => { productStockMap[p.name] = getMerchStock(p) })
+
+  // Per-product remaining stock by size and color (for sell-through per product)
+  const productVariantRemainingMap: Record<string, { sizes: Record<string, number>; colors: Record<string, number> }> = {}
+  products.forEach(p => {
+    const vs = p.variant_stock
+    if (!productVariantRemainingMap[p.name]) productVariantRemainingMap[p.name] = { sizes: {}, colors: {} }
+    if (vs && Object.keys(vs).length > 0) {
+      Object.entries(vs).forEach(([color, sizes]) => {
+        const colorTotal = Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0)
+        if (color !== '_') productVariantRemainingMap[p.name].colors[color] = (productVariantRemainingMap[p.name].colors[color] || 0) + colorTotal
+        Object.entries(sizes as Record<string, number>).forEach(([size, qty]) => {
+          if (size !== '_') productVariantRemainingMap[p.name].sizes[size] = (productVariantRemainingMap[p.name].sizes[size] || 0) + qty
+        })
+      })
+    }
+  })
+
+  // Range days for velocity
+  const rangeDays = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365
+  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
+
+  // Auto flags per top product
+  const productFlagMap: Record<string, { label: string; color: string; bg: string }[]> = {}
+  topProducts.forEach(tp => {
+    const p = productByName[tp.name]
+    if (!p) return
+    const flags: { label: string; color: string; bg: string }[] = []
+    const stock = getMerchStock(p)
+    if (p.is_bestseller || p.best_seller_score > 0) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
+    if (p.is_trending || p.trending_score > 0)       flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
+    if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: '#5B21B6', bg: '#F5F3FF' })
+    if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: '#991B1B', bg: '#FEE2E2' })
+    else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: '#DC2626', bg: '#FEE2E2' })
+    else if (stock <= 5)   flags.push({ label: '⚠ Low Stock',      color: '#B45309', bg: '#FEF9C3' })
+    productFlagMap[tp.name] = flags
+  })
+
+  // Colors and sizeMap (sizeMap still needed for sell-through)
   const colorMap: Record<string, number> = {}
-  const sizeMap:  Record<string, number> = {} // still needed for sizeSellThrough
-  const cityMap:  Record<string, number> = {}
+  const sizeMap:  Record<string, number> = {}
   activeOrders.forEach(o => {
-    cityMap[o.city] = (cityMap[o.city] || 0) + 1
     ;(o.items as OrderItem[]).forEach(i => {
       if (i.color && i.color !== '_') colorMap[i.color] = (colorMap[i.color] || 0) + i.quantity
       if (i.size  && i.size  !== '_') sizeMap[i.size]   = (sizeMap[i.size]   || 0) + i.quantity
     })
   })
   const topColors = Object.entries(colorMap).map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
-  const topCities = Object.entries(cityMap) .map(([name, count]) => ({ name, units: count })).sort((a, b) => b.units - a.units).slice(0, 8)
+
+  // Cities with revenue + AOV
+  const cityDataMap: Record<string, { orders: number; revenue: number }> = {}
+  activeOrders.forEach(o => {
+    if (!cityDataMap[o.city]) cityDataMap[o.city] = { orders: 0, revenue: 0 }
+    cityDataMap[o.city].orders++
+    cityDataMap[o.city].revenue += o.total
+  })
+  const topCities = Object.entries(cityDataMap)
+    .map(([name, d]) => ({ name, orders: d.orders, revenue: d.revenue, aov: Math.round(d.revenue / d.orders) }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 8)
 
   // ── Inventory ──────────────────────────────────────────────────────────────
   const lowStockItems: { name: string; variant: string; qty: number }[] = []
@@ -325,7 +340,7 @@ export default function AnalyticsClient({
   })
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
-  // ── Cancellations — normalize customer_changed_mind → changed_mind ─────────
+  // ── Cancellations ──────────────────────────────────────────────────────────
   const reasonMap: Record<string, number> = {}
   cancelledOrders.forEach(o => {
     let r = o.cancellation_reason || 'other'
@@ -335,9 +350,7 @@ export default function AnalyticsClient({
   const reasonData = Object.entries(reasonMap)
     .map(([key, count]) => ({ name: CANCEL_REASON_LABELS[key] ?? key, count }))
     .sort((a, b) => b.count - a.count)
-  const cancellationRate = orders.length > 0
-    ? ((cancelledOrders.length / orders.length) * 100).toFixed(1)
-    : '0.0'
+  const cancellationRate = orders.length > 0 ? ((cancelledOrders.length / orders.length) * 100).toFixed(1) : '0.0'
 
   // ── Returns ────────────────────────────────────────────────────────────────
   const returnReasonMap: Record<string, number> = {}
@@ -348,12 +361,9 @@ export default function AnalyticsClient({
   const returnReasonData = Object.entries(returnReasonMap)
     .map(([key, count]) => ({ name: RETURN_REASON_LABELS[key] ?? key, count }))
     .sort((a, b) => b.count - a.count)
-  const returnRate = orders.length > 0
-    ? ((returnedOrders.length / orders.length) * 100).toFixed(1)
-    : '0.0'
+  const returnRate = orders.length > 0 ? ((returnedOrders.length / orders.length) * 100).toFixed(1) : '0.0'
 
-  // ── Merchandising ──────────────────────────────────────────────────────────
-  // Category performance — single source of truth (removed from Products tab)
+  // ── Merchandising / Inventory shared ──────────────────────────────────────
   const productCategoryMap = Object.fromEntries(products.map(p => [p.id, p.product_category || 'Uncategorized']))
   const categoryPerfMap: Record<string, { revenue: number; units: number; orderCount: number }> = {}
   activeOrders.forEach(o => {
@@ -367,13 +377,10 @@ export default function AnalyticsClient({
     })
     catsInOrder.forEach(cat => { categoryPerfMap[cat].orderCount += 1 })
   })
-  const categoryPerf = Object.entries(categoryPerfMap)
-    .map(([cat, d]) => ({ cat, ...d }))
-    .sort((a, b) => b.revenue - a.revenue)
+  const categoryPerf = Object.entries(categoryPerfMap).map(([cat, d]) => ({ cat, ...d })).sort((a, b) => b.revenue - a.revenue)
 
-  // Price range performance
   const priceRangeBuckets = [
-    { label: 'Under 1.5k', min: 0,    max: 1500 },
+    { label: 'Under 1.5k', min: 0, max: 1500 },
     { label: '1.5k – 3k',  min: 1500, max: 3000 },
     { label: '3k – 5k',    min: 3000, max: 5000 },
     { label: '5k+',        min: 5000, max: Infinity },
@@ -392,7 +399,6 @@ export default function AnalyticsClient({
     return { label: r.label, revenue: rev, units, orderCount: cnt }
   })
 
-  // Size sell-through (sold in period vs current stock)
   const sizeInventory: Record<string, number> = {}
   products.forEach(p => {
     const vs = p.variant_stock
@@ -414,16 +420,12 @@ export default function AnalyticsClient({
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 10)
 
-  // Slow movers
   const eligibleMerch = products.filter(p => {
     const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
     return age >= 15 && getMerchStock(p) > 0
   })
   const merchAvgSellThrough = eligibleMerch.length > 0
-    ? eligibleMerch.reduce((sum, p) => {
-        const s = getMerchStock(p)
-        return sum + p.total_sold / (p.total_sold + s)
-      }, 0) / eligibleMerch.length
+    ? eligibleMerch.reduce((sum, p) => { const s = getMerchStock(p); return sum + p.total_sold / (p.total_sold + s) }, 0) / eligibleMerch.length
     : 0
 
   const slowMovers = products
@@ -431,10 +433,8 @@ export default function AnalyticsClient({
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
       if (ageDays < 15) return false
       const stock = getMerchStock(p)
-      if (stock === 0) return false
-      if (merchAvgSellThrough === 0) return false
-      const st = p.total_sold / (p.total_sold + stock)
-      return st < merchAvgSellThrough * 0.5
+      if (stock === 0 || merchAvgSellThrough === 0) return false
+      return p.total_sold / (p.total_sold + stock) < merchAvgSellThrough * 0.5
     })
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
@@ -442,7 +442,6 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => a.velocity - b.velocity)
 
-  // Dead inventory (moved to Inventory tab)
   const deadInventory = products
     .filter(p => {
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
@@ -451,8 +450,6 @@ export default function AnalyticsClient({
     .map(p => ({ ...p, stock: getMerchStock(p), ageDays: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) }))
     .sort((a, b) => b.stock - a.stock)
 
-  // New arrivals (single source in Merchandising)
-  const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
   const newArrivals = products
     .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
     .map(p => {
@@ -461,7 +458,6 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  // ── Inventory tab ──────────────────────────────────────────────────────────
   const categoryStockMap: Record<string, { stock: number; sold: number; count: number }> = {}
   products.forEach(p => {
     const cat = p.product_category || 'Uncategorized'
@@ -470,36 +466,28 @@ export default function AnalyticsClient({
     categoryStockMap[cat].sold  += p.total_sold
     categoryStockMap[cat].count++
   })
-  const categoryStockData = Object.entries(categoryStockMap)
-    .map(([cat, d]) => ({ cat, ...d }))
-    .sort((a, b) => b.stock - a.stock)
+  const categoryStockData = Object.entries(categoryStockMap).map(([cat, d]) => ({ cat, ...d })).sort((a, b) => b.stock - a.stock)
 
-  // Restock signals — moved to Merchandising tab
   const invBestSellers = products
     .filter(p => p.is_bestseller || p.best_seller_score > 0)
     .sort((a, b) => (b.is_bestseller ? 1 : 0) - (a.is_bestseller ? 1 : 0) || b.best_seller_score - a.best_seller_score)
-    .slice(0, 8)
-    .map(p => ({ ...p, stock: getMerchStock(p) }))
+    .slice(0, 8).map(p => ({ ...p, stock: getMerchStock(p) }))
 
   const invTrending = products
     .filter(p => p.is_trending || p.trending_score > 0)
     .sort((a, b) => (b.is_trending ? 1 : 0) - (a.is_trending ? 1 : 0) || b.trending_score - a.trending_score)
-    .slice(0, 8)
-    .map(p => ({ ...p, stock: getMerchStock(p) }))
+    .slice(0, 8).map(p => ({ ...p, stock: getMerchStock(p) }))
 
   const TABS: { key: Tab; label: string }[] = [
-    { key: 'revenue',       label: 'Revenue' },
-    { key: 'trend',         label: 'Sales Trend' },
-    { key: 'products',      label: 'Products' },
-    { key: 'inventory',     label: 'Inventory' },
-    { key: 'merchandising', label: 'Merchandising' },
-    { key: 'cancellations', label: 'Cancellations' },
-    { key: 'returns',       label: 'Returns' },
+    { key: 'revenue',     label: 'Revenue' },
+    { key: 'performance', label: 'Performance' },
+    { key: 'inventory',   label: 'Inventory' },
+    { key: 'orders',      label: 'Orders' },
   ]
 
   return (
     <div className="space-y-6">
-      {/* Date range */}
+      {/* Range selector */}
       <div className="flex gap-2 flex-wrap">
         {RANGE_OPTIONS.map(r => (
           <button key={r.key} onClick={() => setRange(r.key)}
@@ -525,7 +513,9 @@ export default function AnalyticsClient({
         ))}
       </div>
 
-      {/* ── Revenue Tab ──────────────────────────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          REVENUE TAB — financial summary only
+      ══════════════════════════════════════════════════════════════════════ */}
       {tab === 'revenue' && (
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
@@ -543,9 +533,7 @@ export default function AnalyticsClient({
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
                 <p className="text-lg font-bold" style={{ color: k.color }}>{k.value}</p>
                 <p className="text-xs text-gray-500 mt-1">{k.label}</p>
-                {'sub' in k && k.sub && (
-                  <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{k.sub}</p>
-                )}
+                {'sub' in k && k.sub && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{k.sub}</p>}
               </div>
             ))}
           </div>
@@ -566,8 +554,7 @@ export default function AnalyticsClient({
                 <XAxis dataKey="label" tick={{ fontSize: 11 }} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={50} />
                 <Tooltip formatter={(v) => pkr(Number(v))} />
-                <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5}
-                  dot={{ fill: '#A68B6E', r: 3 }} name="Revenue" />
+                <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5} dot={{ fill: '#A68B6E', r: 3 }} name="Revenue" />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -578,11 +565,8 @@ export default function AnalyticsClient({
               <>
                 <ResponsiveContainer width="100%" height={160}>
                   <PieChart>
-                    <Pie data={paymentData} dataKey="value" nameKey="name"
-                      cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
-                      {paymentData.map((_, i) => (
-                        <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />
-                      ))}
+                    <Pie data={paymentData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
+                      {paymentData.map((_, i) => <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />)}
                     </Pie>
                     <Tooltip />
                   </PieChart>
@@ -590,8 +574,7 @@ export default function AnalyticsClient({
                 <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
                   {paymentData.map((p, i) => (
                     <div key={p.name} className="flex items-center gap-1.5 text-xs">
-                      <span className="w-2.5 h-2.5 rounded-full inline-block"
-                        style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
+                      <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
                       <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
                     </div>
                   ))}
@@ -604,18 +587,22 @@ export default function AnalyticsClient({
         </div>
       )}
 
-      {/* ── Sales Trend Tab ───────────────────────────────────────────────────── */}
-      {tab === 'trend' && (
-        <div className="space-y-6">
+      {/* ══════════════════════════════════════════════════════════════════════
+          PERFORMANCE TAB — all sales intelligence in one place
+      ══════════════════════════════════════════════════════════════════════ */}
+      {tab === 'performance' && (
+        <div className="space-y-8">
+
+          {/* 1 · Sales Over Time */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex items-baseline justify-between mb-4">
-              <h3 className="font-semibold">Sales Trend</h3>
+              <h3 className="font-semibold">Sales Over Time</h3>
               <span className="text-xs" style={{ color: '#9CA3AF' }}>
-                {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} · hover for revenue
+                {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} · hover for details
               </span>
             </div>
             {salesTrendRows.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
+              <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={salesTrendRows} margin={{ left: 0, right: 8 }}>
                   <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
                   <XAxis dataKey="label" tick={{ fontSize: 10 }} />
@@ -623,20 +610,19 @@ export default function AnalyticsClient({
                   <Tooltip
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as { orders: number; revenue: number }
+                      const d = payload[0]?.payload as { orders: number; revenue: number; units: number; aov: number }
                       return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
                           <p className="font-semibold mb-1">{label}</p>
-                          <p style={{ color: '#1C1C1C' }}>{d.orders} order{d.orders !== 1 ? 's' : ''}</p>
+                          <p style={{ color: '#1C1C1C' }}>{d.orders} orders · {d.units} units</p>
                           <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                          <p style={{ color: '#6B7280' }}>AOV PKR {d.aov.toLocaleString()}</p>
                         </div>
                       )
                     }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="Orders">
-                    {salesTrendRows.map((entry, i) => (
-                      <Cell key={i} fill={entry.orders > 0 ? '#A68B6E' : '#E8DDD4'} />
-                    ))}
+                    {salesTrendRows.map((entry, i) => <Cell key={i} fill={entry.orders > 0 ? '#A68B6E' : '#E8DDD4'} />)}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -645,39 +631,42 @@ export default function AnalyticsClient({
             )}
           </div>
 
+          {/* 2 · Period Breakdown Table */}
           <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
             <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
               <h3 className="font-semibold text-sm">Period Breakdown</h3>
             </div>
             {salesTrendRows.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data for this period.</p>
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
                     <tr>
                       <th className="text-left px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Period</th>
-                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Orders</th>
-                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Orders</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Units</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>AOV</th>
                       <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>vs Prev</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[...salesTrendRows].reverse().map((row, i) => (
                       <tr key={i} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                        <td className="px-5 py-3">{row.label}</td>
-                        <td className="px-5 py-3 text-right" style={{ color: '#6B7280' }}>{row.orders}</td>
-                        <td className="px-5 py-3 text-right font-medium">PKR {row.revenue.toLocaleString()}</td>
+                        <td className="px-5 py-3 text-sm">{row.label}</td>
+                        <td className="px-4 py-3 text-right text-sm" style={{ color: '#6B7280' }}>{row.orders}</td>
+                        <td className="px-4 py-3 text-right text-sm" style={{ color: '#6B7280' }}>{row.units}</td>
+                        <td className="px-4 py-3 text-right text-sm font-medium">PKR {row.revenue.toLocaleString()}</td>
+                        <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>
+                          {row.aov > 0 ? `PKR ${row.aov.toLocaleString()}` : '—'}
+                        </td>
                         <td className="px-5 py-3 text-right">
-                          {row.growth === null ? (
-                            <span style={{ color: '#D1D5DB' }}>—</span>
-                          ) : row.growth === 0 ? (
-                            <span style={{ color: '#9CA3AF' }}>0%</span>
-                          ) : row.growth > 0 ? (
-                            <span className="font-medium" style={{ color: '#10B981' }}>↑ {row.growth}%</span>
-                          ) : (
-                            <span className="font-medium" style={{ color: '#EF4444' }}>↓ {Math.abs(row.growth)}%</span>
-                          )}
+                          {row.growth === null ? <span style={{ color: '#D1D5DB' }}>—</span>
+                            : row.growth === 0 ? <span style={{ color: '#9CA3AF' }}>0%</span>
+                            : row.growth > 0
+                              ? <span className="font-medium" style={{ color: '#10B981' }}>↑ {row.growth}%</span>
+                              : <span className="font-medium" style={{ color: '#EF4444' }}>↓ {Math.abs(row.growth)}%</span>}
                         </td>
                       </tr>
                     ))}
@@ -685,12 +674,10 @@ export default function AnalyticsClient({
                   <tfoot className="border-t" style={{ borderColor: '#E8DDD4' }}>
                     <tr style={{ backgroundColor: '#FAF8F5' }}>
                       <td className="px-5 py-3 font-semibold">Total</td>
-                      <td className="px-5 py-3 text-right font-semibold">
-                        {salesTrendRows.reduce((s, r) => s + r.orders, 0)}
-                      </td>
-                      <td className="px-5 py-3 text-right font-semibold">
-                        PKR {salesTrendRows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}
-                      </td>
+                      <td className="px-4 py-3 text-right font-semibold">{salesTrendRows.reduce((s, r) => s + r.orders, 0)}</td>
+                      <td className="px-4 py-3 text-right font-semibold">{salesTrendRows.reduce((s, r) => s + r.units, 0)}</td>
+                      <td className="px-4 py-3 text-right font-semibold">PKR {salesTrendRows.reduce((s, r) => s + r.revenue, 0).toLocaleString()}</td>
+                      <td className="px-4 py-3" />
                       <td className="px-5 py-3" />
                     </tr>
                   </tfoot>
@@ -698,17 +685,13 @@ export default function AnalyticsClient({
               </div>
             )}
           </div>
-        </div>
-      )}
 
-      {/* ── Products Tab — what sold, by product / color / city ──────────────── */}
-      {tab === 'products' && (
-        <div className="space-y-6">
+          {/* 3 · Top Products */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Top Selling Products</h3>
+            <h3 className="font-semibold mb-4">Top Products</h3>
             {topProducts.length > 0 ? (
               <>
-                <ResponsiveContainer width="100%" height={280}>
+                <ResponsiveContainer width="100%" height={260}>
                   <BarChart data={topProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
                     <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110}
@@ -717,89 +700,322 @@ export default function AnalyticsClient({
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as { name: string; units: number; revenue: number }
-                        const detail = productSizeColorMap[d.name]
-                        const dColors = detail ? Object.entries(detail.colors).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
-                        const dSizes  = detail ? Object.entries(detail.sizes).sort((a, b) => b[1] - a[1]).slice(0, 3) : []
                         return (
-                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-1" style={{ borderColor: '#E8DDD4' }}>
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
                             <p className="font-semibold">{d.name}</p>
                             <p style={{ color: '#A68B6E' }}>{d.units} units · {pkr(d.revenue)}</p>
-                            {dColors.length > 0 && (
-                              <p style={{ color: '#6B7280' }}>Colors: {dColors.map(([c, n]) => `${c} (${n})`).join(', ')}</p>
-                            )}
-                            {dSizes.length > 0 && (
-                              <p style={{ color: '#6B7280' }}>Sizes: {dSizes.map(([s, n]) => `${s} (${n})`).join(', ')}</p>
-                            )}
                           </div>
                         )
                       }}
                     />
-                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="units" />
+                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
                   </BarChart>
                 </ResponsiveContainer>
-                <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
-                  <thead>
-                    <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
-                      <th className="text-left py-1.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Units</th>
-                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
-                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>Repeat %</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    {topProducts.map(p => {
-                      const rr = productRepeatRates[p.name]
-                      return (
-                        <tr key={p.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
-                          <td className="py-1.5 pr-2 truncate max-w-[140px]">{p.name}</td>
-                          <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{p.units}</td>
-                          <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>{pkr(p.revenue)}</td>
-                          <td className="py-1.5 text-right font-medium"
-                            style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : rr === 0 ? '#EF4444' : '#374151' }}>
-                            {rr == null ? '—' : `${rr}%`}
-                          </td>
-                        </tr>
-                      )
-                    })}
-                  </tbody>
-                </table>
+
+                <div className="overflow-x-auto mt-4">
+                  <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                    <thead>
+                      <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                        <th className="text-left py-2 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                        <th className="text-left py-2 font-medium px-2" style={{ color: '#6B7280' }}>Collection</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Units</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Revenue</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Velocity</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Stock</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Repeat %</th>
+                        <th className="text-left py-2 font-medium px-2" style={{ color: '#6B7280' }}>Flags</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {topProducts.map(p => {
+                        const rr    = productRepeatRates[p.name]
+                        const stock = productStockMap[p.name] ?? 0
+                        const prod  = productByName[p.name]
+                        const vel   = (p.units / rangeDays).toFixed(1)
+                        const flags = productFlagMap[p.name] ?? []
+                        return (
+                          <tr key={p.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                            <td className="py-2 pr-2 font-medium truncate max-w-[130px]">{p.name}</td>
+                            <td className="py-2 px-2 text-xs" style={{ color: '#9CA3AF' }}>
+                              {prod?.product_category || '—'}
+                            </td>
+                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{p.units}</td>
+                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{pkr(p.revenue)}</td>
+                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{vel}/d</td>
+                            <td className="py-2 px-2 text-right font-medium"
+                              style={{ color: stock === 0 ? '#DC2626' : stock <= 5 ? '#B45309' : '#374151' }}>
+                              {stock === 0 ? 'OUT' : stock}
+                            </td>
+                            <td className="py-2 px-2 text-right font-medium"
+                              style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : rr === 0 ? '#EF4444' : '#374151' }}>
+                              {rr == null ? '—' : `${rr}%`}
+                            </td>
+                            <td className="py-2 px-2">
+                              <div className="flex flex-wrap gap-1">
+                                {flags.map(f => (
+                                  <span key={f.label} className="text-xs px-1.5 py-0.5 rounded-full whitespace-nowrap"
+                                    style={{ backgroundColor: f.bg, color: f.color }}>
+                                    {f.label}
+                                  </span>
+                                ))}
+                              </div>
+                            </td>
+                          </tr>
+                        )
+                      })}
+                    </tbody>
+                  </table>
+                </div>
               </>
             ) : (
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
             )}
           </div>
 
-          {/* Colors + Cities — Sizes live in Merchandising → Size Sell-Through */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {[
-              { title: 'Top Colors', data: topColors },
-              { title: 'Top Cities', data: topCities },
-            ].map(chart => (
-              <div key={chart.title} className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold mb-4">{chart.title}</h3>
-                {chart.data.length > 0 ? (
-                  <ResponsiveContainer width="100%" height={200}>
-                    <BarChart data={chart.data} layout="vertical" margin={{ left: 8, right: 16 }}>
-                      <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                      <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
-                      <Tooltip />
-                      <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} />
-                    </BarChart>
-                  </ResponsiveContainer>
-                ) : (
-                  <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
-                )}
+          {/* 4 · Sizes & Colors by Product */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-1">Sizes & Colors by Product</h3>
+            <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Sold in period · remaining stock · sell-through %</p>
+            {topProducts.filter(p => {
+              const sc = productSizeColorMap[p.name]
+              return sc && (Object.keys(sc.sizes).length > 0 || Object.keys(sc.colors).length > 0)
+            }).length === 0 ? (
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>No size or color data available.</p>
+            ) : (
+              <div className="space-y-6">
+                {topProducts.map(tp => {
+                  const sc        = productSizeColorMap[tp.name]
+                  const rem       = productVariantRemainingMap[tp.name]
+                  const prod      = productByName[tp.name]
+                  const collection = prod?.product_category || ''
+                  if (!sc || (Object.keys(sc.sizes).length === 0 && Object.keys(sc.colors).length === 0)) return null
+
+                  const renderBars = (soldMap: Record<string, number>, remMap: Record<string, number>) =>
+                    Object.entries(soldMap)
+                      .sort((a, b) => b[1] - a[1])
+                      .map(([key, sold]) => {
+                        const remaining = remMap?.[key] || 0
+                        const total = sold + remaining
+                        const pct = total > 0 ? Math.round((sold / total) * 100) : 0
+                        return (
+                          <div key={key} className="flex items-center gap-3">
+                            <span className="w-14 text-xs font-medium shrink-0 text-right truncate">{key}</span>
+                            <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                              <div className="h-full rounded-full"
+                                style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? '#10B981' : pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
+                            </div>
+                            <span className="text-xs shrink-0 w-8 text-right font-medium" style={{ color: '#6B7280' }}>{pct}%</span>
+                            <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{sold} sold · {remaining} left</span>
+                          </div>
+                        )
+                      })
+
+                  return (
+                    <div key={tp.name}>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="text-sm font-semibold">{tp.name}</span>
+                        {collection && (
+                          <span className="text-xs px-2 py-0.5 rounded-full"
+                            style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>{collection}</span>
+                        )}
+                      </div>
+                      <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
+                        {Object.keys(sc.sizes).length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium mb-2" style={{ color: '#9CA3AF' }}>SIZES</p>
+                            <div className="space-y-1.5">
+                              {renderBars(sc.sizes, rem?.sizes || {})}
+                            </div>
+                          </div>
+                        )}
+                        {Object.keys(sc.colors).length > 0 && (
+                          <div>
+                            <p className="text-xs font-medium mb-2" style={{ color: '#9CA3AF' }}>COLORS</p>
+                            <div className="space-y-1.5">
+                              {renderBars(sc.colors, rem?.colors || {})}
+                            </div>
+                          </div>
+                        )}
+                      </div>
+                    </div>
+                  )
+                })}
               </div>
-            ))}
+            )}
           </div>
+
+          {/* 5 · Cities */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Cities</h3>
+            {topCities.length > 0 ? (
+              <>
+                <ResponsiveContainer width="100%" height={220}>
+                  <BarChart data={topCities} layout="vertical" margin={{ left: 8, right: 16 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null
+                        const d = payload[0]?.payload as { name: string; orders: number; revenue: number; aov: number }
+                        return (
+                          <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                            <p className="font-semibold">{d.name}</p>
+                            <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                            <p style={{ color: '#6B7280' }}>{d.orders} orders · AOV PKR {d.aov.toLocaleString()}</p>
+                          </div>
+                        )
+                      }}
+                    />
+                    <Bar dataKey="revenue" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Revenue" />
+                  </BarChart>
+                </ResponsiveContainer>
+                <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
+                  <thead>
+                    <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                      <th className="text-left py-1.5 font-medium" style={{ color: '#6B7280' }}>City</th>
+                      <th className="text-right py-1.5 font-medium px-3" style={{ color: '#6B7280' }}>Orders</th>
+                      <th className="text-right py-1.5 font-medium px-3" style={{ color: '#6B7280' }}>Revenue</th>
+                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>AOV</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {topCities.map(c => (
+                      <tr key={c.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                        <td className="py-1.5 font-medium">{c.name}</td>
+                        <td className="py-1.5 px-3 text-right" style={{ color: '#6B7280' }}>{c.orders}</td>
+                        <td className="py-1.5 px-3 text-right" style={{ color: '#6B7280' }}>{pkr(c.revenue)}</td>
+                        <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>PKR {c.aov.toLocaleString()}</td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
+              </>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+            )}
+          </div>
+
+          {/* 6 · Category Performance */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Category Performance</h3>
+            {categoryPerf.length === 0 ? (
+              <p className="text-sm" style={{ color: '#9CA3AF' }}>No category data — assign collections to products first.</p>
+            ) : (
+              <div className="space-y-3">
+                {categoryPerf.map(c => {
+                  const maxRev = categoryPerf[0].revenue
+                  const barPct = maxRev > 0 ? Math.round((c.revenue / maxRev) * 100) : 0
+                  return (
+                    <div key={c.cat}>
+                      <div className="flex justify-between text-sm mb-1">
+                        <span className="font-medium">{c.cat}</span>
+                        <span style={{ color: '#6B7280' }}>
+                          {pkr(c.revenue)} · {c.units} units · {c.orderCount} orders
+                        </span>
+                      </div>
+                      <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                        <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: '#A68B6E' }} />
+                      </div>
+                    </div>
+                  )
+                })}
+              </div>
+            )}
+          </div>
+
+          {/* 7 · Price Range Performance */}
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <h3 className="font-semibold mb-4">Price Range Performance</h3>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+              {priceRangeStats.map(r => (
+                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
+                  <p className="text-lg font-bold mt-1">{r.units}</p>
+                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
+                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>PKR {Math.round(r.revenue / 1000)}k</p>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* 8 · Best Sellers + Trending */}
+          {(invBestSellers.length > 0 || invTrending.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {invBestSellers.length > 0 && (
+                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
+                    <span className="text-sm font-semibold" style={{ color: '#92400E' }}>★ Best Sellers</span>
+                    <span className="text-xs ml-auto" style={{ color: '#B45309' }}>restock priority</span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                    {invBestSellers.map(p => (
+                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{p.name}</p>
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold all time</p>
+                        </div>
+                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                          style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                            : p.stock <= 5 ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+              {invTrending.length > 0 && (
+                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FDF2F8' }}>
+                    <span className="text-sm font-semibold" style={{ color: '#9D174D' }}>↑ Trending</span>
+                    <span className="text-xs ml-auto" style={{ color: '#BE185D' }}>moving fast</span>
+                  </div>
+                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                    {invTrending.map(p => (
+                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
+                        <div className="min-w-0 flex-1">
+                          <p className="text-xs font-medium truncate">{p.name}</p>
+                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold · score {p.trending_score.toFixed(1)}</p>
+                        </div>
+                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
+                          style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                            : p.stock <= 5 ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                        </span>
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* 9 · Top Colors */}
+          {topColors.length > 0 && (
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-4">Top Colors (all products)</h3>
+              <ResponsiveContainer width="100%" height={200}>
+                <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 16 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                  <Tooltip />
+                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
         </div>
       )}
 
-      {/* ── Inventory Tab — stock health only ────────────────────────────────── */}
+      {/* ══════════════════════════════════════════════════════════════════════
+          INVENTORY TAB — stock health only
+      ══════════════════════════════════════════════════════════════════════ */}
       {tab === 'inventory' && (
         <div className="space-y-6">
 
-          {/* KPIs: stock-health metrics */}
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
               {inventoryValue === 0 && products.length > 0 ? (
@@ -816,15 +1032,11 @@ export default function AnalyticsClient({
               )}
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? '#F59E0B' : '#10B981' }}>
-                {lowStockItems.length}
-              </p>
+              <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? '#F59E0B' : '#10B981' }}>{lowStockItems.length}</p>
               <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Low Stock variants</p>
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold" style={{ color: deadInventory.length > 0 ? '#EF4444' : '#10B981' }}>
-                {deadInventory.length}
-              </p>
+              <p className="text-xl font-bold" style={{ color: deadInventory.length > 0 ? '#EF4444' : '#10B981' }}>{deadInventory.length}</p>
               <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Dead Stock items</p>
             </div>
             <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
@@ -837,7 +1049,7 @@ export default function AnalyticsClient({
           {categoryStockData.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <h3 className="font-semibold mb-1">Stock by Collection</h3>
-              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Hover to see units sold vs remaining</p>
+              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Hover to see sold vs remaining</p>
               <ResponsiveContainer width="100%" height={Math.max(160, categoryStockData.length * 40)}>
                 <BarChart data={categoryStockData} layout="vertical" margin={{ left: 8, right: 24 }}>
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
@@ -852,7 +1064,7 @@ export default function AnalyticsClient({
                         <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
                           <p className="font-semibold mb-1">{d.cat}</p>
                           <p>{d.stock} units in stock</p>
-                          <p style={{ color: '#A68B6E' }}>{d.sold} units sold</p>
+                          <p style={{ color: '#A68B6E' }}>{d.sold} units sold all time</p>
                           <p style={{ color: '#6B7280' }}>{pct}% sell-through · {d.count} products</p>
                         </div>
                       )
@@ -864,13 +1076,12 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* Low Stock list */}
+          {/* Low Stock */}
           {lowStockItems.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
               <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
                 <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>⚠ Low Stock</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full ml-1"
-                  style={{ backgroundColor: '#FEF9C3', color: '#92400E' }}>{lowStockItems.length}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF9C3', color: '#92400E' }}>{lowStockItems.length}</span>
                 <span className="text-xs ml-auto" style={{ color: '#B45309' }}>1–3 units remaining</span>
               </div>
               <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
@@ -878,9 +1089,7 @@ export default function AnalyticsClient({
                   <div key={i} className="px-5 py-2.5 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate">{item.name}</p>
-                      {item.variant && (
-                        <p className="text-xs" style={{ color: '#9CA3AF' }}>{item.variant}</p>
-                      )}
+                      {item.variant && <p className="text-xs" style={{ color: '#9CA3AF' }}>{item.variant}</p>}
                     </div>
                     <span className="text-xs font-semibold shrink-0 px-2 py-0.5 rounded"
                       style={{ backgroundColor: item.qty === 1 ? '#FEE2E2' : '#FEF9C3', color: item.qty === 1 ? '#DC2626' : '#92400E' }}>
@@ -892,166 +1101,12 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* Dead Inventory */}
-          {deadInventory.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold text-sm">Dead Inventory</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full"
-                  style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
-                  {deadInventory.length}
-                </span>
-                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
-              </div>
-              <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
-                  <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {deadInventory.map(p => (
-                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="px-5 py-3">
-                        <p className="font-medium">{p.name}</p>
-                        {p.product_category && (
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
-                        )}
-                      </td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
-                      <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
-                      <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
-                    </tr>
-                  ))}
-                </tbody>
-              </table>
-            </div>
-          )}
-
-          {lowStockItems.length === 0 && deadInventory.length === 0 && (
-            <p className="text-sm py-4" style={{ color: '#10B981' }}>No stock health issues detected.</p>
-          )}
-        </div>
-      )}
-
-      {/* ── Merchandising Tab — demand signals + actionable priorities ─────────── */}
-      {tab === 'merchandising' && (
-        <div className="space-y-6">
-
-          {/* Restock Signals — Best Sellers + Trending (moved from Inventory) */}
-          {(invBestSellers.length > 0 || invTrending.length > 0) && (
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-
-              {invBestSellers.length > 0 && (
-                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
-                    <span className="text-sm font-semibold" style={{ color: '#92400E' }}>★ Best Sellers</span>
-                    <span className="text-xs ml-auto" style={{ color: '#B45309' }}>restock priority</span>
-                  </div>
-                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                    {invBestSellers.map(p => (
-                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium truncate">{p.name}</p>
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold</p>
-                        </div>
-                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
-                          style={p.stock === 0
-                            ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                            : p.stock <= 5
-                            ? { backgroundColor: '#FEF9C3', color: '#92400E' }
-                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
-                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              {invTrending.length > 0 && (
-                <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-                  <div className="px-4 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FDF2F8' }}>
-                    <span className="text-sm font-semibold" style={{ color: '#9D174D' }}>↑ Trending</span>
-                    <span className="text-xs ml-auto" style={{ color: '#BE185D' }}>moving fast</span>
-                  </div>
-                  <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
-                    {invTrending.map(p => (
-                      <div key={p.id} className="px-4 py-2.5 flex items-center justify-between gap-2">
-                        <div className="min-w-0 flex-1">
-                          <p className="text-xs font-medium truncate">{p.name}</p>
-                          <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.total_sold} sold · ↑{p.trending_score.toFixed(1)}</p>
-                        </div>
-                        <span className="text-xs font-semibold shrink-0 px-1.5 py-0.5 rounded"
-                          style={p.stock === 0
-                            ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                            : p.stock <= 5
-                            ? { backgroundColor: '#FEF9C3', color: '#92400E' }
-                            : { backgroundColor: '#F0FDF4', color: '#166534' }}>
-                          {p.stock === 0 ? 'OUT' : `${p.stock} left`}
-                        </span>
-                      </div>
-                    ))}
-                  </div>
-                </div>
-              )}
-            </div>
-          )}
-
-          {/* Category Performance — single source of truth for category revenue */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Category Performance</h3>
-            {categoryPerf.length === 0 ? (
-              <p className="text-sm" style={{ color: '#9CA3AF' }}>No sales data — add a Season/Type to products first.</p>
-            ) : (
-              <div className="space-y-3">
-                {categoryPerf.map(c => {
-                  const maxRev = categoryPerf[0].revenue
-                  const barPct = maxRev > 0 ? Math.round((c.revenue / maxRev) * 100) : 0
-                  return (
-                    <div key={c.cat}>
-                      <div className="flex justify-between text-sm mb-1">
-                        <span className="font-medium">{c.cat}</span>
-                        <span style={{ color: '#6B7280' }}>
-                          PKR {c.revenue.toLocaleString()} · {c.units} units · {c.orderCount} orders
-                        </span>
-                      </div>
-                      <div className="h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
-                        <div className="h-full rounded-full" style={{ width: `${barPct}%`, backgroundColor: '#A68B6E' }} />
-                      </div>
-                    </div>
-                  )
-                })}
-              </div>
-            )}
-          </div>
-
-          {/* Price Range Performance */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Price Range Performance</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {priceRangeStats.map(r => (
-                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
-                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
-                  <p className="text-lg font-bold mt-1">{r.units}</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>
-                    PKR {Math.round(r.revenue / 1000)}k
-                  </p>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Size Sell-Through — single source for size data (replaces Top Sizes chart in Products) */}
+          {/* Size Sell-Through */}
           {sizeSellThrough.length > 0 && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <div className="flex items-baseline gap-2 mb-4">
                 <h3 className="font-semibold">Size Sell-Through</h3>
-                <span className="text-xs" style={{ color: '#9CA3AF' }}>% = sold in period ÷ (sold + current stock)</span>
+                <span className="text-xs" style={{ color: '#9CA3AF' }}>sold ÷ (sold + remaining stock)</span>
               </div>
               <div className="space-y-2.5">
                 {sizeSellThrough.map(s => (
@@ -1062,44 +1117,46 @@ export default function AnalyticsClient({
                         style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? '#10B981' : s.pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
                     </div>
                     <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: '#6B7280' }}>{s.pct}%</span>
-                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{s.sold} sold / {s.remaining} left</span>
+                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>{s.sold} sold · {s.remaining} left</span>
                   </div>
                 ))}
               </div>
             </div>
           )}
 
-          {/* New Arrivals Performance — single source */}
+          {/* New Arrivals */}
           {newArrivals.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
               <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold text-sm">New Arrivals (last 30 days)</h3>
+                <h3 className="font-semibold text-sm">New Arrivals — last 30 days</h3>
               </div>
               <table className="w-full text-sm">
                 <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
                   <tr>
                     <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Days Live</th>
                     <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock Left</th>
                     <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
                   </tr>
                 </thead>
                 <tbody>
                   {newArrivals.map(p => (
                     <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
-                      <td className="px-5 py-3 font-medium">{p.name}</td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d ago</td>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
                       <td className="px-4 py-3 text-right">{p.total_sold}</td>
-                      <td className="px-4 py-3 text-right">{p.stock}</td>
+                      <td className="px-4 py-3 text-right font-medium"
+                        style={{ color: p.stock === 0 ? '#DC2626' : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        {p.stock === 0 ? 'OUT' : p.stock}
+                      </td>
                       <td className="px-5 py-3 text-right text-xs">
-                        {p.velocity >= 1 ? (
-                          <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
-                        ) : p.velocity > 0 ? (
-                          <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
-                        ) : (
-                          <span style={{ color: '#D1D5DB' }}>no sales</span>
-                        )}
+                        {p.velocity >= 1 ? <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
+                          : p.velocity > 0 ? <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                          : <span style={{ color: '#D1D5DB' }}>no sales</span>}
                       </td>
                     </tr>
                   ))}
@@ -1112,11 +1169,8 @@ export default function AnalyticsClient({
           <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
             <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
               <h3 className="font-semibold text-sm">Slow Movers</h3>
-              <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
-                {slowMovers.length}
-              </span>
-              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>sell-through &lt; 50% of store avg · 15+ days · in stock</span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{slowMovers.length}</span>
+              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>sell-through &lt; 50% of store avg · 15+ days old</span>
             </div>
             {slowMovers.length === 0 ? (
               <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>
@@ -1137,9 +1191,7 @@ export default function AnalyticsClient({
                       <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
                         <td className="px-5 py-3">
                           <p className="font-medium">{p.name}</p>
-                          {p.product_category && (
-                            <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>
-                          )}
+                          {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
                         </td>
                         <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
                         <td className="px-4 py-3 text-right">{p.total_sold}</td>
@@ -1153,84 +1205,118 @@ export default function AnalyticsClient({
                 </table>
                 {slowMovers.length > 15 && (
                   <p className="px-5 py-2.5 text-xs border-t" style={{ color: '#9CA3AF', borderColor: '#F3F4F6' }}>
-                    …and {slowMovers.length - 15} more slow movers not shown
+                    …and {slowMovers.length - 15} more
                   </p>
                 )}
               </>
             )}
           </div>
+
+          {/* Dead Inventory */}
+          {deadInventory.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Dead Inventory</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{deadInventory.length}</span>
+                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
+              </div>
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {deadInventory.map(p => {
+                    const ageBadge = p.ageDays >= 180 ? { label: '6m+', color: '#991B1B', bg: '#FEE2E2' }
+                      : p.ageDays >= 90 ? { label: '3m+', color: '#DC2626', bg: '#FEF2F2' }
+                      : { label: '1m+', color: '#F87171', bg: '#FFF1F2' }
+                    return (
+                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                        <td className="px-5 py-3">
+                          <p className="font-medium">{p.name}</p>
+                          {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                        </td>
+                        <td className="px-4 py-3 text-right">
+                          <span className="text-xs font-semibold px-1.5 py-0.5 rounded"
+                            style={{ backgroundColor: ageBadge.bg, color: ageBadge.color }}>
+                            {ageBadge.label}
+                          </span>
+                        </td>
+                        <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
+                        <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
+                      </tr>
+                    )
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+
+          {lowStockItems.length === 0 && deadInventory.length === 0 && (
+            <p className="text-sm py-4" style={{ color: '#10B981' }}>No stock health issues detected.</p>
+          )}
         </div>
       )}
 
-      {/* ── Cancellations Tab ─────────────────────────────────────────────────── */}
-      {tab === 'cancellations' && (
+      {/* ══════════════════════════════════════════════════════════════════════
+          ORDERS TAB — cancellations + returns merged
+      ══════════════════════════════════════════════════════════════════════ */}
+      {tab === 'orders' && (
         <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+
+          <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
             {[
               { label: 'Cancellation Rate', value: `${cancellationRate}%`, color: '#EF4444' },
-              { label: 'Orders Cancelled',  value: cancelledOrders.length, color: '#1C1C1C' },
-              { label: 'Revenue Lost',      value: pkr(cancelledRev),      color: '#EF4444' },
+              { label: 'Return Rate',        value: `${returnRate}%`,        color: '#EF4444' },
+              { label: 'Orders Cancelled',   value: cancelledOrders.length,  color: '#1C1C1C' },
+              { label: 'Orders Returned',    value: returnedOrders.length,   color: '#1C1C1C' },
+              { label: 'Revenue Leakage',    value: pkr(cancelledRev + returnedRev), color: '#EF4444' },
             ].map(k => (
               <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-                <p className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</p>
+                <p className="text-xl font-bold" style={{ color: k.color }}>{k.value}</p>
                 <p className="text-xs text-gray-500 mt-1">{k.label}</p>
               </div>
             ))}
           </div>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Cancellation Reasons</h3>
-            {reasonData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={reasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#EF4444" radius={[0, 4, 4, 0]} name="Count" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>
-                No cancellations in this period.
-              </p>
-            )}
-          </div>
-        </div>
-      )}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-4">Why Orders Were Cancelled</h3>
+              {reasonData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={reasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#EF4444" radius={[0, 4, 4, 0]} name="Count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No cancellations in this period.</p>
+              )}
+            </div>
 
-      {/* ── Returns Tab ───────────────────────────────────────────────────────── */}
-      {tab === 'returns' && (
-        <div className="space-y-6">
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-            {[
-              { label: 'Return Rate',     value: `${returnRate}%`,     color: '#EF4444' },
-              { label: 'Orders Returned', value: returnedOrders.length, color: '#1C1C1C' },
-              { label: 'Revenue Lost',    value: pkr(returnedRev),     color: '#EF4444' },
-            ].map(k => (
-              <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-                <p className="text-2xl font-bold" style={{ color: k.color }}>{k.value}</p>
-                <p className="text-xs text-gray-500 mt-1">{k.label}</p>
-              </div>
-            ))}
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <h3 className="font-semibold mb-4">Why Orders Were Returned</h3>
+              {returnReasonData.length > 0 ? (
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={returnReasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
+                    <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
+                    <Tooltip />
+                    <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} name="Count" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No returns in this period.</p>
+              )}
+            </div>
           </div>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Return Reasons</h3>
-            {returnReasonData.length > 0 ? (
-              <ResponsiveContainer width="100%" height={240}>
-                <BarChart data={returnReasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
-                  <Tooltip />
-                  <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} name="Count" />
-                </BarChart>
-              </ResponsiveContainer>
-            ) : (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>
-                No returns in this period.
-              </p>
-            )}
-          </div>
         </div>
       )}
     </div>
