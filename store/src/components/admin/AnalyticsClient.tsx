@@ -445,7 +445,9 @@ export default function AnalyticsClient({
   const deadInventory = products
     .filter(p => {
       const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-      return ageDays > 15 && p.total_sold === 0 && getMerchStock(p) >= 10
+      // total_sold may be stale; also exclude products with any sales in current period
+      const hasRecentSales = !!productMap[p.name]
+      return ageDays > 15 && p.total_sold === 0 && !hasRecentSales && getMerchStock(p) >= 10
     })
     .map(p => ({ ...p, stock: getMerchStock(p), ageDays: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) }))
     .sort((a, b) => b.stock - a.stock)
