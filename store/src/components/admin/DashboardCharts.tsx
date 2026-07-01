@@ -257,11 +257,6 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   }).length
   const inStockCount    = products.filter(p => getProductStock(p) > 0).length
 
-  const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
-  const justDropped = [...products]
-    .filter(p => new Date(p.created_at) >= d7)
-    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
-    .slice(0, 5)
 
   // Sale banner logic
   const totalSaleRevenue = activeSales.reduce((s, a) => s + a.revenue, 0)
@@ -540,34 +535,6 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         </div>
       </div>
 
-      {/* Just Dropped */}
-      <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-        <div className="flex items-center gap-2 mb-4">
-          <h3 className="font-semibold text-sm">Just Dropped</h3>
-          <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
-        </div>
-        {justDropped.length === 0 ? (
-          <p className="text-xs" style={{ color: '#9CA3AF' }}>No new products in the last 7 days.</p>
-        ) : (
-          <ul className="space-y-2.5">
-            {justDropped.map(p => {
-              const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86_400_000)
-              const stock   = getProductStock(p)
-              return (
-                <li key={p.id} className="flex items-center gap-2 text-sm">
-                  <span className="flex-1 truncate">{p.name}</span>
-                  <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>
-                    {ageDays === 0 ? 'today' : `${ageDays}d ago`}
-                  </span>
-                  {stock <= 3 && stock > 0 && (
-                    <span className="text-xs font-semibold shrink-0" style={{ color: '#C62828' }}>{stock} left</span>
-                  )}
-                </li>
-              )
-            })}
-          </ul>
-        )}
-      </div>
 
     </div>
   )

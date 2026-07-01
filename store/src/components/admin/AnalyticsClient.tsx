@@ -278,6 +278,7 @@ export default function AnalyticsClient({
   // Range days for velocity
   const rangeDays = range === '7d' ? 7 : range === '30d' ? 30 : range === '90d' ? 90 : 365
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
+  const sevenDaysAgo  = new Date(Date.now() -  7 * 86400000)
 
   // Auto flags per top product
   const productFlagMap: Record<string, { label: string; color: string; bg: string }[]> = {}
@@ -451,6 +452,14 @@ export default function AnalyticsClient({
     })
     .map(p => ({ ...p, stock: getMerchStock(p), ageDays: Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86400000) }))
     .sort((a, b) => b.stock - a.stock)
+
+  const justDropped = products
+    .filter(p => new Date(p.created_at) >= sevenDaysAgo)
+    .map(p => {
+      const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+      return { ...p, ageDays: Math.floor(ageDays), stock: getMerchStock(p) }
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
   const newArrivals = products
     .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
@@ -1126,6 +1135,37 @@ export default function AnalyticsClient({
                   </div>
                 ))}
               </div>
+            </div>
+          )}
+
+          {/* Just Dropped */}
+          {justDropped.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Just Dropped</h3>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
+              </div>
+              <ul className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+                {justDropped.map(p => (
+                  <li key={p.id} className="px-5 py-2.5 flex items-center justify-between gap-3">
+                    <div className="min-w-0 flex-1">
+                      <p className="text-xs font-medium truncate">{p.name}</p>
+                      {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                    </div>
+                    <div className="flex items-center gap-3 shrink-0">
+                      <span className="text-xs" style={{ color: '#9CA3AF' }}>
+                        {p.ageDays === 0 ? 'today' : `${p.ageDays}d ago`}
+                      </span>
+                      <span className="text-xs font-semibold px-1.5 py-0.5 rounded"
+                        style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                          : p.stock <= 3 ? { backgroundColor: '#FEF9C3', color: '#92400E' }
+                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                        {p.stock === 0 ? 'OUT' : `${p.stock} left`}
+                      </span>
+                    </div>
+                  </li>
+                ))}
+              </ul>
             </div>
           )}
 
