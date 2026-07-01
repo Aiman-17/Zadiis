@@ -1040,47 +1040,7 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 3 · Trending chart */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-baseline justify-between mb-4">
-              <h3 className="font-semibold">↑ Trending Now</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>by trending score · hover for details</span>
-            </div>
-            {trendingChartData.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No trending products right now.</p>
-            ) : (
-              <ResponsiveContainer width="100%" height={Math.max(160, trendingChartData.length * 42)}>
-                <BarChart data={trendingChartData} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} tickFormatter={v => v.toFixed(1)} />
-                  <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={120} />
-                  <Tooltip
-                    content={({ active, payload }) => {
-                      if (!active || !payload?.length) return null
-                      const d = payload[0]?.payload as typeof trendingChartData[0]
-                      return (
-                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
-                          <p className="font-semibold mb-1">{d.name}</p>
-                          <p style={{ color: '#9CA3AF' }}>{d.category}</p>
-                          <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units sold · score {d.score.toFixed(1)}</p>
-                          <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
-                            {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
-                          </p>
-                        </div>
-                      )
-                    }}
-                  />
-                  <Bar dataKey="score" fill="#9D174D" radius={[0, 4, 4, 0]} name="Trend Score">
-                    {trendingChartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
-                    ))}
-                  </Bar>
-                </BarChart>
-              </ResponsiveContainer>
-            )}
-          </div>
-
-          {/* 4 · Category Performance chart */}
+          {/* 3 · Category Performance chart */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Category Performance</h3>
@@ -1182,22 +1142,7 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 6 · Top Colors */}
-          {topColors.length > 0 && (
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-              <h3 className="font-semibold mb-4">Top Colors</h3>
-              <ResponsiveContainer width="100%" height={Math.max(160, topColors.length * 38)}>
-                <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
-                  <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
-                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
-                </BarChart>
-              </ResponsiveContainer>
-            </div>
-          )}
-
-          {/* 7 · Price Range Performance */}
+          {/* 6 · Price Range Performance */}
           <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
             <h3 className="font-semibold mb-4">Price Range Performance</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
@@ -1276,7 +1221,11 @@ export default function AnalyticsClient({
                       )
                     }}
                   />
-                  <Bar dataKey="stock" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Stock" />
+                  <Bar dataKey="stock" radius={[0, 4, 4, 0]} name="Stock">
+                    {categoryMerged.map((_, i) => (
+                      <Cell key={i} fill={i === 0 ? '#1C1C1C' : i === 1 ? '#A68B6E' : i === 2 ? '#C9956C' : i === 3 ? '#8B7355' : '#D4B896'} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             </div>
