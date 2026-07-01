@@ -268,11 +268,8 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
 
       {product.colors.length > 0 && (
         <div>
-          <p className="text-sm font-medium mb-2">
-            Color
-            {selectedColor && <span className="font-normal text-gray-500 ml-2">{selectedColor}</span>}
-          </p>
-          <div className="flex flex-wrap gap-3">
+          <p className="text-sm font-medium mb-3">Color</p>
+          <div className="flex flex-wrap gap-4">
             {product.colors.map(color => {
               const disabled = isColorDisabled(color)
               return (
@@ -280,24 +277,38 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
                   key={color}
                   onClick={() => { if (!disabled) { setSelectedColor(color); setSelectedSize(''); setError('') } }}
                   disabled={disabled}
-                  title={disabled ? `${color} — sold out` : color}
-                  className="w-8 h-8 rounded-full border-2 transition-all relative"
-                  style={{
-                    backgroundColor: getColorHex(color),
-                    borderColor: selectedColor === color ? '#A68B6E' : '#E8DDD4',
-                    boxShadow: selectedColor === color ? '0 0 0 2px #FAF8F5, 0 0 0 4px #A68B6E' : 'none',
-                    opacity: disabled ? 0.35 : 1,
-                    cursor: disabled ? 'not-allowed' : 'pointer',
-                  }}
+                  className="flex flex-col items-center gap-1.5"
+                  style={{ cursor: disabled ? 'not-allowed' : 'pointer' }}
                 >
-                  {disabled && (
-                    <span
-                      className="absolute inset-0 flex items-center justify-center"
-                      style={{ fontSize: 16, color: '#999', lineHeight: 1 }}
-                    >
-                      ╲
-                    </span>
-                  )}
+                  <span
+                    className="w-8 h-8 rounded-full border-2 transition-all relative block"
+                    style={{
+                      backgroundColor: getColorHex(color),
+                      borderColor: selectedColor === color ? '#A68B6E' : '#E8DDD4',
+                      boxShadow: selectedColor === color ? '0 0 0 2px #FAF8F5, 0 0 0 4px #A68B6E' : 'none',
+                      opacity: disabled ? 0.35 : 1,
+                    }}
+                  >
+                    {disabled && (
+                      <span
+                        className="absolute inset-0 flex items-center justify-center"
+                        style={{ fontSize: 16, color: '#999', lineHeight: 1 }}
+                      >
+                        ╲
+                      </span>
+                    )}
+                  </span>
+                  <span
+                    className="text-xs leading-tight text-center"
+                    style={{
+                      color: selectedColor === color ? '#1C1C1C' : '#9CA3AF',
+                      fontWeight: selectedColor === color ? 600 : 400,
+                      opacity: disabled ? 0.5 : 1,
+                      maxWidth: '52px',
+                    }}
+                  >
+                    {color}
+                  </span>
                 </button>
               )
             })}
