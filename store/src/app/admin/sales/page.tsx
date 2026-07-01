@@ -59,7 +59,19 @@ export default async function AdminSalesPage() {
     .select('*')
     .order('created_at', { ascending: false })
 
-  const allSales = (sales as Sale[] ?? [])
+  let allSales = (sales as Sale[] ?? [])
+
+  // Lazy deactivation: expire any active sale past its ends_at so this page
+  // shows the correct status without waiting for the nightly cron
+  const now = new Date()
+  const expiredIds = allSales
+    .filter(s => s.is_active && s.ends_at && new Date(s.ends_at) < now)
+    .map(s => s.id)
+  if (expiredIds.length > 0) {
+    void supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
+    allSales = allSales.map(s => expiredIds.includes(s.id) ? { ...s, is_active: false } : s)
+  }
+
   const revenueMap = await getSaleRevenue(allSales.map(s => s.id))
 
   return (
