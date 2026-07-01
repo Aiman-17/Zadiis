@@ -127,15 +127,39 @@ function SizeGuideModal({ onClose }: { onClose: () => void }) {
 }
 
 const COLOR_MAP: Record<string, string> = {
-  black: '#1a1a1a', white: '#FFFFFF', beige: '#F5F0E8',
-  'navy blue': '#003087', navy: '#003087', blue: '#3B82F6',
-  'royal blue': '#4169E1', red: '#DC2626', maroon: '#800000',
-  pink: '#EC4899', 'dusty rose': '#D4A5A5', blush: '#FFB6C1',
-  mint: '#98FFB7', sage: '#9DC183', olive: '#808000',
-  brown: '#A0522D', camel: '#C19A6B', grey: '#9CA3AF',
-  gray: '#9CA3AF', cream: '#FFFDD0', 'off white': '#F8F6F0',
-  gold: '#FFD700', silver: '#C0C0C0', purple: '#7C3AED',
-  lavender: '#E6E6FA', coral: '#FF6B6B', teal: '#0D9488', green: '#16A34A',
+  // Neutrals & whites
+  black: '#1a1a1a', white: '#FFFFFF', grey: '#9CA3AF', gray: '#9CA3AF',
+  cream: '#FFFDD0', 'off white': '#F8F6F0', ivory: '#F8F4E8',
+  beige: '#F5F0E8', nude: '#E8C4A0', champagne: '#EFD9B4',
+  // Browns & warm tones
+  brown: '#A0522D', camel: '#C19A6B', truffle: '#917A6B',
+  khaki: '#C3B091', taupe: '#B5A494', tan: '#D2B48C',
+  rust: '#B7410E', copper: '#B87333',
+  // Pinks
+  pink: '#EC4899', 'baby pink': '#F4C2C2', 'tea pink': '#C98C96',
+  blush: '#FFB6C1', 'dusty rose': '#D4A5A5', 'peach pink': '#F7A8A8',
+  mauve: '#B784A7', fuchsia: '#C71F7E', 'hot pink': '#FF69B4',
+  rose: '#E8637A',
+  // Peach & orange
+  peach: '#FFCBA4', coral: '#FF6B6B', orange: '#F97316',
+  // Purples & lilac
+  lilac: '#C8A2C8', lavender: '#E6E6FA', purple: '#7C3AED',
+  plum: '#8B4580', orchid: '#DA70D6',
+  // Reds
+  red: '#DC2626', maroon: '#800000', burgundy: '#800020',
+  // Greens
+  pista: '#ADCF8B', 'pista green': '#ADCF8B', mint: '#98FFB7',
+  sage: '#9DC183', olive: '#808000', green: '#16A34A',
+  emerald: '#50C878', 'bottle green': '#006A4E',
+  // Blues
+  blue: '#3B82F6', navy: '#003087', 'navy blue': '#003087',
+  'royal blue': '#4169E1', 'sky blue': '#87CEEB', teal: '#0D9488',
+  turquoise: '#30D5C8', 'powder blue': '#B0C4DE',
+  // Yellows & mustard
+  mustard: '#E3A902', yellow: '#FBBF24', lemon: '#FFF44F',
+  gold: '#FFD700', silver: '#C0C0C0',
+  // Rose gold & metallics
+  'rose gold': '#B76E79',
 }
 
 function getColorHex(name: string) {
