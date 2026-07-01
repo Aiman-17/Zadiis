@@ -257,14 +257,6 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   }).length
   const inStockCount    = products.filter(p => getProductStock(p) > 0).length
 
-  // Fix #6 — Best Sellers: ALL products ranked, not just score > 0
-  const topBestSellers = [...products]
-    .sort((a, b) => b.best_seller_score - a.best_seller_score)
-    .slice(0, 5)
-  const topTrending = [...products]
-    .filter(p => p.trending_score > 0)
-    .sort((a, b) => b.trending_score - a.trending_score)
-    .slice(0, 5)
   const d7 = new Date(Date.now() - 7 * 24 * 60 * 60 * 1000)
   const justDropped = [...products]
     .filter(p => new Date(p.created_at) >= d7)
@@ -548,112 +540,34 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         </div>
       </div>
 
-      {/* Merchandising Panel */}
-      <div>
-        <h3 className="font-semibold mb-3">Merchandising</h3>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-
-          {/* Fix #6 — Best Sellers: all products ranked */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <p className="font-semibold text-sm">Best Sellers</p>
-              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}>by score</span>
-            </div>
-            <ol className="space-y-2.5">
-              {topBestSellers.map((p, i) => (
+      {/* Just Dropped */}
+      <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+        <div className="flex items-center gap-2 mb-4">
+          <h3 className="font-semibold text-sm">Just Dropped</h3>
+          <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
+        </div>
+        {justDropped.length === 0 ? (
+          <p className="text-xs" style={{ color: '#9CA3AF' }}>No new products in the last 7 days.</p>
+        ) : (
+          <ul className="space-y-2.5">
+            {justDropped.map(p => {
+              const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86_400_000)
+              const stock   = getProductStock(p)
+              return (
                 <li key={p.id} className="flex items-center gap-2 text-sm">
-                  <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#A68B6E' }}>#{i + 1}</span>
                   <span className="flex-1 truncate">{p.name}</span>
-                  <span className="text-xs shrink-0" style={{ color: p.total_sold > 0 ? '#374151' : '#D1D5DB' }}>
-                    {p.total_sold > 0 ? `${p.total_sold} sold` : 'no sales'}
+                  <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>
+                    {ageDays === 0 ? 'today' : `${ageDays}d ago`}
                   </span>
+                  {stock <= 3 && stock > 0 && (
+                    <span className="text-xs font-semibold shrink-0" style={{ color: '#C62828' }}>{stock} left</span>
+                  )}
                 </li>
-              ))}
-            </ol>
-          </div>
-
-          {/* Trending Now */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <p className="font-semibold text-sm">Trending Now</p>
-              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#FEE2E2', color: '#B91C1C' }}>this week</span>
-            </div>
-            {topTrending.length === 0 ? (
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>No trending data yet. Products score after recent orders.</p>
-            ) : (
-              <ol className="space-y-2.5">
-                {topTrending.map((p, i) => (
-                  <li key={p.id} className="flex items-center gap-2 text-sm">
-                    <span className="w-5 text-xs font-bold shrink-0 text-right" style={{ color: '#C62828' }}>#{i + 1}</span>
-                    <span className="flex-1 truncate">{p.name}</span>
-                    <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>↑ {p.trending_score.toFixed(1)}</span>
-                  </li>
-                ))}
-              </ol>
-            )}
-          </div>
-
-          {/* Just Dropped */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <div className="flex items-center gap-2 mb-4">
-              <p className="font-semibold text-sm">Just Dropped</p>
-              <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
-            </div>
-            {justDropped.length === 0 ? (
-              <p className="text-xs" style={{ color: '#9CA3AF' }}>No new products in the last 7 days.</p>
-            ) : (
-              <ul className="space-y-2.5">
-                {justDropped.map(p => {
-                  const ageDays = Math.floor((Date.now() - new Date(p.created_at).getTime()) / 86_400_000)
-                  const stock   = getProductStock(p)
-                  return (
-                    <li key={p.id} className="flex items-center gap-2 text-sm">
-                      <span className="flex-1 truncate">{p.name}</span>
-                      <span className="text-xs shrink-0" style={{ color: '#9CA3AF' }}>
-                        {ageDays === 0 ? 'today' : `${ageDays}d ago`}
-                      </span>
-                      {stock <= 3 && stock > 0 && (
-                        <span className="text-xs font-semibold shrink-0" style={{ color: '#C62828' }}>{stock} left</span>
-                      )}
-                    </li>
-                  )
-                })}
-              </ul>
-            )}
-          </div>
-
-        </div>
+              )
+            })}
+          </ul>
+        )}
       </div>
-
-      {/* Fix #4 — Low Stock Alerts badge outside h3 */}
-      {lowStockItems.length > 0 && (
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <div className="flex items-center gap-2 mb-4">
-            <h3 className="font-semibold">Low Stock Alerts</h3>
-            <span className="text-xs px-2 py-0.5 rounded-full font-normal"
-              style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
-              {lowStockItems.length}
-            </span>
-          </div>
-          <div className="space-y-2">
-            {lowStockItems.slice(0, 10).map((item, i) => (
-              <div key={i} className="flex items-center justify-between py-2 border-b last:border-0"
-                style={{ borderColor: '#F3F4F6' }}>
-                <div>
-                  <p className="text-sm font-medium">{item.name}</p>
-                  {item.variant && <p className="text-xs" style={{ color: '#6B7280' }}>{item.variant}</p>}
-                </div>
-                <span className="text-xs font-semibold px-2 py-1 rounded-full"
-                  style={item.qty === 0
-                    ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
-                    : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
-                  {item.qty === 0 ? 'OUT OF STOCK' : `${item.qty} left`}
-                </span>
-              </div>
-            ))}
-          </div>
-        </div>
-      )}
 
     </div>
   )
