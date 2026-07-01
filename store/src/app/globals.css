@@ -154,3 +154,6 @@ h1, h2, h3 {
   88%  { transform: rotate(180deg); }
   100% { transform: rotate(360deg); }
 }
+
+.scrollbar-hide { scrollbar-width: none; -ms-overflow-style: none; }
+.scrollbar-hide::-webkit-scrollbar { display: none; }

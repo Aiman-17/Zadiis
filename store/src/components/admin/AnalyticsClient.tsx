@@ -220,6 +220,7 @@ export default function AnalyticsClient({
 
   const trendData      = buildTrendData(orders, range)
   const salesTrendRows = buildSalesTrendTable(orders, range)
+  const salesMaxOrders = Math.max(...salesTrendRows.map(r => r.orders), 1)
 
   const paymentMap: Record<string, number> = {}
   activeOrders.forEach(o => { paymentMap[o.payment_method] = (paymentMap[o.payment_method] || 0) + 1 })
@@ -545,7 +546,7 @@ export default function AnalyticsClient({
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b overflow-x-auto" style={{ borderColor: '#E8DDD4' }}>
+      <div className="flex gap-1 border-b overflow-x-auto scrollbar-hide" style={{ borderColor: '#E8DDD4' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0"
@@ -668,7 +669,14 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="Orders">
-                    {salesTrendRows.map((entry, i) => <Cell key={i} fill={entry.orders > 0 ? '#A68B6E' : '#E8DDD4'} />)}
+                    {salesTrendRows.map((entry, i) => (
+                      <Cell key={i} fill={
+                        entry.orders === 0 ? '#E8DDD4'
+                        : entry.orders >= salesMaxOrders * 0.8 ? '#1C1C1C'
+                        : entry.orders >= salesMaxOrders * 0.5 ? '#A68B6E'
+                        : '#C9956C'
+                      } />
+                    ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -769,7 +777,11 @@ export default function AnalyticsClient({
                         )
                       }}
                     />
-                    <Bar dataKey="revenue" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Revenue" />
+                    <Bar dataKey="revenue" radius={[0, 4, 4, 0]} name="Revenue">
+                      {topCities.map((_, i) => (
+                        <Cell key={i} fill={i === 0 ? '#1C1C1C' : i <= 2 ? '#A68B6E' : i <= 4 ? '#C9956C' : '#D4B896'} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
                 <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
@@ -843,7 +855,11 @@ export default function AnalyticsClient({
                         )
                       }}
                     />
-                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
+                    <Bar dataKey="units" radius={[0, 4, 4, 0]} name="Units">
+                      {allProductsInRange.slice(0, 20).map((_, i) => (
+                        <Cell key={i} fill={i === 0 ? '#1C1C1C' : i <= 2 ? '#A68B6E' : i <= 5 ? '#C9956C' : '#D4B896'} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
 

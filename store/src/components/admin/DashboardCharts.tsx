@@ -355,114 +355,107 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         </Link>
       </div>
 
-      {/* Fix #1 #3 #5 #7 #8 — KPI Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-        {/* Gross Revenue 7d with net sub + vs prev */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
-            Net: {pkr(netRevenue7d)}
-          </p>
-          {revenue7dChangePct !== null && (
-            <p className="text-xs mt-0.5 font-medium"
-              style={{ color: revenue7dChangePct >= 0 ? '#10B981' : '#EF4444' }}>
-              {revenue7dChangePct >= 0 ? '↑' : '↓'} {Math.abs(revenue7dChangePct)}% vs prev 7d
-            </p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Gross Revenue (7d)</p>
-        </div>
-
-        {/* Revenue This Month */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
-          {revenueLastMonth > 0 ? (
-            <p className="text-xs mt-0.5 font-medium"
-              style={{ color: revenueThisMonth >= revenueLastMonth ? '#10B981' : '#EF4444' }}>
-              {revenueThisMonth >= revenueLastMonth ? '↑' : '↓'} vs last month: {pkr(revenueLastMonth)}
-            </p>
-          ) : (
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>first month on record</p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Revenue This Month</p>
-        </div>
-
-        {/* Orders This Month + fulfillment rate */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{ordersThisMonth}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? '#10B981' : '#F59E0B' }}>
-            {fulfillmentRate}% fulfilled
-          </p>
-          {ordersLastMonth > 0 && (
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {ordersLastMonth} orders</p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Orders This Month</p>
-        </div>
-
-        {/* AOV */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{pkr(aov)}</p>
-          {aovLastMonth > 0 && (
-            <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {pkr(aovLastMonth)}</p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Avg. Order Value</p>
-        </div>
-
-        {/* Low Stock Variants — links to filtered products */}
-        <Link href="/admin/products?filter=low-stock"
-          className="bg-white rounded-lg p-5 border block hover:shadow-sm transition-shadow"
-          style={{ borderColor: lowStockItems.length > 0 ? '#FCA5A5' : '#E8DDD4' }}>
-          <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? '#DC2626' : '#374151' }}>
-            {lowStockItems.length}
-          </p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
-            variants need restocking
-          </p>
-          <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Low Stock Alerts → view</p>
-        </Link>
-
-        {/* Total Products */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{totalProducts}</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#F59E0B' }}>
-            {totalStock.toLocaleString('en-US')} units in stock
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Total Products</p>
-        </div>
-
-        {/* Revenue This Year with YoY */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{pkr(thisYearRevenue)}</p>
-          {yoyChangePct !== null && (
-            <p className="text-xs mt-0.5 font-medium"
-              style={{ color: yoyChangePct >= 0 ? '#10B981' : '#EF4444' }}>
-              {yoyChangePct >= 0 ? '↑' : '↓'} {Math.abs(yoyChangePct)}% vs {currentYear - 1}
-            </p>
-          )}
-          <p className="text-xs text-gray-500 mt-1">Revenue This Year</p>
-        </div>
-
-        {/* Repeat Customer Rate */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-2xl font-bold">{repeatCustomerRate}%</p>
-          <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
-            {repeatCustomerCount} of {uniqueCustomerCount} customers
-          </p>
-          <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
-        </div>
-
-        {/* COD Success Rate */}
-        {codSuccessRate !== null && (
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <p className="text-2xl font-bold"
-              style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
-              {codSuccessRate}%
-            </p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
-              {codDelivered} of {resolvedCod.length} resolved COD orders
-            </p>
-            <p className="text-xs text-gray-500 mt-1">COD Success Rate</p>
+      {/* Revenue KPIs */}
+      <div>
+        <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Revenue</p>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+            <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>Net: {pkr(netRevenue7d)}</p>
+            {revenue7dChangePct !== null && (
+              <p className="text-xs mt-0.5 font-medium" style={{ color: revenue7dChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+                {revenue7dChangePct >= 0 ? '↑' : '↓'} {Math.abs(revenue7dChangePct)}% vs prev 7d
+              </p>
+            )}
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Gross Revenue (7d)</p>
           </div>
-        )}
+
+          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+            <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
+            {revenueLastMonth > 0 ? (
+              <p className="text-xs mt-0.5 font-medium" style={{ color: revenueThisMonth >= revenueLastMonth ? '#10B981' : '#EF4444' }}>
+                {revenueThisMonth >= revenueLastMonth ? '↑' : '↓'} vs last month: {pkr(revenueLastMonth)}
+              </p>
+            ) : (
+              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>first month on record</p>
+            )}
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Revenue This Month</p>
+          </div>
+
+          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+            <p className="text-2xl font-bold">{pkr(thisYearRevenue)}</p>
+            {yoyChangePct !== null && (
+              <p className="text-xs mt-0.5 font-medium" style={{ color: yoyChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+                {yoyChangePct >= 0 ? '↑' : '↓'} {Math.abs(yoyChangePct)}% vs {currentYear - 1}
+              </p>
+            )}
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Revenue This Year</p>
+          </div>
+
+          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+            <p className="text-2xl font-bold">{pkr(aov)}</p>
+            {aovLastMonth > 0 && (
+              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {pkr(aovLastMonth)}</p>
+            )}
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Avg. Order Value</p>
+          </div>
+        </div>
+      </div>
+
+      {/* Operations KPIs */}
+      <div>
+        <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Operations</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <p className="text-2xl font-bold">{ordersThisMonth}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? '#10B981' : '#F59E0B' }}>
+              {fulfillmentRate}% fulfilled
+            </p>
+            {ordersLastMonth > 0 && (
+              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {ordersLastMonth} orders</p>
+            )}
+            <p className="text-xs text-gray-500 mt-1">Orders This Month</p>
+          </div>
+
+          <Link href="/admin/products?filter=low-stock"
+            className="bg-white rounded-lg p-5 border block hover:shadow-sm transition-shadow"
+            style={{ borderColor: lowStockItems.length > 0 ? '#FCA5A5' : '#E8DDD4' }}>
+            <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? '#DC2626' : '#374151' }}>
+              {lowStockItems.length}
+            </p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>variants need restocking</p>
+            <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Low Stock Alerts → view</p>
+          </Link>
+
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <p className="text-2xl font-bold">{totalProducts}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#F59E0B' }}>
+              {totalStock.toLocaleString('en-US')} units in stock
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Total Products</p>
+          </div>
+
+          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <p className="text-2xl font-bold">{repeatCustomerRate}%</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+              {repeatCustomerCount} of {uniqueCustomerCount} customers
+            </p>
+            <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
+          </div>
+
+          {codSuccessRate !== null && (
+            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <p className="text-2xl font-bold"
+                style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
+                {codSuccessRate}%
+              </p>
+              <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+                {codDelivered} of {resolvedCod.length} resolved COD orders
+              </p>
+              <p className="text-xs text-gray-500 mt-1">COD Success Rate</p>
+            </div>
+          )}
+        </div>
       </div>
 
       {/* Cash Position (MTD) */}
