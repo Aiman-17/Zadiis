@@ -11,10 +11,12 @@ test.describe('Admin — Orders', () => {
   })
 
   test('orders page shows the real status tab strip', async ({ page }) => {
-    // Real tabs (orders/page.tsx TABS): Active / Pending Shipment / Completed /
-    // Returns / Cancellations / Archived — each with a live count. No "All" tab.
+    // Real tabs (orders/page.tsx TABS): Active / Pending Shipment / Shipped /
+    // Completed / Returns / Cancellations / Archived — each with a live count.
+    // No "All" tab. Shipped is its own tab so shipped orders aren't lumped
+    // into "pending" once they've actually left the warehouse.
     await expect(page.getByRole('button', { name: /^Active \(\d+\)$/ })).toBeVisible({ timeout: 8_000 })
-    for (const label of [/^Pending Shipment \(\d+\)$/, /^Completed \(\d+\)$/, /^Returns \(\d+\)$/, /^Cancellations \(\d+\)$/, /^Archived \(\d+\)$/]) {
+    for (const label of [/^Pending Shipment \(\d+\)$/, /^Shipped \(\d+\)$/, /^Completed \(\d+\)$/, /^Returns \(\d+\)$/, /^Cancellations \(\d+\)$/, /^Archived \(\d+\)$/]) {
       await expect(page.getByRole('button', { name: label })).toBeVisible()
     }
   })

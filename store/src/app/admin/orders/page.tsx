@@ -43,7 +43,7 @@ const REQUEST_REASON_LABELS: Record<string, string> = {
 // Lifecycle: new → processing → shipped → delivered | cancelled | returned
 const STATUSES = ['new', 'processing', 'shipped', 'delivered', 'returned']
 
-type Tab = 'active' | 'pending_shipment' | 'completed' | 'returns' | 'cancellations' | 'archived'
+type Tab = 'active' | 'pending_shipment' | 'shipped' | 'completed' | 'returns' | 'cancellations' | 'archived'
 
 export default function AdminOrders() {
   const [orders,          setOrders]          = useState<Order[]>([])
@@ -75,7 +75,8 @@ export default function AdminOrders() {
 
   const counts = useMemo(() => ({
     active:           orders.filter(o => !o.is_archived && o.order_status === 'new').length,
-    pending_shipment: orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped')).length,
+    pending_shipment: orders.filter(o => !o.is_archived && o.order_status === 'processing').length,
+    shipped:          orders.filter(o => !o.is_archived && o.order_status === 'shipped').length,
     completed:        orders.filter(o => !o.is_archived && o.order_status === 'delivered').length,
     returns:          orders.filter(o => !o.is_archived && o.order_status === 'returned').length + returnRequests.length,
     cancellations:    orders.filter(o => !o.is_archived && o.order_status === 'cancelled').length + cancelRequests.length,
@@ -84,7 +85,8 @@ export default function AdminOrders() {
 
   const filtered = useMemo(() => {
     if (tab === 'active')            return orders.filter(o => !o.is_archived && o.order_status === 'new')
-    if (tab === 'pending_shipment')  return orders.filter(o => !o.is_archived && (o.order_status === 'processing' || o.order_status === 'shipped'))
+    if (tab === 'pending_shipment')  return orders.filter(o => !o.is_archived && o.order_status === 'processing')
+    if (tab === 'shipped')           return orders.filter(o => !o.is_archived && o.order_status === 'shipped')
     if (tab === 'completed')         return orders.filter(o => !o.is_archived && o.order_status === 'delivered')
     if (tab === 'returns')           return orders.filter(o => !o.is_archived && o.order_status === 'returned')
     if (tab === 'cancellations')     return orders.filter(o => !o.is_archived && o.order_status === 'cancelled')
@@ -228,6 +230,7 @@ export default function AdminOrders() {
   const TABS: { key: Tab; label: string }[] = [
     { key: 'active',           label: `Active (${counts.active})` },
     { key: 'pending_shipment', label: `Pending Shipment (${counts.pending_shipment})` },
+    { key: 'shipped',          label: `Shipped (${counts.shipped})` },
     { key: 'completed',        label: `Completed (${counts.completed})` },
     { key: 'returns',          label: `Returns (${counts.returns})` },
     { key: 'cancellations',    label: `Cancellations (${counts.cancellations})` },

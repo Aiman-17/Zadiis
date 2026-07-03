@@ -78,7 +78,7 @@ export default async function HomePage() {
         {heroImage && (
           <Image
             src={heroImage}
-            alt="ZADIIS Hero Banner"
+            alt="ZADII'S Hero Banner"
             fill
             className="object-cover"
             priority

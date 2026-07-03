@@ -1,15 +1,38 @@
 import { Resend } from 'resend'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM || 'ZADIIS <orders@zadiis.com.pk>'
-const WHATSAPP = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || ''
+const FROM = process.env.RESEND_FROM || "ZADII'S <orders@zadiis.com.pk>"
+const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zadiis.com'
+
+type EmailItem = { product_id?: string; product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }
+
+// Resolve product page URLs for order items (id → /shop/[slug]).
+// Old orders and deleted products degrade gracefully to plain text.
+async function productLinkMap(items: Array<{ product_id?: string }>): Promise<Record<string, string>> {
+  const ids = [...new Set(items.map(i => i.product_id).filter(Boolean))] as string[]
+  if (ids.length === 0) return {}
+  try {
+    const { data } = await supabaseAdmin.from('products').select('id, slug').in('id', ids)
+    return Object.fromEntries((data ?? []).filter(p => p.slug).map(p => [p.id, `${BASE_URL}/shop/${p.slug}`]))
+  } catch {
+    return {}
+  }
+}
+
+function linkedName(i: EmailItem, links: Record<string, string>): string {
+  const url = i.product_id ? links[i.product_id] : undefined
+  return url
+    ? `<a href="${url}" style="color:#A68B6E;text-decoration:underline">${i.product_name}</a>`
+    : i.product_name
+}
 
 // Shared item rows builder (used by multiple templates)
-function buildItemRows(items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>): string {
+function buildItemRows(items: EmailItem[], links: Record<string, string> = {}): string {
   return items.map(i => `
     <tr>
       <td style="padding:10px 0;border-bottom:1px solid #F0EAE3;color:#1C1C1C">
-        ${i.product_name}${i.sku ? `<br><span style="font-size:12px;color:#A68B6E">${i.sku}</span>` : ''}
+        ${linkedName(i, links)}${i.sku ? `<br><span style="font-size:12px;color:#A68B6E">${i.sku}</span>` : ''}
         <br><span style="font-size:12px;color:#888">${i.size} · ${i.color}</span>
       </td>
       <td style="padding:10px 0;border-bottom:1px solid #F0EAE3;text-align:center;color:#1C1C1C">×${i.quantity}</td>
@@ -17,20 +40,20 @@ function buildItemRows(items: Array<{ product_name: string; sku?: string; size: 
     </tr>`).join('')
 }
 
-// Shared ZADIIS header HTML
+// Shared ZADII'S header HTML
 function zadiisHeader(): string {
   return `
     <div style="background:#1C1C1C;padding:28px 32px;text-align:center">
-      <h1 style="color:white;font-family:Georgia,serif;margin:0;font-size:28px;letter-spacing:4px">ZADIIS</h1>
+      <h1 style="color:white;font-family:Georgia,serif;margin:0;font-size:28px;letter-spacing:4px">ZADII&apos;S</h1>
       <p style="color:#A68B6E;margin:6px 0 0;font-size:13px;letter-spacing:1px">Modern Pakistani Women's Fashion</p>
     </div>`
 }
 
-// Shared ZADIIS footer HTML
+// Shared ZADII'S footer HTML
 function zadiisFooter(): string {
   return `
     <div style="background:#1C1C1C;padding:20px 32px;text-align:center">
-      <p style="color:#888;margin:0;font-size:12px">© 2026 ZADIIS. All rights reserved.</p>
+      <p style="color:#888;margin:0;font-size:12px">© 2026 ZADII&apos;S. All rights reserved.</p>
       <p style="color:#666;margin:6px 0 0;font-size:11px">zadiis.com.pk</p>
     </div>`
 }
@@ -38,7 +61,7 @@ function zadiisFooter(): string {
 export async function sendCustomerOrderConfirmed(to: string | null | undefined, d: {
   order_number: string
   customer_name: string
-  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
+  items: EmailItem[]
   subtotal: number
   delivery_charge: number
   total: number
@@ -48,7 +71,8 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
   is_sale?: boolean
 }): Promise<void> {
   if (!to) return
-  const itemRows = buildItemRows(d.items)
+  const links = await productLinkMap(d.items)
+  const itemRows = buildItemRows(d.items, links)
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
@@ -85,13 +109,6 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
                <p style="margin:0;color:#166534;font-weight:bold">Online Payment</p>
                <p style="margin:6px 0 0;color:#166534;font-size:14px">Once your payment is confirmed, your order will be processed immediately.</p>
              </div>`}
-        <div style="text-align:center;margin-bottom:8px">
-          <a href="https://wa.me/${WHATSAPP}?text=Hi!%20I%20need%20help%20with%20my%20order%20${d.order_number}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-          <p style="margin:8px 0 0;font-size:12px;color:#888">Questions? Chat with us on WhatsApp</p>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -99,7 +116,7 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Your order ${d.order_number} has been placed — ZADIIS`,
+      subject: `Your order ${d.order_number} has been placed — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -169,7 +186,7 @@ function buildInvoiceBlock(d: {
 export async function sendCustomerPaymentConfirmed(to: string | null | undefined, d: {
   order_number:   string
   customer_name:  string
-  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
+  items: EmailItem[]
   subtotal:        number
   delivery_charge: number
   total:           number
@@ -181,7 +198,8 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
   is_sale?:        boolean
 }): Promise<void> {
   if (!to) return
-  const itemRows    = buildItemRows(d.items)
+  const links = await productLinkMap(d.items)
+  const itemRows = buildItemRows(d.items, links)
   const invoiceBlock = d.invoice_number
     ? buildInvoiceBlock({
         invoice_number: d.invoice_number,
@@ -218,13 +236,6 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
           <p style="margin:0 0 8px;font-weight:bold;color:#1C1C1C">Delivery Address</p>
           <p style="margin:0;color:#666">${d.address}, ${d.city}</p>
         </div>
-        <div style="text-align:center;margin-bottom:8px">
-          <a href="https://wa.me/${WHATSAPP}?text=Hi!%20I%20need%20help%20with%20my%20order%20${d.order_number}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-          <p style="margin:8px 0 0;font-size:12px;color:#888">Questions? Chat with us on WhatsApp</p>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -232,7 +243,7 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Payment confirmed — Order ${d.order_number} — ZADIIS`,
+      subject: `Payment confirmed — Order ${d.order_number} — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -244,28 +255,25 @@ export async function sendCustomerOrderDelivered(to: string | null | undefined, 
   order_number: string
   customer_name: string
   total: number
+  items?: EmailItem[]
 }): Promise<void> {
   if (!to) return
+  const links = d.items ? await productLinkMap(d.items) : {}
+  const itemRows = d.items ? buildItemRows(d.items, links) : ''
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto;background:#FAF8F5;padding:0">
       ${zadiisHeader()}
       <div style="padding:32px;background:#FAF8F5">
         <h2 style="color:#1C1C1C;font-family:Georgia,serif;margin:0 0 8px">Your Order Has Arrived!</h2>
-        <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your ZADIIS order has been delivered.</p>
+        <p style="color:#666;margin:0 0 24px">Hi ${d.customer_name}, your ZADII&apos;S order has been delivered.</p>
         <div style="background:white;border:1px solid #E8DDD4;border-radius:8px;padding:16px 20px;margin-bottom:24px;text-align:center">
           <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
         </div>
+        ${itemRows ? `<table style="width:100%;border-collapse:collapse;margin-bottom:24px">${itemRows}</table>` : ''}
         <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:16px 20px;margin-bottom:24px">
           <p style="margin:0;color:#166534;font-weight:bold">✓ Delivered</p>
           <p style="margin:6px 0 0;color:#166534;font-size:14px">We hope you love your new outfit! Share your review at zadiis.com.pk</p>
-        </div>
-        <div style="text-align:center;margin-bottom:8px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-          <p style="margin:8px 0 0;font-size:12px;color:#888">Questions? Chat with us on WhatsApp</p>
         </div>
       </div>
       ${zadiisFooter()}
@@ -274,7 +282,7 @@ export async function sendCustomerOrderDelivered(to: string | null | undefined, 
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Your order ${d.order_number} has been delivered — ZADIIS`,
+      subject: `Your order ${d.order_number} has been delivered — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -289,7 +297,7 @@ export async function sendOwnerNewOrder(d: {
   customer_email?: string | null
   address: string
   city: string
-  items: Array<{ product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }>
+  items: EmailItem[]
   subtotal: number
   delivery_charge: number
   total: number
@@ -297,7 +305,8 @@ export async function sendOwnerNewOrder(d: {
   payment_status: string
   is_sale?: boolean
 }): Promise<void> {
-  const itemRows = buildItemRows(d.items)
+  const links = await productLinkMap(d.items)
+  const itemRows = buildItemRows(d.items, links)
   const saleTag = d.is_sale ? '🛍️ SALE — ' : ''
   const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
@@ -402,7 +411,7 @@ export async function sendOwnerStockConflict(d: { product_names: string }): Prom
   }
   const ts2 = new Date().toLocaleTimeString('en-PK', { timeZone: 'Asia/Karachi', hour: '2-digit', minute: '2-digit' })
   await sendWhatsAppToOwner(
-    `[ZADIIS] Stock conflict at ${ts2}: "${d.product_names}" went out of stock while a customer was checking out. Please review your inventory.`
+    `[ZADII'S] Stock conflict at ${ts2}: "${d.product_names}" went out of stock while a customer was checking out. Please review your inventory.`
   )
 }
 
@@ -437,13 +446,7 @@ export async function sendCustomerOrderCancelled(to: string | null | undefined, 
           <p style="margin:0;font-size:12px;color:#888;letter-spacing:1px;text-transform:uppercase">Order Number</p>
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
         </div>
-        <p style="color:#666;font-size:14px">If you paid online, your refund will be processed within 3–5 business days. For any questions, please WhatsApp us.</p>
-        <div style="text-align:center;margin-top:24px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-        </div>
+        <p style="color:#666;font-size:14px">If you paid online, your refund will be processed within 3–5 business days.</p>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -451,7 +454,7 @@ export async function sendCustomerOrderCancelled(to: string | null | undefined, 
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Your order ${d.order_number} has been cancelled — ZADIIS`,
+      subject: `Your order ${d.order_number} has been cancelled — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -507,13 +510,6 @@ export async function sendCustomerCancellationConfirmation(to: string | null | u
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
         </div>
         <p style="color:#666;font-size:14px">We have received your cancellation request and our team will review it within <strong>24 hours</strong>. You will receive a confirmation email once your cancellation has been processed.</p>
-        <p style="color:#666;font-size:14px;margin-top:12px">In the meantime, if you have any questions, please don't hesitate to reach out via WhatsApp.</p>
-        <div style="text-align:center;margin-top:24px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -521,7 +517,7 @@ export async function sendCustomerCancellationConfirmation(to: string | null | u
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Cancellation request received — ${d.order_number} — ZADIIS`,
+      subject: `Cancellation request received — ${d.order_number} — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -578,12 +574,6 @@ export async function sendCustomerReturnConfirmation(to: string | null | undefin
         </div>
         <p style="color:#666;font-size:14px">Our team will review your return request and respond within <strong>24 hours</strong> with next steps, including the return address and instructions.</p>
         <p style="color:#666;font-size:14px;margin-top:12px">Please do not ship the item back until you've received our confirmation. Thank you for your patience.</p>
-        <div style="text-align:center;margin-top:24px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -591,7 +581,7 @@ export async function sendCustomerReturnConfirmation(to: string | null | undefin
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Return request received — ${d.order_number} — ZADIIS`,
+      subject: `Return request received — ${d.order_number} — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -646,13 +636,6 @@ export async function sendCustomerExchangeConfirmation(to: string | null | undef
           <p style="margin:6px 0 0;font-size:24px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.order_number}</p>
         </div>
         <p style="color:#666;font-size:14px">Our team will prepare your replacement and you will receive a shipping confirmation email as soon as your exchange is dispatched. Please do not send back the original item until you hear from us.</p>
-        <p style="color:#666;font-size:14px;margin-top:12px">If you have any questions in the meantime, please reach out to us on WhatsApp.</p>
-        <div style="text-align:center;margin-top:24px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -660,7 +643,7 @@ export async function sendCustomerExchangeConfirmation(to: string | null | undef
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Exchange request received — ${d.order_number} — ZADIIS`,
+      subject: `Exchange request received — ${d.order_number} — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -694,13 +677,6 @@ export async function sendCustomerExchangeShipped(to: string | null | undefined,
           <p style="margin:0;color:#5B21B6;font-weight:bold">📦 Dispatched</p>
           <p style="margin:8px 0 0;color:#5B21B6;font-size:14px">Please allow <strong>2–3 business days</strong> for processing. Your replacement is expected to arrive within <strong>3–4 business days</strong> from today.</p>
         </div>
-        <p style="color:#666;font-size:14px">If you haven't received your exchange after 4 business days, please reach out to us on WhatsApp and we'll assist you right away.</p>
-        <div style="text-align:center;margin-top:24px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
-        </div>
       </div>
       ${zadiisFooter()}
     </div>`
@@ -708,7 +684,7 @@ export async function sendCustomerExchangeShipped(to: string | null | undefined,
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Your exchange for ${d.order_number} is on the way — ZADIIS`,
+      subject: `Your exchange for ${d.order_number} is on the way — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -730,13 +706,7 @@ export async function sendCustomerExchangeDelivered(to: string | null | undefine
         <p style="color:#666;margin:0 0 24px">Hi ${name}, your exchange for order <strong>${d.order_number}</strong> has been delivered. We hope it is exactly what you were looking for!</p>
         <div style="background:#F0FDF4;border:1px solid #86EFAC;border-radius:8px;padding:16px 20px;margin-bottom:24px">
           <p style="margin:0;color:#166534;font-weight:bold">✓ Exchange Delivered</p>
-          <p style="margin:6px 0 0;color:#166534;font-size:14px">We hope you love your new piece. Thank you for choosing ZADIIS — we look forward to serving you again!</p>
-        </div>
-        <div style="text-align:center;margin-top:8px">
-          <a href="https://wa.me/${WHATSAPP}"
-             style="display:inline-block;background:#25D366;color:white;padding:12px 28px;border-radius:6px;text-decoration:none;font-weight:bold;font-size:14px">
-            WhatsApp Support
-          </a>
+          <p style="margin:6px 0 0;color:#166534;font-size:14px">We hope you love your new piece. Thank you for choosing ZADII&apos;S — we look forward to serving you again!</p>
         </div>
       </div>
       ${zadiisFooter()}
@@ -745,7 +715,7 @@ export async function sendCustomerExchangeDelivered(to: string | null | undefine
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `Your exchange for ${d.order_number} has been delivered — ZADIIS`,
+      subject: `Your exchange for ${d.order_number} has been delivered — ZADII'S`,
       html,
     })
   } catch (e) {
@@ -772,7 +742,7 @@ export async function sendOtpEmail(to: string, otp: string): Promise<void> {
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `${otp} — Your ZADIIS verification code`,
+      subject: `${otp} — Your ZADII'S verification code`,
       html,
     })
   } catch (e) {
@@ -812,7 +782,7 @@ export async function sendBackInStockEmail(to: string, d: {
     await resend.emails.send({
       from: FROM,
       to,
-      subject: `${d.product_name} is back in stock — ZADIIS`,
+      subject: `${d.product_name} is back in stock — ZADII'S`,
       html,
     })
   } catch (e) {

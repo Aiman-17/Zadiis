@@ -29,10 +29,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: product.name,
-    description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADIIS`,
+    description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADII'S`,
     openGraph: {
       title: product.name,
-      description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADIIS`,
+      description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADII'S`,
       images: product.images?.[0] ? [{ url: product.images[0] }] : [],
       type: 'website',
       url: `${BASE_URL}/shop/${product.slug}`,

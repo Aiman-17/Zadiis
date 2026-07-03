@@ -184,15 +184,20 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // Trending products (from product scores)
+  // Trending products — computed score OR manually flagged ↑ Trending
+  // (same rule the analytics flags use; manual-only products get a floor
+  // chart value so their bar is visible even at score 0)
   const trendingProducts = products
-    .filter(p => p.trending_score > 0)
+    .filter(p => p.is_trending || p.trending_score > 0)
     .sort((a, b) => b.trending_score - a.trending_score)
     .slice(0, 8)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
       score: p.trending_score,
+      chartScore: Math.max(p.trending_score, p.is_trending ? 1 : 0),
+      manual: !!p.is_trending,
+      price: p.price,
       category: p.product_category || 'Uncategorized',
       stock: dashStock(p),
       total_sold: p.total_sold,
@@ -580,15 +585,16 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
                           <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
                             <p className="font-semibold mb-1">{d.name}</p>
                             <p style={{ color: '#9CA3AF' }}>{d.category}</p>
-                            <p style={{ color: '#6B7280' }}>{d.total_sold} total sold · score {d.score.toFixed(1)}</p>
+                            <p style={{ color: '#A68B6E' }}>PKR {Number(d.price).toLocaleString()}</p>
+                            <p style={{ color: '#6B7280' }}>{d.total_sold} units sold{d.manual ? ' · ↑ flagged trending' : ` · score ${d.score.toFixed(1)}`}</p>
                             <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
-                              {d.stock === 0 ? '⚠ OUT OF STOCK' : d.stock <= 5 ? `⚠ Only ${d.stock} left` : `${d.stock} in stock`}
+                              {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                             </p>
                           </div>
                         )
                       }}
                     />
-                    <Bar dataKey="score" radius={[0, 4, 4, 0]} name="Trend Score">
+                    <Bar dataKey="chartScore" radius={[0, 4, 4, 0]} name="Trend Score">
                       {trendingProducts.map((entry, i) => (
                         <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
                       ))}

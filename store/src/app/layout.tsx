@@ -3,12 +3,12 @@ import './globals.css'
 
 export const metadata: Metadata = {
   title: {
-    default: 'ZADIIS — Women\'s Fashion',
-    template: '%s | ZADIIS',
+    default: "ZADII'S — Women's Fashion",
+    template: "%s | ZADII'S",
   },
   description: 'Discover women\'s fashion crafted for the modern Pakistani woman. Shop dresses, suits, and more.',
   openGraph: {
-    siteName: 'ZADIIS',
+    siteName: "ZADII'S",
     type: 'website',
     locale: 'en_PK',
   },

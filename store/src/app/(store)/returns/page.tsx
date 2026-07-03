@@ -1,6 +1,6 @@
 import ReturnRequestForm from '@/components/store/ReturnRequestForm'
 
-export const metadata = { title: 'Returns & Exchanges | ZADIIS' }
+export const metadata = { title: "Returns & Exchanges | ZADII'S" }
 
 export default function ReturnsPage() {
   return (

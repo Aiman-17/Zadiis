@@ -1,4 +1,4 @@
-export const metadata = { title: 'Shipping Information | ZADIIS' }
+export const metadata = { title: "Shipping Information | ZADII'S" }
 
 export default function ShippingPage() {
   return (

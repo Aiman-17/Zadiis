@@ -153,6 +153,7 @@ export async function PUT(req: NextRequest) {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           total: orderData.total,
+          items: 'items' in orderData ? (orderData.items as OrderItem[]) : undefined,
         })
       }
 
