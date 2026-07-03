@@ -41,7 +41,8 @@ test.describe('Shop page', () => {
   })
 
   test('clearing search restores full list', async ({ page }) => {
-    test.fixme(true, 'BUG-002: search debounce does not cancel in-flight navigation — see specs/001-e2e-test-suite/bugs/BUG-002-shop-search-debounce-race.md')
+    // Regression test for BUG-002 (fixed 2026-07-03): ShopSearchBar now
+    // re-pushes the latest intent when a stale navigation resolves last.
     await page.waitForSelector('a[href^="/shop/"]', { timeout: 10_000 })
     const initial = await page.locator('a[href^="/shop/"]').count()
 

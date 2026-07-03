@@ -80,12 +80,8 @@ test.describe('Checkout email OTP verification', () => {
   })
 
   test('server rate-limit error from send is surfaced to the customer', async ({ page }) => {
-    // BUG-001 (specs/001-e2e-test-suite/bugs/BUG-001-otp-send-error-hidden.md):
-    // sendOtp() stores the error but resets otpState to 'idle', and the error
-    // only renders inside the otpState==='sent' box — so it is never visible.
-    // Re-enable this test when BUG-001 is fixed.
-    test.fixme(true, 'BUG-001: OTP send error is swallowed — error renders only inside the hidden OTP box')
-
+    // Regression test for BUG-001 (fixed 2026-07-03): send errors now render
+    // under the email field even when the OTP box is unmounted.
     // Override the send route BEFORE navigation: respond like the real 60s limiter
     await page.route('**/api/otp/send', (route) =>
       route.fulfill({

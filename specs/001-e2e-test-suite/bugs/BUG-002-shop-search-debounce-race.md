@@ -8,7 +8,7 @@
 | **Category** | Functional — race condition / state management |
 | **Component** | `store/src/components/products/ShopSearchBar.tsx` (`handleChange`, lines 11-22) |
 | **Environment** | All — code-level defect, reproduced against local production build (`npm run build && npm start`), Chromium, no other load on the machine |
-| **Status** | Open |
+| **Status** | Fixed 2026-07-03 — ShopSearchBar tracks latest intent in a ref and re-pushes when a stale navigation settles last; regression test re-enabled, 5/5 repeat-each passes (was 1/5 pre-fix) |
 | **Found by** | E2E test `tests/store/shop.spec.ts:42 › Shop page › clearing search restores full list` (timed out 30000ms, both attempt and retry) |
 | **Date** | 2026-07-02 |
 

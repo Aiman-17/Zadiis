@@ -8,7 +8,7 @@
 | **Category** | Functional / UX — error handling |
 | **Component** | `store/src/app/(store)/checkout/page.tsx` (OTP email verification) |
 | **Environment** | All — code-level defect, reproduced on local production build (Next 16.2.7), Chromium |
-| **Status** | Open |
+| **Status** | Fixed 2026-07-03 — otpError now renders under the email field when the OTP box is unmounted (checkout/page.tsx); regression test re-enabled and passing |
 | **Found by** | E2E test `checkout-otp.spec.ts › server rate-limit error from send is surfaced to the customer` |
 | **Date** | 2026-07-02 |
 
