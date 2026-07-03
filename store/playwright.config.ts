@@ -16,13 +16,15 @@ export default defineConfig({
   projects: [
     { name: 'setup', testMatch: '**/global.setup.ts' },
     {
+      // Anchor to tests/store — the repo folder is also named "store", so a
+      // bare '**/store/**' pattern matches EVERY spec path (including admin)
       name: 'store',
-      testMatch: '**/store/**/*.spec.ts',
+      testMatch: '**/tests/store/**/*.spec.ts',
       dependencies: [],
     },
     {
       name: 'admin',
-      testMatch: '**/admin/**/*.spec.ts',
+      testMatch: '**/tests/admin/**/*.spec.ts',
       dependencies: ['setup'],
       use: {
         storageState: 'tests/.auth/admin.json',

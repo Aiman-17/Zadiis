@@ -55,7 +55,8 @@ test.describe('Home page', () => {
 
   test('footer renders brand name', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await expect(page.getByRole('contentinfo')).toContainText('ZADIIS')
+    // Brand renders with an apostrophe in the UI: ZADII'S (Footer.tsx)
+    await expect(page.getByRole('contentinfo')).toContainText(/ZADII.?S/)
   })
 
 })

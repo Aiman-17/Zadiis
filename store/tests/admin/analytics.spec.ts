@@ -1,0 +1,68 @@
+import { test, expect } from '@playwright/test'
+
+/**
+ * US5 — Admin analytics dashboard (/admin/analytics).
+ * Real UI: 5 tabs (Revenue, Performance, Products, Inventory, Orders)
+ * and a range selector (7 Days, 30 Days, 90 Days, 12 Months).
+ */
+
+const TABS = ['Revenue', 'Performance', 'Products', 'Inventory', 'Orders']
+
+test.describe('Admin analytics dashboard', () => {
+
+  test('analytics page renders heading without page error', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+
+    await page.goto('/admin/analytics')
+    await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible({ timeout: 8_000 })
+    expect(errors).toEqual([])
+  })
+
+  test('all five tabs are present', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    for (const tab of TABS) {
+      await expect(page.getByRole('button', { name: tab, exact: true }).first()).toBeVisible({ timeout: 8_000 })
+    }
+  })
+
+  test('every tab switches without a client crash', async ({ page }) => {
+    const errors: string[] = []
+    page.on('pageerror', (err) => errors.push(err.message))
+
+    await page.goto('/admin/analytics')
+    for (const tab of TABS) {
+      await page.getByRole('button', { name: tab, exact: true }).first().click()
+      // Heading stays mounted — the page did not white-screen
+      await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible()
+    }
+    expect(errors).toEqual([])
+  })
+
+  test('date range selector changes range without crash', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: '7 Days' }).click()
+    await expect(page).toHaveURL(/range=7d/, { timeout: 8_000 })
+    await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible()
+
+    await page.getByRole('button', { name: '12 Months' }).click()
+    await expect(page).toHaveURL(/range=12m/, { timeout: 8_000 })
+    await expect(page.getByRole('heading', { name: 'Analytics' })).toBeVisible()
+  })
+
+  test('Revenue tab shows revenue figures or empty state — never an error page', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Revenue', exact: true }).first().click()
+    // PKR amounts render for data, or the section renders empty — both acceptable;
+    // an unhandled error page is not.
+    await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
+  })
+
+  test('unauthenticated visit to analytics redirects to login', async ({ browser }) => {
+    const context = await browser.newContext({ storageState: { cookies: [], origins: [] } })
+    const page = await context.newPage()
+    await page.goto('/admin/analytics')
+    await expect(page).toHaveURL(/\/admin\/login/, { timeout: 8_000 })
+    await context.close()
+  })
+})

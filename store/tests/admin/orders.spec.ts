@@ -10,24 +10,21 @@ test.describe('Admin — Orders', () => {
     await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible()
   })
 
-  test('orders table has expected status columns', async ({ page }) => {
-    await page.waitForTimeout(2_000)
-    // Expect status filter tabs or column headers
-    const statusLabels = ['All', 'New', 'Processing', 'Shipped', 'Delivered', 'Cancelled']
-    let found = 0
-    for (const label of statusLabels) {
-      const el = page.getByRole('tab', { name: label }).or(page.getByRole('button', { name: label })).or(page.getByText(label))
-      if (await el.first().isVisible().catch(() => false)) found++
+  test('orders page shows the real status tab strip', async ({ page }) => {
+    // Real tabs (orders/page.tsx TABS): Active / Pending Shipment / Completed /
+    // Returns / Cancellations / Archived — each with a live count. No "All" tab.
+    await expect(page.getByRole('button', { name: /^Active \(\d+\)$/ })).toBeVisible({ timeout: 8_000 })
+    for (const label of [/^Pending Shipment \(\d+\)$/, /^Completed \(\d+\)$/, /^Returns \(\d+\)$/, /^Cancellations \(\d+\)$/, /^Archived \(\d+\)$/]) {
+      await expect(page.getByRole('button', { name: label })).toBeVisible()
     }
-    expect(found).toBeGreaterThan(1)
   })
 
   test('clicking an order opens order detail', async ({ page }) => {
-    await page.waitForTimeout(2_000)
     const firstOrder = page.getByRole('link', { name: /#ZD-/i }).or(
       page.locator('table tr').nth(1).getByRole('link')
     ).first()
-    const hasOrders = await firstOrder.isVisible().catch(() => false)
+    // Bounded wait for the list to load (replaces fixed sleep); no orders → skip
+    const hasOrders = await firstOrder.waitFor({ state: 'visible', timeout: 8_000 }).then(() => true).catch(() => false)
     if (!hasOrders) test.skip()
 
     await firstOrder.click()
@@ -38,11 +35,11 @@ test.describe('Admin — Orders', () => {
   })
 
   test('can change order status to Processing', async ({ page }) => {
-    await page.waitForTimeout(2_000)
     const firstOrder = page.getByRole('link', { name: /#ZD-/i }).or(
       page.locator('table tr').nth(1).getByRole('link')
     ).first()
-    if (!await firstOrder.isVisible().catch(() => false)) test.skip()
+    // Bounded wait for the list to load (replaces fixed sleep); no orders → skip
+    if (!await firstOrder.waitFor({ state: 'visible', timeout: 8_000 }).then(() => true).catch(() => false)) test.skip()
 
     await firstOrder.click()
 
@@ -57,11 +54,11 @@ test.describe('Admin — Orders', () => {
   })
 
   test('can mark order as Cancelled with reason', async ({ page }) => {
-    await page.waitForTimeout(2_000)
     const firstOrder = page.getByRole('link', { name: /#ZD-/i }).or(
       page.locator('table tr').nth(1).getByRole('link')
     ).first()
-    if (!await firstOrder.isVisible().catch(() => false)) test.skip()
+    // Bounded wait for the list to load (replaces fixed sleep); no orders → skip
+    if (!await firstOrder.waitFor({ state: 'visible', timeout: 8_000 }).then(() => true).catch(() => false)) test.skip()
 
     await firstOrder.click()
 
@@ -82,9 +79,8 @@ test.describe('Admin — Orders', () => {
 
   test('cancelled order count updates in payments tab', async ({ page }) => {
     await page.goto('/admin/payments')
-    await page.waitForTimeout(2_000)
-    // Payments page should render tabs — check it loads without error
-    await expect(page.getByRole('heading', { name: /payments/i })).toBeVisible()
+    // Payments page should render tabs — the heading assertion already polls
+    await expect(page.getByRole('heading', { name: /payments/i })).toBeVisible({ timeout: 8_000 })
   })
 
 })
@@ -112,8 +108,49 @@ test.describe('Admin — COD Management', () => {
 
   test('COD page shows awaiting cash count', async ({ page }) => {
     await page.goto('/admin/cod')
-    await page.waitForTimeout(2_000)
-    await expect(page.getByText(/awaiting|collected|pending/i).first()).toBeVisible()
+    // The visibility assertion polls — no fixed sleep needed
+    await expect(page.getByText(/awaiting|collected|pending/i).first()).toBeVisible({ timeout: 8_000 })
   })
 
+})
+
+/**
+ * US7 — Returns & cancellations managed within /admin/orders.
+ * Real UI: tabs "Returns (n)" and "Cancellations (n)" show customer request
+ * cards alongside orders already in those statuses.
+ */
+test.describe('Admin — Orders: Returns & Cancellations', () => {
+
+  test.beforeEach(async ({ page }) => {
+    await page.goto('/admin/orders')
+  })
+
+  test('Returns and Cancellations tabs are present', async ({ page }) => {
+    await expect(page.getByRole('button', { name: /^Returns \(\d+\)$/ })).toBeVisible({ timeout: 8_000 })
+    await expect(page.getByRole('button', { name: /^Cancellations \(\d+\)$/ })).toBeVisible()
+  })
+
+  test('Returns tab opens without error and shows requests or empty state', async ({ page }) => {
+    await page.getByRole('button', { name: /^Returns \(\d+\)$/ }).click()
+    await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible()
+    await expect(page.getByText(/Application error/i)).not.toBeVisible()
+  })
+
+  test('Cancellations tab opens without error', async ({ page }) => {
+    await page.getByRole('button', { name: /^Cancellations \(\d+\)$/ }).click()
+    await expect(page.getByRole('heading', { name: /orders/i })).toBeVisible()
+    await expect(page.getByText(/Application error/i)).not.toBeVisible()
+  })
+
+  test('pending return request card shows actionable status', async ({ page }) => {
+    const returnsTab = page.getByRole('button', { name: /^Returns \((\d+)\)$/ })
+    const label = await returnsTab.textContent()
+    const count = Number(label?.match(/\((\d+)\)/)?.[1] ?? 0)
+    test.skip(count === 0, 'no return requests in DB to exercise')
+
+    await returnsTab.click()
+    await expect(
+      page.getByText(/Return Request|Exchange Request|pending|approved/i).first()
+    ).toBeVisible({ timeout: 8_000 })
+  })
 })
