@@ -29,9 +29,17 @@ export async function mockOtp(page: Page, code: string = TEST_OTP) {
 
 /**
  * Complete inline email verification on the checkout page with the mocked code.
- * Assumes mockOtp() was installed and the email field has been filled + blurred.
+ * Assumes mockOtp() was installed and the email field has been filled.
+ *
+ * Sending is a deliberate customer action (send-arrow button next to the
+ * email field), not automatic on blur — this helper clicks it before waiting
+ * for the code box, so existing callers don't need to know about the button.
  */
 export async function completeOtp(page: Page, code: string = TEST_OTP) {
+  const sendButton = page.getByRole('button', { name: /send verification code/i })
+  if (await sendButton.isVisible().catch(() => false)) {
+    await sendButton.click()
+  }
   const otpInput = page.getByPlaceholder('000000')
   await expect(otpInput).toBeVisible({ timeout: 8_000 })
   await otpInput.fill(code)
