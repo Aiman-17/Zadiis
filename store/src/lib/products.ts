@@ -3,6 +3,7 @@ import { supabaseAdmin } from './supabase/server'
 import type { Product } from '@/types'
 import { getBestSellers, getTrending, getMerchandisingContext } from './merchandising'
 import { getJustDropped, getJustDroppedIds } from './merchandising-server'
+import { getEffectiveStock } from './stock'
 
 function getPKTDate(): string {
   const now = new Date()
@@ -90,10 +91,15 @@ export async function getProducts(filters?: {
         tabOrdered = true
         break
       }
-      case 'last-chance':
-        query = query.gt('stock_quantity', 0).lte('stock_quantity', 3).order('stock_quantity', { ascending: true })
+      case 'last-chance': {
+        // BUG-004: stock_quantity alone can drift from the true variant
+        // stock — filter/sort on effective stock instead of the raw field
+        // (same fix as getLastChanceProducts() below).
+        const lastChanceIds = (await lastChanceQualifying()).map(p => p.id)
+        query = query.in('id', lastChanceIds.length > 0 ? lastChanceIds : ['00000000-0000-0000-0000-000000000000'])
         tabOrdered = true
         break
+      }
     }
   }
 
@@ -193,16 +199,27 @@ export async function getBestsellerProducts(limit = 6) {
   return getBestSellers(limit)
 }
 
-export async function getLastChanceProducts(limit = 4) {
-  const { data } = await supabase
+/**
+ * Products qualifying for Last Chance (effective stock 1-3), sorted
+ * scarcest-first. Fetches the full active catalog and filters/sorts on
+ * getEffectiveStock() rather than the raw stock_quantity column — that
+ * column can drift stale relative to variant_stock (BUG-004), which
+ * previously both hid an in-stock product from this section and let the
+ * same drift block real orders in checkout.
+ */
+async function lastChanceQualifying(): Promise<Product[]> {
+  const { data, error } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
-    .gt('stock_quantity', 0)
-    .lte('stock_quantity', 3)
-    .order('stock_quantity', { ascending: true })
-    .limit(limit)
-  return (data || []) as Product[]
+  if (error) throw error
+  return ((data || []) as Product[])
+    .filter(p => { const s = getEffectiveStock(p); return s > 0 && s <= 3 })
+    .sort((a, b) => getEffectiveStock(a) - getEffectiveStock(b))
+}
+
+export async function getLastChanceProducts(limit = 4) {
+  return (await lastChanceQualifying()).slice(0, limit)
 }
 
 export async function getTrendingProducts(limit = 4) {

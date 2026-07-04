@@ -7,6 +7,7 @@ import {
 } from 'recharts'
 import type { Order, OrderItem, Product } from '@/types'
 import { rankBestSellers, rankTrending, merchandisingIdSets } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 const RANGE_OPTIONS = [
   { key: '7d',  label: '7 Days' },
@@ -54,13 +55,7 @@ function toWeeklySundayKey(d: Date): string {
 }
 
 function getMerchStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return p.stock_quantity
+  return getEffectiveStock(p)
 }
 
 function buildAllBuckets(range: string, longMonthLabel = false) {

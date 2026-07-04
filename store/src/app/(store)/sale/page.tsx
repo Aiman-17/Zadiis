@@ -2,21 +2,12 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import ProductCard from '@/components/products/ProductCard'
 import SaleCountdown from '@/components/products/SaleCountdown'
 import { getBestSellers, getMerchandisingContext } from '@/lib/merchandising'
+import { getEffectiveStock as getTotalStock } from '@/lib/stock'
 import type { Sale, SaleProduct, Product, Category } from '@/types'
 
 export const dynamic = 'force-dynamic'
 
 type SaleProductFull = SaleProduct & { products: Product & { categories?: Category } }
-
-function getTotalStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return p.stock_quantity
-}
 
 function sortByDiscount(sps: SaleProductFull[]): SaleProductFull[] {
   return [...sps].sort((a, b) => {

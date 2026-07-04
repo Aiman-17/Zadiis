@@ -3,16 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Flame, Hourglass } from 'lucide-react'
 import type { Product } from '@/types'
-
-function getEffectiveStock(product: Product): number {
-  const vs = product.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return product.stock_quantity
-}
+import { getEffectiveStock } from '@/lib/stock'
 
 interface ProductCardProps {
   product: Product

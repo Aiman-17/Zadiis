@@ -4,6 +4,7 @@ import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductBySlug } from '@/lib/products'
 import { getMerchandisingContext } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import AddToCartButton from '@/components/products/AddToCartButton'
 import ProductImageGallery from '@/components/products/ProductImageGallery'
@@ -120,28 +121,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     // fail gracefully
   }
 
-  const isSoldOut = (() => {
-    const vs = product!.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      ) === 0
-    }
-    return product!.stock_quantity === 0
-  })()
+  const totalStock = getEffectiveStock(product!)
+  const isSoldOut = totalStock === 0
 
   const displayPrice = salePrice ?? product!.price
   const savings = salePrice ? product!.price - salePrice : 0
-
-  const totalStock = (() => {
-    const vs = product!.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return product!.stock_quantity
-  })()
   const isLastChance = totalStock > 0 && totalStock <= 3
 
   const jsonLd = {
@@ -233,7 +217,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     PKR {product!.price.toLocaleString('en-US')}
                   </p>
                 )}
-                {product!.stock_quantity === 0 && (
+                {isSoldOut && (
                   <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500">Out of Stock</span>
                 )}
               </div>
@@ -243,7 +227,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                 <div className="mt-3">
                   <ProductSaleUrgency
                     endsAt={saleEndsAt}
-                    stockQty={product!.stock_quantity}
+                    stockQty={totalStock}
                   />
                 </div>
               )}
@@ -259,11 +243,11 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
             )}
 
             {/* Stock urgency — only on non-sale products (sale products use ProductSaleUrgency) */}
-            {!salePrice && product!.stock_quantity > 0 && product!.stock_quantity <= 10 && (
-              <p className="text-sm font-semibold" style={{ color: product!.stock_quantity <= 3 ? '#B91C1C' : '#B45309' }}>
-                {product!.stock_quantity <= 3
-                  ? `Hurry! Only ${product!.stock_quantity} left in stock`
-                  : `Only ${product!.stock_quantity} left in stock`}
+            {!salePrice && totalStock > 0 && totalStock <= 10 && (
+              <p className="text-sm font-semibold" style={{ color: totalStock <= 3 ? '#B91C1C' : '#B45309' }}>
+                {totalStock <= 3
+                  ? `Hurry! Only ${totalStock} left in stock`
+                  : `Only ${totalStock} left in stock`}
               </p>
             )}
 

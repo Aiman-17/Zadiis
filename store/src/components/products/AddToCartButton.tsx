@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { addToCart } from '@/lib/cart-store'
+import { getEffectiveStock } from '@/lib/stock'
 import type { Product } from '@/types'
 
 const STITCHED_SIZES = [
@@ -222,7 +223,10 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const totalOutOfStock = product.stock_quantity === 0
+  // BUG-004: raw stock_quantity can drift stale relative to variant_stock —
+  // this must agree with ProductCard's own effective-stock check, or a
+  // product can show as available in listings but "Sold Out" on its own page.
+  const totalOutOfStock = getEffectiveStock(product) === 0
 
   return (
     <>

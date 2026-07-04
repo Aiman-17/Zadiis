@@ -5,6 +5,7 @@ import { useRouter, useSearchParams } from 'next/navigation'
 import { Trash2, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Product } from '@/types'
 import { merchandisingIdSets } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 function isLowStock(p: Product): boolean {
   const vs = p.variant_stock
@@ -17,13 +18,7 @@ function isLowStock(p: Product): boolean {
 }
 
 function getProductStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return p.stock_quantity
+  return getEffectiveStock(p)
 }
 
 function productVelocity(p: Product): number {

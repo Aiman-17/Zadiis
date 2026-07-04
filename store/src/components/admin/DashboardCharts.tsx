@@ -6,6 +6,7 @@ import {
 import Link from 'next/link'
 import type { Order, OrderItem, Product } from '@/types'
 import { rankTrending } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 const STATUS_COLORS: Record<string, string> = {
   new:        '#3B82F6',
@@ -151,13 +152,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     : 0
 
   // Slow movers — relative: below 50% of store average sell-through, 15+ days old
-  function dashStock(p: Product): number {
-    const vs = p.variant_stock
-    return vs && Object.keys(vs).length > 0
-      ? Object.values(vs).reduce((sum, sizes) =>
-          sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
-      : p.stock_quantity
-  }
+  const dashStock = getEffectiveStock
   const eligibleProds = products.filter(p => {
     const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
     return age >= 15 && dashStock(p) > 0
@@ -217,14 +212,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
 
   // Product stock helpers
   const totalProducts = products.length
-  const totalStock = products.reduce((sum, p) => {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return sum + Object.values(vs).reduce((s, sizes) =>
-        s + Object.values(sizes as Record<string, number>).reduce((si, q) => si + q, 0), 0)
-    }
-    return sum + p.stock_quantity
-  }, 0)
+  const totalStock = products.reduce((sum, p) => sum + getEffectiveStock(p), 0)
 
   // 7-day sales trend
   const salesTrend7d = Array.from({ length: 7 }, (_, i) => {
@@ -265,16 +253,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
   // Inventory health
-  function getProductStock(p: Product): number {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return p.stock_quantity
-  }
-  const soldOutCount    = products.filter(p => getProductStock(p) === 0).length
+  const soldOutCount    = products.filter(p => getEffectiveStock(p) === 0).length
   // Match the products page filter: any variant with ≤3 units (or total stock ≤3 for non-variant products)
   const lastChanceCount = products.filter(p => {
     const vs = p.variant_stock
@@ -283,10 +262,10 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         Object.values(sizes as Record<string, number>).some(q => q > 0 && q <= 3)
       )
     }
-    const s = getProductStock(p)
+    const s = getEffectiveStock(p)
     return s > 0 && s <= 3
   }).length
-  const inStockCount    = products.filter(p => getProductStock(p) > 0).length
+  const inStockCount    = products.filter(p => getEffectiveStock(p) > 0).length
 
 
   // Sale banner logic

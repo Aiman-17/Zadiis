@@ -106,8 +106,11 @@ test.describe('Product detail page', () => {
     const href = await firstCard.getAttribute('href')
     await page.goto(href!)
 
+    // A last-chance product can show both the category-strip badge and the
+    // urgency message simultaneously — assert at least one is visible rather
+    // than assuming exactly one match (Playwright strict mode).
     await expect(
-      page.getByText(/Almost Gone|Final Stock|Only \d+ left/i)
+      page.getByText(/Almost Gone|Final Stock|Only \d+ left/i).first()
     ).toBeVisible()
   })
 

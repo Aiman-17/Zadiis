@@ -8,7 +8,7 @@
 | **Category** | Data / Functional |
 | **Component** | `store/src/app/api/orders/route.ts` (stock validation, line 59), `store/src/lib/products.ts` (`getLastChanceProducts()` and the `'last-chance'` Shop tab filter) — both read raw `stock_quantity` directly instead of the variant-aware effective-stock computation three other places in the codebase already implement independently: `store/src/lib/scoring.ts`'s `getTotalStock()`, `store/src/components/products/ProductCard.tsx`'s `getEffectiveStock()`, and `store/src/app/(store)/shop/[slug]/page.tsx`'s inline `totalStock` |
 | **Environment** | Production database (confirmed against the live Supabase instance) |
-| **Status** | Open — filed only, per explicit user decision; no code or data changes made |
+| **Status** | Fixed 2026-07-04 — consolidated 11 independently-duplicated "effective stock" implementations into `store/src/lib/stock.ts::getEffectiveStock()`, then routed every consumer that previously trusted raw `stock_quantity` through it: `orders/route.ts` and `payments/tracker/route.ts` (checkout stock validation, both COD and online-payment paths), `cart/validate/route.ts` (previously had no variant awareness at all), `AddToCartButton.tsx`'s `totalOutOfStock`/"Sold Out" state (the most customer-visible instance), and `products.ts`'s `getLastChanceProducts()` + the `'last-chance'` Shop tab filter. Verified live: `POST /api/cart/validate` for "New suit best cotton quality with printed" now returns `{"unavailable":[]}` (previously would reject it); its product page now renders "Add to Cart" (not "Sold Out") and "Hurry! Only 2 left in stock". Full store+admin Playwright regression: 144/144 non-skipped tests pass (one pre-existing test's strict-mode locator needed a `.first()` after the fix correctly surfaced two matching urgency elements at once — not a regression). The code fix alone resolves the symptom completely, since every consumer now prefers `variant_stock`'s true sum over the stale `stock_quantity` value — the one-time data-reconciliation SQL below remains available but is now optional data hygiene, not a blocking requirement. |
 | **Found by** | Surfaced while explaining the Last Chance section's logic during a code-review conversation on feature 003-merchandising-badges-v2; verified against live data before filing (not assumed) |
 | **Date** | 2026-07-04 |
 
@@ -55,3 +55,22 @@ Confirmed via live query: 2 of 7 active products (29%) currently mismatched. No 
 ## Regression Risk
 
 Low for the data reconciliation (idempotent single-row `UPDATE`s, no schema change). Medium for the code consolidation — it touches checkout's stock-validation path, which is sensitive; needs regression coverage confirming order placement still correctly rejects genuinely-sold-out products (both variant-tracked and non-variant) before/after the change, not just that it now accepts the 2 currently-blocked ones. No existing Playwright spec asserts on the relationship between `stock_quantity` and `variant_stock` after an order or admin edit — new coverage would be needed alongside any fix.
+
+## Post-fix note (2026-07-04)
+
+Fix #2 (consolidation) is what actually closed this bug — every code path that gates purchase or Last Chance eligibility now reads through `getEffectiveStock()`, which ignores the stale `stock_quantity` value entirely whenever `variant_stock` is present. That means fix #1 (data reconciliation) is no longer required for correctness — `stock_quantity` staying wrong for these 2 products has no observable effect anywhere in the app anymore. It's optional cosmetic/data-hygiene cleanup only, offered here if wanted (not applied — no direct DB write access):
+
+```sql
+-- Optional: realign stock_quantity with the true variant_stock sum for the
+-- 2 products BUG-004 found drifted. Not required for correctness (the app
+-- no longer reads stock_quantity for these products where variant_stock
+-- exists) — purely cosmetic so the raw column isn't misleading if read
+-- directly (e.g. in a future report or CSV export).
+UPDATE products SET stock_quantity = 2
+WHERE id = '8c69067c-2442-47c2-a68f-4c2d6dc27d78'; -- "New suit best cotton quality with printed"
+
+UPDATE products SET stock_quantity = 10
+WHERE name = 'CO-ORDS 2pcs set';
+```
+
+Scope actually touched during the fix ended up broader than this report's original two named components — 11 total independently-duplicated "effective stock" computations were found and consolidated (not 3), because the same drift-blindness pattern was reproduced in `payments/tracker/route.ts` (online-payment checkout), `cart/validate/route.ts` (had no variant awareness at all), `AddToCartButton.tsx` (drove the actual "Sold Out" button state — the most customer-visible instance), and eight admin-dashboard/analytics/sales-page helper functions computing the same total independently.
