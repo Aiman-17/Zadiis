@@ -54,7 +54,7 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
             {discountPct > 0 && (
               <span
                 className="text-[9px] font-bold px-1.5 py-0.5"
-                style={{ backgroundColor: '#1E3A8A', color: 'white' }}
+                style={{ backgroundColor: '#C62828', color: 'white' }}
               >
                 -{discountPct}%
               </span>
