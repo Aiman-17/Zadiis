@@ -509,8 +509,26 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  const newArrivals = products
+  // Age-based — every product added to the catalog in the last 30 days,
+  // regardless of the curated "New Arrival" flag below. Used to track the
+  // whole recent inventory, not just what's curated for the storefront.
+  const recentlyAdded = products
     .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
+    .map(p => {
+      const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+      return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  // Curated — the manual is_new_arrival flag + optional start/end window
+  // (same lifecycle the storefront's /new-arrivals page and homepage section
+  // use, see lib/products.ts 'new-arrivals' tab query). Independent of
+  // product age — an admin decides what counts as "new," not created_at.
+  const todayStr = new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const curatedNewArrivals = products
+    .filter(p => p.is_new_arrival)
+    .filter(p => !p.new_arrival_start || p.new_arrival_start <= todayStr)
+    .filter(p => !p.new_arrival_end || p.new_arrival_end >= todayStr)
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
       return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
@@ -1136,21 +1154,6 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 6 · Price Range Performance */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Price Range Performance</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {priceRangeStats.map(r => (
-                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
-                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
-                  <p className="text-lg font-bold mt-1">{r.units}</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>PKR {Math.round(r.revenue / 1000)}k</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       )}
 
@@ -1304,11 +1307,12 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* New Arrivals */}
-          {newArrivals.length > 0 && (
+          {/* New Arrivals — curated (is_new_arrival flag + window) */}
+          {curatedNewArrivals.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold text-sm">New Arrivals — last 30 days</h3>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">New Arrivals</h3>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F5F3FF', color: '#5B21B6' }}>flagged · live on storefront</span>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -1322,7 +1326,50 @@ export default function AnalyticsClient({
                   </tr>
                 </thead>
                 <tbody>
-                  {newArrivals.map(p => (
+                  {curatedNewArrivals.map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right">{p.total_sold}</td>
+                      <td className="px-4 py-3 text-right font-medium"
+                        style={{ color: p.stock === 0 ? '#DC2626' : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        {p.stock === 0 ? 'OUT' : p.stock}
+                      </td>
+                      <td className="px-5 py-3 text-right text-xs">
+                        {p.velocity >= 1 ? <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
+                          : p.velocity > 0 ? <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                          : <span style={{ color: '#D1D5DB' }}>no sales</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              </div>
+            </div>
+          )}
+
+          {/* Recently Added to Inventory — age-based, all products (not just curated new arrivals) */}
+          {recentlyAdded.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Recently Added to Inventory — last 30 days</h3>
+              </div>
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Days Live</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock Left</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentlyAdded.map(p => (
                     <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
                       <td className="px-5 py-3">
                         <p className="font-medium">{p.name}</p>
