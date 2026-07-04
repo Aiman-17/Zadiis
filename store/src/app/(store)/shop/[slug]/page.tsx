@@ -167,9 +167,9 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* Ambient sale banner — shown on non-sale products when a sale is running */}
         {isSaleActive && !salePrice && (
           <a href="/sale" className="flex items-center gap-2 mb-6 px-4 py-2.5 rounded-lg text-sm transition-opacity hover:opacity-90" style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
-            <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: '#C62828' }} />
+            <span className="w-2 h-2 rounded-full shrink-0 animate-pulse" style={{ backgroundColor: '#1E3A8A' }} />
             <span style={{ color: '#1C1C1C' }}>Sale On Now — Browse discounted styles</span>
-            <span className="ml-auto text-xs font-semibold" style={{ color: '#C62828' }}>View Sale →</span>
+            <span className="ml-auto text-xs font-semibold" style={{ color: '#1E3A8A' }}>View Sale →</span>
           </a>
         )}
 
@@ -180,8 +180,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
               {/* Category identity strip — contextual to product flags */}
               {salePrice ? (
                 <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>Sale</span>
-                  <span className="text-xs" style={{ color: '#C62828' }}>Limited time price — ends when timer hits zero</span>
+                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#1E3A8A', color: 'white' }}>Sale</span>
+                  <span className="text-xs" style={{ color: '#1E3A8A' }}>Limited time price — ends when timer hits zero</span>
                 </div>
               ) : isLastChance ? (
                 <div className="flex items-center gap-1.5 mb-2">
@@ -215,7 +215,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                     <p className="text-lg line-through" style={{ color: '#9CA3AF' }}>
                       PKR {product!.price.toLocaleString('en-US')}
                     </p>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>
+                    <span className="text-xs font-bold px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#1E3A8A', color: 'white' }}>
                       -{Math.round((1 - salePrice / product!.price) * 100)}%
                     </span>
                     <span className="text-xs" style={{ color: '#10B981' }}>

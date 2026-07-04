@@ -27,7 +27,7 @@ export default function Header({ hasSale = false }: { hasSale?: boolean }) {
         <nav className="hidden md:flex gap-8 text-sm font-medium">
           <Link href="/shop" className="hover:opacity-70 transition-opacity">Shop</Link>
           <Link href="/new-arrivals" className="hover:opacity-70 transition-opacity">New Arrivals</Link>
-          {hasSale && <Link href="/sale" className="hover:opacity-70 transition-opacity font-semibold" style={{ color: '#C62828' }}>Sale</Link>}
+          {hasSale && <Link href="/sale" className="hover:opacity-70 transition-opacity font-semibold" style={{ color: '#1E3A8A' }}>Sale</Link>}
           <Link href="/about" className="hover:opacity-70 transition-opacity">About</Link>
           <Link href="/contact" className="hover:opacity-70 transition-opacity">Contact</Link>
         </nav>
@@ -52,7 +52,7 @@ export default function Header({ hasSale = false }: { hasSale?: boolean }) {
         <div className="md:hidden border-t px-4 py-4 flex flex-col gap-4 text-sm font-medium" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
           <Link href="/shop" onClick={() => setMenuOpen(false)}>Shop</Link>
           <Link href="/new-arrivals" onClick={() => setMenuOpen(false)}>New Arrivals</Link>
-          {hasSale && <Link href="/sale" onClick={() => setMenuOpen(false)} className="font-semibold" style={{ color: '#C62828' }}>Sale</Link>}
+          {hasSale && <Link href="/sale" onClick={() => setMenuOpen(false)} className="font-semibold" style={{ color: '#1E3A8A' }}>Sale</Link>}
           <Link href="/about" onClick={() => setMenuOpen(false)}>About</Link>
           <Link href="/contact" onClick={() => setMenuOpen(false)}>Contact</Link>
         </div>
