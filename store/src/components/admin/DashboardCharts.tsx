@@ -36,8 +36,8 @@ type ActiveSaleSummary = {
   todayRevenue: number; yesterdayRevenue: number
 }
 
-export default function DashboardCharts({ orders, products, activeSales = [] }: {
-  orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]
+export default function DashboardCharts({ orders, products, activeSales = [], codEnabled = false }: {
+  orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]; codEnabled?: boolean
 }) {
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
@@ -416,7 +416,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
             <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
           </div>
 
-          {codSuccessRate !== null && (
+          {codEnabled && codSuccessRate !== null && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <p className="text-2xl font-bold"
                 style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
@@ -432,7 +432,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
       </div>
 
       {/* Cash Position (MTD) */}
-      {(cashCollectedMTD > 0 || inTransitMTD > 0) && (
+      {codEnabled && (cashCollectedMTD > 0 || inTransitMTD > 0) && (
         <div className="flex gap-4 px-5 py-3 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAFAFA' }}>
           <div className="flex-1">
             <p className="text-xs font-medium" style={{ color: '#6B7280' }}>Cash Collected (MTD)</p>

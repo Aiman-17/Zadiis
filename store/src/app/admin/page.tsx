@@ -16,12 +16,13 @@ export default async function AdminDashboard() {
   let allOrders: Order[] = []
   let products: Product[] = []
   let activeSales: ActiveSaleSummary[] = []
+  let codEnabled = false
 
   try {
     const today = new Date().toISOString().slice(0, 10)
     const yesterday = new Date(Date.now() - 86400000).toISOString().slice(0, 10)
 
-    const [ordersRes, productsRes, salesRes, saleProductsRes, saleOrdersRes] = await Promise.all([
+    const [ordersRes, productsRes, salesRes, saleProductsRes, saleOrdersRes, codSettingRes] = await Promise.all([
       supabaseAdmin.from('orders').select('*').order('created_at', { ascending: false }),
       supabaseAdmin.from('products').select('*').eq('is_active', true),
       supabaseAdmin.from('sales').select('id, title, ends_at').eq('is_active', true),
@@ -30,7 +31,10 @@ export default async function AdminDashboard() {
         .eq('is_sale', true)
         .not('order_status', 'in', '("cancelled","returned")')
         .order('created_at', { ascending: false }),
+      supabaseAdmin.from('store_settings').select('value').eq('key', 'cod_enabled').maybeSingle(),
     ])
+
+    codEnabled = codSettingRes.data?.value === 'true'
 
     allOrders = (ordersRes.data || []) as Order[]
     products = (productsRes.data || []) as Product[]
@@ -81,7 +85,7 @@ export default async function AdminDashboard() {
   return (
     <div>
       <h1 className="text-2xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Dashboard</h1>
-      <DashboardCharts orders={allOrders} products={products} activeSales={activeSales} />
+      <DashboardCharts orders={allOrders} products={products} activeSales={activeSales} codEnabled={codEnabled} />
     </div>
   )
 }
