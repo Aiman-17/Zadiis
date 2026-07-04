@@ -57,6 +57,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   let saleEndsAt: string | null = null
   let isSaleActive = false
   let relatedProducts: Product[] = []
+  let relatedSalePrices: Record<string, number> = {}
   let soldLast24h = 0
   let isTrending = false
 
@@ -116,6 +117,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .eq('product_id', product!.id)
         .maybeSingle()
       if (sp) salePrice = sp.sale_price
+
+      if (relatedProducts.length > 0) {
+        const { data: relatedSp } = await supabaseAdmin
+          .from('sale_products')
+          .select('product_id, sale_price')
+          .eq('sale_id', saleRes.data.id)
+          .in('product_id', relatedProducts.map(p => p.id))
+        relatedSalePrices = Object.fromEntries((relatedSp || []).map(sp => [sp.product_id, sp.sale_price]))
+      }
     }
   } catch {
     // fail gracefully
@@ -268,7 +278,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {relatedProducts.length > 0 && (
           <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
             <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>This Is For You</h2>
-            <ProductSlider products={relatedProducts} />
+            <ProductSlider products={relatedProducts} salePriceMap={relatedSalePrices} />
           </div>
         )}
       </div>
