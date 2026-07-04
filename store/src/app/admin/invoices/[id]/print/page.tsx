@@ -151,7 +151,13 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
           <p style={{ margin: 0, fontSize: 11, fontWeight: 'bold', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Payment Details</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 24px' }}>
             <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Method: <strong style={{ color: '#1C1C1C', textTransform: 'capitalize' }}>{order.payment_method}</strong></p>
-            <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Status: <strong style={{ color: '#15803D' }}>PAID</strong></p>
+            <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>
+              Status: <strong style={{
+                color: order.payment_status === 'paid' ? '#15803D'
+                  : order.payment_status === 'failed' ? '#DC2626'
+                  : '#92400E'
+              }}>{order.payment_status.toUpperCase()}</strong>
+            </p>
             {order.safepay_transaction_id && (
               <p style={{ margin: 0, fontSize: 12, color: '#6B7280', gridColumn: '1 / -1' }}>
                 Transaction ID: {order.safepay_transaction_id}

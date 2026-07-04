@@ -169,11 +169,11 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
     return (p.total_sold / (p.total_sold + s)) < dashAvgSellThrough * 0.5
   }).length
 
-  // Order status donut — ALL non-archived orders
+  // Order status donut — non-archived orders from the last 30 days
   const statusCounts: Record<string, number> = {
     new: 0, processing: 0, shipped: 0, delivered: 0, returned: 0, cancelled: 0,
   }
-  orders.filter(o => !o.is_archived).forEach(o => {
+  orders.filter(o => !o.is_archived && isWithinDays(o.created_at, 30)).forEach(o => {
     if (statusCounts[o.order_status] !== undefined) statusCounts[o.order_status]++
   })
   const statusData = Object.entries(statusCounts)
@@ -452,7 +452,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Order Status Donut */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold mb-4">Order Status Breakdown</h3>
+          <h3 className="font-semibold mb-4">Order Status Breakdown <span className="font-normal text-xs" style={{ color: '#9CA3AF' }}>(Last 30 Days)</span></h3>
           {statusData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={180}>
