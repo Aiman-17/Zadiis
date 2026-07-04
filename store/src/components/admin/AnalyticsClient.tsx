@@ -6,6 +6,7 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import type { Order, OrderItem, Product } from '@/types'
+import { rankBestSellers, rankTrending, merchandisingIdSets } from '@/lib/merchandising'
 
 const RANGE_OPTIONS = [
   { key: '7d',  label: '7 Days' },
@@ -330,15 +331,17 @@ export default function AnalyticsClient({
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
   const sevenDaysAgo  = new Date(Date.now() -  7 * 86400000)
 
-  // Auto flags per top product
+  // Auto flags per top product — same qualifying sets as every other page
+  // (single source of truth — specs/003-merchandising-badges-v2)
+  const { bestSellerIds: flagBestSellerIds, trendingIds: flagTrendingIds } = merchandisingIdSets(products)
   const productFlagMap: Record<string, { label: string; color: string; bg: string }[]> = {}
   allProductsInRange.forEach(tp => {
     const p = productByName[tp.name]
     if (!p) return
     const flags: { label: string; color: string; bg: string }[] = []
     const stock = getMerchStock(p)
-    if (p.is_bestseller || p.best_seller_score > 0) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
-    if (p.is_trending || p.trending_score > 0)       flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
+    if (flagBestSellerIds.has(p.id)) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
+    if (flagTrendingIds.has(p.id))   flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
     if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: '#5B21B6', bg: '#F5F3FF' })
     if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: '#991B1B', bg: '#FEE2E2' })
     else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: '#DC2626', bg: '#FEE2E2' })
@@ -529,10 +532,10 @@ export default function AnalyticsClient({
   })
   const categoryStockData = Object.entries(categoryStockMap).map(([cat, d]) => ({ cat, ...d })).sort((a, b) => b.stock - a.stock)
 
-  const bestSellerChartData = products
-    .filter(p => p.is_bestseller || p.best_seller_score > 0)
-    .sort((a, b) => b.best_seller_score - a.best_seller_score)
-    .slice(0, 10)
+  // Same qualification + ranking as every other page (single source of
+  // truth — specs/003-merchandising-badges-v2): category-relative,
+  // minimum-sales-gated, capped identically to Shop/Homepage (SC-001).
+  const bestSellerChartData = rankBestSellers(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
@@ -544,10 +547,7 @@ export default function AnalyticsClient({
       units: productMap[p.name]?.units || 0,
     }))
 
-  const trendingChartData = products
-    .filter(p => p.trending_score > 0)
-    .sort((a, b) => b.trending_score - a.trending_score)
-    .slice(0, 10)
+  const trendingChartData = rankTrending(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,

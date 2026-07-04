@@ -41,6 +41,9 @@ export type Product = {
   new_arrival_end?: string
   no_restock?: boolean
   discount_percentage?: number | null
+  is_featured?: boolean
+  featured_start?: string | null
+  featured_end?: string | null
 }
 
 export type OrderItem = {

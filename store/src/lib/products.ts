@@ -1,6 +1,8 @@
 import { supabase } from './supabase/client'
 import { supabaseAdmin } from './supabase/server'
 import type { Product } from '@/types'
+import { getBestSellers, getTrending, getMerchandisingContext } from './merchandising'
+import { getJustDropped, getJustDroppedIds } from './merchandising-server'
 
 function getPKTDate(): string {
   const now = new Date()
@@ -59,11 +61,15 @@ export async function getProducts(filters?: {
   let tabOrdered = false
   if (filters?.tab) {
     switch (filters.tab) {
-      case 'trending':
-        // Use only the admin-set flag — trending_score is auto-computed from sales
-        // velocity so bestsellers bleed in; is_trending is the explicit admin signal
-        query = query.eq('is_trending', true).order('created_at', { ascending: false })
+      case 'trending': {
+        // Same qualifying set as every other page (single source of truth —
+        // specs/003-merchandising-badges-v2) — composes with search/price/
+        // category filters via id membership rather than re-deriving a
+        // separate threshold here.
+        const { trendingIds } = await getMerchandisingContext()
+        query = query.in('id', trendingIds.size > 0 ? [...trendingIds] : ['00000000-0000-0000-0000-000000000000'])
         break
+      }
       case 'new-arrivals': {
         const today = getPKTDate()
         query = query
@@ -74,14 +80,16 @@ export async function getProducts(filters?: {
         break
       }
       case 'just-dropped': {
-        const h72 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
-        query = query.eq('is_new_arrival', false).gt('stock_quantity', 0).gte('created_at', h72)
+        const restockedIds = await getJustDroppedIds()
+        query = query.gt('stock_quantity', 0).in('id', restockedIds.length > 0 ? restockedIds : ['00000000-0000-0000-0000-000000000000'])
         break
       }
-      case 'best-sellers':
-        query = query.or('best_seller_score.gt.0,is_bestseller.eq.true').order('best_seller_score', { ascending: false })
+      case 'best-sellers': {
+        const { bestSellerIds } = await getMerchandisingContext()
+        query = query.in('id', bestSellerIds.size > 0 ? [...bestSellerIds] : ['00000000-0000-0000-0000-000000000000'])
         tabOrdered = true
         break
+      }
       case 'last-chance':
         query = query.gt('stock_quantity', 0).lte('stock_quantity', 3).order('stock_quantity', { ascending: true })
         tabOrdered = true
@@ -136,17 +144,10 @@ export async function getProductBySlug(slug: string) {
 }
 
 export async function getJustDroppedProducts(limit = 4) {
-  const h72 = new Date(Date.now() - 72 * 60 * 60 * 1000).toISOString()
-  const { data } = await supabase
-    .from('products')
-    .select('*, categories(name, slug)')
-    .eq('is_active', true)
-    .eq('is_new_arrival', false)
-    .gt('stock_quantity', 0)
-    .gte('created_at', h72)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-  return (data || []) as Product[]
+  // Delegates to the shared merchandising computation (single source of
+  // truth — see specs/003-merchandising-badges-v2). Restock-event based,
+  // not created_at based.
+  return getJustDropped(limit)
 }
 
 export async function getNewArrivalProducts(limit = 8) {
@@ -164,49 +165,32 @@ export async function getNewArrivalProducts(limit = 8) {
   return (data || []) as Product[]
 }
 
+/**
+ * Featured — merchant-controlled promotion (US5), independent of and with
+ * no effect on Best Seller/Trending. Mirrors getNewArrivalProducts()'s
+ * optional date-window pattern exactly.
+ */
 export async function getFeaturedProducts(limit = 6) {
-  const excludeIds = await getActiveSaleExcludeIds()
-
-  let query = supabase
-    .from('products')
-    .select('*, categories(name, slug)')
-    .eq('is_active', true)
-    .gt('stock_quantity', 0)
-    .order('created_at', { ascending: false })
-    .limit(limit)
-
-  if (excludeIds.length > 0) {
-    query = query.not('id', 'in', `(${excludeIds.join(',')})`)
-  }
-
-  const { data, error } = await query
-  if (error) throw error
-  return data as Product[]
-}
-
-export async function getBestsellerProducts(limit = 6) {
-  const { data: scored } = await supabase
-    .from('products')
-    .select('*, categories(name, slug)')
-    .eq('is_active', true)
-    .gt('stock_quantity', 0)
-    .gt('best_seller_score', 0)
-    .order('best_seller_score', { ascending: false })
-    .limit(limit)
-
-  if (scored && scored.length > 0) return scored as Product[]
-
+  const today = getPKTDate()
   const { data, error } = await supabase
     .from('products')
     .select('*, categories(name, slug)')
     .eq('is_active', true)
-    .eq('is_bestseller', true)
+    .eq('is_featured', true)
     .gt('stock_quantity', 0)
+    .or(`featured_start.is.null,featured_start.lte.${today}`)
+    .or(`featured_end.is.null,featured_end.gte.${today}`)
     .order('created_at', { ascending: false })
     .limit(limit)
-
   if (error) throw error
   return (data || []) as Product[]
+}
+
+export async function getBestsellerProducts(limit = 6) {
+  // Delegates to the shared merchandising computation (single source of
+  // truth — see specs/003-merchandising-badges-v2). Category-relative,
+  // minimum-sales-gated; no longer falls back to the is_bestseller flag.
+  return getBestSellers(limit)
 }
 
 export async function getLastChanceProducts(limit = 4) {
@@ -222,14 +206,8 @@ export async function getLastChanceProducts(limit = 4) {
 }
 
 export async function getTrendingProducts(limit = 4) {
-  const { data } = await supabase
-    .from('products')
-    .select('*, categories(name, slug)')
-    .eq('is_active', true)
-    .gt('stock_quantity', 0)
-    .or('trending_score.gt.0,is_trending.eq.true')
-    .order('trending_score', { ascending: false })
-    .limit(limit)
-
-  return (data || []) as Product[]
+  // Delegates to the shared merchandising computation (single source of
+  // truth — see specs/003-merchandising-badges-v2). Fully automatic,
+  // category-relative; no longer reads the is_trending flag.
+  return getTrending(limit)
 }

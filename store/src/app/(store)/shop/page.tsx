@@ -6,19 +6,28 @@ import ProductFilters from '@/components/products/ProductFilters'
 import ShopSearchBar from '@/components/products/ShopSearchBar'
 import ProductSectionTabs from '@/components/products/ProductSectionTabs'
 import { getProducts } from '@/lib/products'
+import { getMerchandisingContext } from '@/lib/merchandising'
 
 async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string; q?: string; cat?: string; tab?: string } }) {
   let products: Awaited<ReturnType<typeof getProducts>> = []
+  let bestSellerIds = new Set<string>()
+  let trendingIds = new Set<string>()
   try {
-    products = await getProducts({
-      size: searchParams.size,
-      minPrice: searchParams.min ? Number(searchParams.min) : undefined,
-      maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
-      type: searchParams.type,
-      q: searchParams.q,
-      category: searchParams.cat,
-      tab: searchParams.tab,
-    })
+    const [productsResult, context] = await Promise.all([
+      getProducts({
+        size: searchParams.size,
+        minPrice: searchParams.min ? Number(searchParams.min) : undefined,
+        maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
+        type: searchParams.type,
+        q: searchParams.q,
+        category: searchParams.cat,
+        tab: searchParams.tab,
+      }),
+      getMerchandisingContext(),
+    ])
+    products = productsResult
+    bestSellerIds = context.bestSellerIds
+    trendingIds = context.trendingIds
   } catch {
     // Supabase not configured yet
   }
@@ -29,9 +38,10 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {products.map(product => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+      {products.map(product => {
+        const badge = bestSellerIds.has(product.id) ? 'BESTSELLER' : trendingIds.has(product.id) ? 'TRENDING' : undefined
+        return <ProductCard key={product.id} product={product} badge={badge} />
+      })}
     </div>
   )
 }

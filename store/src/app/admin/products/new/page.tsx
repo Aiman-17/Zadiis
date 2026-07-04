@@ -11,10 +11,11 @@ import type { VariantStock } from '@/types'
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 const PRESET_CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale']
 
+// Best Seller and Trending are computed automatically (specs/003-merchandising-badges-v2)
+// and are no longer manual toggles — Featured is the merchant promotion outlet instead.
 const FLAG_OPTIONS = [
-  { key: 'is_bestseller',  label: '★ Best Seller', activeBg: '#FFFBEB', activeColor: '#92400E' },
-  { key: 'is_trending',    label: '↑ Trending',    activeBg: '#FDF2F8', activeColor: '#9D174D' },
   { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: '#F5F3FF', activeColor: '#5B21B6' },
+  { key: 'is_featured',    label: '☆ Featured',    activeBg: '#FFFBEB', activeColor: '#92400E' },
 ] as const
 
 export default function NewProduct() {
@@ -35,12 +36,13 @@ export default function NewProduct() {
     category_id: '',
     product_category: '',
     is_active: true,
-    is_bestseller: false,
-    is_trending: false,
     is_new_arrival: false,
     collection_name: '',
     new_arrival_start: '',
     new_arrival_end: '',
+    is_featured: false,
+    featured_start: '',
+    featured_end: '',
     no_restock: false,
     variant_stock: {} as VariantStock,
   })
@@ -121,12 +123,13 @@ export default function NewProduct() {
         category_id: form.category_id || null,
         product_category: form.product_category || null,
         is_active: form.is_active,
-        is_bestseller: form.is_bestseller,
-        is_trending: form.is_trending,
         is_new_arrival: form.is_new_arrival,
         collection_name: form.collection_name || null,
         new_arrival_start: form.new_arrival_start || null,
         new_arrival_end: form.new_arrival_end || null,
+        is_featured: form.is_featured,
+        featured_start: form.featured_start || null,
+        featured_end: form.featured_end || null,
         no_restock: form.no_restock,
         variant_stock: completeVariantStock,
       }),
@@ -299,7 +302,7 @@ export default function NewProduct() {
               </button>
             ))}
           </div>
-          <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>Auto-scoring also runs in the background — these are manual overrides</p>
+          <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>Best Seller and Trending are computed automatically from sales — Featured is for manual promotion</p>
 
           {/* New Arrival detail fields */}
           {form.is_new_arrival && (
@@ -323,6 +326,24 @@ export default function NewProduct() {
                   <Label className="text-xs">Expiry Date</Label>
                   <Input type="date" className="mt-1 text-sm" value={form.new_arrival_end} onChange={e => set('new_arrival_end', e.target.value)} />
                   <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Leave blank — stays active until manually retired</p>
+                </div>
+              </div>
+            </div>
+          )}
+
+          {/* Featured detail fields */}
+          {form.is_featured && (
+            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: '#92400E', backgroundColor: '#FFFBEB' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#92400E' }}>Featured Settings</p>
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs">Start Date</Label>
+                  <Input type="date" className="mt-1 text-sm" value={form.featured_start} onChange={e => set('featured_start', e.target.value)} />
+                </div>
+                <div>
+                  <Label className="text-xs">End Date</Label>
+                  <Input type="date" className="mt-1 text-sm" value={form.featured_end} onChange={e => set('featured_end', e.target.value)} />
+                  <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Leave blank — stays featured until manually retired</p>
                 </div>
               </div>
             </div>

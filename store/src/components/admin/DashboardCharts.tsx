@@ -5,6 +5,7 @@ import {
 } from 'recharts'
 import Link from 'next/link'
 import type { Order, OrderItem, Product } from '@/types'
+import { rankTrending } from '@/lib/merchandising'
 
 const STATUS_COLORS: Record<string, string> = {
   new:        '#3B82F6',
@@ -184,19 +185,16 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // Trending products — computed score OR manually flagged ↑ Trending
-  // (same rule the analytics flags use; manual-only products get a floor
-  // chart value so their bar is visible even at score 0)
-  const trendingProducts = products
-    .filter(p => p.is_trending || p.trending_score > 0)
-    .sort((a, b) => b.trending_score - a.trending_score)
-    .slice(0, 8)
+  // Same qualification + ranking as every other page (single source of
+  // truth — specs/003-merchandising-badges-v2): category-relative,
+  // fully automatic — the manual is_trending flag is retired (US6) and no
+  // longer read here.
+  const trendingProducts = rankTrending(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
       score: p.trending_score,
-      chartScore: Math.max(p.trending_score, p.is_trending ? 1 : 0),
-      manual: !!p.is_trending,
+      chartScore: p.trending_score,
       price: p.price,
       category: p.product_category || 'Uncategorized',
       stock: dashStock(p),
@@ -586,7 +584,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
                             <p className="font-semibold mb-1">{d.name}</p>
                             <p style={{ color: '#9CA3AF' }}>{d.category}</p>
                             <p style={{ color: '#A68B6E' }}>PKR {Number(d.price).toLocaleString()}</p>
-                            <p style={{ color: '#6B7280' }}>{d.total_sold} units sold{d.manual ? ' · ↑ flagged trending' : ` · score ${d.score.toFixed(1)}`}</p>
+                            <p style={{ color: '#6B7280' }}>{d.total_sold} units sold · score {d.score.toFixed(1)}</p>
                             <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
                               {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                             </p>

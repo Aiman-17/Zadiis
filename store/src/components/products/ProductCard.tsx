@@ -29,11 +29,15 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
     ? Math.round((1 - salePrice / product.price) * 100)
     : 0
 
-  // Independent signal checks — all can show simultaneously
-  const showFire       = !!(product.is_trending || badge === 'TRENDING')
+  // Independent signal checks — all can show simultaneously.
+  // Best Seller / Trending qualification is decided once per page by the
+  // shared merchandising computation (specs/003-merchandising-badges-v2) —
+  // this component never re-derives its own threshold; it only reflects
+  // whatever the parent tells it via `badge`.
+  const showFire       = badge === 'TRENDING'
   const showHourglass  = stock > 0 && stock <= 3
   const showNewArrival = !!product.is_new_arrival
-  const showBestseller = !!((product.best_seller_score && product.best_seller_score >= 5) || badge === 'BESTSELLER')
+  const showBestseller = badge === 'BESTSELLER'
   const hasBadgeRow    = showFire || showHourglass || showBestseller
 
   return (

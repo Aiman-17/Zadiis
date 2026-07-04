@@ -49,10 +49,14 @@ test.describe('Admin — Products', () => {
     await expect(page.getByText(/Expiry Date/i)).toBeVisible()
   })
 
-  test('new product form — is_trending toggle renders', async ({ page }) => {
+  test('new product form — is_featured toggle renders', async ({ page }) => {
     await page.goto('/admin/products/new')
-    // Trending is a badge toggle button labeled "↑ Trending", not a checkbox
-    await expect(page.getByRole('button', { name: /Trending/i }).first()).toBeVisible()
+    // Trending/Best Seller are fully automatic as of 003-merchandising-badges-v2
+    // (US6) and no longer offer a manual toggle; Featured (US5) replaced them
+    // as the merchant-controlled promotion outlet — same badge-toggle-button pattern.
+    await expect(page.getByRole('button', { name: /Featured/i }).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /Trending/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Best Seller/i })).toHaveCount(0)
   })
 
   test('new product form — no_restock toggle renders', async ({ page }) => {
@@ -103,7 +107,7 @@ test.describe('Admin — Products', () => {
     expect(value.length).toBeGreaterThan(0)
   })
 
-  test('edit product — is_trending toggle saves', async ({ page }) => {
+  test('edit product — is_featured toggle saves', async ({ page }) => {
     const editLink = page.locator('a[href*="/admin/products/"][href*="/edit"]').first()
     const hasEdit = await editLink.isVisible().catch(() => false)
     if (!hasEdit) test.skip()
@@ -111,11 +115,11 @@ test.describe('Admin — Products', () => {
     await editLink.click()
     await page.waitForURL(/\/admin\/products\/.+\/edit/, { timeout: 8_000 })
 
-    // Trending is a badge toggle button ("↑ Trending"), not a checkbox.
+    // Featured is a badge toggle button ("☆ Featured"), not a checkbox.
     // Toggle it twice so the saved value is unchanged — no data mutation.
-    const trendingToggle = page.getByRole('button', { name: /Trending/i }).first()
-    await trendingToggle.click()
-    await trendingToggle.click()
+    const featuredToggle = page.getByRole('button', { name: /Featured/i }).first()
+    await featuredToggle.click()
+    await featuredToggle.click()
 
     await page.getByRole('button', { name: /Save|Update/i }).first().click()
     // Save either redirects back to the product list or shows a success note

@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductBySlug } from '@/lib/products'
+import { getMerchandisingContext } from '@/lib/merchandising'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import AddToCartButton from '@/components/products/AddToCartButton'
 import ProductImageGallery from '@/components/products/ProductImageGallery'
@@ -56,11 +57,12 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   let isSaleActive = false
   let relatedProducts: Product[] = []
   let soldLast24h = 0
+  let isTrending = false
 
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
   try {
-    const [reviewsRes, saleRes, relatedRes, recentOrderIdsRes] = await Promise.all([
+    const [reviewsRes, saleRes, relatedRes, recentOrderIdsRes, merchContext] = await Promise.all([
       supabaseAdmin
         .from('reviews')
         .select('*')
@@ -85,10 +87,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .select('id')
         .in('order_status', ['processing', 'shipped', 'delivered'])
         .gte('created_at', oneDayAgo),
+      // Same qualifying set as every other page (specs/003-merchandising-badges-v2)
+      getMerchandisingContext(),
     ])
 
     reviews = (reviewsRes.data || []) as Review[]
     relatedProducts = (relatedRes.data || []) as Product[]
+    isTrending = merchContext.trendingIds.has(product!.id)
 
     const recentOrderIds = (recentOrderIdsRes.data || []).map((o: { id: string }) => o.id)
     if (recentOrderIds.length > 0) {
@@ -189,7 +194,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
                   <Hourglass size={13} color="#C62828" style={{ animation: 'hourglass-flip 3s ease-in-out infinite', transformOrigin: 'center' }} />
                   <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Almost Gone — Final Stock</span>
                 </div>
-              ) : product!.is_trending ? (
+              ) : isTrending ? (
                 <div className="flex items-center gap-1.5 mb-2">
                   <Flame size={13} color="#ea580c" style={{ animation: 'fire-flicker 0.65s ease-in-out infinite alternate', transformOrigin: 'bottom center' }} />
                   <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ea580c' }}>Trending Now — High Demand</span>

@@ -1,6 +1,7 @@
 import { supabaseAdmin } from '@/lib/supabase/server'
 import ProductCard from '@/components/products/ProductCard'
 import SaleCountdown from '@/components/products/SaleCountdown'
+import { getBestSellers, getMerchandisingContext } from '@/lib/merchandising'
 import type { Sale, SaleProduct, Product, Category } from '@/types'
 
 export const dynamic = 'force-dynamic'
@@ -54,14 +55,12 @@ export default async function SalePage() {
         .filter(sp => sp.products)
 
       const saleIds = saleProducts.map(sp => sp.product_id)
-      const { data: relData } = await supabaseAdmin
-        .from('products')
-        .select('*')
-        .eq('is_active', true)
-        .eq('is_bestseller', true)
-        .limit(10)
+      // "You Might Also Love" surfaces genuine Best Sellers (shared
+      // merchandising computation — specs/003-merchandising-badges-v2),
+      // not the retired is_bestseller flag.
+      const bestSellers = await getBestSellers(10)
 
-      relatedProducts = ((relData || []) as Product[])
+      relatedProducts = bestSellers
         .filter(p => !saleIds.includes(p.id))
         .slice(0, 6)
     }
@@ -89,15 +88,12 @@ export default async function SalePage() {
     (a, b) => new Date(b.created_at || 0).getTime() - new Date(a.created_at || 0).getTime()
   )
 
-  // Three non-overlapping groups
-  const scoredSps = [...saleProducts].sort(
-    (a, b) => (b.products?.best_seller_score || 0) - (a.products?.best_seller_score || 0)
-  )
-  const hasScores = saleProducts.some(sp => (sp.products?.best_seller_score || 0) > 0)
+  // Three non-overlapping groups — Best Sellers uses the same qualifying
+  // set as every other page (single source of truth —
+  // specs/003-merchandising-badges-v2), not a separate score/flag check.
+  const { bestSellerIds: qualifyingBestSellerIds } = await getMerchandisingContext()
   const bestSellerSps = sortByDiscount(
-    hasScores
-      ? scoredSps.filter(sp => (sp.products?.best_seller_score || 0) > 0).slice(0, 4)
-      : saleProducts.filter(sp => sp.products?.is_bestseller)
+    saleProducts.filter(sp => qualifyingBestSellerIds.has(sp.product_id))
   )
   const bestSellerIds = new Set(bestSellerSps.map(sp => sp.product_id))
 
@@ -220,7 +216,7 @@ export default async function SalePage() {
               <ProductCard
                 key={p.id}
                 product={p}
-                badge={p.is_bestseller ? 'BESTSELLER' : undefined}
+                badge="BESTSELLER"
               />
             ))}
           </div>
