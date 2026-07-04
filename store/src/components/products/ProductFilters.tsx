@@ -19,11 +19,11 @@ const PRICE_RANGES = [
 const activeStyle = { backgroundColor: '#1C1C1C', borderColor: '#1C1C1C', color: 'white' }
 const idleStyle = { borderColor: '#D1D5DB' }
 
-export default function ProductFilters({ hasSale = false }: { hasSale?: boolean }) {
+export default function ProductFilters() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const router = useRouter()
   const params = useSearchParams()
-  const CATEGORIES = hasSale ? [...BASE_CATEGORIES, 'Sale'] : BASE_CATEGORIES
+  const CATEGORIES = BASE_CATEGORIES
 
   const updateParam = (key: string, value: string) => {
     const p = new URLSearchParams(params.toString())

@@ -106,7 +106,7 @@ export default async function SalePage() {
 
       {/* ── Hero ── */}
       <section className="py-12 px-4 text-center" style={{ backgroundColor: '#1C1C1C', color: 'white' }}>
-        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#1E3A8A', letterSpacing: '0.3em' }}>
+        <p className="text-xs uppercase tracking-widest mb-3" style={{ color: '#C62828', letterSpacing: '0.3em' }}>
           Exclusive Sale Event
         </p>
         <h1 className="text-4xl md:text-5xl mb-3" style={{ fontFamily: 'Playfair Display, serif' }}>

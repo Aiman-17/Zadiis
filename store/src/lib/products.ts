@@ -12,7 +12,10 @@ function getPKTDate(): string {
 
 let _saleCache: { ids: string[]; ts: number } | null = null
 
-async function getActiveSaleExcludeIds(): Promise<string[]> {
+// Product ids currently in the active sale — used both to exclude them from
+// default browsing (they have their own dedicated /sale section) and to
+// include them for the 'sale' tab filter.
+async function getActiveSaleProductIds(): Promise<string[]> {
   if (_saleCache && Date.now() - _saleCache.ts < 30_000) return _saleCache.ids
   const now = new Date().toISOString()
   const { data: sale } = await supabaseAdmin
@@ -51,7 +54,7 @@ export async function getProducts(filters?: {
   // Browsing without tab/search: hide new arrivals + sale products (they have dedicated sections).
   // Tab or search: bypass those exclusions — apply the tab's own conditions instead.
   if (!isSearch && !isTab) {
-    const excludeIds = await getActiveSaleExcludeIds()
+    const excludeIds = await getActiveSaleProductIds()
     query = query.eq('is_new_arrival', false)
     if (excludeIds.length > 0) {
       query = query.not('id', 'in', `(${excludeIds.join(',')})`)
@@ -89,6 +92,11 @@ export async function getProducts(filters?: {
         const { bestSellerIds } = await getMerchandisingContext()
         query = query.in('id', bestSellerIds.size > 0 ? [...bestSellerIds] : ['00000000-0000-0000-0000-000000000000'])
         tabOrdered = true
+        break
+      }
+      case 'sale': {
+        const saleIds = await getActiveSaleProductIds()
+        query = query.in('id', saleIds.length > 0 ? saleIds : ['00000000-0000-0000-0000-000000000000'])
         break
       }
       case 'last-chance': {

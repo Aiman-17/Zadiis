@@ -13,6 +13,7 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
   let products: Awaited<ReturnType<typeof getProducts>> = []
   let bestSellerIds = new Set<string>()
   let trendingIds = new Set<string>()
+  let salePriceMap: Record<string, number> = {}
   try {
     const [productsResult, context] = await Promise.all([
       getProducts({
@@ -29,6 +30,24 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
     products = productsResult
     bestSellerIds = context.bestSellerIds
     trendingIds = context.trendingIds
+
+    // Sale products can surface here via search or the 'sale' tab (they're
+    // excluded from default browsing) — fetch their sale prices so the
+    // discount badge renders, same as everywhere else sale prices are shown.
+    const { data: sale } = await supabaseAdmin
+      .from('sales')
+      .select('id')
+      .eq('is_active', true)
+      .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+      .maybeSingle()
+    if (sale && products.length > 0) {
+      const { data: sps } = await supabaseAdmin
+        .from('sale_products')
+        .select('product_id, sale_price')
+        .eq('sale_id', sale.id)
+        .in('product_id', products.map(p => p.id))
+      salePriceMap = Object.fromEntries((sps || []).map(sp => [sp.product_id, sp.sale_price]))
+    }
   } catch {
     // Supabase not configured yet
   }
@@ -41,7 +60,7 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
       {products.map(product => {
         const badge = bestSellerIds.has(product.id) ? 'BESTSELLER' : trendingIds.has(product.id) ? 'TRENDING' : undefined
-        return <ProductCard key={product.id} product={product} badge={badge} />
+        return <ProductCard key={product.id} product={product} badge={badge} salePrice={salePriceMap[product.id]} />
       })}
     </div>
   )
@@ -67,7 +86,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
     <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
       <Suspense>
-        <ProductSectionTabs />
+        <ProductSectionTabs hasSale={hasSale} />
       </Suspense>
 
       <div className="mt-4">
@@ -78,7 +97,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       <div className="flex flex-col md:flex-row gap-8 mt-4">
         <aside className="shrink-0 md:w-56">
           <Suspense>
-            <ProductFilters hasSale={hasSale} />
+            <ProductFilters />
           </Suspense>
         </aside>
         <div className="flex-1">
