@@ -115,8 +115,11 @@ test.describe('Checkout email OTP verification', () => {
 
     // Fill everything but never complete the OTP
     await fillCheckoutForm(page)
+    // COD may be disabled in settings — fall back to any available method so
+    // the guard under test (OTP, not payment-method selection) is reached.
     const cod = page.getByText(/Cash on Delivery/i)
     if (await cod.isVisible().catch(() => false)) await cod.click()
+    else await page.getByText(/JazzCash/i).click()
     await page.getByRole('button', { name: /Place Order/i }).click()
 
     await expect(page.getByText(/verify your email/i)).toBeVisible({ timeout: 8_000 })

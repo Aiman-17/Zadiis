@@ -180,11 +180,16 @@ export default function CheckoutPage() {
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
+  const FREE_DELIVERY_MIN_QUANTITY = 5
+  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0)
+  const qualifiesForFreeDelivery = totalQuantity >= FREE_DELIVERY_MIN_QUANTITY
+
   const handleCityChange = (city: string) => {
     set('city', city)
     const zone = zones.find(z => z.city === city)
     const baseCharge = zone?.delivery_charge ?? 0
-    setDeliveryCharge(saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge)
+    const charge = saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge
+    setDeliveryCharge(qualifiesForFreeDelivery ? 0 : charge)
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -504,7 +509,16 @@ export default function CheckoutPage() {
             <option value="">Select city</option>
             {zones.map(z => <option key={z.id} value={z.city}>{z.city}</option>)}
           </select>
-          {form.city && <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>Delivery charge: PKR {deliveryCharge.toLocaleString()}</p>}
+          {form.city && (
+            <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>
+              {qualifiesForFreeDelivery ? 'Free delivery — your order qualifies!' : `Delivery charge: PKR ${deliveryCharge.toLocaleString()}`}
+            </p>
+          )}
+          {!qualifiesForFreeDelivery && (
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+              Add {FREE_DELIVERY_MIN_QUANTITY - totalQuantity} more item{FREE_DELIVERY_MIN_QUANTITY - totalQuantity === 1 ? '' : 's'} to your cart for free delivery
+            </p>
+          )}
         </div>
         <div>
           <Label className="block mb-2">Payment Method *</Label>
@@ -532,7 +546,7 @@ export default function CheckoutPage() {
           </div>
           <div className="border-t pt-3 space-y-1" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex justify-between text-sm"><span>Subtotal</span><span>PKR {subtotal.toLocaleString()}</span></div>
-            <div className="flex justify-between text-sm"><span>Delivery</span><span>{form.city ? `PKR ${deliveryCharge.toLocaleString()}` : '—'}</span></div>
+            <div className="flex justify-between text-sm"><span>Delivery</span><span>{form.city ? (qualifiesForFreeDelivery ? 'Free' : `PKR ${deliveryCharge.toLocaleString()}`) : '—'}</span></div>
             <div className="flex justify-between font-semibold pt-1 border-t" style={{ borderColor: '#E8DDD4' }}>
               <span>Total</span><span>PKR {total.toLocaleString()}</span>
             </div>

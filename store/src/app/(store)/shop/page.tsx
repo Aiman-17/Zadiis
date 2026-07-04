@@ -7,6 +7,7 @@ import ShopSearchBar from '@/components/products/ShopSearchBar'
 import ProductSectionTabs from '@/components/products/ProductSectionTabs'
 import { getProducts } from '@/lib/products'
 import { getMerchandisingContext } from '@/lib/merchandising'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string; q?: string; cat?: string; tab?: string } }) {
   let products: Awaited<ReturnType<typeof getProducts>> = []
@@ -49,6 +50,19 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
 export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string; type?: string; q?: string; cat?: string; tab?: string }> }) {
   const params = await searchParams
 
+  let hasSale = false
+  try {
+    const { data: sale } = await supabaseAdmin
+      .from('sales')
+      .select('id')
+      .eq('is_active', true)
+      .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+      .maybeSingle()
+    hasSale = !!sale
+  } catch {
+    // Supabase not configured yet
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
@@ -64,7 +78,7 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       <div className="flex flex-col md:flex-row gap-8 mt-4">
         <aside className="shrink-0 md:w-56">
           <Suspense>
-            <ProductFilters />
+            <ProductFilters hasSale={hasSale} />
           </Suspense>
         </aside>
         <div className="flex-1">
