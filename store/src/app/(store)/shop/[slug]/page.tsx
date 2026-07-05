@@ -277,7 +277,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* You May Also Like */}
         {relatedProducts.length > 0 && (
           <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
-            <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>This Is For You</h2>
+            <h2 className="text-lg mb-4 text-center" style={{ fontFamily: 'Playfair Display, serif' }}>This Is For You</h2>
             <ProductSlider products={relatedProducts} salePriceMap={relatedSalePrices} />
           </div>
         )}

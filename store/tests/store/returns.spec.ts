@@ -10,7 +10,7 @@ test.describe('Returns page', () => {
   test('returns page renders policy and request form', async ({ page }) => {
     await page.goto('/returns')
     await expect(page.getByRole('heading', { name: /Returns & Exchanges/i })).toBeVisible()
-    await expect(page.getByText(/7-Day Return Policy/i)).toBeVisible()
+    await expect(page.getByText(/3-Day Return Policy/i)).toBeVisible()
     await expect(page.getByPlaceholder('e.g. ZD-1023')).toBeVisible()
     await expect(page.getByPlaceholder('your@email.com')).toBeVisible()
   })
@@ -27,6 +27,7 @@ test.describe('Returns page', () => {
 
     await page.getByPlaceholder('e.g. ZD-1023').fill('ZD-1023')
     await page.getByPlaceholder('your@email.com').fill('e2e-test@zadiis.test')
+    await page.getByPlaceholder(/full name/i).fill('E2E Test Customer')
     // Pick the first reason radio in the return-reason group
     await page.locator('input[name="return_reason"]').first().check()
 
@@ -45,6 +46,7 @@ test.describe('Returns page', () => {
 
     await page.getByPlaceholder('e.g. ZD-1023').fill('ZD-00000')
     await page.getByPlaceholder('your@email.com').fill('e2e-test@zadiis.test')
+    await page.getByPlaceholder(/full name/i).fill('E2E Test Customer')
     await page.locator('input[name="return_reason"]').first().check()
     await page.getByRole('button', { name: /Submit (Return|Exchange) Request/i }).click()
 
@@ -68,6 +70,7 @@ test.describe('Cancel order page', () => {
 
     await page.getByPlaceholder('e.g. ZD-1023').fill('ZD-1023')
     await page.getByPlaceholder('your@email.com').fill('e2e-test@zadiis.test')
+    await page.getByPlaceholder(/full name/i).fill('E2E Test Customer')
     await page.getByText(/I changed my mind/i).click()
     await page.getByRole('button', { name: /submit|cancel/i }).last().click()
 
@@ -82,6 +85,7 @@ test.describe('Cancel order page', () => {
 
     await page.getByPlaceholder('e.g. ZD-1023').fill('ZD-00000')
     await page.getByPlaceholder('your@email.com').fill('e2e-test@zadiis.test')
+    await page.getByPlaceholder(/full name/i).fill('E2E Test Customer')
     await page.getByText(/I changed my mind/i).click()
     await page.getByRole('button', { name: /submit|cancel/i }).last().click()
 
