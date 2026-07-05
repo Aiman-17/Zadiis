@@ -146,12 +146,15 @@ export default async function AdminSalesPage() {
                 )}
               </div>
               <div className="flex gap-2 shrink-0">
-                {(rev?.orders ?? 0) > 0 && (
-                  <Button asChild variant="outline" size="sm" className="rounded-none text-xs"
-                    style={{ borderColor: '#A68B6E', color: '#A68B6E' }}>
-                    <Link href={`/admin/sales/${sale.id}/analytics`}>Analytics</Link>
-                  </Button>
-                )}
+                {/* Always reachable — the analytics detail page already
+                    handles "no products yet" and "no orders yet" (margin
+                    preview) gracefully. Gating this on orders > 0 made the
+                    margin-preview mode unreachable for any sale that hasn't
+                    sold yet, which defeats its purpose. */}
+                <Button asChild variant="outline" size="sm" className="rounded-none text-xs"
+                  style={{ borderColor: '#A68B6E', color: '#A68B6E' }}>
+                  <Link href={`/admin/sales/${sale.id}/analytics`}>Analytics</Link>
+                </Button>
                 <Button asChild variant="outline" size="sm" className="rounded-none">
                   <Link href={`/admin/sales/${sale.id}/edit`}>Edit</Link>
                 </Button>
