@@ -116,9 +116,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     { total_orders: relevantOrders.length, sale_revenue: 0, full_price_revenue: 0, cost_total: 0, profit_at_sale: 0, profit_at_full: 0, sacrifice: 0 }
   )
 
+  // Don't trust the raw is_active column alone — the lazy-deactivation write
+  // elsewhere can lag, so re-derive from ends_at here too.
+  const isActuallyActive = sale.is_active && (!sale.ends_at || new Date(sale.ends_at) > new Date())
+
   return NextResponse.json({
     sale_id: id,
-    is_active: sale.is_active,
+    is_active: isActuallyActive,
     has_orders: relevantOrders.length > 0,
     saleProductData,
     revenueTrend,

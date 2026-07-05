@@ -55,8 +55,8 @@ export default async function SalePage() {
         .filter(p => !saleIds.includes(p.id))
         .slice(0, 6)
     }
-  } catch {
-    // graceful fallback
+  } catch (e) {
+    console.error('SalePage data fetch failed:', e)
   }
 
   if (!sale) {

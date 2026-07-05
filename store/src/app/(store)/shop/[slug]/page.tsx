@@ -127,8 +127,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         relatedSalePrices = Object.fromEntries((relatedSp || []).map(sp => [sp.product_id, sp.sale_price]))
       }
     }
-  } catch {
-    // fail gracefully
+  } catch (e) {
+    console.error('ProductPage sale/related data fetch failed:', e)
   }
 
   const totalStock = getEffectiveStock(product!)

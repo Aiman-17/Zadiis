@@ -11,7 +11,19 @@ export async function GET() {
     .select('*, sale_products(*, products(id, name, slug, price, images))')
     .order('created_at', { ascending: false })
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
-  return NextResponse.json(data)
+
+  // Lazy deactivation: don't let a stale is_active outlive ends_at just
+  // because this route never re-checked it before returning the row.
+  const now = new Date()
+  const expiredIds = (data || [])
+    .filter(s => s.is_active && s.ends_at && new Date(s.ends_at) < now)
+    .map(s => s.id)
+  if (expiredIds.length > 0) {
+    await supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
+  }
+  const sales = (data || []).map(s => expiredIds.includes(s.id) ? { ...s, is_active: false } : s)
+
+  return NextResponse.json(sales)
 }
 
 export async function POST(req: NextRequest) {

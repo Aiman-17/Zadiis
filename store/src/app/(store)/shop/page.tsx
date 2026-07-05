@@ -48,8 +48,8 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
         .in('product_id', products.map(p => p.id))
       salePriceMap = Object.fromEntries((sps || []).map(sp => [sp.product_id, sp.sale_price]))
     }
-  } catch {
-    // Supabase not configured yet
+  } catch (e) {
+    console.error('ShopPage data fetch failed:', e)
   }
 
   if (products.length === 0) {
@@ -78,8 +78,8 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
       .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
       .maybeSingle()
     hasSale = !!sale
-  } catch {
-    // Supabase not configured yet
+  } catch (e) {
+    console.error('ShopPage data fetch failed:', e)
   }
 
   return (

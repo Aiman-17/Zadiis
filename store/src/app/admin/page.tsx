@@ -49,7 +49,9 @@ export default async function AdminDashboard() {
       .filter(s => s.ends_at && new Date(s.ends_at) < now)
       .map(s => s.id)
     if (expiredIds.length > 0) {
-      void supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
+      // Must be awaited — Supabase query builders are thenable and never send
+      // the request unless awaited/then'd, so a bare `void query` is a no-op.
+      await supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
     }
     const sales = allActiveSales.filter(s => !expiredIds.includes(s.id))
 
@@ -78,8 +80,8 @@ export default async function AdminDashboard() {
 
       activeSales = Object.values(summaries)
     }
-  } catch {
-    // Supabase not configured — show empty state
+  } catch (e) {
+    console.error('AdminDashboard data fetch failed:', e)
   }
 
   return (
