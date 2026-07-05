@@ -111,10 +111,20 @@ export async function PUT(req: NextRequest) {
 
     // Stamp action timestamps — migration-safe (fails silently before columns exist).
     // Only fires for terminal statuses; switching between them clears the other field.
+    // Must be awaited — supabase-js query builders are thenable and never send
+    // the request at all unless awaited/then'd, so a bare `void query` is a no-op.
     if (order_status === 'cancelled' || order_status === 'returned') {
-      void supabaseAdmin.from('orders').update({
+      await supabaseAdmin.from('orders').update({
         cancelled_at: order_status === 'cancelled' ? new Date().toISOString() : null,
         returned_at:  order_status === 'returned'  ? new Date().toISOString() : null,
+      }).eq('id', id)
+    }
+
+    // Stamp delivered_at — source of truth for the return/exchange policy
+    // window (3 days from actual delivery, not order placement).
+    if (order_status === 'delivered') {
+      await supabaseAdmin.from('orders').update({
+        delivered_at: new Date().toISOString(),
       }).eq('id', id)
     }
 

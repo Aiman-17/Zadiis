@@ -76,6 +76,7 @@ export type Order = {
   return_reason?: string | null
   cancelled_at?: string | null
   returned_at?: string | null
+  delivered_at?: string | null
   cod_status?: 'pending' | 'received' | 'lost' | null
   cod_collected_at?: string | null
   is_archived: boolean

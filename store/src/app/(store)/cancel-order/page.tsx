@@ -75,8 +75,11 @@ export default function CancelOrderPage() {
       <h1 className="text-3xl mb-2" style={{ fontFamily: 'Playfair Display, serif', color: '#1C1C1C' }}>
         Cancel Your Order
       </h1>
-      <p className="mb-8 text-sm" style={{ color: '#6B7280' }}>
+      <p className="mb-2 text-sm" style={{ color: '#6B7280' }}>
         Need to cancel? Fill in the details below and we will get back to you within 24 hours.
+      </p>
+      <p className="mb-8 text-xs" style={{ color: '#9CA3AF' }}>
+        Cancellations are only accepted within 24 hours of placing your order, and the name and email below must match your order.
       </p>
 
       <form onSubmit={handleSubmit} className="space-y-5">
@@ -104,9 +107,9 @@ export default function CancelOrderPage() {
         </div>
 
         <div>
-          <label className="block text-sm font-medium mb-1.5">Your Name</label>
+          <label className="block text-sm font-medium mb-1.5">Your Name *</label>
           <input
-            type="text" placeholder="Full name"
+            type="text" required placeholder="Full name — must match your order"
             value={form.customer_name} onChange={set('customer_name')}
             className="w-full border rounded-md px-3 py-2.5 text-sm"
             style={inputStyle}
@@ -149,12 +152,12 @@ export default function CancelOrderPage() {
 
         <button
           type="submit"
-          disabled={loading || !form.reason || !form.order_number || !form.customer_email}
+          disabled={loading || !form.reason || !form.order_number || !form.customer_email || !form.customer_name}
           className="w-full py-3 text-sm font-medium rounded-md transition-opacity"
           style={{
             backgroundColor: '#1C1C1C',
             color: 'white',
-            opacity: (loading || !form.reason || !form.order_number || !form.customer_email) ? 0.45 : 1,
+            opacity: (loading || !form.reason || !form.order_number || !form.customer_email || !form.customer_name) ? 0.45 : 1,
           }}
         >
           {loading ? 'Submitting…' : 'Submit Cancellation Request'}
