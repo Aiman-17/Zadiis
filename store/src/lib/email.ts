@@ -427,19 +427,24 @@ export async function sendOwnerPaymentReceived(d: {
   order_number: string
   customer_name: string
   customer_phone: string
+  customer_email?: string | null
   total: number
   payment_method: string
   safepay_transaction_id?: string | null
+  items?: EmailItem[]
 }): Promise<void> {
-  const html = `
+  try {
+    const itemRows = d.items?.length ? buildItemRows(d.items) : ''
+    const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">Payment Received — ${d.order_number}</h2>
       <p><strong>Customer:</strong> ${d.customer_name} · ${d.customer_phone}</p>
+      ${d.customer_email ? `<p><strong>Email:</strong> ${d.customer_email}</p>` : ''}
       <p><strong>Amount:</strong> PKR ${Number(d.total).toLocaleString()}</p>
       <p><strong>Method:</strong> ${d.payment_method}</p>
       ${d.safepay_transaction_id ? `<p><strong>Transaction ID:</strong> ${d.safepay_transaction_id}</p>` : ''}
+      ${itemRows ? `<table style="width:100%;border-collapse:collapse;margin-top:12px">${itemRows}</table>` : ''}
     </div>`
-  try {
     await resend.emails.send({
       from: FROM,
       to: process.env.OWNER_EMAIL!,
@@ -620,9 +625,12 @@ export async function sendOwnerReturnRequest(d: {
   customer_name?: string | null
   reason: string
   notes?: string | null
+  items?: EmailItem[]
 }): Promise<void> {
-  const reasonLabel = RETURN_REASON_LABELS[d.reason] || d.reason
-  const html = `
+  try {
+    const reasonLabel = RETURN_REASON_LABELS[d.reason] || d.reason
+    const itemRows = d.items?.length ? buildItemRows(d.items) : ''
+    const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
         📦 Return Request — ${d.order_number}
@@ -631,9 +639,9 @@ export async function sendOwnerReturnRequest(d: {
       <p><strong>Email:</strong> ${d.customer_email}</p>
       <p><strong>Reason:</strong> ${reasonLabel}</p>
       ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+      ${itemRows ? `<table style="width:100%;border-collapse:collapse;margin-top:12px">${itemRows}</table>` : ''}
       <p style="color:#6B7280;font-size:13px;margin-top:16px">Go to your admin panel → Returns tab to process this request.</p>
     </div>`
-  try {
     await resend.emails.send({
       from: FROM,
       to: process.env.OWNER_EMAIL!,
@@ -684,8 +692,11 @@ export async function sendOwnerExchangeRequest(d: {
   customer_name?: string | null
   exchange_details: string
   notes?: string | null
+  items?: EmailItem[]
 }): Promise<void> {
-  const html = `
+  try {
+    const itemRows = d.items?.length ? buildItemRows(d.items) : ''
+    const html = `
     <div style="font-family:Arial,sans-serif;max-width:600px;margin:0 auto">
       <h2 style="color:#1C1C1C;font-family:Georgia,serif;border-bottom:2px solid #A68B6E;padding-bottom:8px">
         🔄 Exchange Request — ${d.order_number}
@@ -694,9 +705,9 @@ export async function sendOwnerExchangeRequest(d: {
       <p><strong>Email:</strong> ${d.customer_email}</p>
       <p><strong>Wants instead:</strong> ${d.exchange_details}</p>
       ${d.notes ? `<p><strong>Notes:</strong> ${d.notes}</p>` : ''}
+      ${itemRows ? `<table style="width:100%;border-collapse:collapse;margin-top:12px">${itemRows}</table>` : ''}
       <p style="color:#6B7280;font-size:13px;margin-top:16px">Go to your admin panel → Returns tab to process this exchange. Ship the replacement and click Mark Shipped to notify the customer.</p>
     </div>`
-  try {
     await resend.emails.send({
       from: FROM,
       to: process.env.OWNER_EMAIL!,

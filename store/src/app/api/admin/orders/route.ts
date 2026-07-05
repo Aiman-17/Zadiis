@@ -88,6 +88,7 @@ export async function PUT(req: NextRequest) {
       total: number
       payment_method: string
       safepay_transaction_id?: string | null
+      items?: OrderItem[]
     } | null = null
 
     const needsOrderData = order_status === 'delivered' || order_status === 'cancelled' || payment_status === 'paid'
@@ -155,15 +156,17 @@ export async function PUT(req: NextRequest) {
             order_number: orderData.order_number,
             customer_name: orderData.customer_name,
             customer_phone: orderData.customer_phone,
+            customer_email: orderData.customer_email,
             total: orderData.total,
             payment_method: orderData.payment_method,
+            items: orderData.items,
           })
         }
         await sendCustomerOrderDelivered(orderData.customer_email, {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           total: orderData.total,
-          items: 'items' in orderData ? (orderData.items as OrderItem[]) : undefined,
+          items: orderData.items,
         })
       }
 
@@ -172,9 +175,11 @@ export async function PUT(req: NextRequest) {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           customer_phone: orderData.customer_phone,
+          customer_email: orderData.customer_email,
           total: orderData.total,
           payment_method: orderData.payment_method,
           safepay_transaction_id: orderData.safepay_transaction_id,
+          items: orderData.items,
         })
       }
     }

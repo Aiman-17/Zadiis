@@ -52,7 +52,7 @@ export async function POST(req: NextRequest) {
 
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('id, order_status, created_at, delivered_at, customer_email, customer_name')
+      .select('id, order_status, created_at, delivered_at, customer_email, customer_name, items')
       .eq('order_number', normalised)
       .single()
 
@@ -126,12 +126,12 @@ export async function POST(req: NextRequest) {
 
     if (isExchange) {
       await Promise.allSettled([
-        sendOwnerExchangeRequest({ order_number: normalised, customer_email, customer_name, exchange_details, notes }),
+        sendOwnerExchangeRequest({ order_number: normalised, customer_email, customer_name, exchange_details, notes, items: order.items }),
         sendCustomerExchangeConfirmation(customer_email, { order_number: normalised, customer_name }),
       ])
     } else {
       await Promise.allSettled([
-        sendOwnerReturnRequest({ order_number: normalised, customer_email, customer_name, reason, notes }),
+        sendOwnerReturnRequest({ order_number: normalised, customer_email, customer_name, reason, notes, items: order.items }),
         sendCustomerReturnConfirmation(customer_email, { order_number: normalised, customer_name }),
       ])
     }

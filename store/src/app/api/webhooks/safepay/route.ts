@@ -109,9 +109,11 @@ export async function POST(req: NextRequest) {
     order_number: order.order_number,
     customer_name: order.customer_name,
     customer_phone: order.customer_phone,
+    customer_email: order.customer_email,
     total: order.total,
     payment_method: order.payment_method,
     safepay_transaction_id: transactionId,
+    items: order.items,
   })
 
   console.log(`[webhook/safepay] Order ${order.order_number} marked paid. TXN: ${transactionId}`)
