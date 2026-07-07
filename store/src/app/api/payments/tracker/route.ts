@@ -80,7 +80,7 @@ export async function POST(req: NextRequest) {
           amount: Math.round(total * 100),
           currency: 'PKR',
           payload: {
-            purpose: 'ZADIIS Order',
+            purpose: "ZADII'S Order",
             mode: 'payment',
             metadata: { source: 'zadiis' },
           },

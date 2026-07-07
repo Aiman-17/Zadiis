@@ -8,7 +8,7 @@ import type { Product } from '@/types'
 
 export const metadata: Metadata = {
   title: 'New Arrivals',
-  description: 'Shop the latest new arrivals at ZADIIS — fresh seasonal launches and new fashion collections.',
+  description: "Shop the latest new arrivals at ZADII'S — fresh seasonal launches and new fashion collections.",
 }
 
 export default async function NewArrivalsPage() {

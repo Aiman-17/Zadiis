@@ -32,7 +32,8 @@ test.describe('Shop page', () => {
 
     // Search for something unlikely to match all products
     await page.getByPlaceholder(/search/i).fill('kameez')
-    await page.waitForTimeout(500)
+    // Debounced search navigates with ?q= — wait for the URL, not a fixed sleep
+    await page.waitForURL(/q=kameez/, { timeout: 8_000 })
 
     // Result count should have changed (either fewer results or same)
     const after = await page.locator('a[href^="/shop/"]').count()
@@ -40,16 +41,18 @@ test.describe('Shop page', () => {
   })
 
   test('clearing search restores full list', async ({ page }) => {
+    // Regression test for BUG-002 (fixed 2026-07-03): ShopSearchBar now
+    // re-pushes the latest intent when a stale navigation resolves last.
     await page.waitForSelector('a[href^="/shop/"]', { timeout: 10_000 })
     const initial = await page.locator('a[href^="/shop/"]').count()
 
     await page.getByPlaceholder(/search/i).fill('xyznothing')
-    await page.waitForTimeout(500)
+    // Wait for the filter to actually apply (search is debounced)
+    await expect(page.locator('a[href^="/shop/"]')).toHaveCount(0, { timeout: 8_000 })
 
     await page.getByPlaceholder(/search/i).clear()
-    await page.waitForTimeout(500)
-    const after = await page.locator('a[href^="/shop/"]').count()
-    expect(after).toBe(initial)
+    // toHaveCount polls until the debounced refetch restores the list
+    await expect(page.locator('a[href^="/shop/"]')).toHaveCount(initial, { timeout: 8_000 })
   })
 
   test('price filter limits visible products', async ({ page }) => {
@@ -61,7 +64,8 @@ test.describe('Shop page', () => {
     if (await maxInput.isVisible()) {
       await maxInput.fill('500')
       await page.getByRole('button', { name: /apply|filter/i }).first().click()
-      await page.waitForTimeout(500)
+      // Filter applies via navigation with ?max= — wait for the URL, not a sleep
+      await page.waitForURL(/max=500/, { timeout: 8_000 })
       const after = await page.locator('a[href^="/shop/"]').count()
       expect(after).toBeLessThanOrEqual(initial)
     }
@@ -109,7 +113,10 @@ test.describe('Shop — section tabs', () => {
 
   test('Last Chance tab shows low-stock products', async ({ page }) => {
     await page.goto('/shop?tab=last-chance')
-    await page.waitForTimeout(2_000)
+    // Wait for the Suspense grid to resolve to either products or the empty state
+    await expect(
+      page.locator('a[href^="/shop/"]').first().or(page.getByText(/No products found/i))
+    ).toBeVisible({ timeout: 10_000 })
     const hasProducts = await page.locator('a[href^="/shop/"]').first().isVisible().catch(() => false)
     const hasEmpty = await page.getByText(/No products found/i).isVisible().catch(() => false)
     expect(hasProducts || hasEmpty).toBe(true)

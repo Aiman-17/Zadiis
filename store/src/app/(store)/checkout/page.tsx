@@ -413,6 +413,13 @@ export default function CheckoutPage() {
           </div>
           {fieldErrors.email && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
 
+          {/* BUG-001: send failures (rate limit, mail service down) reset otpState
+              to 'idle', unmounting the OTP box below — render the error here so
+              the customer is never left without feedback */}
+          {otpError && otpState !== 'sent' && otpState !== 'verifying' && (
+            <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{otpError}</p>
+          )}
+
           {/* OTP input — shown once code is sent */}
           {(otpState === 'sent' || otpState === 'verifying') && (
             <div className="mt-3 p-4 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>

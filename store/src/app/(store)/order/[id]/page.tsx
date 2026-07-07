@@ -23,7 +23,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
   }
 
   const whatsappNumber = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER
-  const whatsappMessage = encodeURIComponent(`Hi! I just placed order ${order.order_number} on ZADIIS`)
+  const whatsappMessage = encodeURIComponent(`Hi! I just placed order ${order.order_number} on ZADII'S`)
   const whatsappUrl = `https://wa.me/${whatsappNumber}?text=${whatsappMessage}`
 
   return (
@@ -41,7 +41,7 @@ export default async function OrderConfirmationPage({ params }: { params: Promis
         <div className="px-5 py-4 border-b" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
           <div className="flex justify-between items-start">
             <div>
-              <p className="font-bold text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS</p>
+              <p className="font-bold text-lg" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S</p>
               <p className="text-xs text-gray-500 mt-0.5">{new Date(order.created_at).toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })}</p>
             </div>
             <div className="text-right">

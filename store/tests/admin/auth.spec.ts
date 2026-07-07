@@ -5,19 +5,20 @@ test.use({ storageState: { cookies: [], origins: [] } })
 
 test.describe('Admin auth guard', () => {
 
+  // The guard appends ?from=<original path> to the login URL — match by path
   test('unauthenticated /admin redirects to /admin/login', async ({ page }) => {
     await page.goto('/admin')
-    await expect(page).toHaveURL('/admin/login', { timeout: 8_000 })
+    await expect(page).toHaveURL(/\/admin\/login/, { timeout: 8_000 })
   })
 
   test('unauthenticated /admin/products redirects to /admin/login', async ({ page }) => {
     await page.goto('/admin/products')
-    await expect(page).toHaveURL('/admin/login', { timeout: 8_000 })
+    await expect(page).toHaveURL(/\/admin\/login/, { timeout: 8_000 })
   })
 
   test('unauthenticated /admin/orders redirects to /admin/login', async ({ page }) => {
     await page.goto('/admin/orders')
-    await expect(page).toHaveURL('/admin/login', { timeout: 8_000 })
+    await expect(page).toHaveURL(/\/admin\/login/, { timeout: 8_000 })
   })
 
   test('login page renders password field and submit button', async ({ page }) => {

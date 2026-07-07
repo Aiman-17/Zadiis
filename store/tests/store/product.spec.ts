@@ -59,6 +59,14 @@ test.describe('Product detail page', () => {
     const isAddable = await addBtn.isVisible().catch(() => false)
     if (!isAddable) test.skip() // product is sold out
 
+    // Color FIRST — selecting a color resets the chosen size (AddToCartButton),
+    // and adding without a color is rejected with a validation message.
+    const colorGroup = page.locator('div', { has: page.locator('p', { hasText: /^Color$/ }) }).last()
+    const firstColor = colorGroup.locator('button:enabled').first()
+    if (await firstColor.isVisible().catch(() => false)) {
+      await firstColor.click()
+    }
+
     // Pick a size if required
     const sizeButtons = page.getByRole('button').filter({ hasText: /^(XS|S|M|L|XL|XXL|Unstitched)$/i })
     if (await sizeButtons.first().isVisible().catch(() => false)) {
