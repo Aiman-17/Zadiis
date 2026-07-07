@@ -102,8 +102,9 @@ export async function addRealProductToCart(page: Page): Promise<string | null> {
 }
 
 /**
- * Fill every checkout field except payment method.
- * Email blur triggers the OTP send — mock OTP routes first (helpers/otp.ts).
+ * Fill every checkout field except payment method. Does not send the OTP —
+ * sending is a deliberate click on the send button (see helpers/otp.ts →
+ * completeOtp, which clicks it before waiting for the code box).
  */
 export async function fillCheckoutForm(
   page: Page,
@@ -126,7 +127,6 @@ export async function fillCheckoutForm(
   const options = await citySelect.locator('option').all()
   if (options.length > 1) await citySelect.selectOption({ index: 1 })
 
-  // Blur email last so the OTP send fires after all fields are stable
   await page.getByRole('textbox', { name: /email/i }).blur()
 
   return data
