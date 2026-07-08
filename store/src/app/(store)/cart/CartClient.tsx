@@ -105,7 +105,7 @@ export default function CartClient({ suggestions }: Props) {
               )}
               {item.originalPrice && item.originalPrice > item.price ? (
                 <div className="mt-1 space-y-0.5">
-                  <p className="font-semibold" style={{ color: '#DC2626' }}>PKR {item.price.toLocaleString('en-US')}</p>
+                  <p className="font-semibold" style={{ color: '#A68B6E' }}>PKR {item.price.toLocaleString('en-US')}</p>
                   <div className="flex items-center gap-2">
                     <p className="text-xs line-through" style={{ color: '#9CA3AF' }}>PKR {item.originalPrice.toLocaleString('en-US')}</p>
                     <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}>
