@@ -214,6 +214,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 - Supabase (PostgreSQL) — 3 new columns on `products` (`is_featured`, `featured_start`, `featured_end`); no new tables; `stock_movements.reason='restock'` gets its first actual writer (003-merchandising-badges-v2)
 - TypeScript, Next.js 16.2.7 (App Router) + `@supabase/supabase-js` (existing), `recharts` (existing, already used throughout `AnalyticsClient.tsx`), `lucide-react` (existing, for the bell/archive/delete icons) (004-post-launch-roadmap)
 - Supabase (PostgreSQL) — one new table, `admin_notifications`; no changes to existing tables (004-post-launch-roadmap)
+- TypeScript, Next.js 16.2.7 (App Router) + No new dependencies for most stories — reuses `recharts`, `lucide-react`, `@radix-ui/react-dialog` (via the existing unused `store/src/components/ui/dialog.tsx`), and Tailwind v4's already-configured class-based dark mode (`@custom-variant dark`, `globals.css`). (006-conversion-admin-enhancements)
+- Supabase (PostgreSQL) — two new `store_settings` keys (`free_delivery_enabled`, `cancellations_enabled`, same pattern as `cod_enabled`), one new `image_colors text[]` column on `products`. No other schema changes. (006-conversion-admin-enhancements)
 
 ## Recent Changes
 - 003-merchandising-badges-v2: Added TypeScript, Next.js 16.2.7 (App Router) + none new — reuses existing Supabase client, existing `recalculateScores`/cron infrastructure in `store/src/lib/scoring.ts`
