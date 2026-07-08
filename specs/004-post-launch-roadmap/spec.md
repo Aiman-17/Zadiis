@@ -18,15 +18,15 @@ mark orders delivered, and email is the only channel that surfaces new
 activity (orders, payments, cancellation/return/exchange requests) to the
 merchant.
 
-Five improvements were identified during recent work on this store but are
-explicitly **not** being built now, each for a different reason — no courier
-account yet, or a deliberate business-maturity gate. Per this project's
-established convention (specs/003-merchandising-badges-v2, FR-016), deferred
-capabilities must be documented with the concrete condition that would
-justify revisiting them, rather than silently dropped or forgotten. This spec
-exists to record that condition for each of the five, and to specify the two
-that have no external dependency and could be picked up independently of the
-courier integration.
+Five improvements were identified during recent work on this store. Per this
+project's established convention (specs/003-merchandising-badges-v2,
+FR-016), deferred capabilities must be documented with the concrete
+condition that would justify revisiting them, rather than silently dropped
+or forgotten. This spec records that condition for each. As of Session 2
+(2026-07-08), three of the five are buildable-now (User Stories 1, 2, and
+4 — the business-maturity trigger for PDF invoicing has been judged met);
+only User Story 3 remains deferred, blocked on the courier tracking
+integration.
 
 ## Clarifications
 
@@ -35,6 +35,13 @@ courier integration.
 - Q: US1's notification center was scoped to five event types including "new order placed" — but the admin already has a dedicated orders page and a dashboard KPI for new orders. Keep new-order as a sixth surface, or drop it from the notification center? → A: Drop it. The notification center covers only payment received, cancellation request, return request, and exchange request — the four events that currently have *no* in-admin surface other than email. New orders stay covered by the existing orders page + dashboard KPI, avoiding a duplicate signal.
 - Q: US2's year-over-year comparison was scoped as one view combining revenue and repeat-customer rate. The Admin Analytics dashboard already separates concerns into tabs (Revenue, Performance, Products, Inventory, Orders), each with its own global 7d/30d/90d/12m range filter. Keep repeat-customer rate, or narrow to metrics that map onto existing tabs? → A: Narrow to two separate metrics, each living in the tab it already relates to: a revenue year-over-year comparison in the Revenue tab, and a sales/units-sold year-over-year comparison in the Performance tab. Repeat-customer rate is dropped from this spec's scope. Both comparisons must be additive to their tab — the existing range filter and current charts must not change behavior.
 - Q: The store has no order history older than ~1 month (repo started 2026-06-07), so a true year-over-year comparison can't show real data yet. Build now or defer like US3/US4? → A: Build now, not defer. Each comparison collapses to a single "not enough history yet" line while under 12 months of data exists, and auto-expands into the full comparison once eligible — this avoids needing a second implementation pass later and keeps the re-entry-trigger pattern (FR-005 style) reserved for the genuinely dependency-blocked items (US3, US4).
+
+### Session 2 (2026-07-08, later)
+
+- Q: User Story 4's re-entry trigger was "the merchant judges the store has reached a stage where a polished PDF invoice is worth the added dependency" — a business-maturity judgment call, not a technical precondition. Has that trigger been met? → A: Yes. The merchant has judged it met and wants this built now. US4 moves from deferred to buildable-now in this spec.
+- Q: Scope of the PDF invoice — replace just the customer email attachment, or also the admin's browser-based print view at `/admin/invoices/[id]/print`? → A: Email attachment only. The admin print view is a separate, already-working mechanism (browser print-to-PDF) and stays untouched.
+- Q: Which PDF-rendering library? → A: `@react-pdf/renderer` — the standard choice for server-side PDF generation from React components in a Next.js API/server context, no headless browser required.
+- Q: Does this apply to COD orders too? → A: No — matches existing behavior exactly. `buildInvoiceDocument`'s HTML attachment today only fires for online payments (COD invoices are settled at delivery, not by email); the PDF replacement keeps that same scope, online payments only.
 
 ---
 
@@ -101,7 +108,7 @@ tab's existing content or the global range filter.
 
 ---
 
-### User Story 3 - Delivery and return/cancel eligibility update automatically from real courier data (Priority: P3, deferred)
+### User Story 3 - Delivery and return/cancel eligibility update automatically from real courier data (Priority: P4, deferred)
 
 Today the merchant manually clicks "Delivered" on an order, which is also
 what starts the customer's 3-day return window and closes their 24-hour
@@ -140,32 +147,31 @@ rejected even if fewer than 24 hours have passed since placement.
 
 ---
 
-### User Story 4 - Professional, branded PDF invoices (Priority: P4, deferred)
+### User Story 4 - Professional, branded PDF invoices (Priority: P3, buildable now)
 
 Customer-facing invoices are currently an HTML file attached to the payment
 confirmation email. A dedicated, professionally formatted PDF (via a
-React-based PDF rendering library) would look more polished for a more
-established store.
+React-based PDF rendering library) looks more polished and trustworthy for
+a more established store.
 
-**Why this priority (and why deferred)**: **This is explicitly out of scope
-to build now.** It is gated on business maturity ("later when store goes
-well"), not on any external integration — it is intentionally independent of
-the courier-tracking trigger in User Story 3, and lower priority than either
-of the two no-dependency items above.
+**Why this priority**: The business-maturity re-entry trigger has been
+judged met (Session 2 clarification) — this is no longer gated on an
+external dependency (independent of User Story 3's courier trigger) or on
+further business growth. Scoped to the email attachment only; the admin's
+existing browser-based print view is untouched.
 
-**Re-entry trigger**: The merchant judges the store has reached a stage
-where a more polished, professional invoice format is worth the added
-dependency (a PDF-rendering library) and implementation effort — no
-technical precondition, a business-judgment call.
-
-**Independent Test** (once the trigger condition is met): Trigger a payment
-confirmation email and confirm the attached invoice is a genuine PDF file,
-opens correctly in standard PDF viewers, and matches the store's branding.
+**Independent Test**: Trigger a payment confirmation email for an online
+(non-COD) order and confirm the attached invoice is a genuine PDF file,
+opens correctly in standard PDF viewers, and matches the store's branding
+(same fonts/colors/layout intent as the current HTML version). Confirm COD
+orders are unaffected (no email invoice today, none added).
 
 **Acceptance Scenarios**:
 
-1. **Given** the business-maturity trigger has been judged met, **When** a customer's online payment is confirmed, **Then** the confirmation email attaches a real PDF invoice instead of the current HTML file.
-2. **Given** this feature is not yet built (current state), **When** a payment is confirmed, **Then** the existing HTML invoice attachment continues to work exactly as it does today — this item introduces no regression risk to the current flow.
+1. **Given** a customer's online payment is confirmed, **When** the payment-confirmation email is sent, **Then** it attaches a real PDF invoice (not an `.html` file) generated via a React PDF-rendering library.
+2. **Given** the generated PDF, **When** opened in a standard PDF viewer, **Then** it displays the same invoice content (invoice number, order number, customer details, line items, totals, transaction ID) currently shown in the HTML version, styled with the store's brand fonts and colors.
+3. **Given** a COD order, **When** payment is settled at delivery, **Then** no email invoice is sent — unchanged from current behavior (COD was never in scope for the email attachment).
+4. **Given** the admin's browser-based invoice print view (`/admin/invoices/[id]/print`), **When** an admin opens it, **Then** it continues to work exactly as it does today — this item does not touch that code path.
 
 ---
 
@@ -189,14 +195,15 @@ opens correctly in standard PDF viewers, and matches the store's branding.
 - **FR-006**: Both year-over-year comparisons MUST be additive to their respective tab — they MUST NOT change the behavior or output of the existing 7-day/30-day/90-day/1-year range filter or any other chart currently on the Revenue or Performance tab.
 - **FR-007**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: automatic delivery-status transition and automatic return/cancel eligibility driven by real courier tracking data. Re-entry trigger: a courier tracking number and tracking API become available per order (e.g., a Leopards Courier merchant account is opened and integrated). Until that trigger is met, the existing admin-manual status workflow (and the 24-hour/3-day policy windows built on `created_at`/`delivered_at`) remains the source of truth and MUST NOT be weakened or removed in anticipation of this feature.
 - **FR-008**: When the courier-tracking trigger (FR-007) is eventually met, the automatic delivery transition MUST fire the identical cascade the existing manual "mark delivered" action fires today: `delivered_at` stamping, COD `payment_status` auto-flip to paid, invoice generation/settlement, and the customer delivery-confirmation email — reusing that existing cascade logic rather than duplicating it.
-- **FR-009**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: replacing the current HTML-file email invoice attachment with a real PDF generated via a React PDF-rendering library. Re-entry trigger: the merchant judges the business has reached a maturity stage that justifies the added dependency and effort — a business decision, not a technical precondition. This item is independent of FR-007/FR-008's courier-tracking trigger.
-- **FR-010**: Until the FR-009 trigger is met, the existing HTML-file invoice attachment on the payment-confirmation email MUST continue to function unchanged.
+- **FR-009**: The system MUST attach a genuine PDF file (generated via a React PDF-rendering library, `@react-pdf/renderer`) to the payment-confirmation email for online (non-COD) orders, replacing the current HTML-file attachment. The PDF MUST contain the same content (invoice number, order number, customer details, line items, totals, transaction ID) as the current HTML version, styled with the store's brand fonts and colors.
+- **FR-010**: This capability is scoped to the email attachment only — the admin's existing browser-based invoice print view (`/admin/invoices/[id]/print`) MUST continue to function unchanged, with no shared code path required between the two.
 
 ### Key Entities
 
 - **Notification**: A record of a merchant-facing event (payment received, cancellation/return/exchange request — explicitly not new-order), including its type, related order number, timestamp, and seen/unseen state.
 - **Courier Tracking Event**: A delivery/shipment status update reported by an external courier tracking API for a specific order — the future source of truth for automatic delivery transition and return/cancel eligibility (not yet integrated).
 - **Year-over-Year Comparison Period**: A pair of matching calendar periods (current and prior year) used to compute and present a single metric side by side — revenue in the Revenue tab, sales/units sold in the Performance tab. Each is independent of the dashboard's global range filter.
+- **PDF Invoice**: A React-component-rendered PDF document (via `@react-pdf/renderer`) attached to the payment-confirmation email for online orders, replacing the prior HTML-file attachment — same content, real PDF format. Does not replace the separate admin browser-print invoice view.
 
 ## Success Criteria *(mandatory)*
 
@@ -204,6 +211,7 @@ opens correctly in standard PDF viewers, and matches the store's branding.
 
 - **SC-001**: A merchant with the admin panel open learns of a payment or cancellation/return/exchange request without needing to switch to an email client, verified across all four in-scope event types; new-order activity continues to be learned via the existing orders page/KPI, not duplicated here.
 - **SC-002**: A merchant can determine, from the Revenue tab alone, whether current-period revenue is higher or lower than the same period the previous year, and separately, from the Performance tab alone, whether current-period sales/units sold is higher or lower than the same period the previous year — without manually cross-referencing external reports.
-- **SC-003**: The two deferred capabilities (courier-driven automation; PDF invoicing) remain documented with their re-entry conditions and introduce zero behavior change to the current manual-status workflow or HTML invoice attachment until their respective triggers are met, verified by the existing cancel/return policy and invoice-email tests continuing to pass unmodified.
+- **SC-003**: The one remaining deferred capability (courier-driven automation, User Story 3) stays documented with its re-entry condition and introduces zero behavior change to the current manual-status workflow until that trigger is met, verified by the existing cancel/return policy tests continuing to pass unmodified.
 - **SC-004**: Once the courier-tracking trigger is met and User Story 3 is built, an order's delivery cascade (payment status, invoice, customer email) fires exactly once per real delivery event — zero duplicate cascades when a courier event and a lingering manual action could otherwise both fire it.
 - **SC-005**: Before 12 months of order history exist (current state), the existing Revenue and Performance tab range filters (7d/30d/90d/12m) and all charts they currently drive produce identical output to today, verified by comparing tab output before and after the year-over-year widgets are added.
+- **SC-006**: Every online-payment confirmation email attaches a genuine PDF (openable in standard viewers, matching brand styling) instead of an HTML file, verified across at least one full order with multiple line items; COD orders and the admin print view remain completely unaffected.

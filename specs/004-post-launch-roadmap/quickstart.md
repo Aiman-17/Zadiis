@@ -24,3 +24,12 @@
 ## Regression check (required before PR, per FR-006/SC-005)
 
 Diff `/admin/analytics` output (all 5 tabs, all 4 range options) against the current `main`/pre-change branch — must be pixel-identical outside the two new YoY widgets.
+
+## US4 — PDF Invoice (Session 2)
+
+1. Place a real online-payment test order (not COD).
+2. Confirm payment (via `/api/payments/verify` or the Safepay webhook path, as already exercised for US1's testing).
+3. Confirm the payment-confirmation email attaches a file named `<invoice-number>.pdf` (not `.html`).
+4. Open the PDF in a standard viewer — confirm it shows the same content as the old HTML version (invoice number, order number, bill-to, line items, subtotal/delivery/total, payment method + status + transaction ID), styled in Playfair Display/Inter with the brand gold/black/cream palette, not the PDF-library default fonts.
+5. Confirm a COD order still produces no email invoice (unchanged behavior).
+6. Open `/admin/invoices/[id]/print` for any order — confirm it renders exactly as before, completely unaffected.

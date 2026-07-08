@@ -45,3 +45,29 @@ No `NEEDS CLARIFICATION` markers remain in the Technical Context — every decis
 **Decision**: Reuse the exact pill-badge style already established for merchandising badges (`AdminProductsClient.tsx:88`'s `✦ New` styling — `text-xs px-1.5 py-0.5 rounded-full` with a light-background/dark-text color pair), applied to unread notification rows, rather than inventing a new visual language for the notification center.
 
 **Rationale**: Constitution Principle VI (Brand Consistency) — "no ad-hoc styling decisions may deviate from the design system." The badge convention already exists and is well-established across the admin panel; a new visual would be inconsistent for no functional benefit.
+
+---
+
+# Research addendum: User Story 4 (PDF Invoice), Session 2
+
+## Decision 7: `@react-pdf/renderer` for server-side PDF generation
+
+**Decision**: `@react-pdf/renderer`, using its `renderToBuffer()` API to produce a `Buffer` directly, matching the existing `Buffer.from(...).toString('base64')` attachment pattern in `email.ts:319-333`.
+
+**Rationale**: It's the standard library for generating real PDFs from a React component tree in a Node/server context — no headless browser dependency (unlike Puppeteer-based approaches), which matters for a serverless-friendly Next.js API route. Confirmed via web search this session that `renderToBuffer()` is explicitly documented for "Node.js Server Actions or API Routes," returning a `Buffer` usable directly.
+
+**Alternatives considered**: Puppeteer/headless-Chrome HTML-to-PDF (rejected — heavy dependency, slow cold starts, overkill for a text-and-table invoice); `jsPDF` (rejected — imperative canvas-style API, not a natural fit for a React-component-tree-based system like the rest of this codebase's email templates).
+
+## Decision 8: Bundle local TTF fonts, not remote Google Fonts URLs
+
+**Decision**: Bundle actual TTF font files in the repo (`store/src/lib/fonts/`) for Playfair Display and Inter, registered via local file paths.
+
+**Rationale**: Verified via web search this session — registering fonts via Google Fonts CDN URLs (the initial idea) is a documented reliability risk for this specific library: Google Fonts serves WOFF2, which `@react-pdf/renderer` supports poorly (TTF/OTF preferred), and `Font.register()`'s async download can race with `renderToBuffer()` since there's no built-in await-font-readiness mechanism — a real, reported failure mode (see GitHub issue diegomura/react-pdf#2675, fonts stuck effectively unloaded). Local file registration is explicitly supported server-side in Node.js and avoids both failure modes entirely — no network fetch at render time.
+
+**Alternatives considered**: Built-in PDF fonts (Helvetica/Times-Roman) — rejected, doesn't satisfy FR-009's brand-matching requirement, would look visibly generic against the store's established Playfair Display/Inter identity.
+
+## Decision 9: Scope boundary — email attachment only, not the admin print view
+
+**Decision**: Only `email.ts`'s attachment-generation call site changes. `store/src/app/admin/invoices/[id]/print/page.tsx` (the admin's browser-based print view) is untouched.
+
+**Rationale**: Per this session's clarification — the print view already works today via the browser's native print-to-PDF, a completely separate, already-functioning mechanism with no code overlap with the email attachment path. Expanding scope to unify them would be a larger, riskier change than what was asked for, and isn't needed to satisfy any FR in this spec.

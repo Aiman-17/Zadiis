@@ -31,15 +31,15 @@
 
 ## Notes
 
-- This spec intentionally documents two buildable-now capabilities (notification
-  center, year-over-year analytics) alongside two explicitly deferred
-  capabilities (courier-driven automation, PDF invoicing), each deferred item
-  carrying its own re-entry trigger per the project's established
-  FR-016-style convention (specs/003-merchandising-badges-v2).
-- Deferred items (User Story 3, User Story 4) are not ready for `/sp.plan`
-  until their respective re-entry triggers are met — a courier tracking
-  integration for US3, a business-maturity judgment call for US4. `/sp.plan`
-  can proceed now for User Story 1 (notification center) and User Story 2
-  (year-over-year analytics) independently, since they have no such gate.
-- No spec updates required before `/sp.clarify` or `/sp.plan` for the two
-  buildable-now stories.
+- This spec intentionally documents three buildable-now capabilities
+  (notification center — implemented, PR #5; year-over-year analytics —
+  implemented, PR #5; PDF invoicing — pending) alongside one explicitly
+  deferred capability (courier-driven automation, User Story 3), carrying
+  its own re-entry trigger per the project's established FR-016-style
+  convention (specs/003-merchandising-badges-v2).
+- User Story 3 is not ready for `/sp.plan` until its re-entry trigger is
+  met — a courier tracking integration becoming available.
+- User Story 4's re-entry trigger (business-maturity judgment call) was
+  recorded as met in Session 2 (2026-07-08); it moved from deferred to
+  buildable-now and is ready for `/sp.plan` scoped to just that story.
+- No spec updates required before `/sp.plan` for User Story 4.

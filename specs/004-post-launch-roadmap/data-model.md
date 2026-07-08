@@ -42,3 +42,7 @@ Purely derived, no schema. Computed client-side (in `AnalyticsClient.tsx` / the 
 - **Prior period**: the 12 months before that.
 - **Eligibility**: `earliest order in ordersForYoY <= 24 months ago` → full comparison renders; otherwise the "insufficient history" collapsed state renders (FR-005).
 - **Metric**: `revenue` (sum of order totals per bucket) for the Revenue tab widget, `units` (sum of order-item quantities per bucket) for the Performance tab widget — two instances of the same `YoyWidget` component, differing only by metric key and tab placement.
+
+## User Story 4 (PDF Invoice) — no new persisted entity
+
+Purely a rendering-layer change. No new table, no new column, no schema migration. The PDF is generated on-demand at email-send time from the same `order`/`invoice_number` data already assembled for the existing HTML invoice (`buildInvoiceDocument`'s input shape, `email.ts:189-201`) — the React-PDF component tree (`invoice-pdf.tsx`) takes an identical input shape, just renders it differently.

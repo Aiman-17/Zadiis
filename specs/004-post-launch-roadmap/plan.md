@@ -1,7 +1,46 @@
-# Implementation Plan: Post-Launch Roadmap — US1 (Notification Center) + US2 (YoY Analytics)
+# Implementation Plan: Post-Launch Roadmap — US1 (Notification Center) + US2 (YoY Analytics) + US4 (PDF Invoice)
 
 **Branch**: `004-post-launch-roadmap` | **Date**: 2026-07-08 | **Spec**: [spec.md](./spec.md)
-**Input**: Feature specification from `specs/004-post-launch-roadmap/spec.md`, scoped to User Story 1 and User Story 2 only (User Story 3 and User Story 4 remain deferred, spec-only, untouched by this plan).
+**Input**: Feature specification from `specs/004-post-launch-roadmap/spec.md`. US1 and US2 (below) are implemented (PR #5). This document is extended with a second planning pass for **User Story 4** (PDF invoice), un-deferred this session. User Story 3 remains deferred, spec-only, untouched.
+
+---
+
+## Addendum: User Story 4 — Professional PDF Invoices
+
+**Date added**: 2026-07-08 (Session 2) | **Scope**: email attachment only, online (non-COD) orders
+
+### Summary
+
+Replace the `.html`-file invoice attachment on the payment-confirmation email with a genuine PDF, rendered server-side from React components via `@react-pdf/renderer`. Same content as today's HTML version (verified against `store/src/lib/email.ts:189-255`'s `buildInvoiceDocument`), same brand styling intent. No new database table, no new API route — purely a rendering-layer swap inside `store/src/lib/email.ts`. The admin's browser-based print view (`/admin/invoices/[id]/print`) is a fully separate code path and is not touched.
+
+### Technical Context (addendum)
+
+**New Dependency**: `@react-pdf/renderer` — chosen because it's the standard library for generating real PDFs from React component trees in a Node/server context (no headless browser, works cleanly inside a Next.js API route), and produces a `Buffer` directly via `renderToBuffer()`, matching the existing `Buffer.from(...).toString('base64')` attachment pattern already used for the HTML version (`email.ts:319-333`).
+**Font handling** (verified via web search this session — corrected from an initial draft): `@react-pdf/renderer` does not use CSS/system fonts — fonts must be registered via `Font.register()`. Registering brand fonts (Playfair Display, Inter) via their Google Fonts CDN URLs was the first idea, but is a real reliability risk: Google Fonts serves WOFF2, which `@react-pdf/renderer` supports poorly (it prefers TTF/OTF), and `Font.register()`'s download can race with `renderToBuffer()` since there's no built-in await-font-readiness mechanism — both are documented, real failure modes, not theoretical. **Decision**: bundle the actual TTF font files locally in the repo (`store/src/lib/fonts/PlayfairDisplay-Bold.ttf`, `Inter-Regular.ttf`, `Inter-SemiBold.ttf` — both are open-source/OFL-licensed, freely redistributable) and register via local file paths, which `@react-pdf/renderer` explicitly supports in Node.js server contexts. No network fetch at render time, no race condition, no format-compatibility risk.
+
+### Constitution Check (addendum)
+
+| Principle | Assessment |
+|---|---|
+| I. Customer Journey First | PASS — invoice generation happens after payment confirmation, outside the purchase flow; a failure here (already tolerated today for HTML) cannot block checkout. |
+| III. Lean MVP | PASS — single new dependency, no new infrastructure, replaces existing functionality rather than adding a parallel system. |
+| VI. Brand Consistency | PASS (with the font-registration approach above) — reuses the exact color values already in `buildInvoiceDocument` (`#A68B6E` gold, `#1C1C1C` near-black, `#FAF8F5` cream, `#E8DDD4` border) and the same content structure (header, bill-to, item table, subtotal/delivery/total, payment details block). |
+| VII. E2E Testing Mandate | GATE — `tasks.md` must include a test verifying the attachment is generated (content-type `application/pdf`, non-empty buffer) since Playwright can't directly open email attachments; verify via a unit-style check on `renderToBuffer()`'s output or a manual `quickstart.md` step, decided during `/sp.tasks`. |
+
+**No violations.** Single new dependency, additive to existing email-sending code, no schema changes.
+
+### Project Structure (addendum)
+
+```text
+store/
+├── src/
+│   ├── lib/
+│   │   ├── email.ts                        # MODIFIED — attachment block (lines 319-333) swaps buildInvoiceDocument()+text/html for the new PDF renderer+application/pdf; buildInvoiceDocument itself removed (dead code once replaced)
+│   │   └── invoice-pdf.tsx                  # NEW — @react-pdf/renderer Document/Page component tree, same content as buildInvoiceDocument, brand fonts registered
+│   └── ... (no other files touched — no new route, no schema change)
+```
+
+**Structure Decision**: Single new file (`store/src/lib/invoice-pdf.tsx`) plus a small, localized edit to the existing attachment block in `email.ts`. No API contract changes (nothing new is exposed over HTTP), so no `contracts/` addition for this story.
 
 ## Summary
 

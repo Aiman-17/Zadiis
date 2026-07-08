@@ -70,12 +70,31 @@ No setup or foundational tasks are required. This feature adds zero new npm depe
 
 ---
 
-## Phase 3: Polish & Cross-Cutting Concerns
+## Phase 3: User Story 4 — Professional PDF Invoices (Priority: P3, session 2)
 
-- [ ] T020 [P] Run every step in `quickstart.md` end-to-end for both US1 and US2.
-- [X] T021 [P] **(bug-pattern sweep)** Grep every file touched by T001-T019 for un-awaited `supabaseAdmin` calls and any new page/route missing `export const dynamic = 'force-dynamic'` — this project has two documented recurring bug classes from prior sessions (unawaited Supabase writes, missing force-dynamic causing stale cached admin data). Fix anything found before considering this feature done.
-- [X] T022 Update `specs/004-post-launch-roadmap/checklists/requirements.md` if implementation surfaced anything requiring a spec clarification not already captured.
-- [X] T023 [P] `npm run build && npm run lint` in `store/` — must pass with zero new errors/warnings.
+**Goal**: Payment-confirmation emails for online (non-COD) orders attach a real PDF invoice, rendered via `@react-pdf/renderer`, matching the store's brand fonts/colors — replacing the current `.html`-file attachment. Admin's browser-based print view is untouched.
+
+**Independent Test**: Confirm an online payment, open the resulting email, confirm the attachment is a `.pdf` opening correctly in a standard viewer with brand-consistent styling and identical content to the old HTML version. Full steps in `quickstart.md`'s "US4" section.
+
+### Implementation for User Story 4
+
+- [X] T024 [US4] Add `@react-pdf/renderer` to `store/package.json` dependencies.
+- [X] T025 [P] [US4] **(corrected mid-implementation)** Bundle TTF font files into `store/src/lib/fonts/`. The `google/fonts` source repo turned out to only publish variable-axis `.ttf` files for Inter/Playfair Display (unsuitable for distinct static weights), and `@fontsource/*` npm packages only ship woff/woff2 — neither worked. Resolved by fetching genuine static TTFs directly from Google's font-serving CDN using a legacy-browser User-Agent (a well-established technique; modern UAs get woff2, pre-WOFF-era UAs get true `format('truetype')` URLs) — confirmed via `file` as real TrueType Font data. Do NOT register via Google Fonts CDN URLs at runtime — verified this session as a real reliability risk for this library (WOFF2 format incompatibility + a font-load/render race condition with no built-in await mechanism); files are bundled locally instead.
+- [X] T026 [US4] Create `store/src/lib/invoice-pdf.tsx` — a `@react-pdf/renderer` `Document`/`Page` component tree taking the same input shape as `buildInvoiceDocument` (`email.ts:189-201`: invoice_number, order_number, customer_name, address, city, items, subtotal, delivery_charge, total, payment_method, transaction_id), registering the local TTF fonts from T025 via `Font.register()` with local file paths, and reproducing the same content sections (header, bill-to, item table, subtotal/delivery/total, payment details) using the existing brand colors (`#A68B6E` gold, `#1C1C1C` near-black, `#FAF8F5` cream, `#E8DDD4` border). Export a `renderInvoicePdf(data): Promise<Buffer>` helper wrapping `renderToBuffer()`. (Depends on T024, T025.)
+- [X] T027 [US4] In `store/src/lib/email.ts`'s attachment block (lines 319-333), replace the `buildInvoiceDocument(...)` + `contentType: 'text/html'` + `filename: '${invoice_number}.html'` with `await renderInvoicePdf(...)` + `contentType: 'application/pdf'` + `filename: '${invoice_number}.pdf'`, keeping the same `Buffer → base64` encoding step. Remove the now-unused `buildInvoiceDocument` function entirely (dead code once replaced) — do not leave it as unreferenced code. (Depends on T026.)
+- [X] T028 [US4] **(corrected mid-implementation)** Add a lightweight automated check that calls `renderInvoicePdf()` directly and asserts the returned `Buffer` is non-empty and starts with the PDF magic bytes (`%PDF`). Originally planned as a Playwright spec (`store/tests/admin/invoice-pdf.spec.ts`) but that failed with `Cannot read properties of null (reading 'props')` — root-caused to Playwright Test's own esbuild bundler mishandling `@react-pdf/renderer`'s custom React reconciler when the `.tsx` file is pulled into its transform pipeline (confirmed via a direct `tsx` run producing a correct 17KB PDF with the identical function call — a test-infrastructure incompatibility, not a production bug). Implemented instead as `store/scripts/verify-invoice-pdf.mjs`, run via `npm run verify:invoice-pdf` (uses the `tsx` devDependency, added this task).
+- [ ] T029 [US4] Manual verification per `quickstart.md`'s US4 section: place a real online-payment order, confirm the emailed PDF opens correctly and matches brand styling; confirm COD orders still produce no email invoice; confirm `/admin/invoices/[id]/print` is unaffected.
+
+**Checkpoint**: User Story 4 independently functional — touches only `email.ts` and two new files, no overlap with US1/US2/US3.
+
+---
+
+## Phase 4: Polish & Cross-Cutting Concerns
+
+- [ ] T030 [P] Run every step in `quickstart.md` end-to-end for US1, US2, and US4.
+- [X] T031 [P] **(bug-pattern sweep)** Grep every file touched by T001-T029 for un-awaited `supabaseAdmin` calls and any new page/route missing `export const dynamic = 'force-dynamic'` — this project has two documented recurring bug classes from prior sessions (unawaited Supabase writes, missing force-dynamic causing stale cached admin data). Fix anything found before considering this feature done.
+- [X] T032 Update `specs/004-post-launch-roadmap/checklists/requirements.md` if implementation surfaced anything requiring a spec clarification not already captured.
+- [X] T033 [P] `npm run build && npm run lint` in `store/` — must pass with zero new errors/warnings.
 
 ---
 
@@ -83,8 +102,8 @@ No setup or foundational tasks are required. This feature adds zero new npm depe
 
 ### Phase Dependencies
 
-- **US1 (Phase 1)** and **US2 (Phase 2)** have no dependency on each other — fully parallel-safe, touch disjoint files.
-- **Polish (Phase 3)** depends on both US1 and US2 being complete.
+- **US1 (Phase 1)**, **US2 (Phase 2)**, and **US4 (Phase 3)** have no dependency on each other — fully parallel-safe, touch disjoint files (US4 only touches `email.ts` + 2 new files under `lib/`).
+- **Polish (Phase 4)** depends on US1, US2, and US4 all being complete.
 
 ### Within User Story 1
 
@@ -94,13 +113,18 @@ T002 (table) blocks T003 (API route) and all six notification-insert tasks (T005
 
 T016 (YoyWidget component) is independent of T015 (data-fetch change) — parallel-safe. T017 and T018 (tab integration) each depend on both T015 and T016. T019 (regression check) depends on T017 and T018.
 
+### Within User Story 4
+
+T025 (fonts) is parallel-safe with T024 (dependency install) — different concerns. T026 (PDF component) depends on both T024 and T025. T027 (email.ts swap) depends on T026. T028 (automated check) depends on T026 (can run before or after T027, but is most meaningful after). T029 (manual verification) depends on T027 being complete.
+
 ### Parallel Opportunities
 
 - T001 (US1 test) can be written any time before T002-T013 are implemented.
 - T004, T006, T007, T008 are parallel-safe with each other (four different files).
 - T014 (US2 test) can be written any time before T015-T019 are implemented.
 - T016 is parallel-safe with T015.
-- T020, T021, T023 in Polish are parallel-safe with each other; T022 depends on findings from the others.
+- T024 and T025 (US4) are parallel-safe with each other.
+- T030, T031, T033 in Polish are parallel-safe with each other; T032 depends on findings from the others.
 
 ---
 
@@ -122,6 +146,14 @@ Task: "Add trailing-24-month superset fetch to admin/analytics/page.tsx"
 Task: "Create YoyWidget.tsx component"
 ```
 
+## Parallel Example: User Story 4
+
+```bash
+# T024 and T025 can run together — dependency install vs. font bundling, no shared dependency:
+Task: "Add @react-pdf/renderer to package.json"
+Task: "Bundle Playfair Display / Inter TTF files into store/src/lib/fonts/"
+```
+
 ---
 
 ## Implementation Strategy
@@ -130,22 +162,25 @@ Task: "Create YoyWidget.tsx component"
 
 1. Complete Phase 1 (US1): T001-T013.
 2. **STOP and VALIDATE**: run `quickstart.md`'s US1 section independently.
-3. Deploy/demo if ready — US2 is not required for US1 to ship value.
+3. Deploy/demo if ready — US2/US4 are not required for US1 to ship value.
 
 ### Incremental Delivery
 
 1. US1 (T001-T013) → validate independently → deploy/demo (MVP).
 2. US2 (T014-T019) → validate independently → deploy/demo.
-3. Polish (T020-T023) → final gate before PR.
+3. US4 (T024-T029) → validate independently → deploy/demo.
+4. Polish (T030-T033) → final gate before PR.
 
 ---
 
 ## Summary
 
-- **Total tasks**: 23 (T001-T023)
+- **Total tasks**: 33 (T001-T033)
 - **User Story 1**: 13 tasks (T001-T013) — 1 test, 12 implementation (including 2 bug-fix tasks: T004, T009)
 - **User Story 2**: 6 tasks (T014-T019) — 1 test, 5 implementation
-- **Polish**: 4 tasks (T020-T023) — includes a project-specific bug-pattern sweep (T021)
-- **Parallel opportunities**: T004/T006/T007/T008 (US1 write sites), T015/T016 (US2), T020/T021/T023 (Polish)
-- **Suggested MVP scope**: User Story 1 only (T001-T013) — delivers the higher-priority, more novel capability (notification center) independently of US2.
-- **Bugs resolved as part of this task list** (per this run's explicit request): T004 (missing `id` in `cancel/route.ts` order select), T009 (two missed `admin_notifications` write call sites in `admin/orders/route.ts`), T021 (proactive sweep for this project's two documented recurring bug classes in all new code).
+- **User Story 4**: 6 tasks (T024-T029) — 5 implementation, 1 manual verification (email attachments aren't Playwright-inspectable)
+- **Polish**: 4 tasks (T030-T033) — includes a project-specific bug-pattern sweep (T031)
+- **Parallel opportunities**: T004/T006/T007/T008 (US1 write sites), T015/T016 (US2), T024/T025 (US4), T030/T031/T033 (Polish)
+- **Suggested MVP scope**: User Story 1 only (T001-T013) — delivers the higher-priority, more novel capability (notification center) independently of US2/US4.
+- **Bugs resolved as part of this task list** (per an earlier run's explicit request): T004 (missing `id` in `cancel/route.ts` order select), T009 (two missed `admin_notifications` write call sites in `admin/orders/route.ts`), T031 (proactive sweep for this project's two documented recurring bug classes in all new code).
+- **Design risk caught during planning for US4**: registering brand fonts via Google Fonts CDN URLs was the initial idea, corrected to bundling local TTF files (T025) after verifying `@react-pdf/renderer`'s actual font-handling limitations — see `research.md` Decision 8.
