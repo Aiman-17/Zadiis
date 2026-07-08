@@ -109,8 +109,8 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col py-6 px-4 gap-1" style={{ backgroundColor: '#1C1C1C' }}>
+      {/* Desktop sidebar — sticky so it stays in view while main content scrolls */}
+      <aside className="hidden md:flex w-56 shrink-0 flex-col py-6 px-4 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ backgroundColor: '#1C1C1C' }}>
         <h2 className="text-lg px-2 mb-6 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S Admin</h2>
         <NavContent />
       </aside>
