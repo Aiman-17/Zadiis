@@ -5,7 +5,9 @@ import {
   sendCustomerReturnConfirmation,
   sendOwnerExchangeRequest,
   sendCustomerExchangeConfirmation,
+  RETURN_REASON_LABELS,
 } from '@/lib/email'
+import { notifyAdmin } from '@/lib/notifications'
 
 const VALID_REASONS = new Set([
   'wrong_size',
@@ -129,11 +131,22 @@ export async function POST(req: NextRequest) {
         sendOwnerExchangeRequest({ order_number: normalised, customer_email, customer_name, exchange_details, notes, items: order.items }),
         sendCustomerExchangeConfirmation(customer_email, { order_number: normalised, customer_name }),
       ])
+      await notifyAdmin(
+        'exchange_request',
+        order.id,
+        `${customer_name || 'A customer'} requested an exchange on order #${normalised} — ${exchange_details.trim()}`,
+      )
     } else {
       await Promise.allSettled([
         sendOwnerReturnRequest({ order_number: normalised, customer_email, customer_name, reason, notes, items: order.items }),
         sendCustomerReturnConfirmation(customer_email, { order_number: normalised, customer_name }),
       ])
+      const reasonLabel = RETURN_REASON_LABELS[reason] || reason
+      await notifyAdmin(
+        'return_request',
+        order.id,
+        `${customer_name || 'A customer'} requested a return on order #${normalised} — ${reasonLabel}`,
+      )
     }
 
     return NextResponse.json({ success: true })

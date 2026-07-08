@@ -3,6 +3,7 @@ import { createHmac, timingSafeEqual } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
+import { notifyAdmin } from '@/lib/notifications'
 
 function verifySignature(rawBody: string, signature: string, secret: string): boolean {
   try {
@@ -115,6 +116,11 @@ export async function POST(req: NextRequest) {
     safepay_transaction_id: transactionId,
     items: order.items,
   })
+  await notifyAdmin(
+    'payment_received',
+    order.id,
+    `Payment received from ${order.customer_name} — order #${order.order_number} — PKR ${Number(order.total).toLocaleString()}`,
+  )
 
   console.log(`[webhook/safepay] Order ${order.order_number} marked paid. TXN: ${transactionId}`)
   return NextResponse.json({ received: true })

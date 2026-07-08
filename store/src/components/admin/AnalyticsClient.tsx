@@ -8,6 +8,7 @@ import {
 import type { Order, OrderItem, Product } from '@/types'
 import { rankBestSellers, rankTrending, merchandisingIdSets } from '@/lib/merchandising'
 import { getEffectiveStock } from '@/lib/stock'
+import YoyWidget from './YoyWidget'
 
 const RANGE_OPTIONS = [
   { key: '7d',  label: '7 Days' },
@@ -211,11 +212,13 @@ function buildRepeatRateTrend(orders: Order[], range: string) {
 
 export default function AnalyticsClient({
   orders,
+  ordersForYoY,
   products,
   range,
   allCostPrices,
 }: {
   orders: Order[]
+  ordersForYoY?: Order[]
   products: Product[]
   range: string
   allCostPrices?: { id: string; cost_price: number }[]
@@ -668,6 +671,8 @@ export default function AnalyticsClient({
             </ResponsiveContainer>
           </div>
 
+          <YoyWidget orders={ordersForYoY ?? []} metric="revenue" title="Revenue — Year over Year" />
+
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Payment Methods */}
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
@@ -779,6 +784,8 @@ export default function AnalyticsClient({
               <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
             )}
           </div>
+
+          <YoyWidget orders={ordersForYoY ?? []} metric="units" title="Sales — Year over Year" />
 
           {/* 2 · Period Breakdown Table */}
           <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>

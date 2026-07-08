@@ -1,11 +1,12 @@
 import { Resend } from 'resend'
 import { supabaseAdmin } from '@/lib/supabase/server'
+import { renderInvoicePdf } from '@/lib/invoice-pdf'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
 const FROM = process.env.RESEND_FROM || "ZADII'S <orders@zadiis.com.pk>"
 const BASE_URL = process.env.NEXT_PUBLIC_APP_URL || 'https://zadiis.com'
 
-type EmailItem = { product_id?: string; product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }
+export type EmailItem = { product_id?: string; product_name: string; sku?: string; size: string; color: string; quantity: number; price: number }
 
 // Resolve product page URLs for order items (id → /shop/[slug]).
 // Old orders and deleted products degrade gracefully to plain text.
@@ -183,77 +184,6 @@ function buildInvoiceBlock(d: {
     </div>`
 }
 
-// Standalone invoice document — attached as a downloadable .html file on the
-// payment-confirmed email (online payments only; COD invoices are settled at
-// delivery, not by email).
-function buildInvoiceDocument(d: {
-  invoice_number: string
-  order_number:   string
-  customer_name:  string
-  address:        string
-  city:           string
-  items: EmailItem[]
-  subtotal:        number
-  delivery_charge: number
-  total:           number
-  payment_method:  string
-  transaction_id?: string
-}): string {
-  const date = new Date().toLocaleDateString('en-PK', { day: 'numeric', month: 'long', year: 'numeric' })
-  const method = PAYMENT_METHOD_LABELS[d.payment_method] || d.payment_method
-  const itemRows = buildItemRows(d.items)
-  return `<!doctype html>
-<html>
-<head><meta charset="utf-8"><title>Invoice ${d.invoice_number}</title></head>
-<body style="font-family:Arial,sans-serif;background:white;margin:0;padding:32px">
-  <div style="max-width:600px;margin:0 auto">
-    <div style="display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:24px;padding-bottom:12px;border-bottom:2px solid #A68B6E">
-      <div>
-        <h1 style="margin:0;font-size:22px;font-family:Georgia,serif;color:#1C1C1C;letter-spacing:2px">ZADII&apos;S</h1>
-        <p style="margin:4px 0 0;font-size:11px;color:#A68B6E;letter-spacing:1px">AUTHENTIC PAKISTANI FASHION</p>
-      </div>
-      <div style="text-align:right">
-        <p style="margin:0;font-size:16px;font-weight:bold;color:#1C1C1C">INVOICE</p>
-        <p style="margin:4px 0 0;font-size:15px;font-weight:bold;color:#A68B6E;font-family:Georgia,serif">${d.invoice_number}</p>
-        <p style="margin:6px 0 0;font-size:11px;color:#6B7280">Order: ${d.order_number}</p>
-        <p style="margin:2px 0 0;font-size:11px;color:#6B7280">Date: ${date}</p>
-      </div>
-    </div>
-    <div style="margin-bottom:20px">
-      <p style="margin:0 0 4px;font-size:10px;font-weight:bold;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px">Bill To</p>
-      <p style="margin:0;font-size:14px;font-weight:bold;color:#1C1C1C">${d.customer_name}</p>
-      <p style="margin:2px 0 0;font-size:12px;color:#4B5563">${d.address}, ${d.city}</p>
-    </div>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:16px">
-      <thead>
-        <tr style="background:#FAF8F5;border-bottom:2px solid #E8DDD4">
-          <th style="padding:8px 10px;text-align:left;font-size:11px;color:#6B7280;text-transform:uppercase">Item</th>
-          <th style="padding:8px 10px;text-align:center;font-size:11px;color:#6B7280;text-transform:uppercase">Qty</th>
-          <th style="padding:8px 10px;text-align:right;font-size:11px;color:#6B7280;text-transform:uppercase">Total</th>
-        </tr>
-      </thead>
-      <tbody>${itemRows}</tbody>
-    </table>
-    <table style="width:100%;border-collapse:collapse;margin-bottom:20px">
-      <tr><td style="padding:5px 0;font-size:12px;color:#6B7280">Subtotal</td><td style="padding:5px 0;font-size:12px;color:#1C1C1C;text-align:right">PKR ${Number(d.subtotal).toLocaleString()}</td></tr>
-      <tr><td style="padding:5px 0;font-size:12px;color:#6B7280">Delivery</td><td style="padding:5px 0;font-size:12px;color:#1C1C1C;text-align:right">PKR ${Number(d.delivery_charge).toLocaleString()}</td></tr>
-      <tr style="border-top:2px solid #E8DDD4">
-        <td style="padding:8px 0;font-size:13px;font-weight:bold;color:#1C1C1C">Total</td>
-        <td style="padding:8px 0;font-size:13px;font-weight:bold;color:#A68B6E;text-align:right">PKR ${Number(d.total).toLocaleString()}</td>
-      </tr>
-    </table>
-    <div style="background:#FAF8F5;border:1px solid #E8DDD4;border-radius:6px;padding:14px 18px">
-      <p style="margin:0 0 6px;font-size:10px;font-weight:bold;color:#9CA3AF;text-transform:uppercase;letter-spacing:1px">Payment Details</p>
-      <p style="margin:0;font-size:12px;color:#6B7280">Method: <strong style="color:#1C1C1C;text-transform:capitalize">${method}</strong></p>
-      <p style="margin:4px 0 0;font-size:12px;color:#6B7280">Status: <strong style="color:#15803D">PAID</strong></p>
-      ${d.transaction_id ? `<p style="margin:4px 0 0;font-size:11px;color:#6B7280">Transaction ID: ${d.transaction_id}</p>` : ''}
-    </div>
-    <p style="margin:20px 0 0;font-size:11px;color:#9CA3AF;text-align:center">This is a computer-generated invoice and does not require a physical signature.</p>
-  </div>
-</body>
-</html>`
-}
-
 export async function sendCustomerPaymentConfirmed(to: string | null | undefined, d: {
   order_number:   string
   customer_name:  string
@@ -311,16 +241,8 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
       ${zadiisFooter()}
     </div>`
   try {
-    await resend.emails.send({
-      from: FROM,
-      to,
-      subject: `Payment confirmed — Order ${d.order_number} — ZADII'S`,
-      html,
-      attachments: d.invoice_number ? [{
-        filename: `${d.invoice_number}.html`,
-        contentType: 'text/html',
-        // Resend expects string attachment content pre-encoded as base64.
-        content: Buffer.from(buildInvoiceDocument({
+    const invoicePdf = d.invoice_number
+      ? await renderInvoicePdf({
           invoice_number:  d.invoice_number,
           order_number:    d.order_number,
           customer_name:   d.customer_name,
@@ -332,7 +254,19 @@ export async function sendCustomerPaymentConfirmed(to: string | null | undefined
           total:           d.total,
           payment_method:  d.payment_method,
           transaction_id:  d.transaction_id,
-        }), 'utf-8').toString('base64'),
+        })
+      : null
+
+    await resend.emails.send({
+      from: FROM,
+      to,
+      subject: `Payment confirmed — Order ${d.order_number} — ZADII'S`,
+      html,
+      attachments: invoicePdf ? [{
+        filename: `${d.invoice_number}.pdf`,
+        contentType: 'application/pdf',
+        // Resend expects string attachment content pre-encoded as base64.
+        content: invoicePdf.toString('base64'),
       }] : undefined,
     })
   } catch (e) {
@@ -509,7 +443,7 @@ export async function sendOwnerStockConflict(d: { product_names: string }): Prom
   )
 }
 
-const CANCEL_REASON_LABELS: Record<string, string> = {
+export const CANCEL_REASON_LABELS: Record<string, string> = {
   changed_mind:       'Changed My Mind',
   ordered_by_mistake: 'Ordered by Mistake',
   found_better_price: 'Found a Better Price',
@@ -517,7 +451,7 @@ const CANCEL_REASON_LABELS: Record<string, string> = {
   other:              'Other',
 }
 
-const RETURN_REASON_LABELS: Record<string, string> = {
+export const RETURN_REASON_LABELS: Record<string, string> = {
   wrong_size:      'Wrong Size',
   defective_item:  'Defective / Damaged',
   wrong_item_sent: 'Wrong Item Sent',
