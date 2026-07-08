@@ -65,4 +65,34 @@ test.describe('Admin analytics dashboard', () => {
     await expect(page).toHaveURL(/\/admin\/login/, { timeout: 8_000 })
     await context.close()
   })
+
+  // Spec 004 US2 — YoY widgets, additive to Revenue and Performance tabs.
+  test('Revenue tab shows the YoY widget in collapsed or expanded state', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Revenue', exact: true }).first().click()
+    await expect(page.getByText('Revenue — Year over Year')).toBeVisible({ timeout: 8_000 })
+    await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
+  })
+
+  test('Performance tab shows the YoY widget in collapsed or expanded state', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Performance', exact: true }).first().click()
+    await expect(page.getByText('Sales — Year over Year')).toBeVisible({ timeout: 8_000 })
+    await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
+  })
+
+  test('YoY widget state is unaffected by the range filter (regression: decoupled fetch)', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Revenue', exact: true }).first().click()
+    const widget = page.getByText('Revenue — Year over Year')
+    await expect(widget).toBeVisible({ timeout: 8_000 })
+    const textBefore = await page.locator('text=Revenue — Year over Year').locator('..').textContent()
+
+    await page.getByRole('button', { name: '7 Days' }).click()
+    await page.getByRole('button', { name: 'Revenue', exact: true }).first().click()
+    await expect(widget).toBeVisible({ timeout: 8_000 })
+    const textAfter = await page.locator('text=Revenue — Year over Year').locator('..').textContent()
+
+    expect(textAfter).toEqual(textBefore)
+  })
 })

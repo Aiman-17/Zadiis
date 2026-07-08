@@ -212,6 +212,8 @@ See `.specify/memory/constitution.md` for code quality, testing, performance, se
 ## Active Technologies
 - TypeScript, Next.js 16.2.7 (App Router) + none new — reuses existing Supabase client, existing `recalculateScores`/cron infrastructure in `store/src/lib/scoring.ts` (003-merchandising-badges-v2)
 - Supabase (PostgreSQL) — 3 new columns on `products` (`is_featured`, `featured_start`, `featured_end`); no new tables; `stock_movements.reason='restock'` gets its first actual writer (003-merchandising-badges-v2)
+- TypeScript, Next.js 16.2.7 (App Router) + `@supabase/supabase-js` (existing), `recharts` (existing, already used throughout `AnalyticsClient.tsx`), `lucide-react` (existing, for the bell/archive/delete icons) (004-post-launch-roadmap)
+- Supabase (PostgreSQL) — one new table, `admin_notifications`; no changes to existing tables (004-post-launch-roadmap)
 
 ## Recent Changes
 - 003-merchandising-badges-v2: Added TypeScript, Next.js 16.2.7 (App Router) + none new — reuses existing Supabase client, existing `recalculateScores`/cron infrastructure in `store/src/lib/scoring.ts`

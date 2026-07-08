@@ -28,31 +28,46 @@ exists to record that condition for each of the five, and to specify the two
 that have no external dependency and could be picked up independently of the
 courier integration.
 
+## Clarifications
+
+### Session 2026-07-08
+
+- Q: US1's notification center was scoped to five event types including "new order placed" — but the admin already has a dedicated orders page and a dashboard KPI for new orders. Keep new-order as a sixth surface, or drop it from the notification center? → A: Drop it. The notification center covers only payment received, cancellation request, return request, and exchange request — the four events that currently have *no* in-admin surface other than email. New orders stay covered by the existing orders page + dashboard KPI, avoiding a duplicate signal.
+- Q: US2's year-over-year comparison was scoped as one view combining revenue and repeat-customer rate. The Admin Analytics dashboard already separates concerns into tabs (Revenue, Performance, Products, Inventory, Orders), each with its own global 7d/30d/90d/12m range filter. Keep repeat-customer rate, or narrow to metrics that map onto existing tabs? → A: Narrow to two separate metrics, each living in the tab it already relates to: a revenue year-over-year comparison in the Revenue tab, and a sales/units-sold year-over-year comparison in the Performance tab. Repeat-customer rate is dropped from this spec's scope. Both comparisons must be additive to their tab — the existing range filter and current charts must not change behavior.
+- Q: The store has no order history older than ~1 month (repo started 2026-06-07), so a true year-over-year comparison can't show real data yet. Build now or defer like US3/US4? → A: Build now, not defer. Each comparison collapses to a single "not enough history yet" line while under 12 months of data exists, and auto-expands into the full comparison once eligible — this avoids needing a second implementation pass later and keeps the re-entry-trigger pattern (FR-005 style) reserved for the genuinely dependency-blocked items (US3, US4).
+
+---
+
 ## User Scenarios & Testing *(mandatory)*
 
-### User Story 1 - Merchant sees all order activity in one place, without checking email (Priority: P1)
+### User Story 1 - Merchant sees payment and request activity in one place, without checking email (Priority: P1)
 
-Today, the merchant only learns about a new order, a payment being received,
-or a customer submitting a cancellation/return/exchange request by checking
-an external email inbox. A merchant who has the admin panel open should be
-able to see all of that same activity inside the admin panel itself.
+Today, the merchant only learns about a payment being received, or a
+customer submitting a cancellation/return/exchange request, by checking an
+external email inbox. A merchant who has the admin panel open should be
+able to see all of that same activity inside the admin panel itself. New
+orders are explicitly out of scope for this notification center — they
+already have a dedicated orders page and a dashboard KPI, so surfacing them
+a second time here would be a duplicate signal rather than new information.
 
 **Why this priority**: No external dependency — buildable independently of
 the courier integration, and directly addresses a real, present-day
 friction point ("so I don't need to check email every time I opened admin
 panel").
 
-**Independent Test**: With the admin panel open, trigger each of the five
-event types (new order, payment received, cancellation request, return
+**Independent Test**: With the admin panel open, trigger each of the four
+in-scope event types (payment received, cancellation request, return
 request, exchange request) and confirm each appears in the notification
-center without the merchant needing to open a separate email client.
+center without the merchant needing to open a separate email client, and
+confirm placing a new order does NOT create a notification-center entry
+(it remains visible only via the existing orders page/KPI).
 
 **Acceptance Scenarios**:
 
-1. **Given** a customer places a new order, **When** the merchant has the admin panel open, **Then** a notification for that order appears in the notification center.
-2. **Given** a payment is confirmed (COD marked delivered, or an online payment webhook/verify fires), **When** the merchant views the notification center, **Then** a "payment received" notification appears with the order number.
-3. **Given** a customer submits a cancellation, return, or exchange request, **When** the merchant views the notification center, **Then** a notification appears identifying the request type and order number.
-4. **Given** the merchant has already reviewed a notification, **When** they return to the notification center later, **Then** previously-seen notifications are visually distinguished from new ones.
+1. **Given** a payment is confirmed (COD marked delivered, or an online payment webhook/verify fires), **When** the merchant views the notification center, **Then** a "payment received" notification appears with the order number.
+2. **Given** a customer submits a cancellation, return, or exchange request, **When** the merchant views the notification center, **Then** a notification appears identifying the request type and order number.
+3. **Given** the merchant has already reviewed a notification, **When** they return to the notification center later, **Then** previously-seen notifications are visually distinguished from new ones.
+4. **Given** a customer places a new order, **When** the merchant views the notification center, **Then** no entry for it appears there (it remains covered exclusively by the existing orders page and dashboard KPI).
 
 ---
 
@@ -61,20 +76,28 @@ center without the merchant needing to open a separate email client.
 The Admin Analytics dashboard currently offers single-period views (7 days,
 30 days, 90 days, 1 year) with no way to compare a period against the same
 period a year prior. A merchant who has been operating long enough to have a
-prior year of data should be able to see whether revenue and repeat-customer
-rate are improving year-over-year, not just view one period in isolation.
+prior year of data should be able to see whether revenue (in the Revenue
+tab) and sales volume (in the Performance tab) are improving year-over-year,
+presented alongside the metric they already relate to rather than as a
+separate report elsewhere in the dashboard.
 
 **Why this priority**: No external dependency — buildable independently,
 and the second-highest-value item with no blocker.
 
 **Independent Test**: With at least one full year of order history, open
-the year-over-year view and confirm it shows both the current period's and
-the prior year's same-period revenue and repeat-customer rate side by side.
+the Revenue tab and confirm it shows current-period vs. same-period-prior-
+year revenue; separately open the Performance tab and confirm it shows the
+equivalent year-over-year comparison for sales/units sold. With less than a
+year of history (the current state), confirm both instead show a clear
+"insufficient history" indicator that does not affect the rest of either
+tab's existing content or the global range filter.
 
 **Acceptance Scenarios**:
 
-1. **Given** the store has order history spanning more than one year, **When** the merchant opens the year-over-year comparison, **Then** current-period revenue and repeat-customer rate are shown alongside the same calendar period from the previous year.
-2. **Given** the store does not yet have a full prior year of history, **When** the merchant opens the year-over-year comparison, **Then** the view clearly indicates insufficient historical data rather than showing a misleading zero or blank comparison.
+1. **Given** the store has order history spanning more than one year, **When** the merchant opens the Revenue tab, **Then** current-period revenue is shown alongside the same calendar period's revenue from the previous year.
+2. **Given** the store has order history spanning more than one year, **When** the merchant opens the Performance tab, **Then** current-period sales/units sold is shown alongside the same calendar period's sales/units from the previous year.
+3. **Given** the store does not yet have a full prior year of history (current state), **When** the merchant opens either the Revenue or Performance tab, **Then** the year-over-year comparison clearly indicates insufficient historical data rather than showing a misleading zero or blank comparison.
+4. **Given** either year-over-year comparison is shown or collapsed, **When** the merchant uses the existing 7d/30d/90d/12m range filter or views any other chart on that tab, **Then** their behavior and output are unchanged from today.
 
 ---
 
@@ -157,26 +180,30 @@ opens correctly in standard PDF viewers, and matches the store's branding.
 
 ### Functional Requirements
 
-- **FR-001**: The system MUST provide an in-admin-panel notification center surfacing, at minimum, these five event types without requiring the merchant to check external email: new order placed, payment received (COD delivered-triggered or online payment confirmed), cancellation request submitted, return request submitted, exchange request submitted.
+- **FR-001**: The system MUST provide an in-admin-panel notification center surfacing, at minimum, these four event types without requiring the merchant to check external email: payment received (COD delivered-triggered or online payment confirmed), cancellation request submitted, return request submitted, exchange request submitted. New order placement is explicitly excluded — it remains covered exclusively by the existing orders page and dashboard KPI.
 - **FR-002**: The notification center MUST distinguish notifications the merchant has already seen from ones they haven't.
-- **FR-003**: The Admin Analytics dashboard MUST provide a year-over-year comparison showing current-period revenue and repeat-customer rate alongside the same calendar period from the previous year.
-- **FR-004**: The year-over-year comparison MUST clearly indicate when insufficient historical data exists for a meaningful comparison, rather than silently showing a zero or misleading value.
-- **FR-005**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: automatic delivery-status transition and automatic return/cancel eligibility driven by real courier tracking data. Re-entry trigger: a courier tracking number and tracking API become available per order (e.g., a Leopards Courier merchant account is opened and integrated). Until that trigger is met, the existing admin-manual status workflow (and the 24-hour/3-day policy windows built on `created_at`/`delivered_at`) remains the source of truth and MUST NOT be weakened or removed in anticipation of this feature.
-- **FR-006**: When the courier-tracking trigger (FR-005) is eventually met, the automatic delivery transition MUST fire the identical cascade the existing manual "mark delivered" action fires today: `delivered_at` stamping, COD `payment_status` auto-flip to paid, invoice generation/settlement, and the customer delivery-confirmation email — reusing that existing cascade logic rather than duplicating it.
-- **FR-007**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: replacing the current HTML-file email invoice attachment with a real PDF generated via a React PDF-rendering library. Re-entry trigger: the merchant judges the business has reached a maturity stage that justifies the added dependency and effort — a business decision, not a technical precondition. This item is independent of FR-005/FR-006's courier-tracking trigger.
-- **FR-008**: Until the FR-007 trigger is met, the existing HTML-file invoice attachment on the payment-confirmation email MUST continue to function unchanged.
+- **FR-002a**: The merchant MUST be able to archive (recoverable) or permanently delete individual notifications, so the center does not grow into an unbounded wall of stale entries (resolves the archival-mechanism edge case above). Deletion of a notification record MUST follow the same confirm-before-destructive-action convention already used elsewhere in admin (e.g. invoice/payment deletion).
+- **FR-003**: The Admin Analytics Revenue tab MUST provide a year-over-year comparison showing current-period revenue alongside the same calendar period from the previous year.
+- **FR-004**: The Admin Analytics Performance tab MUST provide a year-over-year comparison showing current-period sales/units sold alongside the same calendar period from the previous year.
+- **FR-005**: Both year-over-year comparisons (FR-003, FR-004) MUST clearly indicate when insufficient historical data exists for a meaningful comparison, rather than silently showing a zero or misleading value.
+- **FR-006**: Both year-over-year comparisons MUST be additive to their respective tab — they MUST NOT change the behavior or output of the existing 7-day/30-day/90-day/1-year range filter or any other chart currently on the Revenue or Performance tab.
+- **FR-007**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: automatic delivery-status transition and automatic return/cancel eligibility driven by real courier tracking data. Re-entry trigger: a courier tracking number and tracking API become available per order (e.g., a Leopards Courier merchant account is opened and integrated). Until that trigger is met, the existing admin-manual status workflow (and the 24-hour/3-day policy windows built on `created_at`/`delivered_at`) remains the source of truth and MUST NOT be weakened or removed in anticipation of this feature.
+- **FR-008**: When the courier-tracking trigger (FR-007) is eventually met, the automatic delivery transition MUST fire the identical cascade the existing manual "mark delivered" action fires today: `delivered_at` stamping, COD `payment_status` auto-flip to paid, invoice generation/settlement, and the customer delivery-confirmation email — reusing that existing cascade logic rather than duplicating it.
+- **FR-009**: The following capability is explicitly out of scope for this spec and MUST NOT be built now: replacing the current HTML-file email invoice attachment with a real PDF generated via a React PDF-rendering library. Re-entry trigger: the merchant judges the business has reached a maturity stage that justifies the added dependency and effort — a business decision, not a technical precondition. This item is independent of FR-007/FR-008's courier-tracking trigger.
+- **FR-010**: Until the FR-009 trigger is met, the existing HTML-file invoice attachment on the payment-confirmation email MUST continue to function unchanged.
 
 ### Key Entities
 
-- **Notification**: A record of a merchant-facing event (new order, payment received, cancellation/return/exchange request), including its type, related order number, timestamp, and seen/unseen state.
+- **Notification**: A record of a merchant-facing event (payment received, cancellation/return/exchange request — explicitly not new-order), including its type, related order number, timestamp, and seen/unseen state.
 - **Courier Tracking Event**: A delivery/shipment status update reported by an external courier tracking API for a specific order — the future source of truth for automatic delivery transition and return/cancel eligibility (not yet integrated).
-- **Year-over-Year Comparison Period**: A pair of matching calendar periods (current and prior year) used to compute and present revenue and repeat-customer rate side by side.
+- **Year-over-Year Comparison Period**: A pair of matching calendar periods (current and prior year) used to compute and present a single metric side by side — revenue in the Revenue tab, sales/units sold in the Performance tab. Each is independent of the dashboard's global range filter.
 
 ## Success Criteria *(mandatory)*
 
 ### Measurable Outcomes
 
-- **SC-001**: A merchant with the admin panel open learns of a new order, payment, or cancellation/return/exchange request without needing to switch to an email client, verified across all five event types.
-- **SC-002**: A merchant can determine, within one view, whether current-period revenue and repeat-customer rate are higher or lower than the same period the previous year, without manually cross-referencing two separate reports.
+- **SC-001**: A merchant with the admin panel open learns of a payment or cancellation/return/exchange request without needing to switch to an email client, verified across all four in-scope event types; new-order activity continues to be learned via the existing orders page/KPI, not duplicated here.
+- **SC-002**: A merchant can determine, from the Revenue tab alone, whether current-period revenue is higher or lower than the same period the previous year, and separately, from the Performance tab alone, whether current-period sales/units sold is higher or lower than the same period the previous year — without manually cross-referencing external reports.
 - **SC-003**: The two deferred capabilities (courier-driven automation; PDF invoicing) remain documented with their re-entry conditions and introduce zero behavior change to the current manual-status workflow or HTML invoice attachment until their respective triggers are met, verified by the existing cancel/return policy and invoice-email tests continuing to pass unmodified.
 - **SC-004**: Once the courier-tracking trigger is met and User Story 3 is built, an order's delivery cascade (payment status, invoice, customer email) fires exactly once per real delivery event — zero duplicate cascades when a courier event and a lingering manual action could otherwise both fire it.
+- **SC-005**: Before 12 months of order history exist (current state), the existing Revenue and Performance tab range filters (7d/30d/90d/12m) and all charts they currently drive produce identical output to today, verified by comparing tab output before and after the year-over-year widgets are added.

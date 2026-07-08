@@ -2,13 +2,14 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign, Bell } from 'lucide-react'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
   const [open, setOpen] = useState(false)
   const [newOrders, setNewOrders] = useState(0)
   const [pendingCod, setPendingCod] = useState(0)
+  const [notifCount, setNotifCount] = useState(0)
   const lastCountRef = useRef<number | null>(null)
 
   const NAV = [
@@ -20,6 +21,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     { href: '/admin/sales', icon: Tag, label: 'Sales', exact: false, badge: 0 },
     { href: '/admin/analytics', icon: BarChart2, label: 'Analytics', exact: false, badge: 0 },
     { href: '/admin/cod', icon: DollarSign, label: 'COD', exact: false, badge: 0 },
+    { href: '/admin/notifications', icon: Bell, label: 'Notifications', exact: false, badge: notifCount },
     { href: '/admin/settings', icon: Settings, label: 'Settings', exact: false, badge: 0 },
   ]
 
@@ -48,6 +50,19 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             ).length
           : 0
         setPendingCod(codCount)
+      } catch {
+        // network error — ignore
+      }
+
+      // Notification badge — always the true current unread count (not a
+      // diff-based delta like newOrders above), so a fresh page load also
+      // reflects everything still outstanding.
+      try {
+        const notifRes = await fetch('/api/admin/notifications')
+        if (notifRes.ok) {
+          const notifData = await notifRes.json()
+          setNotifCount(notifData.unreadCount || 0)
+        }
       } catch {
         // network error — ignore
       }

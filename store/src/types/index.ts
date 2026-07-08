@@ -133,3 +133,14 @@ export type ProductWaitlist = {
   notified_at: string | null
   created_at: string
 }
+
+export type AdminNotification = {
+  id: string
+  type: 'payment_received' | 'cancellation_request' | 'return_request' | 'exchange_request'
+  order_id: string | null
+  order_number: string | null
+  message: string
+  created_at: string
+  read_at: string | null
+  archived_at: string | null
+}

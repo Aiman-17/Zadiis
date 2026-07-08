@@ -509,7 +509,7 @@ export async function sendOwnerStockConflict(d: { product_names: string }): Prom
   )
 }
 
-const CANCEL_REASON_LABELS: Record<string, string> = {
+export const CANCEL_REASON_LABELS: Record<string, string> = {
   changed_mind:       'Changed My Mind',
   ordered_by_mistake: 'Ordered by Mistake',
   found_better_price: 'Found a Better Price',
@@ -517,7 +517,7 @@ const CANCEL_REASON_LABELS: Record<string, string> = {
   other:              'Other',
 }
 
-const RETURN_REASON_LABELS: Record<string, string> = {
+export const RETURN_REASON_LABELS: Record<string, string> = {
   wrong_size:      'Wrong Size',
   defective_item:  'Defective / Damaged',
   wrong_item_sent: 'Wrong Item Sent',

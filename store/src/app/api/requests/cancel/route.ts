@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendOwnerCancellationRequest, sendCustomerCancellationConfirmation } from '@/lib/email'
+import { sendOwnerCancellationRequest, sendCustomerCancellationConfirmation, CANCEL_REASON_LABELS } from '@/lib/email'
+import { notifyAdmin } from '@/lib/notifications'
 
 const VALID_REASONS = new Set([
   'changed_mind',
@@ -24,7 +25,7 @@ export async function POST(req: NextRequest) {
 
     const { data: order } = await supabaseAdmin
       .from('orders')
-      .select('order_status, created_at, customer_email, customer_name')
+      .select('id, order_status, created_at, customer_email, customer_name')
       .eq('order_number', normalised)
       .single()
 
@@ -80,6 +81,12 @@ export async function POST(req: NextRequest) {
       sendOwnerCancellationRequest({ order_number: normalised, customer_email, customer_name, reason, notes }),
       sendCustomerCancellationConfirmation(customer_email, { order_number: normalised, customer_name }),
     ])
+    const reasonLabel = CANCEL_REASON_LABELS[reason] || reason
+    await notifyAdmin(
+      'cancellation_request',
+      order.id,
+      `${customer_name || 'A customer'} requested to cancel order #${normalised} — ${reasonLabel}`,
+    )
 
     return NextResponse.json({ success: true })
   } catch {

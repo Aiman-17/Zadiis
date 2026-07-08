@@ -3,6 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { generateInvoice } from '@/lib/invoice'
 import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled } from '@/lib/email'
 import { incrementTotalSold } from '@/lib/scoring'
+import { notifyAdmin } from '@/lib/notifications'
 import type { OrderItem } from '@/types'
 
 export async function PATCH(req: NextRequest) {
@@ -161,6 +162,11 @@ export async function PUT(req: NextRequest) {
             payment_method: orderData.payment_method,
             items: orderData.items,
           })
+          await notifyAdmin(
+            'payment_received',
+            id,
+            `Payment received from ${orderData.customer_name} — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()}`,
+          )
         }
         await sendCustomerOrderDelivered(orderData.customer_email, {
           order_number: orderData.order_number,
@@ -181,6 +187,11 @@ export async function PUT(req: NextRequest) {
           safepay_transaction_id: orderData.safepay_transaction_id,
           items: orderData.items,
         })
+        await notifyAdmin(
+          'payment_received',
+          id,
+          `Payment received from ${orderData.customer_name} — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()}`,
+        )
       }
     }
 
