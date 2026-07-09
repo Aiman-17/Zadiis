@@ -25,6 +25,7 @@ export default function CheckoutPage() {
   const [items, setItems] = useState<CartItem[]>([])
   const [zones, setZones] = useState<DeliveryZone[]>([])
   const [codEnabled, setCodEnabled] = useState(false)
+  const [freeDeliveryEnabled, setFreeDeliveryEnabled] = useState(true)
   const [deliveryCharge, setDeliveryCharge] = useState(0)
   const [saleActive, setSaleActive] = useState(false)
   const [saleDeliveryOverride, setSaleDeliveryOverride] = useState<number | null>(null)
@@ -148,9 +149,10 @@ export default function CheckoutPage() {
 
     fetch('/api/delivery-zones')
       .then(r => r.json())
-      .then(({ zones, cod_enabled, sale_active, sale_delivery_override }: { zones: DeliveryZone[]; cod_enabled: boolean; sale_active: boolean; sale_delivery_override: number | null }) => {
+      .then(({ zones, cod_enabled, free_delivery_enabled, sale_active, sale_delivery_override }: { zones: DeliveryZone[]; cod_enabled: boolean; free_delivery_enabled: boolean; sale_active: boolean; sale_delivery_override: number | null }) => {
         setZones(zones)
         setCodEnabled(cod_enabled)
+        setFreeDeliveryEnabled(free_delivery_enabled)
         setSaleActive(sale_active)
         setSaleDeliveryOverride(sale_delivery_override)
 
@@ -182,7 +184,7 @@ export default function CheckoutPage() {
 
   const FREE_DELIVERY_MIN_QUANTITY = 5
   const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0)
-  const qualifiesForFreeDelivery = totalQuantity >= FREE_DELIVERY_MIN_QUANTITY
+  const qualifiesForFreeDelivery = freeDeliveryEnabled && totalQuantity >= FREE_DELIVERY_MIN_QUANTITY
 
   const handleCityChange = (city: string) => {
     set('city', city)
@@ -514,7 +516,7 @@ export default function CheckoutPage() {
               {qualifiesForFreeDelivery ? 'Free delivery — your order qualifies!' : `Delivery charge: PKR ${deliveryCharge.toLocaleString()}`}
             </p>
           )}
-          {!qualifiesForFreeDelivery && (
+          {!qualifiesForFreeDelivery && freeDeliveryEnabled && (
             <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
               Add {FREE_DELIVERY_MIN_QUANTITY - totalQuantity} more item{FREE_DELIVERY_MIN_QUANTITY - totalQuantity === 1 ? '' : 's'} to your cart for free delivery
             </p>

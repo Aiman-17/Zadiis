@@ -32,9 +32,12 @@ export default async function AnalyticsPage({
   let ordersForYoY: Order[] = []
   let products: Product[] = []
   let allCostPrices: { id: string; cost_price: number }[] = []
+  // Defaults match Safepay's published domestic rate — see admin/settings/page.tsx
+  let gatewayFeePct = 2.9
+  let gatewayFeeFlat = 30
 
   try {
-    const [ordersRes, yoyRes, productsRes, costRes] = await Promise.all([
+    const [ordersRes, yoyRes, productsRes, costRes, settingsRes] = await Promise.all([
       supabaseAdmin
         .from('orders')
         .select('*')
@@ -46,11 +49,16 @@ export default async function AnalyticsPage({
         .gte('created_at', yoyFrom.toISOString()),
       supabaseAdmin.from('products').select('*').eq('is_active', true),
       supabaseAdmin.from('products').select('id, cost_price'),
+      supabaseAdmin.from('store_settings').select('key, value').in('key', ['gateway_fee_pct', 'gateway_fee_flat']),
     ])
     orders = (ordersRes.data || []) as Order[]
     ordersForYoY = (yoyRes.data || []) as Order[]
     products = (productsRes.data || []) as Product[]
     allCostPrices = (costRes.data || []) as { id: string; cost_price: number }[]
+    const pctSetting = settingsRes.data?.find(s => s.key === 'gateway_fee_pct')?.value
+    const flatSetting = settingsRes.data?.find(s => s.key === 'gateway_fee_flat')?.value
+    if (pctSetting) gatewayFeePct = Number(pctSetting)
+    if (flatSetting) gatewayFeeFlat = Number(flatSetting)
   } catch {
     // Supabase not configured
   }
@@ -58,7 +66,15 @@ export default async function AnalyticsPage({
   return (
     <div>
       <h1 className="text-2xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Analytics</h1>
-      <AnalyticsClient orders={orders} ordersForYoY={ordersForYoY} products={products} range={range} allCostPrices={allCostPrices} />
+      <AnalyticsClient
+        orders={orders}
+        ordersForYoY={ordersForYoY}
+        products={products}
+        range={range}
+        allCostPrices={allCostPrices}
+        gatewayFeePct={gatewayFeePct}
+        gatewayFeeFlat={gatewayFeeFlat}
+      />
     </div>
   )
 }

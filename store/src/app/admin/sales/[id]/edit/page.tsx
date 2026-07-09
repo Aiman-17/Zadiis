@@ -6,21 +6,16 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Sale, SaleProduct, Product } from '@/types'
-import { getEffectiveStock as getStock } from '@/lib/stock'
-
-function isSlowMover(p: Product, avgST: number): boolean {
-  const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-  if (age < 15) return false
-  const s = getStock(p)
-  if (s === 0 || avgST === 0) return false
-  return (p.total_sold / (p.total_sold + s)) < avgST * 0.5
-}
+import { computeStoreAvgSellThrough, isSlowMover } from '@/lib/merchandising'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
 export default function EditSalePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
+  const C = getAdminStatusColors(useAdminDarkMode())
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [sale, setSale] = useState<Sale | null>(null)
@@ -124,17 +119,15 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
     load()
   }
 
-  if (!sale) return <div className="p-4 text-sm" style={{ color: '#9CA3AF' }}>Loading…</div>
+  if (!sale) return <div className="p-4 text-sm" style={{ color: 'var(--admin-subtle)' }}>Loading…</div>
 
   const addedIds = new Set(saleProducts.map(sp => sp.product_id))
   const eligible = allProducts.filter(p => !addedIds.has(p.id) && !p.is_new_arrival)
-  const eligibleForAvg = allProducts.filter(p => {
-    const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-    return age >= 15 && getStock(p) > 0
-  })
-  const avgST = eligibleForAvg.length > 0
-    ? eligibleForAvg.reduce((sum, p) => { const s = getStock(p); return sum + p.total_sold / (p.total_sold + s) }, 0) / eligibleForAvg.length
-    : 0
+  // Shared with AdminProductsClient and sales/new (spec 006, US9 consolidation).
+  // NOTE: this previously included is_new_arrival products in the average
+  // baseline (unlike sales/new/page.tsx) — that inconsistency is the bug
+  // this consolidation fixes; some products' Slow Mover flag here may change.
+  const avgST = computeStoreAvgSellThrough(allProducts)
   const availableProducts = [...eligible].sort((a, b) => {
     const aS = isSlowMover(a, avgST), bS = isSlowMover(b, avgST)
     if (aS && !bS) return -1; if (!aS && bS) return 1
@@ -148,7 +141,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
         <h1 className="text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Edit Sale</h1>
         {sale.is_active && (
           <Link href={`/admin/sales/${id}/analytics`}
-            className="text-sm px-4 py-2 rounded-none border font-medium hover:bg-gray-50"
+            className="text-sm px-4 py-2 rounded-none border font-medium hover:bg-[var(--admin-divider)]"
             style={{ borderColor: '#A68B6E', color: '#A68B6E' }}>
             View Analytics →
           </Link>
@@ -156,7 +149,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
       </div>
 
       {/* Sale settings */}
-      <form onSubmit={handleSubmit} className="space-y-4 bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+      <form onSubmit={handleSubmit} className="space-y-4 bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
         <div>
           <Label htmlFor="title">Sale Title *</Label>
           <Input id="title" required value={form.title} onChange={e => set('title', e.target.value)} className="mt-1" />
@@ -164,7 +157,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
         <div>
           <Label htmlFor="desc">Description</Label>
           <textarea id="desc" value={form.description} onChange={e => set('description', e.target.value)} rows={2}
-            className="w-full border rounded px-3 py-2 text-sm mt-1 resize-none" style={{ borderColor: '#E2E8F0' }} />
+            className="w-full border rounded px-3 py-2 text-sm mt-1 resize-none" style={{ borderColor: 'var(--admin-input-border)' }} />
         </div>
         <div>
           <Label htmlFor="delivery">Delivery Charge Override (PKR, optional)</Label>
@@ -187,21 +180,21 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
           <Button type="submit" disabled={loading} className="flex-1 text-white rounded-none" style={{ backgroundColor: '#1C1C1C' }}>
             {loading ? 'Saving...' : 'Save Changes'}
           </Button>
-          <Button type="button" variant="outline" className="rounded-none" style={{ borderColor: '#DC2626', color: '#DC2626' }} onClick={handleDelete}>
+          <Button type="button" variant="outline" className="rounded-none" style={{ borderColor: C.criticalStrong, color: C.criticalStrong }} onClick={handleDelete}>
             Delete Sale
           </Button>
         </div>
       </form>
 
       {/* Products in this sale */}
-      <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+      <div className="bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
         <h2 className="font-semibold mb-4">Products in this Sale</h2>
 
         <div className="flex items-center gap-2 mb-4 p-3 rounded-lg" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
-          <label className="text-xs font-medium shrink-0" style={{ color: '#1C1C1C' }}>Discount %</label>
+          <label className="text-xs font-medium shrink-0" style={{ color: 'var(--admin-text)' }}>Discount %</label>
           <input type="number" min="1" max="99" value={discountPct} onChange={e => setDiscountPct(e.target.value)}
             className="w-16 border rounded px-2 py-1 text-sm text-center" style={{ borderColor: '#A68B6E' }} />
-          <span className="text-xs" style={{ color: '#9CA3AF' }}>off original price</span>
+          <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>off original price</span>
           <Button type="button" onClick={applyDiscountToExisting}
             disabled={applyingDiscount || saleProducts.length === 0}
             className="ml-auto text-xs text-white rounded-none" style={{ backgroundColor: '#A68B6E' }}>
@@ -216,7 +209,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
               const p = availableProducts.find(pr => pr.id === e.target.value)
               setAddSalePrice(p ? String(Math.floor(p.price * (1 - (Number(discountPct) || 20) / 100))) : '')
             }}
-            className="flex-1 border rounded px-3 py-2 text-sm" style={{ borderColor: '#E2E8F0' }}>
+            className="flex-1 border rounded px-3 py-2 text-sm" style={{ borderColor: 'var(--admin-input-border)' }}>
             <option value="">
               {availableProducts.length > 0
                 ? `Select product to add${newArrivalCount > 0 ? ` (${newArrivalCount} new arrival${newArrivalCount !== 1 ? 's' : ''} hidden)` : ''}…`
@@ -240,7 +233,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
             const discPct = product ? Math.round((1 - sp.sale_price / product.price) * 100) : 0
             return (
               <div key={sp.id} className="flex items-center justify-between py-2.5 px-3 rounded border"
-                style={{ borderColor: slow ? '#FEE2E2' : '#F3F4F6', backgroundColor: slow ? '#FFF5F5' : 'white' }}>
+                style={{ borderColor: slow ? '#FEE2E2' : 'var(--admin-divider)', backgroundColor: slow ? '#FFF5F5' : 'var(--admin-surface)' }}>
                 <div>
                   <div className="flex items-center gap-1.5">
                     <p className="text-sm font-medium">{product?.name || sp.product_id}</p>
@@ -249,11 +242,11 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
                         style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>Slow Mover</span>
                     )}
                   </div>
-                  <p className="text-xs mt-0.5" style={{ color: '#6B7280' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--admin-muted)' }}>
                     {pkr(product?.price || 0)} → {pkr(sp.sale_price)}
-                    <span className="ml-1.5 font-medium" style={{ color: '#DC2626' }}>(-{discPct}%)</span>
+                    <span className="ml-1.5 font-medium" style={{ color: C.criticalStrong }}>(-{discPct}%)</span>
                     {product?.cost_price ? (
-                      <span className="ml-1.5" style={{ color: '#9CA3AF' }}>
+                      <span className="ml-1.5" style={{ color: 'var(--admin-subtle)' }}>
                         · profit/unit: {pkr(sp.sale_price - product.cost_price)}
                       </span>
                     ) : null}
@@ -268,7 +261,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
             )
           })}
           {saleProducts.length === 0 && (
-            <p className="text-sm" style={{ color: '#9CA3AF' }}>No products added yet.</p>
+            <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No products added yet.</p>
           )}
         </div>
       </div>

@@ -1,5 +1,6 @@
 'use client'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
+import { MessageCircle } from 'lucide-react'
 
 const REASONS = [
   { value: 'changed_mind',       label: 'I changed my mind' },
@@ -24,6 +25,16 @@ export default function CancelOrderPage() {
   const [loading, setLoading] = useState(false)
   const [done,    setDone]    = useState(false)
   const [error,   setError]   = useState('')
+  // Undefined = still loading the setting; render nothing to avoid a flash
+  // of the form before we know whether cancellations are disabled.
+  const [enabled, setEnabled] = useState<boolean | undefined>(undefined)
+
+  useEffect(() => {
+    fetch('/api/admin/settings')
+      .then(r => r.json())
+      .then((s: Record<string, string>) => setEnabled(s.cancellations_enabled !== 'false'))
+      .catch(() => setEnabled(true))
+  }, [])
 
   const set = (k: keyof Form) => (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) =>
     setForm(p => ({ ...p, [k]: e.target.value }))
@@ -46,6 +57,33 @@ export default function CancelOrderPage() {
     } finally {
       setLoading(false)
     }
+  }
+
+  if (enabled === undefined) return null
+
+  if (!enabled) {
+    const phone = process.env.NEXT_PUBLIC_WHATSAPP_NUMBER || '923001234567'
+    const message = encodeURIComponent('Hi! I need help cancelling my order.')
+    return (
+      <div className="max-w-xl mx-auto px-4 py-20 text-center">
+        <h2 className="text-2xl mb-3" style={{ fontFamily: 'Playfair Display, serif', color: '#1C1C1C' }}>
+          Cancellations Currently Unavailable
+        </h2>
+        <p className="mb-6" style={{ color: '#6B7280' }}>
+          Self-service order cancellation is temporarily unavailable. Please reach out to us directly on WhatsApp and our team will help you right away.
+        </p>
+        <a
+          href={`https://wa.me/${phone}?text=${message}`}
+          target="_blank"
+          rel="noopener noreferrer"
+          className="inline-flex items-center gap-2 px-6 py-3 text-sm font-medium rounded-md text-white"
+          style={{ backgroundColor: '#22C55E' }}
+        >
+          <MessageCircle size={18} />
+          Chat on WhatsApp
+        </a>
+      </div>
+    )
   }
 
   if (done) {

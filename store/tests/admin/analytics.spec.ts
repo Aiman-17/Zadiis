@@ -2,11 +2,12 @@ import { test, expect } from '@playwright/test'
 
 /**
  * US5 — Admin analytics dashboard (/admin/analytics).
- * Real UI: 5 tabs (Revenue, Performance, Products, Inventory, Orders)
+ * Real UI: 5 tabs (Revenue, Sales Performance, Merchandising, Inventory,
+ * Orders — renamed from Performance/Products in spec 006 US10, label-only)
  * and a range selector (7 Days, 30 Days, 90 Days, 12 Months).
  */
 
-const TABS = ['Revenue', 'Performance', 'Products', 'Inventory', 'Orders']
+const TABS = ['Revenue', 'Sales Performance', 'Merchandising', 'Inventory', 'Orders']
 
 test.describe('Admin analytics dashboard', () => {
 
@@ -74,10 +75,28 @@ test.describe('Admin analytics dashboard', () => {
     await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
   })
 
-  test('Performance tab shows the YoY widget in collapsed or expanded state', async ({ page }) => {
+  test('Sales Performance tab shows the YoY widget in collapsed or expanded state', async ({ page }) => {
     await page.goto('/admin/analytics')
-    await page.getByRole('button', { name: 'Performance', exact: true }).first().click()
+    await page.getByRole('button', { name: 'Sales Performance', exact: true }).first().click()
     await expect(page.getByText('Sales — Year over Year')).toBeVisible({ timeout: 8_000 })
+    await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
+  })
+
+  // Spec 006 — US7 (additive visuals), US8 (badge lift), US10 (rename)
+  test('Sales Performance tab shows Featured/New Arrival sales and badge lift sections', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Sales Performance', exact: true }).first().click()
+    await expect(page.getByRole('heading', { name: 'Featured Product Sales' })).toBeVisible({ timeout: 8_000 })
+    await expect(page.getByRole('heading', { name: 'New Arrival Sales' })).toBeVisible()
+    await expect(page.getByRole('heading', { name: 'Badge Effectiveness — Before / After' })).toBeVisible()
+    await expect(page.getByText(/reflects correlation with the badge date, not a controlled experiment/i)).toBeVisible()
+    await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
+  })
+
+  test('Inventory tab shows the new row-level product table alongside existing content', async ({ page }) => {
+    await page.goto('/admin/analytics')
+    await page.getByRole('button', { name: 'Inventory', exact: true }).first().click()
+    await expect(page.getByRole('heading', { name: 'Inventory by Product' })).toBeVisible({ timeout: 8_000 })
     await expect(page.getByText(/Application error|Something went wrong/i)).not.toBeVisible()
   })
 

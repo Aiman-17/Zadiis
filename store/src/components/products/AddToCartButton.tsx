@@ -167,9 +167,21 @@ function getColorHex(name: string) {
   return COLOR_MAP[name.toLowerCase()] ?? '#D1D5DB'
 }
 
-export default function AddToCartButton({ product, salePrice }: { product: Product; salePrice?: number }) {
+type Props = {
+  product: Product
+  salePrice?: number
+  // Optional controlled color selection — lets a parent (e.g. for
+  // color-to-image gallery matching) observe/drive the selection. Falls
+  // back to fully internal state when omitted.
+  selectedColor?: string
+  onColorChange?: (color: string) => void
+}
+
+export default function AddToCartButton({ product, salePrice, selectedColor: controlledColor, onColorChange }: Props) {
   const [selectedSize, setSelectedSize] = useState('')
-  const [selectedColor, setSelectedColor] = useState('')
+  const [internalColor, setInternalColor] = useState('')
+  const selectedColor = controlledColor !== undefined ? controlledColor : internalColor
+  const setSelectedColor = onColorChange ?? setInternalColor
   const [added, setAdded] = useState(false)
   const [error, setError] = useState('')
   const [showSizeGuide, setShowSizeGuide] = useState(false)

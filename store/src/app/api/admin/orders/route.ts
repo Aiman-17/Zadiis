@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { generateInvoice } from '@/lib/invoice'
-import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled } from '@/lib/email'
+import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled, PAYMENT_METHOD_LABELS } from '@/lib/email'
 import { incrementTotalSold } from '@/lib/scoring'
 import { notifyAdmin } from '@/lib/notifications'
 import type { OrderItem } from '@/types'
@@ -165,7 +165,7 @@ export async function PUT(req: NextRequest) {
           await notifyAdmin(
             'payment_received',
             id,
-            `Payment received from ${orderData.customer_name} — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()}`,
+            `Payment received from ${orderData.customer_name} (${orderData.customer_email}) — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()} via ${PAYMENT_METHOD_LABELS[orderData.payment_method] || orderData.payment_method}`,
           )
         }
         await sendCustomerOrderDelivered(orderData.customer_email, {

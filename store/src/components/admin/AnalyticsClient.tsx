@@ -6,8 +6,10 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import type { Order, OrderItem, Product } from '@/types'
-import { rankBestSellers, rankTrending, merchandisingIdSets } from '@/lib/merchandising'
+import { rankBestSellers, rankTrending, merchandisingIdSets, computeStoreAvgSellThrough, isSlowMover } from '@/lib/merchandising'
 import { getEffectiveStock } from '@/lib/stock'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 import YoyWidget from './YoyWidget'
 
 const RANGE_OPTIONS = [
@@ -17,7 +19,14 @@ const RANGE_OPTIONS = [
   { key: '12m', label: '12 Months' },
 ]
 
-const PAYMENT_COLORS = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355']
+// The near-black slot (#1C1C1C) has ~1:1 contrast against the dark chart
+// surface (#232323) — invisible. Swapped to a light neutral for dark mode
+// only; the other three slots stay as-is (pre-existing chroma/lightness
+// softness, unrelated to dark mode — see dataviz validator output in
+// research notes, out of scope to redesign here). Validated via
+// dataviz skill's validate_palette.js against surface #232323.
+const PAYMENT_COLORS_LIGHT = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355']
+const PAYMENT_COLORS_DARK  = ['#A68B6E', '#E8DDD4', '#C9956C', '#8B7355']
 
 const CANCEL_REASON_LABELS: Record<string, string> = {
   changed_mind:       'Changed Mind',
@@ -216,17 +225,29 @@ export default function AnalyticsClient({
   products,
   range,
   allCostPrices,
+  gatewayFeePct = 2.9,
+  gatewayFeeFlat = 30,
 }: {
   orders: Order[]
   ordersForYoY?: Order[]
   products: Product[]
   range: string
   allCostPrices?: { id: string; cost_price: number }[]
+  gatewayFeePct?: number
+  gatewayFeeFlat?: number
 }) {
   const searchParams = useSearchParams()
   const [tab, setTab] = useState<Tab>((searchParams.get('tab') as Tab) || 'revenue')
   const router = useRouter()
   const pathname = usePathname()
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
+  const PAYMENT_COLORS = isDark ? PAYMENT_COLORS_DARK : PAYMENT_COLORS_LIGHT
+  // Validated dark-mode substitutes for the two other data-color fills that
+  // failed the dataviz contrast check against #232323 (1.75:1 and 2.22:1 —
+  // both well under the 3:1 floor). Brightened within the same hue family.
+  const newArrivalBarFill = isDark ? '#8B5CF6' : '#5B21B6'
+  const bestSellerBarFill = isDark ? '#D97706' : '#92400E'
 
   const setRange = (r: string) => {
     router.push(`${pathname}?range=${r}&tab=${tab}`, { scroll: false })
@@ -248,11 +269,22 @@ export default function AnalyticsClient({
     o.order_status !== 'cancelled' && o.order_status !== 'returned' &&
     (o.payment_method === 'cod' ? o.order_status === 'delivered' : o.payment_status === 'paid')
   )
-  const grossProfit = qualifyingOrders.reduce((s, o) =>
-    s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0) - o.delivery_charge, 0
+  // Net Profit = product revenue (already net of any discount, since it uses
+  // the actual price charged, not the list price) minus product cost minus
+  // payment gateway fees. Delivery is deliberately excluded — the merchant
+  // charges customers the same amount the courier bills them, a pass-through
+  // with zero net effect on profit — see research notes for the 2026-07-09
+  // accounting review (previous "Gross Profit" figure subtracted
+  // delivery_charge as a pure cost with no offsetting revenue, silently
+  // understating profit by the full delivery charge on every order — a bug,
+  // not a policy). COD orders have no gateway fee (cash in hand).
+  const gatewayFee = (o: Order) => o.payment_method === 'cod' ? 0 : (o.total * (gatewayFeePct / 100) + gatewayFeeFlat)
+  const netProfit = qualifyingOrders.reduce((s, o) =>
+    s + (o.items as OrderItem[]).reduce((si, i) => si + (i.price - (costMap[i.product_id] || 0)) * i.quantity, 0) - gatewayFee(o), 0
   )
+  const totalGatewayFees = qualifyingOrders.reduce((s, o) => s + gatewayFee(o), 0)
   const qualifyingRevenue  = qualifyingOrders.reduce((s, o) => s + o.subtotal, 0)
-  const profitMarginPct    = qualifyingRevenue > 0 ? Math.round((grossProfit / qualifyingRevenue) * 100) : 0
+  const profitMarginPct    = qualifyingRevenue > 0 ? Math.round((netProfit / qualifyingRevenue) * 100) : 0
   const profitLostToDiscounts = qualifyingOrders.reduce((s, o) =>
     s + (o.items as OrderItem[]).reduce((si, i) => si + ((i.original_price ?? i.price) - i.price) * i.quantity, 0), 0
   )
@@ -340,9 +372,9 @@ export default function AnalyticsClient({
     const stock = getMerchStock(p)
     if (flagBestSellerIds.has(p.id)) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
     if (flagTrendingIds.has(p.id))   flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
-    if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: '#5B21B6', bg: '#F5F3FF' })
+    if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: C.violetStrong, bg: '#F5F3FF' })
     if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: '#991B1B', bg: '#FEE2E2' })
-    else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: '#DC2626', bg: '#FEE2E2' })
+    else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: C.criticalStrong, bg: '#FEE2E2' })
     else if (stock <= 5)   flags.push({ label: '⚠ Low Stock',      color: '#B45309', bg: '#FEF9C3' })
     productFlagMap[tp.name] = flags
   })
@@ -391,6 +423,23 @@ export default function AnalyticsClient({
     }
   })
   lowStockItems.sort((a, b) => a.qty - b.qty)
+
+  // Row-level product table (spec 006, US7 — additive, alongside the
+  // existing KPI cards/category chart, no change to either).
+  const productInventoryRows = products
+    .map(p => {
+      const stock = getMerchStock(p)
+      return {
+        id: p.id,
+        name: p.name,
+        sku: p.sku || '—',
+        stock,
+        value: (p.cost_price || 0) * stock,
+        isLowStock: stock > 0 && stock <= 5,
+        isOutOfStock: stock === 0,
+      }
+    })
+    .sort((a, b) => a.stock - b.stock)
 
   // ── Cancellations ──────────────────────────────────────────────────────────
   const reasonMap: Record<string, number> = {}
@@ -472,22 +521,14 @@ export default function AnalyticsClient({
     .sort((a, b) => b.sold - a.sold)
     .slice(0, 10)
 
-  const eligibleMerch = products.filter(p => {
-    const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-    return age >= 15 && getMerchStock(p) > 0
-  })
-  const merchAvgSellThrough = eligibleMerch.length > 0
-    ? eligibleMerch.reduce((sum, p) => { const s = getMerchStock(p); return sum + p.total_sold / (p.total_sold + s) }, 0) / eligibleMerch.length
-    : 0
+  // Shared with AdminProductsClient, sales/new, sales/[id]/edit (spec 006,
+  // US9 consolidation) — a 4th independent copy of this logic was found
+  // here during that consolidation, with the same is_new_arrival-inclusion
+  // inconsistency as AdminProductsClient's, now fixed to match.
+  const merchAvgSellThrough = computeStoreAvgSellThrough(products)
 
   const slowMovers = products
-    .filter(p => {
-      const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-      if (ageDays < 15) return false
-      const stock = getMerchStock(p)
-      if (stock === 0 || merchAvgSellThrough === 0) return false
-      return p.total_sold / (p.total_sold + stock) < merchAvgSellThrough * 0.5
-    })
+    .filter(p => isSlowMover(p, merchAvgSellThrough))
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
       return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
@@ -537,6 +578,64 @@ export default function AnalyticsClient({
       return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  // Curated — the manual is_featured flag + optional start/end window,
+  // mirroring curatedNewArrivals above (spec 006, US7).
+  const curatedFeatured = products
+    .filter(p => p.is_featured)
+    .filter(p => !p.featured_start || p.featured_start <= todayStr)
+    .filter(p => !p.featured_end || p.featured_end >= todayStr)
+    .map(p => ({ ...p, stock: getMerchStock(p) }))
+
+  // Sales-in-current-range for Featured/New-Arrival products (spec 006, US7)
+  // — reuses productMap the same way Best Seller charts do, additive only.
+  const featuredSalesData = curatedFeatured
+    .map(p => ({ name: p.name, units: productMap[p.name]?.units || 0, revenue: productMap[p.name]?.revenue || 0 }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 8)
+  const newArrivalSalesData = curatedNewArrivals
+    .map(p => ({ name: p.name, units: productMap[p.name]?.units || 0, revenue: productMap[p.name]?.revenue || 0 }))
+    .sort((a, b) => b.revenue - a.revenue)
+    .slice(0, 8)
+
+  // Badge lift (spec 006, US8) — sales velocity 7 days before vs. after each
+  // Featured/New-Arrival product's badge start date. Correlational only —
+  // rendered with an explicit caveat, never presented as causal.
+  const BADGE_LIFT_WINDOW_DAYS = 7
+  type BadgeLiftRow = { name: string; badge: 'Featured' | 'New Arrival'; before: number | null; after: number | null; liftPct: number | null }
+  function computeBadgeLift(p: Product, badgeStart: string | null | undefined, badge: 'Featured' | 'New Arrival'): BadgeLiftRow | null {
+    if (!badgeStart) return null
+    const startMs = new Date(badgeStart).getTime()
+    const windowMs = BADGE_LIFT_WINDOW_DAYS * 86400000
+    const beforeOrders = orders.filter(o => {
+      const t = new Date(o.created_at).getTime()
+      return t >= startMs - windowMs && t < startMs
+    })
+    const afterOrders = orders.filter(o => {
+      const t = new Date(o.created_at).getTime()
+      return t >= startMs && t < startMs + windowMs
+    })
+    const unitsIn = (orderList: Order[]) => orderList.reduce((sum, o) => {
+      const items = (o.items as OrderItem[]) || []
+      return sum + items.filter(i => i.product_name === p.name).reduce((s, i) => s + i.quantity, 0)
+    }, 0)
+    const beforeOrderCount = beforeOrders.length
+    const afterOrderCount = afterOrders.length
+    // Insufficient data if there's no order history at all in either window —
+    // a real zero (badge applied, still no sales) is meaningful and shown,
+    // but an empty window (no orders placed by the store at all yet) is not.
+    if (beforeOrderCount === 0 && afterOrderCount === 0) {
+      return { name: p.name, badge, before: null, after: null, liftPct: null }
+    }
+    const before = unitsIn(beforeOrders) / BADGE_LIFT_WINDOW_DAYS
+    const after = unitsIn(afterOrders) / BADGE_LIFT_WINDOW_DAYS
+    const liftPct = before > 0 ? Math.round(((after - before) / before) * 100) : (after > 0 ? 100 : 0)
+    return { name: p.name, badge, before, after, liftPct }
+  }
+  const badgeLiftRows: BadgeLiftRow[] = [
+    ...curatedFeatured.map(p => computeBadgeLift(p, p.featured_start, 'Featured')),
+    ...curatedNewArrivals.map(p => computeBadgeLift(p, p.new_arrival_start, 'New Arrival')),
+  ].filter((r): r is BadgeLiftRow => r !== null)
 
   const categoryStockMap: Record<string, { stock: number; sold: number; count: number }> = {}
   products.forEach(p => {
@@ -588,10 +687,12 @@ export default function AnalyticsClient({
     }
   }).sort((a, b) => b.stock - a.stock)
 
+  // Labels renamed (spec 006, US10) — keys/routing/filters unchanged.
+  // "Products" → "Merchandising", "Performance" → "Sales Performance".
   const TABS: { key: Tab; label: string }[] = [
     { key: 'revenue',     label: 'Revenue' },
-    { key: 'performance', label: 'Performance' },
-    { key: 'products',    label: 'Products' },
+    { key: 'performance', label: 'Sales Performance' },
+    { key: 'products',    label: 'Merchandising' },
     { key: 'inventory',   label: 'Inventory' },
     { key: 'orders',      label: 'Orders' },
   ]
@@ -605,20 +706,20 @@ export default function AnalyticsClient({
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={range === r.key
               ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
-              : { borderColor: '#E8DDD4', color: '#6B7280' }}>
+              : { borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}>
             {r.label}
           </button>
         ))}
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b overflow-x-auto scrollbar-hide" style={{ borderColor: '#E8DDD4' }}>
+      <div className="flex gap-1 border-b overflow-x-auto scrollbar-hide" style={{ borderColor: 'var(--admin-border)' }}>
         {TABS.map(t => (
           <button key={t.key} onClick={() => setTab(t.key)}
             className="px-4 py-2.5 text-sm font-medium transition-colors border-b-2 -mb-px whitespace-nowrap shrink-0"
             style={tab === t.key
-              ? { borderColor: '#A68B6E', color: '#1C1C1C' }
-              : { borderColor: 'transparent', color: '#9CA3AF' }}>
+              ? { borderColor: '#A68B6E', color: 'var(--admin-text)' }
+              : { borderColor: 'transparent', color: 'var(--admin-subtle)' }}>
             {t.label}
           </button>
         ))}
@@ -631,19 +732,19 @@ export default function AnalyticsClient({
         <div className="space-y-6">
           <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
             {[
-              { label: 'Gross Revenue',         value: pkr(grossRevenue),   color: '#1C1C1C' },
-              { label: 'Net Revenue',           value: pkr(netRevenue),     color: '#10B981' },
-              { label: 'Gross Profit',          value: pkr(grossProfit),    color: grossProfit >= 0 ? '#10B981' : '#EF4444',
-                sub: `${profitMarginPct}% margin · COD counted on delivery` },
-              { label: 'Unique Customers',      value: uniqueRangeCustomers.toString(), color: '#1C1C1C' },
+              { label: 'Gross Revenue',         value: pkr(grossRevenue),   color: 'var(--admin-text)' },
+              { label: 'Net Revenue',           value: pkr(netRevenue),     color: C.success },
+              { label: 'Net Profit',            value: pkr(netProfit),      color: netProfit >= 0 ? C.success : C.critical,
+                sub: `${profitMarginPct}% margin · after cost & gateway fees · delivery excluded (pass-through)` },
+              { label: 'Unique Customers',      value: uniqueRangeCustomers.toString(), color: 'var(--admin-text)' },
               { label: 'Repeat Rate',           value: `${repeatRangeRate}%`,
                 color: repeatRangeRate > 0 ? '#A68B6E' : '#9CA3AF',
                 sub: `${repeatRangeCustomers} repeat customers` },
-              { label: 'Avg Orders / Customer', value: avgOrdersPerCustomer, color: '#1C1C1C' },
+              { label: 'Avg Orders / Customer', value: avgOrdersPerCustomer, color: 'var(--admin-text)' },
             ].map(k => (
-              <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <div key={k.label} className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
                 <p className="text-lg font-bold" style={{ color: k.color }}>{k.value}</p>
-                <p className="text-xs text-gray-500 mt-1">{k.label}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>{k.label}</p>
                 {'sub' in k && k.sub && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{k.sub}</p>}
               </div>
             ))}
@@ -652,16 +753,24 @@ export default function AnalyticsClient({
           {profitLostToDiscounts > 0 && (
             <div className="rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm"
               style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
-              <span style={{ color: '#6B7280' }}>Profit reduced by discounts/sales this period:</span>
+              <span style={{ color: 'var(--admin-muted)' }}>Profit reduced by discounts/sales this period:</span>
               <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(profitLostToDiscounts)}</span>
             </div>
           )}
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          {totalGatewayFees > 0 && (
+            <div className="rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm"
+              style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
+              <span style={{ color: 'var(--admin-muted)' }}>Payment gateway fees this period (non-COD orders, already deducted above):</span>
+              <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(totalGatewayFees)}</span>
+            </div>
+          )}
+
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <h3 className="font-semibold mb-4">Revenue Trend</h3>
             <ResponsiveContainer width="100%" height={240}>
               <LineChart data={trendData}>
-                <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
+                <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-divider)" />
                 <XAxis dataKey="label" tick={{ fontSize: 11 }}
                   interval={trendData.length > 10 ? Math.ceil(trendData.length / 6) - 1 : 0} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={50} />
@@ -675,7 +784,7 @@ export default function AnalyticsClient({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {/* Payment Methods */}
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold mb-4">Payment Methods</h3>
               {paymentData.length > 0 ? (
                 <>
@@ -691,23 +800,23 @@ export default function AnalyticsClient({
                     {paymentData.map((p, i) => (
                       <div key={p.name} className="flex items-center gap-1.5 text-xs">
                         <span className="w-2.5 h-2.5 rounded-full inline-block" style={{ backgroundColor: PAYMENT_COLORS[i % PAYMENT_COLORS.length] }} />
-                        <span style={{ color: '#4B5563' }}>{p.name} ({p.value})</span>
+                        <span style={{ color: 'var(--admin-text-secondary)' }}>{p.name} ({p.value})</span>
                       </div>
                     ))}
                   </div>
                 </>
               ) : (
-                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+                <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No data.</p>
               )}
             </div>
 
             {/* Repeat Rate Trend */}
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold mb-1">Repeat Rate Trend</h3>
-              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>% of orders from returning customers per period</p>
+              <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>% of orders from returning customers per period</p>
               <ResponsiveContainer width="100%" height={180}>
                 <LineChart data={repeatRateTrend}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-divider)" />
                   <XAxis dataKey="label" tick={{ fontSize: 10 }}
                     interval={repeatRateTrend.length > 10 ? Math.ceil(repeatRateTrend.length / 6) - 1 : 0} />
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} width={38} domain={[0, 100]} />
@@ -716,10 +825,10 @@ export default function AnalyticsClient({
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as typeof repeatRateTrend[0]
                       return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                           <p className="font-semibold mb-1">{label}</p>
                           <p style={{ color: '#A68B6E' }}>{d.rate}% repeat rate</p>
-                          <p style={{ color: '#6B7280' }}>{d.repeat} repeat · {d.total} total orders</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.repeat} repeat · {d.total} total orders</p>
                         </div>
                       )
                     }}
@@ -740,17 +849,17 @@ export default function AnalyticsClient({
         <div className="space-y-8">
 
           {/* 1 · Sales Over Time */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Sales Over Time</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>
+              <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>
                 {range === '12m' ? 'Monthly' : range === '90d' ? 'Weekly' : 'Daily'} · hover for details
               </span>
             </div>
             {salesTrendRows.length > 0 ? (
               <ResponsiveContainer width="100%" height={220}>
                 <BarChart data={salesTrendRows} margin={{ left: 0, right: 8 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-divider)" />
                   <XAxis dataKey="label" tick={{ fontSize: 10 }}
                     interval={salesTrendRows.length > 10 ? Math.ceil(salesTrendRows.length / 6) - 1 : 0} />
                   <YAxis tick={{ fontSize: 10 }} width={28} allowDecimals={false} />
@@ -759,11 +868,11 @@ export default function AnalyticsClient({
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { orders: number; revenue: number; units: number; aov: number }
                       return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                           <p className="font-semibold mb-1">{label}</p>
-                          <p style={{ color: '#1C1C1C' }}>{d.orders} orders · {d.units} units</p>
+                          <p style={{ color: 'var(--admin-text)' }}>{d.orders} orders · {d.units} units</p>
                           <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
-                          <p style={{ color: '#6B7280' }}>AOV PKR {d.aov.toLocaleString()}</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>AOV PKR {d.aov.toLocaleString()}</p>
                         </div>
                       )
                     }}
@@ -781,53 +890,53 @@ export default function AnalyticsClient({
                 </BarChart>
               </ResponsiveContainer>
             ) : (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No sales in this period.</p>
             )}
           </div>
 
           <YoyWidget orders={ordersForYoY ?? []} metric="units" title="Sales — Year over Year" />
 
           {/* 2 · Period Breakdown Table */}
-          <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-            <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+            <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold text-sm">Period Breakdown</h3>
             </div>
             {salesTrendRows.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No data.</p>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
+                  <thead className="border-b bg-[var(--admin-bg)]" style={{ borderColor: 'var(--admin-border)' }}>
                     <tr>
-                      <th className="text-left px-5 py-3 font-medium" style={{ color: '#6B7280' }}>Period</th>
-                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Orders</th>
-                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Units</th>
-                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>Revenue</th>
-                      <th className="text-right px-4 py-3 font-medium" style={{ color: '#6B7280' }}>AOV</th>
-                      <th className="text-right px-5 py-3 font-medium" style={{ color: '#6B7280' }}>vs Prev</th>
+                      <th className="text-left px-5 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>Period</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>Orders</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>Units</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>Revenue</th>
+                      <th className="text-right px-4 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>AOV</th>
+                      <th className="text-right px-5 py-3 font-medium" style={{ color: 'var(--admin-muted)' }}>vs Prev</th>
                     </tr>
                   </thead>
                   <tbody>
                     {[...salesTrendRows].reverse().map((row, i) => (
-                      <tr key={i} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <tr key={i} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                         <td className="px-5 py-3 text-sm">{row.label}</td>
-                        <td className="px-4 py-3 text-right text-sm" style={{ color: '#6B7280' }}>{row.orders}</td>
-                        <td className="px-4 py-3 text-right text-sm" style={{ color: '#6B7280' }}>{row.units}</td>
+                        <td className="px-4 py-3 text-right text-sm" style={{ color: 'var(--admin-muted)' }}>{row.orders}</td>
+                        <td className="px-4 py-3 text-right text-sm" style={{ color: 'var(--admin-muted)' }}>{row.units}</td>
                         <td className="px-4 py-3 text-right text-sm font-medium">PKR {row.revenue.toLocaleString()}</td>
-                        <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>
+                        <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>
                           {row.aov > 0 ? `PKR ${row.aov.toLocaleString()}` : '—'}
                         </td>
                         <td className="px-5 py-3 text-right">
                           {row.growth === null ? <span style={{ color: '#D1D5DB' }}>—</span>
-                            : row.growth === 0 ? <span style={{ color: '#9CA3AF' }}>0%</span>
+                            : row.growth === 0 ? <span style={{ color: 'var(--admin-subtle)' }}>0%</span>
                             : row.growth > 0
-                              ? <span className="font-medium" style={{ color: '#10B981' }}>↑ {row.growth}%</span>
-                              : <span className="font-medium" style={{ color: '#EF4444' }}>↓ {Math.abs(row.growth)}%</span>}
+                              ? <span className="font-medium" style={{ color: C.success }}>↑ {row.growth}%</span>
+                              : <span className="font-medium" style={{ color: C.critical }}>↓ {Math.abs(row.growth)}%</span>}
                         </td>
                       </tr>
                     ))}
                   </tbody>
-                  <tfoot className="border-t" style={{ borderColor: '#E8DDD4' }}>
+                  <tfoot className="border-t" style={{ borderColor: 'var(--admin-border)' }}>
                     <tr style={{ backgroundColor: '#FAF8F5' }}>
                       <td className="px-5 py-3 font-semibold">Total</td>
                       <td className="px-4 py-3 text-right font-semibold">{salesTrendRows.reduce((s, r) => s + r.orders, 0)}</td>
@@ -843,22 +952,22 @@ export default function AnalyticsClient({
           </div>
 
           {/* 3 · Price Range Performance */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <h3 className="font-semibold mb-4">Price Range Performance</h3>
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {priceRangeStats.map(r => (
-                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: 'var(--admin-border)' }}>
                   <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
                   <p className="text-lg font-bold mt-1">{r.units}</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>PKR {Math.round(r.revenue / 1000)}k</p>
+                  <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>units sold</p>
+                  <p className="text-xs mt-0.5 font-medium" style={{ color: 'var(--admin-text)' }}>PKR {Math.round(r.revenue / 1000)}k</p>
                 </div>
               ))}
             </div>
           </div>
 
           {/* 4 · Cities */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <h3 className="font-semibold mb-4">Cities</h3>
             {topCities.length > 0 ? (
               <>
@@ -871,10 +980,10 @@ export default function AnalyticsClient({
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as { name: string; orders: number; revenue: number; aov: number }
                         return (
-                          <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                          <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                             <p className="font-semibold">{d.name}</p>
                             <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
-                            <p style={{ color: '#6B7280' }}>{d.orders} orders · AOV PKR {d.aov.toLocaleString()}</p>
+                            <p style={{ color: 'var(--admin-muted)' }}>{d.orders} orders · AOV PKR {d.aov.toLocaleString()}</p>
                           </div>
                         )
                       }}
@@ -889,26 +998,128 @@ export default function AnalyticsClient({
                 <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
                   <thead>
                     <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
-                      <th className="text-left py-1.5 font-medium" style={{ color: '#6B7280' }}>City</th>
-                      <th className="text-right py-1.5 font-medium px-3" style={{ color: '#6B7280' }}>Orders</th>
-                      <th className="text-right py-1.5 font-medium px-3" style={{ color: '#6B7280' }}>Revenue</th>
-                      <th className="text-right py-1.5 font-medium" style={{ color: '#6B7280' }}>AOV</th>
+                      <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>City</th>
+                      <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Orders</th>
+                      <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Revenue</th>
+                      <th className="text-right py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>AOV</th>
                     </tr>
                   </thead>
                   <tbody>
                     {topCities.map(c => (
                       <tr key={c.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
                         <td className="py-1.5 font-medium">{c.name}</td>
-                        <td className="py-1.5 px-3 text-right" style={{ color: '#6B7280' }}>{c.orders}</td>
-                        <td className="py-1.5 px-3 text-right" style={{ color: '#6B7280' }}>{pkr(c.revenue)}</td>
-                        <td className="py-1.5 text-right" style={{ color: '#6B7280' }}>PKR {c.aov.toLocaleString()}</td>
+                        <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{c.orders}</td>
+                        <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{pkr(c.revenue)}</td>
+                        <td className="py-1.5 text-right" style={{ color: 'var(--admin-muted)' }}>PKR {c.aov.toLocaleString()}</td>
                       </tr>
                     ))}
                   </tbody>
                 </table>
               </>
             ) : (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No data.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No data.</p>
+            )}
+          </div>
+
+          {/* 4 · Featured & New Arrival Sales (spec 006, US7 — additive) */}
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+            <h3 className="font-semibold mb-1">Featured Product Sales</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Units and revenue for currently-Featured products in this period</p>
+            {featuredSalesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={Math.max(120, featuredSalesData.length * 32)}>
+                <BarChart data={featuredSalesData} layout="vertical" margin={{ left: 8, right: 40 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { name: string; units: number; revenue: number }
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
+                          <p className="font-semibold">{d.name}</p>
+                          <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.units} units</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill="#C9961A" name="Revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No Featured products with sales in this period.</p>
+            )}
+          </div>
+
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+            <h3 className="font-semibold mb-1">New Arrival Sales</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Units and revenue for currently-curated New Arrival products in this period</p>
+            {newArrivalSalesData.length > 0 ? (
+              <ResponsiveContainer width="100%" height={Math.max(120, newArrivalSalesData.length * 32)}>
+                <BarChart data={newArrivalSalesData} layout="vertical" margin={{ left: 8, right: 40 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
+                  <Tooltip
+                    content={({ active, payload }) => {
+                      if (!active || !payload?.length) return null
+                      const d = payload[0]?.payload as { name: string; units: number; revenue: number }
+                      return (
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
+                          <p className="font-semibold">{d.name}</p>
+                          <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.units} units</p>
+                        </div>
+                      )
+                    }}
+                  />
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill={newArrivalBarFill} name="Revenue" />
+                </BarChart>
+              </ResponsiveContainer>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No New Arrival products with sales in this period.</p>
+            )}
+          </div>
+
+          {/* 5 · Badge Lift (spec 006, US8 — additive, correlational only) */}
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+            <h3 className="font-semibold mb-1">Badge Effectiveness — Before / After</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>
+              Sales velocity in the {BADGE_LIFT_WINDOW_DAYS} days before vs. after each badge started.{' '}
+              <strong>This reflects correlation with the badge date, not a controlled experiment</strong> — other factors (price changes, seasonality, restocks) can also explain a change.
+            </p>
+            {badgeLiftRows.length > 0 ? (
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead>
+                  <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                    <th className="text-left py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Badge</th>
+                    <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Before (units/day)</th>
+                    <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>After (units/day)</th>
+                    <th className="text-right py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Change</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {badgeLiftRows.map(r => (
+                    <tr key={`${r.badge}-${r.name}`} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                      <td className="py-1.5 font-medium">{r.name}</td>
+                      <td className="py-1.5 px-3" style={{ color: 'var(--admin-muted)' }}>{r.badge}</td>
+                      {r.before === null ? (
+                        <td colSpan={3} className="py-1.5 text-center italic" style={{ color: 'var(--admin-subtle)' }}>Insufficient order history</td>
+                      ) : (
+                        <>
+                          <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{r.before.toFixed(2)}</td>
+                          <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{r.after!.toFixed(2)}</td>
+                          <td className="py-1.5 text-right font-semibold" style={{ color: (r.liftPct ?? 0) >= 0 ? '#15803D' : C.criticalStrong }}>
+                            {(r.liftPct ?? 0) >= 0 ? '+' : ''}{r.liftPct}%
+                          </td>
+                        </>
+                      )}
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            ) : (
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No Featured or New Arrival products to compare yet.</p>
             )}
           </div>
 
@@ -922,15 +1133,15 @@ export default function AnalyticsClient({
         <div className="space-y-8">
 
           {/* 1 · Product Performance chart + table */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Product Performance</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>
+              <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>
                 {allProductsInRange.length > 20 ? 'Top 20 by revenue · ' : ''}{range === '12m' ? '12 months' : range === '90d' ? '90 days' : range === '30d' ? '30 days' : '7 days'}
               </span>
             </div>
             {allProductsInRange.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No sales in this period.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No sales in this period.</p>
             ) : (
               <>
                 <ResponsiveContainer width="100%" height={Math.max(200, Math.min(allProductsInRange.length, 20) * 38)}>
@@ -945,12 +1156,12 @@ export default function AnalyticsClient({
                         const stock = productStockMap[d.name] ?? 0
                         const prod  = productByName[d.name]
                         return (
-                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                             <p className="font-semibold mb-1">{d.name}</p>
-                            {prod?.product_category && <p style={{ color: '#9CA3AF' }}>{prod.product_category}</p>}
+                            {prod?.product_category && <p style={{ color: 'var(--admin-subtle)' }}>{prod.product_category}</p>}
                             <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)}</p>
-                            <p style={{ color: '#6B7280' }}>{d.units} units sold</p>
-                            <p style={{ color: stock === 0 ? '#DC2626' : stock <= 5 ? '#B45309' : '#374151' }}>
+                            <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold</p>
+                            <p style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? '#B45309' : '#374151' }}>
                               {stock === 0 ? 'OUT OF STOCK' : `${stock} left`}
                             </p>
                           </div>
@@ -969,14 +1180,14 @@ export default function AnalyticsClient({
                   <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
                     <thead>
                       <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
-                        <th className="text-left py-2 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                        <th className="text-left py-2 font-medium px-2" style={{ color: '#6B7280' }}>Collection</th>
-                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Units</th>
-                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Revenue</th>
-                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Velocity</th>
-                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Stock</th>
-                        <th className="text-right py-2 font-medium px-2" style={{ color: '#6B7280' }}>Repeat %</th>
-                        <th className="text-left py-2 font-medium px-2" style={{ color: '#6B7280' }}>Flags</th>
+                        <th className="text-left py-2 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                        <th className="text-left py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Collection</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Units</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Revenue</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Velocity</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Stock</th>
+                        <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Repeat %</th>
+                        <th className="text-left py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Flags</th>
                       </tr>
                     </thead>
                     <tbody>
@@ -989,16 +1200,16 @@ export default function AnalyticsClient({
                         return (
                           <tr key={p.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
                             <td className="py-2 pr-2 font-medium truncate max-w-[130px]">{p.name}</td>
-                            <td className="py-2 px-2" style={{ color: '#9CA3AF' }}>{prod?.product_category || '—'}</td>
-                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{p.units}</td>
-                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{pkr(p.revenue)}</td>
-                            <td className="py-2 px-2 text-right" style={{ color: '#6B7280' }}>{vel}/d</td>
+                            <td className="py-2 px-2" style={{ color: 'var(--admin-subtle)' }}>{prod?.product_category || '—'}</td>
+                            <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{p.units}</td>
+                            <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{pkr(p.revenue)}</td>
+                            <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{vel}/d</td>
                             <td className="py-2 px-2 text-right font-medium"
-                              style={{ color: stock === 0 ? '#DC2626' : stock <= 5 ? '#B45309' : '#374151' }}>
+                              style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? '#B45309' : '#374151' }}>
                               {stock === 0 ? 'OUT' : stock}
                             </td>
                             <td className="py-2 px-2 text-right font-medium"
-                              style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? '#10B981' : rr === 0 ? '#EF4444' : '#374151' }}>
+                              style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? C.success : rr === 0 ? C.critical : '#374151' }}>
                               {rr == null ? '—' : `${rr}%`}
                             </td>
                             <td className="py-2 px-2">
@@ -1020,13 +1231,13 @@ export default function AnalyticsClient({
           </div>
 
           {/* 2 · Best Sellers chart */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">★ Best Sellers</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>by all-time score · hover for details</span>
+              <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>by all-time score · hover for details</span>
             </div>
             {bestSellerChartData.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No best sellers flagged yet.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No best sellers flagged yet.</p>
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(160, bestSellerChartData.length * 42)}>
                 <BarChart data={bestSellerChartData} layout="vertical" margin={{ left: 8, right: 24 }}>
@@ -1037,21 +1248,21 @@ export default function AnalyticsClient({
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as typeof bestSellerChartData[0]
                       return (
-                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                           <p className="font-semibold mb-1">{d.name}</p>
-                          <p style={{ color: '#9CA3AF' }}>{d.category}</p>
+                          <p style={{ color: 'var(--admin-subtle)' }}>{d.category}</p>
                           <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units sold · {d.total_sold} all time</p>
-                          <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold · {d.total_sold} all time</p>
+                          <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? '#B45309' : '#166534' }}>
                             {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                           </p>
                         </div>
                       )
                     }}
                   />
-                  <Bar dataKey="total_sold" fill="#92400E" radius={[0, 4, 4, 0]} name="Total Sold">
+                  <Bar dataKey="total_sold" fill={bestSellerBarFill} radius={[0, 4, 4, 0]} name="Total Sold">
                     {bestSellerChartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#A68B6E'} />
+                      <Cell key={i} fill={entry.stock === 0 ? C.criticalStrong : entry.stock <= 5 ? C.warning : '#A68B6E'} />
                     ))}
                   </Bar>
                 </BarChart>
@@ -1060,17 +1271,17 @@ export default function AnalyticsClient({
           </div>
 
           {/* 3 · Category Performance chart */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <div className="flex items-baseline justify-between mb-4">
               <h3 className="font-semibold">Category Performance</h3>
-              <span className="text-xs" style={{ color: '#9CA3AF' }}>revenue by category · auto-updates with new categories</span>
+              <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>revenue by category · auto-updates with new categories</span>
             </div>
             {categoryPerf.length === 0 ? (
-              <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No category data — assign collections to products first.</p>
+              <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No category data — assign collections to products first.</p>
             ) : (
               <ResponsiveContainer width="100%" height={Math.max(180, categoryPerf.length * 60)}>
                 <BarChart data={categoryPerf} margin={{ left: 8, right: 24, bottom: 20 }}>
-                  <CartesianGrid strokeDasharray="3 3" stroke="#F0EAE3" vertical={false} />
+                  <CartesianGrid strokeDasharray="3 3" stroke="var(--admin-divider)" vertical={false} />
                   <XAxis dataKey="cat" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" interval={0} />
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={40} />
                   <Tooltip
@@ -1078,10 +1289,10 @@ export default function AnalyticsClient({
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { cat: string; revenue: number; units: number; orderCount: number }
                       return (
-                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                           <p className="font-semibold mb-1">{d.cat}</p>
                           <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)}</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units · {d.orderCount} orders</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.units} units · {d.orderCount} orders</p>
                         </div>
                       )
                     }}
@@ -1097,14 +1308,14 @@ export default function AnalyticsClient({
           </div>
 
           {/* 5 · Sizes & Colors by Product */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <h3 className="font-semibold mb-1">Sizes & Colors by Product</h3>
-            <p className="text-xs mb-5" style={{ color: '#9CA3AF' }}>Top 8 by revenue · sold in period · remaining stock · sell-through %</p>
+            <p className="text-xs mb-5" style={{ color: 'var(--admin-subtle)' }}>Top 8 by revenue · sold in period · remaining stock · sell-through %</p>
             {allProductsInRange.slice(0, 8).filter(p => {
               const sc = productSizeColorMap[p.name]
               return sc && (Object.keys(sc.sizes).length > 0 || Object.keys(sc.colors).length > 0)
             }).length === 0 ? (
-              <p className="text-sm" style={{ color: '#9CA3AF' }}>No size or color data available.</p>
+              <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No size or color data available.</p>
             ) : (
               <div className="space-y-6">
                 {allProductsInRange.slice(0, 8).map(tp => {
@@ -1124,10 +1335,10 @@ export default function AnalyticsClient({
                           <span className="w-14 text-xs font-medium shrink-0 text-right truncate">{key}</span>
                           <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
                             <div className="h-full rounded-full"
-                              style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? '#10B981' : pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
+                              style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? C.success : pct >= 40 ? '#A68B6E' : C.warning }} />
                           </div>
-                          <span className="text-xs shrink-0 w-8 text-right font-medium" style={{ color: '#6B7280' }}>{pct}%</span>
-                          <span className="text-xs shrink-0 hidden sm:inline" style={{ color: '#9CA3AF' }}>{sold} sold · {remaining} left</span>
+                          <span className="text-xs shrink-0 w-8 text-right font-medium" style={{ color: 'var(--admin-muted)' }}>{pct}%</span>
+                          <span className="text-xs shrink-0 hidden sm:inline" style={{ color: 'var(--admin-subtle)' }}>{sold} sold · {remaining} left</span>
                         </div>
                       )
                     })
@@ -1137,19 +1348,19 @@ export default function AnalyticsClient({
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-sm font-semibold">{tp.name}</span>
                         {collection && (
-                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>{collection}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F3F4F6', color: 'var(--admin-muted)' }}>{collection}</span>
                         )}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
                         {Object.keys(sc.sizes).length > 0 && (
                           <div>
-                            <p className="text-xs font-medium mb-2" style={{ color: '#9CA3AF' }}>SIZES</p>
+                            <p className="text-xs font-medium mb-2" style={{ color: 'var(--admin-subtle)' }}>SIZES</p>
                             <div className="space-y-1.5">{renderBars(sc.sizes, rem?.sizes || {})}</div>
                           </div>
                         )}
                         {Object.keys(sc.colors).length > 0 && (
                           <div>
-                            <p className="text-xs font-medium mb-2" style={{ color: '#9CA3AF' }}>COLORS</p>
+                            <p className="text-xs font-medium mb-2" style={{ color: 'var(--admin-subtle)' }}>COLORS</p>
                             <div className="space-y-1.5">{renderBars(sc.colors, rem?.colors || {})}</div>
                           </div>
                         )}
@@ -1161,6 +1372,23 @@ export default function AnalyticsClient({
             )}
           </div>
 
+          {/* Top Colors (moved here from the Dashboard, which now shows
+              Top Products by actual sales instead — same underlying data,
+              this is the merchandising home for it). */}
+          {topColors.length > 0 && (
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+              <h3 className="font-semibold mb-4">Top Colors</h3>
+              <ResponsiveContainer width="100%" height={Math.max(160, topColors.length * 38)}>
+                <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 24 }}>
+                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                  <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
+                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
+                </BarChart>
+              </ResponsiveContainer>
+            </div>
+          )}
+
         </div>
       )}
 
@@ -1171,39 +1399,70 @@ export default function AnalyticsClient({
         <div className="space-y-6">
 
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
               {inventoryValue === 0 && products.length > 0 ? (
                 <>
                   <p className="text-xl font-bold">PKR 0</p>
-                  <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
-                  <p className="text-xs mt-0.5" style={{ color: '#F59E0B' }}>Set cost prices on products to calculate</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Inventory Value (at cost)</p>
+                  <p className="text-xs mt-0.5" style={{ color: C.warning }}>Set cost prices on products to calculate</p>
                 </>
               ) : (
                 <>
                   <p className="text-xl font-bold">{pkr(inventoryValue)}</p>
-                  <p className="text-xs text-gray-500 mt-1">Inventory Value (at cost)</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Inventory Value (at cost)</p>
                 </>
               )}
             </div>
-            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? '#F59E0B' : '#10B981' }}>{lowStockItems.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Low Stock variants</p>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
+              <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? C.warning : C.success }}>{lowStockItems.length}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Low Stock variants</p>
             </div>
-            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
-              <p className="text-xl font-bold" style={{ color: deadInventory.length > 0 ? '#EF4444' : '#10B981' }}>{deadInventory.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Dead Stock items</p>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
+              <p className="text-xl font-bold" style={{ color: deadInventory.length > 0 ? C.critical : C.success }}>{deadInventory.length}</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Dead Stock items</p>
             </div>
-            <div className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
               <p className="text-xl font-bold">{products.length}</p>
-              <p className="text-xs mt-1" style={{ color: '#6B7280' }}>Total SKUs</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Total SKUs</p>
+            </div>
+          </div>
+
+          {/* Row-level product table (spec 006, US7 — additive) */}
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+            <h3 className="font-semibold mb-1">Inventory by Product</h3>
+            <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Every SKU, sorted lowest stock first</p>
+            <div className="overflow-x-auto max-h-96 overflow-y-auto">
+              <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
+                <thead className="sticky top-0 bg-[var(--admin-surface)]">
+                  <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                    <th className="text-left py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>SKU</th>
+                    <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Stock</th>
+                    <th className="text-right py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Value (cost)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {productInventoryRows.map(row => (
+                    <tr key={row.id} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                      <td className="py-1.5 font-medium">{row.name}</td>
+                      <td className="py-1.5 px-3" style={{ color: 'var(--admin-muted)' }}>{row.sku}</td>
+                      <td className="py-1.5 px-3 text-right font-semibold" style={{ color: row.isOutOfStock ? C.criticalStrong : row.isLowStock ? '#B45309' : '#1C1C1C' }}>
+                        {row.isOutOfStock ? 'Sold Out' : row.stock}
+                        {row.isLowStock && ' ⚠'}
+                      </td>
+                      <td className="py-1.5 text-right" style={{ color: 'var(--admin-muted)' }}>{pkr(row.value)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
           </div>
 
           {/* Stock & Sales by Category */}
           {categoryMerged.length > 0 && (
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold mb-1">Stock & Sales by Category</h3>
-              <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Stock remaining · hover for revenue and units sold in period</p>
+              <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Stock remaining · hover for revenue and units sold in period</p>
               <ResponsiveContainer width="100%" height={Math.max(160, categoryMerged.length * 40)}>
                 <BarChart data={categoryMerged} layout="vertical" margin={{ left: 8, right: 24 }}>
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
@@ -1215,12 +1474,12 @@ export default function AnalyticsClient({
                       const total = d.stock + d.allTimeSold
                       const pct = total > 0 ? Math.round((d.allTimeSold / total) * 100) : 0
                       return (
-                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                        <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                           <p className="font-semibold mb-1">{d.cat}</p>
-                          <p style={{ color: '#374151' }}>{d.stock} units in stock</p>
+                          <p style={{ color: 'var(--admin-text)' }}>{d.stock} units in stock</p>
                           <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
-                          <p style={{ color: '#6B7280' }}>{d.units} units sold · {d.orders} orders this period</p>
-                          <p style={{ color: '#9CA3AF' }}>{pct}% sell-through · {d.count} products</p>
+                          <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold · {d.orders} orders this period</p>
+                          <p style={{ color: 'var(--admin-subtle)' }}>{pct}% sell-through · {d.count} products</p>
                         </div>
                       )
                     }}
@@ -1237,21 +1496,21 @@ export default function AnalyticsClient({
 
           {/* Low Stock */}
           {lowStockItems.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4', backgroundColor: '#FFFBEB' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)', backgroundColor: '#FFFBEB' }}>
                 <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>⚠ Low Stock</h3>
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF9C3', color: '#92400E' }}>{lowStockItems.length}</span>
                 <span className="text-xs ml-auto" style={{ color: '#B45309' }}>1–3 units remaining</span>
               </div>
-              <div className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+              <div className="divide-y" style={{ borderColor: 'var(--admin-divider)' }}>
                 {lowStockItems.map((item, i) => (
                   <div key={i} className="px-5 py-2.5 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate">{item.name}</p>
-                      {item.variant && <p className="text-xs" style={{ color: '#9CA3AF' }}>{item.variant}</p>}
+                      {item.variant && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{item.variant}</p>}
                     </div>
                     <span className="text-xs font-semibold shrink-0 px-2 py-0.5 rounded"
-                      style={{ backgroundColor: item.qty === 1 ? '#FEE2E2' : '#FEF9C3', color: item.qty === 1 ? '#DC2626' : '#92400E' }}>
+                      style={{ backgroundColor: item.qty === 1 ? '#FEE2E2' : '#FEF9C3', color: item.qty === 1 ? C.criticalStrong : '#92400E' }}>
                       {item.qty} left
                     </span>
                   </div>
@@ -1262,10 +1521,10 @@ export default function AnalyticsClient({
 
           {/* Size Sell-Through */}
           {sizeSellThrough.length > 0 && (
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <div className="flex items-baseline gap-2 mb-4">
                 <h3 className="font-semibold">Size Sell-Through</h3>
-                <span className="text-xs" style={{ color: '#9CA3AF' }}>sold ÷ (sold + remaining stock)</span>
+                <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>sold ÷ (sold + remaining stock)</span>
               </div>
               <div className="space-y-2.5">
                 {sizeSellThrough.map(s => (
@@ -1273,10 +1532,10 @@ export default function AnalyticsClient({
                     <span className="w-10 text-sm font-medium text-right shrink-0">{s.sz}</span>
                     <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
                       <div className="h-full rounded-full"
-                        style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? '#10B981' : s.pct >= 40 ? '#A68B6E' : '#F59E0B' }} />
+                        style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? C.success : s.pct >= 40 ? '#A68B6E' : C.warning }} />
                     </div>
-                    <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: '#6B7280' }}>{s.pct}%</span>
-                    <span className="text-xs shrink-0 hidden sm:inline" style={{ color: '#9CA3AF' }}>{s.sold} sold · {s.remaining} left</span>
+                    <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: 'var(--admin-muted)' }}>{s.pct}%</span>
+                    <span className="text-xs shrink-0 hidden sm:inline" style={{ color: 'var(--admin-subtle)' }}>{s.sold} sold · {s.remaining} left</span>
                   </div>
                 ))}
               </div>
@@ -1285,24 +1544,24 @@ export default function AnalyticsClient({
 
           {/* Just Dropped */}
           {justDropped.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">Just Dropped</h3>
-                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: '#374151' }}>last 7 days</span>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: 'var(--admin-text)' }}>last 7 days</span>
               </div>
-              <ul className="divide-y" style={{ borderColor: '#F3F4F6' }}>
+              <ul className="divide-y" style={{ borderColor: 'var(--admin-divider)' }}>
                 {justDropped.map(p => (
                   <li key={p.id} className="px-5 py-2.5 flex items-center justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <p className="text-xs font-medium truncate">{p.name}</p>
-                      {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                      {p.product_category && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.product_category}</p>}
                     </div>
                     <div className="flex items-center gap-3 shrink-0">
-                      <span className="text-xs" style={{ color: '#9CA3AF' }}>
+                      <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>
                         {p.ageDays === 0 ? 'today' : `${p.ageDays}d ago`}
                       </span>
                       <span className="text-xs font-semibold px-1.5 py-0.5 rounded"
-                        style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                        style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: C.criticalStrong }
                           : p.stock <= 3 ? { backgroundColor: '#FEF9C3', color: '#92400E' }
                           : { backgroundColor: '#F0FDF4', color: '#166534' }}>
                         {p.stock === 0 ? 'OUT' : `${p.stock} left`}
@@ -1316,38 +1575,38 @@ export default function AnalyticsClient({
 
           {/* New Arrivals — curated (is_new_arrival flag + window) */}
           {curatedNewArrivals.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">New Arrivals</h3>
-                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F5F3FF', color: '#5B21B6' }}>flagged · live on storefront</span>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F5F3FF', color: C.violetStrong }}>flagged · live on storefront</span>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <thead className="bg-[var(--admin-bg)] border-b" style={{ borderColor: 'var(--admin-border)' }}>
                   <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Days Live</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock Left</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Days Live</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Stock Left</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Velocity</th>
                   </tr>
                 </thead>
                 <tbody>
                   {curatedNewArrivals.map(p => (
-                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                       <td className="px-5 py-3">
                         <p className="font-medium">{p.name}</p>
-                        {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                        {p.product_category && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.product_category}</p>}
                       </td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.ageDays}d</td>
                       <td className="px-4 py-3 text-right">{p.total_sold}</td>
                       <td className="px-4 py-3 text-right font-medium"
-                        style={{ color: p.stock === 0 ? '#DC2626' : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? '#B45309' : '#374151' }}>
                         {p.stock === 0 ? 'OUT' : p.stock}
                       </td>
                       <td className="px-5 py-3 text-right text-xs">
-                        {p.velocity >= 1 ? <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
-                          : p.velocity > 0 ? <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                        {p.velocity >= 1 ? <span style={{ color: C.success }}>{p.velocity.toFixed(1)}/d</span>
+                          : p.velocity > 0 ? <span style={{ color: C.warning }}>{p.velocity.toFixed(2)}/d</span>
                           : <span style={{ color: '#D1D5DB' }}>no sales</span>}
                       </td>
                     </tr>
@@ -1360,37 +1619,37 @@ export default function AnalyticsClient({
 
           {/* Recently Added to Inventory — age-based, all products (not just curated new arrivals) */}
           {recentlyAdded.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+              <div className="px-5 py-3 border-b" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">Recently Added to Inventory — last 30 days</h3>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <thead className="bg-[var(--admin-bg)] border-b" style={{ borderColor: 'var(--admin-border)' }}>
                   <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Days Live</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock Left</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Days Live</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Stock Left</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Velocity</th>
                   </tr>
                 </thead>
                 <tbody>
                   {recentlyAdded.map(p => (
-                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                       <td className="px-5 py-3">
                         <p className="font-medium">{p.name}</p>
-                        {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                        {p.product_category && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.product_category}</p>}
                       </td>
-                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.ageDays}d</td>
                       <td className="px-4 py-3 text-right">{p.total_sold}</td>
                       <td className="px-4 py-3 text-right font-medium"
-                        style={{ color: p.stock === 0 ? '#DC2626' : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? '#B45309' : '#374151' }}>
                         {p.stock === 0 ? 'OUT' : p.stock}
                       </td>
                       <td className="px-5 py-3 text-right text-xs">
-                        {p.velocity >= 1 ? <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
-                          : p.velocity > 0 ? <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                        {p.velocity >= 1 ? <span style={{ color: C.success }}>{p.velocity.toFixed(1)}/d</span>
+                          : p.velocity > 0 ? <span style={{ color: C.warning }}>{p.velocity.toFixed(2)}/d</span>
                           : <span style={{ color: '#D1D5DB' }}>no sales</span>}
                       </td>
                     </tr>
@@ -1402,38 +1661,38 @@ export default function AnalyticsClient({
           )}
 
           {/* Slow Movers */}
-          <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+            <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold text-sm">Slow Movers</h3>
               <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{slowMovers.length}</span>
-              <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>sell-through &lt; 50% of store avg · 15+ days old</span>
+              <span className="text-xs ml-auto" style={{ color: 'var(--admin-subtle)' }}>sell-through &lt; 50% of store avg · 15+ days old</span>
             </div>
             {slowMovers.length === 0 ? (
-              <p className="px-5 py-4 text-sm" style={{ color: '#10B981' }}>No slow movers — all products are selling well.</p>
+              <p className="px-5 py-4 text-sm" style={{ color: C.success }}>No slow movers — all products are selling well.</p>
             ) : (
               <>
                 <div className="overflow-x-auto">
                 <table className="w-full text-sm">
-                  <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <thead className="bg-[var(--admin-bg)] border-b" style={{ borderColor: 'var(--admin-border)' }}>
                     <tr>
-                      <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
-                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
-                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
-                      <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                      <th className="text-left px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Age</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Sold</th>
+                      <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Stock</th>
+                      <th className="text-right px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Velocity</th>
                     </tr>
                   </thead>
                   <tbody>
                     {slowMovers.slice(0, 15).map(p => (
-                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                         <td className="px-5 py-3">
                           <p className="font-medium">{p.name}</p>
-                          {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                          {p.product_category && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.product_category}</p>}
                         </td>
-                        <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                        <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.ageDays}d</td>
                         <td className="px-4 py-3 text-right">{p.total_sold}</td>
                         <td className="px-4 py-3 text-right">{p.stock}</td>
-                        <td className="px-5 py-3 text-right text-xs font-medium" style={{ color: '#DC2626' }}>
+                        <td className="px-5 py-3 text-right text-xs font-medium" style={{ color: C.criticalStrong }}>
                           {p.velocity > 0 ? `${p.velocity.toFixed(2)}/d` : 'no sales'}
                         </td>
                       </tr>
@@ -1442,7 +1701,7 @@ export default function AnalyticsClient({
                 </table>
                 </div>
                 {slowMovers.length > 15 && (
-                  <p className="px-5 py-2.5 text-xs border-t" style={{ color: '#9CA3AF', borderColor: '#F3F4F6' }}>
+                  <p className="px-5 py-2.5 text-xs border-t" style={{ color: 'var(--admin-subtle)', borderColor: 'var(--admin-divider)' }}>
                     …and {slowMovers.length - 15} more
                   </p>
                 )}
@@ -1452,32 +1711,32 @@ export default function AnalyticsClient({
 
           {/* Dead Inventory */}
           {deadInventory.length > 0 && (
-            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">Dead Inventory</h3>
                 <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{deadInventory.length}</span>
-                <span className="text-xs ml-auto" style={{ color: '#9CA3AF' }}>0 sales · stock ≥ 10 · 15+ days old</span>
+                <span className="text-xs ml-auto" style={{ color: 'var(--admin-subtle)' }}>0 sales · stock ≥ 10 · 15+ days old</span>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
-                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <thead className="bg-[var(--admin-bg)] border-b" style={{ borderColor: 'var(--admin-border)' }}>
                   <tr>
-                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Age</th>
-                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock</th>
-                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Price</th>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Age</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Stock</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Price</th>
                   </tr>
                 </thead>
                 <tbody>
                   {deadInventory.map(p => {
                     const ageBadge = p.ageDays >= 180 ? { label: '6m+', color: '#991B1B', bg: '#FEE2E2' }
-                      : p.ageDays >= 90 ? { label: '3m+', color: '#DC2626', bg: '#FEF2F2' }
+                      : p.ageDays >= 90 ? { label: '3m+', color: C.criticalStrong, bg: '#FEF2F2' }
                       : { label: '1m+', color: '#F87171', bg: '#FFF1F2' }
                     return (
-                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <tr key={p.id} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                         <td className="px-5 py-3">
                           <p className="font-medium">{p.name}</p>
-                          {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                          {p.product_category && <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.product_category}</p>}
                         </td>
                         <td className="px-4 py-3 text-right">
                           <span className="text-xs font-semibold px-1.5 py-0.5 rounded"
@@ -1485,7 +1744,7 @@ export default function AnalyticsClient({
                             {ageBadge.label}
                           </span>
                         </td>
-                        <td className="px-4 py-3 text-right font-medium" style={{ color: '#EF4444' }}>{p.stock}</td>
+                        <td className="px-4 py-3 text-right font-medium" style={{ color: C.critical }}>{p.stock}</td>
                         <td className="px-5 py-3 text-right">PKR {p.price.toLocaleString()}</td>
                       </tr>
                     )
@@ -1497,7 +1756,7 @@ export default function AnalyticsClient({
           )}
 
           {lowStockItems.length === 0 && deadInventory.length === 0 && (
-            <p className="text-sm py-4" style={{ color: '#10B981' }}>No stock health issues detected.</p>
+            <p className="text-sm py-4" style={{ color: C.success }}>No stock health issues detected.</p>
           )}
         </div>
       )}
@@ -1510,21 +1769,21 @@ export default function AnalyticsClient({
 
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3">
             {[
-              { label: 'Cancellation Rate', value: `${cancellationRate}%`, color: '#EF4444' },
-              { label: 'Return Rate',        value: `${returnRate}%`,        color: '#EF4444' },
-              { label: 'Orders Cancelled',   value: cancelledOrders.length,  color: '#1C1C1C' },
-              { label: 'Orders Returned',    value: returnedOrders.length,   color: '#1C1C1C' },
-              { label: 'Revenue Leakage',    value: pkr(cancelledRev + returnedRev), color: '#EF4444' },
+              { label: 'Cancellation Rate', value: `${cancellationRate}%`, color: C.critical },
+              { label: 'Return Rate',        value: `${returnRate}%`,        color: C.critical },
+              { label: 'Orders Cancelled',   value: cancelledOrders.length,  color: 'var(--admin-text)' },
+              { label: 'Orders Returned',    value: returnedOrders.length,   color: 'var(--admin-text)' },
+              { label: 'Revenue Leakage',    value: pkr(cancelledRev + returnedRev), color: C.critical },
             ].map(k => (
-              <div key={k.label} className="bg-white rounded-lg p-4 border" style={{ borderColor: '#E8DDD4' }}>
+              <div key={k.label} className="bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ borderColor: 'var(--admin-border)' }}>
                 <p className="text-base sm:text-xl font-bold break-all" style={{ color: k.color }}>{k.value}</p>
-                <p className="text-xs text-gray-500 mt-1">{k.label}</p>
+                <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>{k.label}</p>
               </div>
             ))}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold mb-4">Why Orders Were Cancelled</h3>
               {reasonData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
@@ -1536,11 +1795,11 @@ export default function AnalyticsClient({
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No cancellations in this period.</p>
+                <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No cancellations in this period.</p>
               )}
             </div>
 
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold mb-4">Why Orders Were Returned</h3>
               {returnReasonData.length > 0 ? (
                 <ResponsiveContainer width="100%" height={240}>
@@ -1552,7 +1811,7 @@ export default function AnalyticsClient({
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
-                <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No returns in this period.</p>
+                <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No returns in this period.</p>
               )}
             </div>
           </div>

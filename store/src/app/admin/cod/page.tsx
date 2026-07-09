@@ -24,13 +24,13 @@ export default async function CodPage() {
 
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
         {[
-          { label: 'Total COD Out',      value: totalOut,      color: '#1C1C1C' },
+          { label: 'Total COD Out',      value: totalOut,      color: 'var(--admin-text)' },
           { label: 'Cash Received',      value: totalReceived, color: '#15803D' },
           { label: 'Awaiting Cash',      value: totalPending,  color: '#92400E' },
           { label: 'Lost / Uncollected', value: totalLost,     color: '#DC2626' },
         ].map(card => (
-          <div key={card.label} className="bg-white rounded-lg border p-4" style={{ borderColor: '#E8DDD4' }}>
-            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: '#9CA3AF' }}>{card.label}</p>
+          <div key={card.label} className="bg-[var(--admin-surface)] rounded-lg border p-4" style={{ borderColor: 'var(--admin-border)' }}>
+            <p className="text-xs uppercase tracking-wider mb-1" style={{ color: 'var(--admin-subtle)' }}>{card.label}</p>
             <p className="text-lg font-semibold" style={{ color: card.color }}>
               PKR {card.value.toLocaleString()}
             </p>

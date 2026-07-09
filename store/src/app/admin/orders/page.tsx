@@ -1,9 +1,11 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Archive, XCircle, Pencil, Check, X } from 'lucide-react'
 import type { Order, OrderItem } from '@/types'
 import CancelModal from '@/components/admin/CancelModal'
 import ReturnModal from '@/components/admin/ReturnModal'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 type RequestRecord = {
   id: string
@@ -17,15 +19,6 @@ type RequestRecord = {
   request_type?: 'return' | 'exchange'
   exchange_details?: string | null
   exchange_status?: 'pending' | 'shipped' | 'delivered' | null
-}
-
-const STATUS_STYLES: Record<string, React.CSSProperties> = {
-  new:        { backgroundColor: '#DBEAFE', color: '#1D4ED8' },
-  processing: { backgroundColor: '#FEF9C3', color: '#92400E' },
-  shipped:    { backgroundColor: '#EDE9FE', color: '#6D28D9' },
-  delivered:  { backgroundColor: '#DCFCE7', color: '#15803D' },
-  returned:   { backgroundColor: '#FEE2E2', color: '#DC2626' },
-  cancelled:  { backgroundColor: '#F3F4F6', color: '#6B7280' },
 }
 
 const REQUEST_REASON_LABELS: Record<string, string> = {
@@ -46,6 +39,15 @@ const STATUSES = ['new', 'processing', 'shipped', 'delivered', 'returned']
 type Tab = 'active' | 'pending_shipment' | 'shipped' | 'completed' | 'returns' | 'cancellations' | 'archived'
 
 export default function AdminOrders() {
+  const C = getAdminStatusColors(useAdminDarkMode())
+  const STATUS_STYLES: Record<string, React.CSSProperties> = {
+    new:        { backgroundColor: '#DBEAFE', color: C.infoStrong },
+    processing: { backgroundColor: '#FEF9C3', color: '#92400E' },
+    shipped:    { backgroundColor: '#EDE9FE', color: '#6D28D9' },
+    delivered:  { backgroundColor: '#DCFCE7', color: '#15803D' },
+    returned:   { backgroundColor: '#FEE2E2', color: C.criticalStrong },
+    cancelled:  { backgroundColor: '#F3F4F6', color: '#6B7280' },
+  }
   const [orders,          setOrders]          = useState<Order[]>([])
   const [returnRequests,  setReturnRequests]   = useState<RequestRecord[]>([])
   const [cancelRequests,  setCancelRequests]   = useState<RequestRecord[]>([])
@@ -57,6 +59,17 @@ export default function AdminOrders() {
   const [editingId,       setEditingId]        = useState<string | null>(null)
   const [editForm,        setEditForm]         = useState({ phone: '', email: '', address: '' })
   const [editError,       setEditError]        = useState<string | null>(null)
+  // Mobile long-press reveal (US6) — one row revealed at a time is sufficient
+  // for this list, avoiding a per-row hook instance in a plain .map().
+  const [revealedRowId,   setRevealedRowId]    = useState<string | null>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const startLongPress = (id: string) => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    longPressTimer.current = setTimeout(() => setRevealedRowId(r => (r === id ? null : id)), 500)
+  }
+  const cancelLongPress = () => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }
   const [editSaving,      setEditSaving]       = useState(false)
   const [actionError,     setActionError]      = useState<string | null>(null)
 
@@ -255,7 +268,7 @@ export default function AdminOrders() {
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Orders</h1>
 
       {actionError && (
-        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}>
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: C.criticalStrong }}>
           <span>{actionError}</span>
           <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
         </div>
@@ -270,7 +283,7 @@ export default function AdminOrders() {
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={tab === t.key
               ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
-              : { borderColor: '#E8DDD4', color: '#6B7280' }}
+              : { borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}
           >
             {t.label}
           </button>
@@ -294,10 +307,10 @@ export default function AdminOrders() {
             const isExchange = req.request_type === 'exchange'
 
             // Exchange border: purple. Return: blue. Cancel: amber.
-            const borderLeftColor = isExchange ? '#A78BFA' : isReturn ? '#3B82F6' : '#F59E0B'
+            const borderLeftColor = isExchange ? '#A78BFA' : isReturn ? C.info : C.warning
 
             return (
-              <div key={req.id} className="bg-white rounded-lg border p-4"
+              <div key={req.id} className="bg-[var(--admin-surface)] rounded-lg border p-4"
                 style={{
                   borderColor: isExchange ? '#DDD6FE' : isReturn ? '#BFDBFE' : '#FDE68A',
                   borderLeftWidth: 4,
@@ -310,7 +323,7 @@ export default function AdminOrders() {
                         style={isExchange
                           ? { backgroundColor: '#EDE9FE', color: '#6D28D9' }
                           : isReturn
-                            ? { backgroundColor: '#DBEAFE', color: '#1D4ED8' }
+                            ? { backgroundColor: '#DBEAFE', color: C.infoStrong }
                             : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
                         {isExchange ? 'EXCHANGE REQUEST' : isReturn ? 'RETURN REQUEST' : 'CANCEL REQUEST'}
                       </span>
@@ -323,21 +336,21 @@ export default function AdminOrders() {
                       )}
                     </div>
                     <p className="text-sm font-medium">{req.customer_name || 'Customer'}</p>
-                    <p className="text-xs" style={{ color: '#6B7280' }}>{req.customer_email}</p>
+                    <p className="text-xs" style={{ color: 'var(--admin-muted)' }}>{req.customer_email}</p>
                     {isExchange && req.exchange_details && (
-                      <p className="text-xs mt-1 font-medium" style={{ color: '#4B5563' }}>
+                      <p className="text-xs mt-1 font-medium" style={{ color: 'var(--admin-text-secondary)' }}>
                         Wants: {req.exchange_details}
                       </p>
                     )}
                     {!isExchange && (
-                      <p className="text-xs mt-1" style={{ color: '#4B5563' }}>
+                      <p className="text-xs mt-1" style={{ color: 'var(--admin-text-secondary)' }}>
                         Reason: {REQUEST_REASON_LABELS[req.reason] || req.reason}
                       </p>
                     )}
                     {req.notes && (
-                      <p className="text-xs mt-0.5 italic" style={{ color: '#9CA3AF' }}>"{req.notes}"</p>
+                      <p className="text-xs mt-0.5 italic" style={{ color: 'var(--admin-subtle)' }}>"{req.notes}"</p>
                     )}
-                    <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+                    <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>
                       {new Date(req.created_at).toLocaleDateString()}
                     </p>
                   </div>
@@ -367,7 +380,7 @@ export default function AdminOrders() {
                           : handleCancelFromRequest(req.order_number, req.id)
                         }
                         className="text-xs px-3 py-1.5 rounded-full font-medium"
-                        style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? '#1D4ED8' : '#92400E' }}
+                        style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? C.infoStrong : '#92400E' }}
                       >
                         {isReturn ? 'Process Return' : 'Cancel Order'}
                       </button>
@@ -375,7 +388,7 @@ export default function AdminOrders() {
                     <button
                       onClick={() => resolveRequest(req.id, isReturn ? 'return' : 'cancellation')}
                       className="text-xs px-3 py-1.5 rounded-full border"
-                      style={{ borderColor: '#E8DDD4', color: '#9CA3AF' }}
+                      style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-subtle)' }}
                     >
                       Dismiss
                     </button>
@@ -385,37 +398,40 @@ export default function AdminOrders() {
             )
           })}
           {filtered.length > 0 && (
-            <div className="border-t mt-3 mb-1" style={{ borderColor: '#E8DDD4' }} />
+            <div className="border-t mt-3 mb-1" style={{ borderColor: 'var(--admin-border)' }} />
           )}
         </div>
       )}
 
       {filtered.length === 0 && activeRequests.length === 0 && (
-        <p className="text-sm" style={{ color: '#9CA3AF' }}>No orders in this category.</p>
+        <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No orders in this category.</p>
       )}
 
       <div className="space-y-3">
         {filtered.map(order => (
-          <div key={order.id} className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+          <div key={order.id} className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
             <div
               className="flex items-center justify-between p-4 cursor-pointer gap-3"
               onClick={() => setExpanded(expanded === order.id ? null : order.id)}
+              onTouchStart={() => startLongPress(order.id)}
+              onTouchEnd={cancelLongPress}
+              onTouchMove={cancelLongPress}
             >
               <div className="min-w-0">
                 <p className="font-medium text-sm flex items-center gap-2 flex-wrap">
                   <span style={{ color: '#A68B6E' }}>{order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}</span>
                   {' — '}{order.customer_name}
                   {order.email_bounced && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FEE2E2', color: '#DC2626' }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FEE2E2', color: C.criticalStrong }}>
                       ⚠️ Email bounced
                     </span>
                   )}
                 </p>
-                <p className="text-xs" style={{ color: '#6B7280' }}>
+                <p className="text-xs" style={{ color: 'var(--admin-muted)' }}>
                   {order.customer_phone} · {order.city} · {new Date(order.created_at).toLocaleDateString()}
                 </p>
                 {order.cancellation_reason && (
-                  <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
                     Reason: {order.cancellation_reason.replace(/_/g, ' ')}
                   </p>
                 )}
@@ -431,32 +447,34 @@ export default function AdminOrders() {
                   style={order.payment_status === 'paid'
                     ? { backgroundColor: '#DCFCE7', color: '#15803D' }
                     : order.payment_status === 'failed'
-                    ? { backgroundColor: '#FEE2E2', color: '#DC2626' }
+                    ? { backgroundColor: '#FEE2E2', color: C.criticalStrong }
                     : { backgroundColor: '#FEF9C3', color: '#92400E' }}
                 >
                   {order.payment_status}
                 </span>
 
-                {/* Cancel — active/pending orders only */}
+                {/* Cancel — active/pending orders only. Hidden below md until long-pressed. */}
                 {!order.is_archived && order.order_status !== 'cancelled' && order.order_status !== 'delivered' && order.order_status !== 'returned' && (
                   <button
                     onClick={e => { e.stopPropagation(); setCancelId(order.id) }}
                     title="Cancel order"
+                    className={revealedRowId === order.id ? '' : 'max-md:hidden'}
                     style={{ color: '#FCA5A5' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                    onMouseEnter={e => (e.currentTarget.style.color = C.critical)}
                     onMouseLeave={e => (e.currentTarget.style.color = '#FCA5A5')}
                   >
                     <XCircle size={15} />
                   </button>
                 )}
 
-                {/* Archive — terminal status orders only */}
+                {/* Archive — terminal status orders only. Hidden below md until long-pressed. */}
                 {!order.is_archived && (order.order_status === 'delivered' || order.order_status === 'cancelled' || order.order_status === 'returned') && (
                   <button
                     onClick={e => { e.stopPropagation(); archiveOrder(order.id) }}
                     title="Archive order"
+                    className={revealedRowId === order.id ? '' : 'max-md:hidden'}
                     style={{ color: '#D1D5DB' }}
-                    onMouseEnter={e => (e.currentTarget.style.color = '#6B7280')}
+                    onMouseEnter={e => (e.currentTarget.style.color = 'var(--admin-muted)')}
                     onMouseLeave={e => (e.currentTarget.style.color = '#D1D5DB')}
                   >
                     <Archive size={15} />
@@ -466,10 +484,10 @@ export default function AdminOrders() {
             </div>
 
             {expanded === order.id && (
-              <div className="border-t p-4 bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
+              <div className="border-t p-4 bg-[var(--admin-bg)]" style={{ borderColor: 'var(--admin-border)' }}>
                 <p className="text-sm font-medium mb-2">Items:</p>
                 {(order.items as OrderItem[]).map((item, i) => (
-                  <p key={i} className="text-sm mb-1" style={{ color: '#4B5563' }}>
+                  <p key={i} className="text-sm mb-1" style={{ color: 'var(--admin-text-secondary)' }}>
                     {item.product_name}{item.sku ? ` (${item.sku})` : ''} × {item.quantity}
                     {' '}({item.size}, {item.color}) — PKR {item.price.toLocaleString()}
                     {item.original_price && item.original_price !== item.price && (
@@ -477,52 +495,52 @@ export default function AdminOrders() {
                     )}
                   </p>
                 ))}
-                <div className="text-sm mt-2 pt-2 border-t" style={{ borderColor: '#E8DDD4' }}>
+                <div className="text-sm mt-2 pt-2 border-t" style={{ borderColor: 'var(--admin-border)' }}>
                   <p>
                     Subtotal: PKR {Number(order.subtotal).toLocaleString()} ·
                     Delivery: PKR {Number(order.delivery_charge).toLocaleString()} ·{' '}
                     <strong>Total: PKR {Number(order.total).toLocaleString()}</strong>
                   </p>
-                  <p className="mt-1" style={{ color: '#6B7280' }}>
+                  <p className="mt-1" style={{ color: 'var(--admin-muted)' }}>
                     {order.address} · Payment: {order.payment_method}
                   </p>
                 </div>
 
                 {/* Edit contact details */}
-                <div className="mt-3 pt-3 border-t" style={{ borderColor: '#E8DDD4' }}>
+                <div className="mt-3 pt-3 border-t" style={{ borderColor: 'var(--admin-border)' }}>
                   {editingId === order.id ? (
                     <div className="space-y-2">
                       <p className="text-xs font-semibold uppercase tracking-wider mb-2" style={{ color: '#A68B6E' }}>Edit Contact Details</p>
                       <div>
-                        <label className="text-xs text-gray-500">Phone</label>
+                        <label className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Phone</label>
                         <input
                           className="w-full border rounded px-2 py-1 text-sm mt-0.5"
-                          style={{ borderColor: '#E2E8F0' }}
+                          style={{ borderColor: 'var(--admin-input-border)' }}
                           value={editForm.phone}
                           onChange={e => setEditForm(f => ({ ...f, phone: e.target.value }))}
                           placeholder="03001234567"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500">Email</label>
+                        <label className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Email</label>
                         <input
                           className="w-full border rounded px-2 py-1 text-sm mt-0.5"
-                          style={{ borderColor: '#E2E8F0' }}
+                          style={{ borderColor: 'var(--admin-input-border)' }}
                           value={editForm.email}
                           onChange={e => setEditForm(f => ({ ...f, email: e.target.value }))}
                           placeholder="customer@email.com"
                         />
                       </div>
                       <div>
-                        <label className="text-xs text-gray-500">Address</label>
+                        <label className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Address</label>
                         <input
                           className="w-full border rounded px-2 py-1 text-sm mt-0.5"
-                          style={{ borderColor: '#E2E8F0' }}
+                          style={{ borderColor: 'var(--admin-input-border)' }}
                           value={editForm.address}
                           onChange={e => setEditForm(f => ({ ...f, address: e.target.value }))}
                         />
                       </div>
-                      {editError && <p className="text-xs" style={{ color: '#DC2626' }}>{editError}</p>}
+                      {editError && <p className="text-xs" style={{ color: C.criticalStrong }}>{editError}</p>}
                       <div className="flex gap-2">
                         <button
                           onClick={() => saveContact(order.id)}
@@ -535,7 +553,7 @@ export default function AdminOrders() {
                         <button
                           onClick={() => { setEditingId(null); setEditError(null) }}
                           className="flex items-center gap-1 text-xs px-3 py-1.5 rounded-full border"
-                          style={{ borderColor: '#E8DDD4', color: '#9CA3AF' }}
+                          style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-subtle)' }}
                         >
                           <X size={12} /> Cancel
                         </button>
@@ -545,7 +563,7 @@ export default function AdminOrders() {
                     <button
                       onClick={() => startEdit(order)}
                       className="flex items-center gap-1.5 text-xs"
-                      style={{ color: '#9CA3AF' }}
+                      style={{ color: 'var(--admin-subtle)' }}
                     >
                       <Pencil size={12} /> Edit contact details
                     </button>
@@ -563,7 +581,7 @@ export default function AdminOrders() {
                           className="text-xs px-3 py-1 rounded-full border transition-colors"
                           style={order.order_status === s
                             ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
-                            : { borderColor: '#D1D5DB', color: '#6B7280' }}
+                            : { borderColor: 'var(--admin-input-border)', color: 'var(--admin-muted)' }}
                         >
                           {s}
                         </button>

@@ -7,15 +7,8 @@ import Link from 'next/link'
 import type { Order, OrderItem, Product } from '@/types'
 import { rankTrending } from '@/lib/merchandising'
 import { getEffectiveStock } from '@/lib/stock'
-
-const STATUS_COLORS: Record<string, string> = {
-  new:        '#3B82F6',
-  processing: '#F59E0B',
-  shipped:    '#8B5CF6',
-  delivered:  '#10B981',
-  returned:   '#EF4444',
-  cancelled:  '#9CA3AF',
-}
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
@@ -39,6 +32,22 @@ type ActiveSaleSummary = {
 export default function DashboardCharts({ orders, products, activeSales = [], codEnabled = false }: {
   orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]; codEnabled?: boolean
 }) {
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
+  const STATUS_COLORS: Record<string, string> = {
+    new: C.info, processing: C.warning, shipped: C.violet,
+    delivered: C.success, returned: C.critical, cancelled: '#9CA3AF',
+  }
+  // #1C1C1C ("today" bar) fails contrast against the dark chart surface
+  // (1.08:1, per dataviz validator) — validated substitute for dark mode.
+  const todayBarFill = isDark ? '#E8DDD4' : '#1C1C1C'
+  // Action-card backgrounds were hardcoded light-only pastels — two solid
+  // light boxes on the dark surface regardless of theme. Tinted via
+  // color-mix over the theme surface/border tokens instead.
+  const newOrdersBg = isDark ? `color-mix(in srgb, ${C.info} 15%, var(--admin-surface))` : '#EFF6FF'
+  const newOrdersBorder = isDark ? `color-mix(in srgb, ${C.info} 35%, var(--admin-border))` : '#BFDBFE'
+  const pendingBg = isDark ? `color-mix(in srgb, ${C.violet} 15%, var(--admin-surface))` : '#F5F3FF'
+  const pendingBorder = isDark ? `color-mix(in srgb, ${C.violet} 35%, var(--admin-border))` : '#DDD6FE'
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
 
@@ -196,18 +205,27 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       total_sold: p.total_sold,
     }))
 
-  // Top Colors (all-time, from active orders)
-  const colorMapDash: Record<string, number> = {}
+  // Top Products by actual sales (all-time, from active orders) — ranked by
+  // revenue actually earned, not by the trending/best-seller scoring
+  // algorithm (that's what "Trending Now" already shows, alongside this).
+  const productSalesMap: Record<string, { revenue: number; units: number }> = {}
   orders
     .filter(o => o.order_status !== 'cancelled' && o.order_status !== 'returned')
     .forEach(o => {
       ;(o.items as OrderItem[]).forEach(i => {
-        if (i.color && i.color !== '_') colorMapDash[i.color] = (colorMapDash[i.color] || 0) + i.quantity
+        if (!productSalesMap[i.product_name]) productSalesMap[i.product_name] = { revenue: 0, units: 0 }
+        productSalesMap[i.product_name].revenue += i.price * i.quantity
+        productSalesMap[i.product_name].units += i.quantity
       })
     })
-  const topColorsDash = Object.entries(colorMapDash)
-    .map(([name, units]) => ({ name, units }))
-    .sort((a, b) => b.units - a.units)
+  const topProductsBySales = Object.entries(productSalesMap)
+    .map(([name, d]) => ({
+      name,
+      shortName: name.length > 16 ? name.slice(0, 15) + '…' : name,
+      revenue: d.revenue,
+      units: d.units,
+    }))
+    .sort((a, b) => b.revenue - a.revenue)
     .slice(0, 8)
 
   // Product stock helpers
@@ -308,23 +326,23 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#EFF6FF', borderLeftColor: '#3B82F6', border: '1px solid #BFDBFE', borderLeft: '4px solid #3B82F6' }}>
-          <p className="text-3xl font-bold" style={{ color: '#1D4ED8' }}>{newOrders}</p>
-          <p className="text-sm font-semibold mt-1" style={{ color: '#1D4ED8' }}>New Orders</p>
-          <p className="text-xs mt-0.5" style={{ color: '#3B82F6' }}>
+          style={{ backgroundColor: newOrdersBg, borderLeftColor: C.info, border: `1px solid ${newOrdersBorder}`, borderLeft: `4px solid ${C.info}` }}>
+          <p className="text-3xl font-bold" style={{ color: C.infoStrong }}>{newOrders}</p>
+          <p className="text-sm font-semibold mt-1" style={{ color: C.infoStrong }}>New Orders</p>
+          <p className="text-xs mt-0.5" style={{ color: C.info }}>
             All unprocessed orders · tap to manage
           </p>
           {overdueNewOrders > 0 && (
-            <p className="text-xs mt-1 font-semibold" style={{ color: '#DC2626' }}>
+            <p className="text-xs mt-1 font-semibold" style={{ color: C.criticalStrong }}>
               ⚠ {overdueNewOrders} order{overdueNewOrders > 1 ? 's' : ''} waiting over 24h
             </p>
           )}
         </Link>
         <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#F5F3FF', border: '1px solid #DDD6FE', borderLeft: '4px solid #7C3AED' }}>
-          <p className="text-3xl font-bold" style={{ color: '#5B21B6' }}>{pendingShipment}</p>
-          <p className="text-sm font-semibold mt-1" style={{ color: '#5B21B6' }}>Pending Shipment</p>
-          <p className="text-xs mt-0.5" style={{ color: '#7C3AED' }}>processing + shipped · tap to manage</p>
+          style={{ backgroundColor: pendingBg, border: `1px solid ${pendingBorder}`, borderLeft: `4px solid ${C.violet}` }}>
+          <p className="text-3xl font-bold" style={{ color: C.violetStrong }}>{pendingShipment}</p>
+          <p className="text-sm font-semibold mt-1" style={{ color: C.violetStrong }}>Pending Shipment</p>
+          <p className="text-xs mt-0.5" style={{ color: C.violet }}>processing + shipped · tap to manage</p>
         </Link>
       </div>
 
@@ -332,45 +350,45 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       <div>
         <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Revenue</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>Net: {pkr(netRevenue7d)}</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>Net: {pkr(netRevenue7d)}</p>
             {revenue7dChangePct !== null && (
-              <p className="text-xs mt-0.5 font-medium" style={{ color: revenue7dChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+              <p className="text-xs mt-0.5 font-medium" style={{ color: revenue7dChangePct >= 0 ? C.success : C.critical }}>
                 {revenue7dChangePct >= 0 ? '↑' : '↓'} {Math.abs(revenue7dChangePct)}% vs prev 7d
               </p>
             )}
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Gross Revenue (7d)</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Gross Revenue (7d)</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
             {revenueLastMonth > 0 ? (
-              <p className="text-xs mt-0.5 font-medium" style={{ color: revenueThisMonth >= revenueLastMonth ? '#10B981' : '#EF4444' }}>
+              <p className="text-xs mt-0.5 font-medium" style={{ color: revenueThisMonth >= revenueLastMonth ? C.success : C.critical }}>
                 {revenueThisMonth >= revenueLastMonth ? '↑' : '↓'} vs last month: {pkr(revenueLastMonth)}
               </p>
             ) : (
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>first month on record</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>first month on record</p>
             )}
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Revenue This Month</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Revenue This Month</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(thisYearRevenue)}</p>
             {yoyChangePct !== null && (
-              <p className="text-xs mt-0.5 font-medium" style={{ color: yoyChangePct >= 0 ? '#10B981' : '#EF4444' }}>
+              <p className="text-xs mt-0.5 font-medium" style={{ color: yoyChangePct >= 0 ? C.success : C.critical }}>
                 {yoyChangePct >= 0 ? '↑' : '↓'} {Math.abs(yoyChangePct)}% vs {currentYear - 1}
               </p>
             )}
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Revenue This Year</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Revenue This Year</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: '#E0D5C8', backgroundColor: '#FAF8F5' }}>
+          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(aov)}</p>
             {aovLastMonth > 0 && (
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {pkr(aovLastMonth)}</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>vs last month: {pkr(aovLastMonth)}</p>
             )}
-            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Avg. Order Value</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Avg. Order Value</p>
           </div>
         </div>
       </div>
@@ -379,53 +397,53 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       <div>
         <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Operations</p>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <p className="text-2xl font-bold">{ordersThisMonth}</p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? '#10B981' : '#F59E0B' }}>
+            <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? C.success : C.warning }}>
               {fulfillmentRate}% fulfilled
             </p>
             {ordersLastMonth > 0 && (
-              <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>vs last month: {ordersLastMonth} orders</p>
+              <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>vs last month: {ordersLastMonth} orders</p>
             )}
-            <p className="text-xs text-gray-500 mt-1">Orders This Month</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Orders This Month</p>
           </div>
 
           <Link href="/admin/products?filter=low-stock"
-            className="bg-white rounded-lg p-5 border block hover:shadow-sm transition-shadow"
-            style={{ borderColor: lowStockItems.length > 0 ? '#FCA5A5' : '#E8DDD4' }}>
-            <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? '#DC2626' : '#374151' }}>
+            className="bg-[var(--admin-surface)] rounded-lg p-5 border block hover:shadow-sm transition-shadow"
+            style={{ borderColor: lowStockItems.length > 0 ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 45%, var(--admin-border))` : '#FCA5A5') : 'var(--admin-border)' }}>
+            <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? C.criticalStrong : 'var(--admin-text)' }}>
               {lowStockItems.length}
             </p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>variants need restocking</p>
+            <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>variants need restocking</p>
             <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Low Stock Alerts → view</p>
           </Link>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <p className="text-2xl font-bold">{totalProducts}</p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: '#F59E0B' }}>
+            <p className="text-xs font-medium mt-0.5" style={{ color: C.warning }}>
               {totalStock.toLocaleString('en-US')} units in stock
             </p>
-            <p className="text-xs text-gray-500 mt-1">Total Products</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Total Products</p>
           </div>
 
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
             <p className="text-2xl font-bold">{repeatCustomerRate}%</p>
-            <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+            <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
               {repeatCustomerCount} of {uniqueCustomerCount} customers
             </p>
-            <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
+            <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Repeat Rate</p>
           </div>
 
           {codEnabled && codSuccessRate !== null && (
-            <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
               <p className="text-2xl font-bold"
-                style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
+                style={{ color: codSuccessRate >= 65 ? C.success : codSuccessRate >= 50 ? C.warning : C.critical }}>
                 {codSuccessRate}%
               </p>
-              <p className="text-xs font-medium mt-0.5" style={{ color: '#9CA3AF' }}>
+              <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
                 {codDelivered} of {resolvedCod.length} resolved COD orders
               </p>
-              <p className="text-xs text-gray-500 mt-1">COD Success Rate</p>
+              <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>COD Success Rate</p>
             </div>
           )}
         </div>
@@ -433,15 +451,15 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
 
       {/* Cash Position (MTD) */}
       {codEnabled && (cashCollectedMTD > 0 || inTransitMTD > 0) && (
-        <div className="flex gap-4 px-5 py-3 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAFAFA' }}>
+        <div className="flex gap-4 px-5 py-3 rounded-lg border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-bg)' }}>
           <div className="flex-1">
-            <p className="text-xs font-medium" style={{ color: '#6B7280' }}>Cash Collected (MTD)</p>
+            <p className="text-xs font-medium" style={{ color: 'var(--admin-muted)' }}>Cash Collected (MTD)</p>
             <p className="text-sm font-semibold mt-0.5">{pkr(cashCollectedMTD)}</p>
           </div>
-          <div className="w-px" style={{ backgroundColor: '#E8DDD4' }} />
+          <div className="w-px" style={{ backgroundColor: 'var(--admin-border)' }} />
           <div className="flex-1">
-            <p className="text-xs font-medium" style={{ color: '#6B7280' }}>COD In Transit</p>
-            <p className="text-sm font-semibold mt-0.5" style={{ color: inTransitMTD > 0 ? '#F59E0B' : '#9CA3AF' }}>
+            <p className="text-xs font-medium" style={{ color: 'var(--admin-muted)' }}>COD In Transit</p>
+            <p className="text-sm font-semibold mt-0.5" style={{ color: inTransitMTD > 0 ? C.warning : '#9CA3AF' }}>
               {pkr(inTransitMTD)}
             </p>
           </div>
@@ -451,8 +469,8 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       {/* Charts Row */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Order Status Donut */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold mb-4">Order Status Breakdown <span className="font-normal text-xs" style={{ color: '#9CA3AF' }}>(Last 30 Days)</span></h3>
+        <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+          <h3 className="font-semibold mb-4">Order Status Breakdown <span className="font-normal text-xs" style={{ color: 'var(--admin-subtle)' }}>(Last 30 Days)</span></h3>
           {statusData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={180}>
@@ -471,20 +489,20 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                   <div key={s.name} className="flex items-center gap-1.5 text-xs">
                     <span className="w-2.5 h-2.5 rounded-full inline-block"
                       style={{ backgroundColor: STATUS_COLORS[s.name] }} />
-                    <span style={{ color: '#4B5563' }}>{s.name} ({s.value})</span>
+                    <span style={{ color: 'var(--admin-text-secondary)' }}>{s.name} ({s.value})</span>
                   </div>
                 ))}
               </div>
             </>
           ) : (
-            <p className="text-sm text-center py-8" style={{ color: '#9CA3AF' }}>No orders yet.</p>
+            <p className="text-sm text-center py-8" style={{ color: 'var(--admin-subtle)' }}>No orders yet.</p>
           )}
         </div>
 
         {/* Sales Trend — last 7 days */}
-        <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+        <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
           <h3 className="font-semibold mb-1">Sales Trend</h3>
-          <p className="text-xs mb-4" style={{ color: '#9CA3AF' }}>Revenue per day — last 7 days</p>
+          <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Revenue per day — last 7 days</p>
           <ResponsiveContainer width="100%" height={200}>
             <BarChart data={salesTrend7d} margin={{ left: 0, right: 8 }}>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
@@ -496,7 +514,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
               />
               <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
                 {salesTrend7d.map((entry, i) => (
-                  <Cell key={i} fill={entry.isToday ? '#1C1C1C' : entry.revenue > 0 ? '#A68B6E' : '#E8DDD4'} />
+                  <Cell key={i} fill={entry.isToday ? todayBarFill : entry.revenue > 0 ? '#A68B6E' : 'var(--admin-divider)'} />
                 ))}
               </Bar>
             </BarChart>
@@ -509,28 +527,28 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
         <h3 className="font-semibold mb-3">Inventory Health</h3>
         <div className="grid grid-cols-2 md:grid-cols-3 gap-3">
           {[
-            { label: 'Last Chance',    value: lastChanceCount, color: '#F59E0B', href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining',                                                       linkLabel: '→ View products' },
-            { label: 'Sold Out',       value: soldOutCount,    color: '#EF4444', href: '/admin/products?filter=sold-out',     sub: null,                                                                        linkLabel: '→ View products' },
-            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? '#DC2626' : '#374151', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well', linkLabel: '→ View products' },
-            { label: 'Returns (last 7d)',   value: returned7d,  color: '#DC2626', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
-            { label: 'Cancelled (last 7d)', value: cancelled7d, color: '#6B7280', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+            { label: 'Last Chance',    value: lastChanceCount, color: C.warning, href: '/admin/products?filter=low-stock',    sub: '1–3 units remaining',                                                       linkLabel: '→ View products' },
+            { label: 'Sold Out',       value: soldOutCount,    color: C.critical, href: '/admin/products?filter=sold-out',     sub: null,                                                                        linkLabel: '→ View products' },
+            { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? C.criticalStrong : 'var(--admin-text)', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well', linkLabel: '→ View products' },
+            { label: 'Returns (last 7d)',   value: returned7d,  color: C.criticalStrong, href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
+            { label: 'Cancelled (last 7d)', value: cancelled7d, color: 'var(--admin-muted)', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
           ].map(({ label, value, color, href, sub, linkLabel }) => {
             const inner = (
               <>
                 <p className="text-2xl font-bold" style={{ color }}>{value}</p>
-                <p className="text-xs mt-1" style={{ color: '#6B7280' }}>{label}</p>
-                {sub && <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{sub}</p>}
+                <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>{label}</p>
+                {sub && <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>{sub}</p>}
                 {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{linkLabel}</p>}
               </>
             )
             return href ? (
               <Link key={label} href={href}
-                className="bg-white rounded-lg p-4 border text-center block hover:shadow-sm transition-shadow"
-                style={{ borderColor: '#E8DDD4' }}>
+                className="bg-[var(--admin-surface)] rounded-lg p-4 border text-center block hover:shadow-sm transition-shadow"
+                style={{ borderColor: 'var(--admin-border)' }}>
                 {inner}
               </Link>
             ) : (
-              <div key={label} className="bg-white rounded-lg p-4 border text-center" style={{ borderColor: '#E8DDD4' }}>
+              <div key={label} className="bg-[var(--admin-surface)] rounded-lg p-4 border text-center" style={{ borderColor: 'var(--admin-border)' }}>
                 {inner}
               </div>
             )
@@ -539,16 +557,17 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       </div>
 
 
-      {/* Merchandise — Trending Now + Top Colors */}
-      {(trendingProducts.length > 0 || topColorsDash.length > 0) && (
+      {/* Merchandise — Trending Now + Top Products by Sales (spec 006 follow-up:
+          Top Colors moved to Analytics > Merchandising tab) */}
+      {(trendingProducts.length > 0 || topProductsBySales.length > 0) && (
         <div>
           <h3 className="font-semibold mb-3">Merchandise</h3>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             {trendingProducts.length > 0 && (
-              <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
+              <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
                 <div className="flex items-baseline justify-between mb-4">
                   <p className="font-semibold text-sm">↑ Trending Now</p>
-                  <span className="text-xs" style={{ color: '#9CA3AF' }}>by score</span>
+                  <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>by score</span>
                 </div>
                 <ResponsiveContainer width="100%" height={Math.max(160, trendingProducts.length * 38)}>
                   <BarChart data={trendingProducts} layout="vertical" margin={{ left: 8, right: 24 }}>
@@ -559,12 +578,12 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as typeof trendingProducts[0]
                         return (
-                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
                             <p className="font-semibold mb-1">{d.name}</p>
-                            <p style={{ color: '#9CA3AF' }}>{d.category}</p>
+                            <p style={{ color: 'var(--admin-subtle)' }}>{d.category}</p>
                             <p style={{ color: '#A68B6E' }}>PKR {Number(d.price).toLocaleString()}</p>
-                            <p style={{ color: '#6B7280' }}>{d.total_sold} units sold · score {d.score.toFixed(1)}</p>
-                            <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                            <p style={{ color: 'var(--admin-muted)' }}>{d.total_sold} units sold · score {d.score.toFixed(1)}</p>
+                            <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? '#B45309' : '#166534' }}>
                               {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                             </p>
                           </div>
@@ -573,22 +592,37 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                     />
                     <Bar dataKey="chartScore" radius={[0, 4, 4, 0]} name="Trend Score">
                       {trendingProducts.map((entry, i) => (
-                        <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
+                        <Cell key={i} fill={entry.stock === 0 ? C.criticalStrong : entry.stock <= 5 ? C.warning : '#BE185D'} />
                       ))}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>
             )}
-            {topColorsDash.length > 0 && (
-              <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-                <p className="font-semibold text-sm mb-4">Top Colors</p>
-                <ResponsiveContainer width="100%" height={Math.max(160, topColorsDash.length * 38)}>
-                  <BarChart data={topColorsDash} layout="vertical" margin={{ left: 8, right: 24 }}>
-                    <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                    <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
-                    <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
-                    <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
+            {topProductsBySales.length > 0 && (
+              <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+                <div className="flex items-baseline justify-between mb-4">
+                  <p className="font-semibold text-sm">Top Products</p>
+                  <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>by revenue</span>
+                </div>
+                <ResponsiveContainer width="100%" height={Math.max(160, topProductsBySales.length * 38)}>
+                  <BarChart data={topProductsBySales} layout="vertical" margin={{ left: 8, right: 24 }}>
+                    <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
+                    <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={100} />
+                    <Tooltip
+                      content={({ active, payload }) => {
+                        if (!active || !payload?.length) return null
+                        const d = payload[0]?.payload as typeof topProductsBySales[0]
+                        return (
+                          <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-[var(--admin-surface)] space-y-0.5" style={{ borderColor: 'var(--admin-border)' }}>
+                            <p className="font-semibold mb-1">{d.name}</p>
+                            <p style={{ color: '#A68B6E' }}>PKR {d.revenue.toLocaleString()}</p>
+                            <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold</p>
+                          </div>
+                        )
+                      }}
+                    />
+                    <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill="#A68B6E" name="Revenue" />
                   </BarChart>
                 </ResponsiveContainer>
               </div>

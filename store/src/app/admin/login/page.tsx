@@ -31,8 +31,8 @@ function LoginForm() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: '#FAF8F5' }}>
-      <div className="bg-white p-8 rounded-lg shadow-sm w-full max-w-sm border" style={{ borderColor: '#E8DDD4' }}>
+    <div className="min-h-screen flex items-center justify-center" style={{ backgroundColor: 'var(--admin-bg)' }}>
+      <div className="bg-[var(--admin-surface)] p-8 rounded-lg shadow-sm w-full max-w-sm border" style={{ borderColor: 'var(--admin-border)' }}>
         <h1 className="text-2xl text-center mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Admin Login</h1>
         <form onSubmit={handleLogin} className="space-y-4">
           <Input

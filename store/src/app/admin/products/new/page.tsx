@@ -7,20 +7,23 @@ import { Label } from '@/components/ui/label'
 import ImageUploader from '@/components/admin/ImageUploader'
 import VariantStockGrid from '@/components/admin/VariantStockGrid'
 import type { VariantStock } from '@/types'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL', 'Unstitched']
 const PRESET_CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale']
 
-// Best Seller and Trending are computed automatically (specs/003-merchandising-badges-v2)
-// and are no longer manual toggles — Featured is the merchant promotion outlet instead.
-const FLAG_OPTIONS = [
-  { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: '#F5F3FF', activeColor: '#5B21B6' },
-  { key: 'is_featured',    label: '☆ Featured',    activeBg: '#FFFBEB', activeColor: '#92400E' },
-] as const
-
 export default function NewProduct() {
   const router = useRouter()
+  const C = getAdminStatusColors(useAdminDarkMode())
+  // Best Seller and Trending are computed automatically (specs/003-merchandising-badges-v2)
+  // and are no longer manual toggles — Featured is the merchant promotion outlet instead.
+  const FLAG_OPTIONS = [
+    { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: '#F5F3FF', activeColor: C.violetStrong },
+    { key: 'is_featured',    label: '☆ Featured',    activeBg: '#FFFBEB', activeColor: '#92400E' },
+  ] as const
   const [loading, setLoading] = useState(false)
+  const [error, setError] = useState('')
   const [categories, setCategories] = useState<{ id: string; name: string }[]>([])
   const [isOtherCategory, setIsOtherCategory] = useState(false)
   const [form, setForm] = useState({
@@ -31,6 +34,7 @@ export default function NewProduct() {
     cost_price: '',
     stock_quantity: '',
     images: [] as string[],
+    image_colors: [] as (string | null)[],
     colors: '',
     sizes: [] as string[],
     category_id: '',
@@ -56,7 +60,7 @@ export default function NewProduct() {
       .catch(() => {})
   }, [])
 
-  const set = (k: string, v: string | boolean | string[] | VariantStock) => setForm(f => ({ ...f, [k]: v }))
+  const set = (k: string, v: string | boolean | string[] | (string | null)[] | VariantStock) => setForm(f => ({ ...f, [k]: v }))
 
   const toggleSize = (s: string) => {
     if (s === 'Unstitched') {
@@ -106,6 +110,7 @@ export default function NewProduct() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
     setLoading(true)
+    setError('')
     const completeVariantStock = buildCompleteVariantStock()
     const res = await fetch('/api/admin/products', {
       method: 'POST',
@@ -118,6 +123,7 @@ export default function NewProduct() {
         cost_price: form.cost_price ? Number(form.cost_price) : 0,
         stock_quantity: autoStock !== null ? autoStock : Number(form.stock_quantity),
         images: form.images,
+        image_colors: form.image_colors,
         colors: parsedColors,
         sizes: form.sizes,
         category_id: form.category_id || null,
@@ -137,7 +143,8 @@ export default function NewProduct() {
     if (res.ok) {
       router.push('/admin/products')
     } else {
-      alert('Failed to save product. Please try again.')
+      const data = await res.json().catch(() => ({}))
+      setError(data.error || 'Failed to save product. Please try again.')
       setLoading(false)
     }
   }
@@ -145,7 +152,7 @@ export default function NewProduct() {
   return (
     <div className="max-w-2xl">
       <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Add Product</h1>
-      <form onSubmit={handleSubmit} className="space-y-5 bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+      <form onSubmit={handleSubmit} className="space-y-5 bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
         <div className="grid grid-cols-2 gap-4">
           <div>
             <Label htmlFor="pname">Product Name *</Label>
@@ -164,7 +171,7 @@ export default function NewProduct() {
             rows={3}
             value={form.description}
             onChange={e => set('description', e.target.value)}
-            style={{ borderColor: '#E2E8F0' }}
+            style={{ borderColor: 'var(--admin-input-border)' }}
           />
         </div>
         <div className="grid grid-cols-2 gap-4">
@@ -178,13 +185,13 @@ export default function NewProduct() {
           </div>
           <div>
             <Label htmlFor="stock">
-              Total Stock {hasVariantTracking ? <span className="font-normal text-gray-400">(auto-calculated from grid)</span> : null}
+              Total Stock {hasVariantTracking ? <span className="font-normal" style={{ color: 'var(--admin-subtle)' }}>(auto-calculated from grid)</span> : null}
             </Label>
             {hasVariantTracking ? (
               <div
                 id="stock"
-                className="mt-1 px-3 py-2 border rounded text-sm bg-gray-50"
-                style={{ borderColor: '#E2E8F0', color: '#374151' }}
+                className="mt-1 px-3 py-2 border rounded text-sm bg-[var(--admin-bg)]"
+                style={{ borderColor: 'var(--admin-input-border)', color: 'var(--admin-text)' }}
               >
                 {autoStock}
               </div>
@@ -204,7 +211,7 @@ export default function NewProduct() {
               value={form.category_id}
               onChange={e => set('category_id', e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm mt-1"
-              style={{ borderColor: '#E2E8F0' }}
+              style={{ borderColor: 'var(--admin-input-border)' }}
             >
               <option value="">No collection (optional)</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -221,7 +228,7 @@ export default function NewProduct() {
               else { setIsOtherCategory(false); set('product_category', v) }
             }}
             className="w-full border rounded px-3 py-2 text-sm"
-            style={{ borderColor: '#E2E8F0' }}
+            style={{ borderColor: 'var(--admin-input-border)' }}
           >
             <option value="">— Select season / type —</option>
             {PRESET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -233,13 +240,19 @@ export default function NewProduct() {
               placeholder="e.g. Party Wear, Bridal"
               value={form.product_category}
               onChange={e => set('product_category', e.target.value)}
-              style={{ borderColor: '#E2E8F0' }}
+              style={{ borderColor: 'var(--admin-input-border)' }}
             />
           )}
         </div>
         <div>
           <Label className="block mb-2">Product Images</Label>
-          <ImageUploader images={form.images} onChange={urls => set('images', urls)} />
+          <ImageUploader
+            images={form.images}
+            onChange={urls => set('images', urls)}
+            availableColors={parsedColors}
+            imageColors={form.image_colors}
+            onColorsChange={colors => set('image_colors', colors)}
+          />
         </div>
         <div>
           <Label htmlFor="colors">Colors (comma separated)</Label>
@@ -254,12 +267,12 @@ export default function NewProduct() {
                 key={s}
                 onClick={() => toggleSize(s)}
                 className="px-3 py-1 text-sm border rounded transition-colors"
-                style={form.sizes.includes(s) ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' } : { borderColor: '#D1D5DB' }}
+                style={form.sizes.includes(s) ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' } : { borderColor: 'var(--admin-input-border)' }}
               >
                 {s}
               </button>
             ))}
-            <span className="text-gray-300 text-sm">|</span>
+            <span className="text-sm" style={{ color: 'var(--admin-border)' }}>|</span>
             <button
               type="button"
               onClick={() => toggleSize('Unstitched')}
@@ -296,18 +309,18 @@ export default function NewProduct() {
                 className="px-3 py-1.5 text-xs border rounded-full font-medium transition-all"
                 style={form[flag.key]
                   ? { backgroundColor: flag.activeBg, color: flag.activeColor, borderColor: flag.activeColor }
-                  : { borderColor: '#E2E8F0', color: '#9CA3AF', backgroundColor: 'white' }}
+                  : { borderColor: 'var(--admin-input-border)', color: 'var(--admin-subtle)', backgroundColor: 'var(--admin-surface)' }}
               >
                 {flag.label}
               </button>
             ))}
           </div>
-          <p className="text-xs mt-1.5" style={{ color: '#9CA3AF' }}>Best Seller and Trending are computed automatically from sales — Featured is for manual promotion</p>
+          <p className="text-xs mt-1.5" style={{ color: 'var(--admin-subtle)' }}>Best Seller and Trending are computed automatically from sales — Featured is for manual promotion</p>
 
           {/* New Arrival detail fields */}
           {form.is_new_arrival && (
-            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: '#5B21B6', backgroundColor: '#FAF5FF' }}>
-              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#5B21B6' }}>New Arrival Settings</p>
+            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: C.violetStrong, backgroundColor: '#FAF5FF' }}>
+              <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: C.violetStrong }}>New Arrival Settings</p>
               <div>
                 <Label className="text-xs">Collection Name</Label>
                 <Input
@@ -325,7 +338,7 @@ export default function NewProduct() {
                 <div>
                   <Label className="text-xs">Expiry Date</Label>
                   <Input type="date" className="mt-1 text-sm" value={form.new_arrival_end} onChange={e => set('new_arrival_end', e.target.value)} />
-                  <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Leave blank — stays active until manually retired</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Leave blank — stays active until manually retired</p>
                 </div>
               </div>
             </div>
@@ -343,7 +356,7 @@ export default function NewProduct() {
                 <div>
                   <Label className="text-xs">End Date</Label>
                   <Input type="date" className="mt-1 text-sm" value={form.featured_end} onChange={e => set('featured_end', e.target.value)} />
-                  <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>Leave blank — stays featured until manually retired</p>
+                  <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Leave blank — stays featured until manually retired</p>
                 </div>
               </div>
             </div>
@@ -354,13 +367,18 @@ export default function NewProduct() {
           <input type="checkbox" id="no_restock" checked={form.no_restock} onChange={e => set('no_restock', e.target.checked)} className="w-4 h-4" />
           <div>
             <Label htmlFor="no_restock">No restock planned</Label>
-            <p className="text-xs" style={{ color: '#9CA3AF' }}>Enables "Last Chance" badge when stock ≤ 3</p>
+            <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Enables "Last Chance" badge when stock ≤ 3</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
           <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
           <Label htmlFor="is_active">Active (visible in store)</Label>
         </div>
+        {error && (
+          <div className="rounded-md px-4 py-3 text-sm" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', border: '1px solid #FECACA' }}>
+            {error}
+          </div>
+        )}
         <Button type="submit" disabled={loading} className="w-full text-white rounded-none" style={{ backgroundColor: '#1C1C1C' }}>
           {loading ? 'Saving...' : 'Save Product'}
         </Button>

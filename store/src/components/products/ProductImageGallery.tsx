@@ -1,11 +1,42 @@
 'use client'
-import { useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import Image from 'next/image'
-import { X, ZoomIn } from 'lucide-react'
+import { ChevronLeft, ChevronRight, X, ZoomIn } from 'lucide-react'
 
-export default function ProductImageGallery({ images, name }: { images: string[]; name: string }) {
+const SWIPE_THRESHOLD_PX = 50
+
+type Props = {
+  images: string[]
+  name: string
+  // Color-to-image matching (US2) — optional; index-aligned with `images`.
+  // Selecting a color jumps the active image to its first tagged match, if
+  // any. No match is a no-op — the gallery is otherwise fully unaffected.
+  imageColors?: (string | null)[]
+  selectedColor?: string
+}
+
+export default function ProductImageGallery({ images, name, imageColors, selectedColor }: Props) {
   const [active, setActive] = useState(0)
   const [zoomed, setZoomed] = useState(false)
+  const touchStartX = useRef<number | null>(null)
+
+  useEffect(() => {
+    if (!selectedColor || !imageColors) return
+    const matchIndex = imageColors.findIndex(c => c?.toLowerCase() === selectedColor.toLowerCase())
+    if (matchIndex !== -1) setActive(matchIndex)
+  }, [selectedColor, imageColors])
+
+  const goNext = () => setActive(i => (i + 1) % images.length)
+  const goPrev = () => setActive(i => (i - 1 + images.length) % images.length)
+
+  const onTouchStart = (e: React.TouchEvent) => { touchStartX.current = e.touches[0].clientX }
+  const onTouchEnd = (e: React.TouchEvent) => {
+    if (touchStartX.current === null || images.length < 2) return
+    const delta = e.changedTouches[0].clientX - touchStartX.current
+    if (delta <= -SWIPE_THRESHOLD_PX) goNext()
+    else if (delta >= SWIPE_THRESHOLD_PX) goPrev()
+    touchStartX.current = null
+  }
 
   if (!images.length) {
     return (
@@ -18,10 +49,12 @@ export default function ProductImageGallery({ images, name }: { images: string[]
   return (
     <>
       <div className="space-y-3">
-        {/* Main image — click to zoom */}
+        {/* Main image — click to zoom, swipe/arrows to navigate */}
         <div
           className="aspect-[3/4] relative rounded-lg overflow-hidden bg-white cursor-zoom-in group"
           onClick={() => setZoomed(true)}
+          onTouchStart={onTouchStart}
+          onTouchEnd={onTouchEnd}
         >
           <Image src={images[active]} alt={name} fill className="object-cover" sizes="(max-width: 768px) 100vw, 50vw" />
           <div
@@ -32,6 +65,26 @@ export default function ProductImageGallery({ images, name }: { images: string[]
               <ZoomIn size={20} style={{ color: '#1C1C1C' }} />
             </div>
           </div>
+          {images.length > 1 && (
+            <>
+              <button
+                onClick={e => { e.stopPropagation(); goPrev() }}
+                aria-label="Previous image"
+                className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ backgroundColor: 'rgba(255,255,255,0.85)', color: '#1C1C1C' }}
+              >
+                <ChevronLeft size={18} />
+              </button>
+              <button
+                onClick={e => { e.stopPropagation(); goNext() }}
+                aria-label="Next image"
+                className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-1.5 opacity-0 group-hover:opacity-100 transition-opacity"
+                style={{ backgroundColor: 'rgba(255,255,255,0.85)', color: '#1C1C1C' }}
+              >
+                <ChevronRight size={18} />
+              </button>
+            </>
+          )}
         </div>
 
         {/* Thumbnails */}
@@ -84,11 +137,13 @@ export default function ProductImageGallery({ images, name }: { images: string[]
             </div>
           )}
 
-          {/* Full image */}
+          {/* Full image — swipe/arrows to navigate, independent of the main view's handlers */}
           <div
             className="relative w-full h-full max-w-3xl mx-4"
             style={{ maxHeight: '90vh' }}
             onClick={e => e.stopPropagation()}
+            onTouchStart={onTouchStart}
+            onTouchEnd={onTouchEnd}
           >
             <Image
               src={images[active]}
@@ -97,6 +152,26 @@ export default function ProductImageGallery({ images, name }: { images: string[]
               className="object-contain"
               sizes="(max-width: 768px) 100vw, 800px"
             />
+            {images.length > 1 && (
+              <>
+                <button
+                  onClick={e => { e.stopPropagation(); goPrev() }}
+                  aria-label="Previous image"
+                  className="absolute left-2 top-1/2 -translate-y-1/2 rounded-full p-2 transition-colors"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white' }}
+                >
+                  <ChevronLeft size={22} />
+                </button>
+                <button
+                  onClick={e => { e.stopPropagation(); goNext() }}
+                  aria-label="Next image"
+                  className="absolute right-2 top-1/2 -translate-y-1/2 rounded-full p-2 transition-colors"
+                  style={{ backgroundColor: 'rgba(255,255,255,0.1)', color: 'white' }}
+                >
+                  <ChevronRight size={22} />
+                </button>
+              </>
+            )}
           </div>
         </div>
       )}

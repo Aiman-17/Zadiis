@@ -116,8 +116,8 @@ export default async function AdminSalesPage() {
           const statusLabel = sale.is_active ? 'Running' : isCompleted ? 'Completed' : 'Inactive'
           const statusIcon  = sale.is_active ? '🟢' : isCompleted ? '✅' : '⚫'
           return (
-            <div key={sale.id} className="flex items-center justify-between p-4 bg-white border rounded-lg"
-              style={{ borderColor: sale.is_active ? '#A68B6E' : '#E8DDD4' }}>
+            <div key={sale.id} className="flex items-center justify-between p-4 bg-[var(--admin-surface)] border rounded-lg"
+              style={{ borderColor: sale.is_active ? '#A68B6E' : 'var(--admin-border)' }}>
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-medium">{sale.title}</p>
@@ -130,17 +130,17 @@ export default async function AdminSalesPage() {
                       style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>Completed</span>
                   )}
                 </div>
-                <p className="text-sm" style={{ color: '#6B7280' }}>
+                <p className="text-sm" style={{ color: 'var(--admin-muted)' }}>
                   {statusIcon} {statusLabel}
                   {sale.delivery_charge_override != null && ` · Delivery override: PKR ${sale.delivery_charge_override}`}
                   {rev && rev.orders > 0 && (
-                    <span className="ml-2 font-medium" style={{ color: '#1C1C1C' }}>
+                    <span className="ml-2 font-medium" style={{ color: 'var(--admin-text)' }}>
                       · PKR {rev.revenue.toLocaleString('en-US')} · {rev.orders} order{rev.orders !== 1 ? 's' : ''}
                     </span>
                   )}
                 </p>
                 {(sale.starts_at || sale.ends_at) && (
-                  <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
                     {fmtSaleDate(sale.starts_at) ?? '—'} → {fmtSaleDate(sale.ends_at) ?? 'No end date'}
                   </p>
                 )}
@@ -163,7 +163,7 @@ export default async function AdminSalesPage() {
           )
         })}
         {allSales.length === 0 && (
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>No sales yet. Create one to get started.</p>
+          <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No sales yet. Create one to get started.</p>
         )}
       </div>
     </div>

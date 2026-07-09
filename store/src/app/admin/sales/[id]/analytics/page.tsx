@@ -5,6 +5,8 @@ import {
   BarChart, Bar, XAxis, YAxis, Tooltip, ResponsiveContainer, Cell,
 } from 'recharts'
 import type { Sale, SaleProduct } from '@/types'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 type ProductRow = {
   product_id: string; product_name: string; cost_price: number
@@ -23,6 +25,7 @@ function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
 export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
+  const C = getAdminStatusColors(useAdminDarkMode())
   const [sale, setSale] = useState<Sale | null>(null)
   const [analytics, setAnalytics] = useState<SaleAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -39,7 +42,7 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
     })
   }, [id])
 
-  if (loading) return <div className="p-4 text-sm" style={{ color: '#9CA3AF' }}>Loading…</div>
+  if (loading) return <div className="p-4 text-sm" style={{ color: 'var(--admin-subtle)' }}>Loading…</div>
 
   return (
     <div className="max-w-3xl space-y-6">
@@ -54,27 +57,27 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
           </h1>
         </div>
         <Link href={`/admin/sales/${id}/edit`}
-          className="text-sm px-4 py-2 border rounded-none hover:bg-gray-50"
-          style={{ borderColor: '#E8DDD4', color: '#1C1C1C' }}>
+          className="text-sm px-4 py-2 border rounded-none hover:bg-[var(--admin-divider)]"
+          style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-text)' }}>
           Edit Sale
         </Link>
       </div>
 
       {/* Status + meta */}
       {sale && (
-        <div className="flex items-center gap-3 text-sm" style={{ color: '#6B7280' }}>
+        <div className="flex items-center gap-3 text-sm" style={{ color: 'var(--admin-muted)' }}>
           {sale.is_active
             ? <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full inline-block bg-green-500" />Active</span>
             : <span className="flex items-center gap-1.5"><span className="w-2 h-2 rounded-full inline-block bg-gray-400" />Inactive</span>}
           {analytics?.has_orders
             ? <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#DCFCE7', color: '#166534' }}>Live Data</span>
-            : <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: '#F3F4F6', color: '#6B7280' }}>Margin Preview</span>}
+            : <span className="px-2 py-0.5 rounded-full text-xs font-medium" style={{ backgroundColor: 'var(--admin-divider)', color: 'var(--admin-muted)' }}>Margin Preview</span>}
         </div>
       )}
 
       {analytics && analytics.saleProductData.length === 0 && (
-        <div className="bg-white rounded-lg border p-8 text-center" style={{ borderColor: '#E8DDD4' }}>
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>No products in this sale yet.</p>
+        <div className="bg-[var(--admin-surface)] rounded-lg border p-8 text-center" style={{ borderColor: 'var(--admin-border)' }}>
+          <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No products in this sale yet.</p>
           <Link href={`/admin/sales/${id}/edit`} className="text-sm mt-2 block hover:underline" style={{ color: '#A68B6E' }}>
             Add products →
           </Link>
@@ -95,17 +98,17 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
           {analytics.has_orders && (
             <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
               {[
-                { label: 'Sale Revenue',   value: pkr(analytics.totals.sale_revenue),       sub: `${analytics.totals.total_orders} orders`, color: '#1C1C1C' },
-                { label: 'At Full Price',  value: pkr(analytics.totals.full_price_revenue),  sub: 'without the discount',                    color: '#6B7280' },
-                { label: 'Discount Given', value: pkr(analytics.totals.sacrifice),            sub: 'given away to buyers',                    color: '#DC2626' },
+                { label: 'Sale Revenue',   value: pkr(analytics.totals.sale_revenue),       sub: `${analytics.totals.total_orders} orders`, color: 'var(--admin-text)' },
+                { label: 'At Full Price',  value: pkr(analytics.totals.full_price_revenue),  sub: 'without the discount',                    color: 'var(--admin-muted)' },
+                { label: 'Discount Given', value: pkr(analytics.totals.sacrifice),            sub: 'given away to buyers',                    color: C.criticalStrong },
                 { label: 'Profit Earned',  value: pkr(analytics.totals.profit_at_sale),
                   sub: analytics.totals.cost_total > 0 ? `vs ${pkr(analytics.totals.profit_at_full)} at full price` : '',
                   color: '#166534' },
               ].map(card => (
-                <div key={card.label} className="bg-white rounded-lg p-4 border text-center" style={{ borderColor: '#E8DDD4' }}>
+                <div key={card.label} className="bg-[var(--admin-surface)] rounded-lg p-4 border text-center" style={{ borderColor: 'var(--admin-border)' }}>
                   <p className="text-lg font-bold" style={{ color: card.color }}>{card.value}</p>
-                  <p className="text-xs font-medium mt-0.5" style={{ color: '#6B7280' }}>{card.label}</p>
-                  {card.sub && <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>{card.sub}</p>}
+                  <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-muted)' }}>{card.label}</p>
+                  {card.sub && <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>{card.sub}</p>}
                 </div>
               ))}
             </div>
@@ -113,7 +116,7 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
 
           {/* Revenue trend chart — live only */}
           {analytics.has_orders && analytics.revenueTrend.length > 0 && (
-            <div className="bg-white rounded-lg border p-5" style={{ borderColor: '#E8DDD4' }}>
+            <div className="bg-[var(--admin-surface)] rounded-lg border p-5" style={{ borderColor: 'var(--admin-border)' }}>
               <p className="text-sm font-medium mb-4">Daily Revenue — Sale Price vs Full Price</p>
               <ResponsiveContainer width="100%" height={200}>
                 <BarChart data={analytics.revenueTrend} barGap={2} barCategoryGap="30%">
@@ -125,14 +128,14 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
                     if (!active || !payload?.length) return null
                     const d = payload[0]?.payload as { sale_revenue: number; full_revenue: number; orders: number }
                     return (
-                      <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-white" style={{ borderColor: '#E8DDD4' }}>
+                      <div className="rounded-lg px-3 py-2 shadow-md text-xs border bg-[var(--admin-surface)]" style={{ borderColor: 'var(--admin-border)' }}>
                         <p className="font-semibold mb-1">
                           {new Date(String(label) + 'T12:00:00').toLocaleDateString('en-US', { weekday: 'short', month: 'short', day: 'numeric' })}
                         </p>
                         <p style={{ color: '#A68B6E' }}>Sale revenue: {pkr(d.sale_revenue)}</p>
-                        <p style={{ color: '#9CA3AF' }}>Full price equiv: {pkr(d.full_revenue)}</p>
-                        <p style={{ color: '#DC2626' }}>Discount given: {pkr(d.full_revenue - d.sale_revenue)}</p>
-                        <p style={{ color: '#374151' }}>{d.orders} order{d.orders !== 1 ? 's' : ''}</p>
+                        <p style={{ color: 'var(--admin-subtle)' }}>Full price equiv: {pkr(d.full_revenue)}</p>
+                        <p style={{ color: C.criticalStrong }}>Discount given: {pkr(d.full_revenue - d.sale_revenue)}</p>
+                        <p style={{ color: 'var(--admin-text)' }}>{d.orders} order{d.orders !== 1 ? 's' : ''}</p>
                       </div>
                     )
                   }} />
@@ -146,7 +149,7 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
               </ResponsiveContainer>
               <div className="flex gap-4 mt-2 justify-end">
                 {[['#A68B6E', 'Sale Revenue'], ['#E8DDD4', 'Full Price Equiv.']].map(([color, label]) => (
-                  <div key={label} className="flex items-center gap-1.5 text-xs" style={{ color: '#6B7280' }}>
+                  <div key={label} className="flex items-center gap-1.5 text-xs" style={{ color: 'var(--admin-muted)' }}>
                     <span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: color }} />
                     {label}
                   </div>
@@ -156,29 +159,29 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
           )}
 
           {/* Product breakdown table */}
-          <div className="bg-white rounded-lg border p-5" style={{ borderColor: '#E8DDD4' }}>
+          <div className="bg-[var(--admin-surface)] rounded-lg border p-5" style={{ borderColor: 'var(--admin-border)' }}>
             <p className="text-sm font-medium mb-4">
               {analytics.has_orders ? 'Product Performance' : 'Projected Margin per Product'}
             </p>
             <div className="overflow-x-auto">
               <table className="w-full text-xs min-w-[520px]">
                 <thead>
-                  <tr className="border-b" style={{ borderColor: '#F3F4F6' }}>
+                  <tr className="border-b" style={{ borderColor: 'var(--admin-divider)' }}>
                     {['Product', 'Cost', 'Full Price', 'Sale Price', 'Disc %',
                       ...(analytics.has_orders
                         ? ['Sold', 'Revenue', 'Profit', 'Sacrificed']
                         : ['Profit/unit (sale)', 'Profit/unit (full)'])
                     ].map(h => (
                       <th key={h} className="text-left py-2 pr-3 font-medium text-right first:text-left"
-                        style={{ color: '#9CA3AF' }}>{h}</th>
+                        style={{ color: 'var(--admin-subtle)' }}>{h}</th>
                     ))}
                   </tr>
                 </thead>
                 <tbody>
                   {analytics.saleProductData.map(p => (
-                    <tr key={p.product_id} className="border-b last:border-0" style={{ borderColor: '#F9FAFB' }}>
+                    <tr key={p.product_id} className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }}>
                       <td className="py-2.5 pr-3 font-medium">{p.product_name}</td>
-                      <td className="py-2.5 pr-3 text-right" style={{ color: '#9CA3AF' }}>
+                      <td className="py-2.5 pr-3 text-right" style={{ color: 'var(--admin-subtle)' }}>
                         {p.cost_price > 0 ? pkr(p.cost_price) : '—'}
                       </td>
                       <td className="py-2.5 pr-3 text-right">{pkr(p.original_price)}</td>
@@ -193,18 +196,18 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
                           <td className="py-2.5 pr-3 text-right font-medium">{p.units_sold}</td>
                           <td className="py-2.5 pr-3 text-right">{pkr(p.revenue_at_sale)}</td>
                           <td className="py-2.5 pr-3 text-right"
-                            style={{ color: p.profit_at_sale >= 0 ? '#166534' : '#DC2626' }}>
+                            style={{ color: p.profit_at_sale >= 0 ? '#166534' : C.criticalStrong }}>
                             {pkr(p.profit_at_sale)}
                           </td>
-                          <td className="py-2.5 text-right" style={{ color: '#DC2626' }}>{pkr(p.sacrifice)}</td>
+                          <td className="py-2.5 text-right" style={{ color: C.criticalStrong }}>{pkr(p.sacrifice)}</td>
                         </>
                       ) : (
                         <>
                           <td className="py-2.5 pr-3 text-right"
-                            style={{ color: p.cost_price > 0 ? (p.sale_price - p.cost_price >= 0 ? '#166534' : '#DC2626') : '#9CA3AF' }}>
+                            style={{ color: p.cost_price > 0 ? (p.sale_price - p.cost_price >= 0 ? '#166534' : C.criticalStrong) : 'var(--admin-subtle)' }}>
                             {p.cost_price > 0 ? pkr(p.sale_price - p.cost_price) : '—'}
                           </td>
-                          <td className="py-2.5 text-right" style={{ color: p.cost_price > 0 ? '#166534' : '#9CA3AF' }}>
+                          <td className="py-2.5 text-right" style={{ color: p.cost_price > 0 ? '#166534' : 'var(--admin-subtle)' }}>
                             {p.cost_price > 0 ? pkr(p.original_price - p.cost_price) : '—'}
                           </td>
                         </>
@@ -214,14 +217,14 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
                 </tbody>
                 {analytics.has_orders && (
                   <tfoot>
-                    <tr className="border-t font-semibold" style={{ borderColor: '#E8DDD4' }}>
+                    <tr className="border-t font-semibold" style={{ borderColor: 'var(--admin-border)' }}>
                       <td colSpan={4} className="py-2.5 pr-3">Total</td>
                       <td className="py-2.5 pr-3 text-right">{analytics.totals.total_orders} orders</td>
                       <td className="py-2.5 pr-3 text-right">{pkr(analytics.totals.sale_revenue)}</td>
                       <td className="py-2.5 pr-3 text-right" style={{ color: '#166534' }}>
                         {pkr(analytics.totals.profit_at_sale)}
                       </td>
-                      <td className="py-2.5 text-right" style={{ color: '#DC2626' }}>
+                      <td className="py-2.5 text-right" style={{ color: C.criticalStrong }}>
                         {pkr(analytics.totals.sacrifice)}
                       </td>
                     </tr>

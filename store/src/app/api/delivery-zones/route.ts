@@ -9,13 +9,17 @@ export async function GET() {
       supabaseAdmin.from('sales').select('id, delivery_charge_override').eq('is_active', true).or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`).maybeSingle(),
     ])
     const cod_enabled = settings?.find(s => s.key === 'cod_enabled')?.value === 'true'
+    // Defaults enabled unless explicitly disabled — preserves today's
+    // always-on behavior when the settings row hasn't been seeded yet.
+    const free_delivery_enabled = settings?.find(s => s.key === 'free_delivery_enabled')?.value !== 'false'
     return NextResponse.json({
       zones: zones || [],
       cod_enabled,
+      free_delivery_enabled,
       sale_active: !!activeSale,
       sale_delivery_override: activeSale?.delivery_charge_override ?? null,
     })
   } catch {
-    return NextResponse.json({ zones: [], cod_enabled: false, sale_active: false, sale_delivery_override: null })
+    return NextResponse.json({ zones: [], cod_enabled: false, free_delivery_enabled: true, sale_active: false, sale_delivery_override: null })
   }
 }

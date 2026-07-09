@@ -2,7 +2,8 @@
 import { useState, useEffect, useRef } from 'react'
 import Link from 'next/link'
 import { usePathname } from 'next/navigation'
-import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign, Bell } from 'lucide-react'
+import { LayoutDashboard, Package, ShoppingBag, Settings, LogOut, Menu, X, CreditCard, FileText, Tag, BarChart2, DollarSign, Bell, Moon, Sun } from 'lucide-react'
+import { useAdminDarkMode, setAdminDarkMode } from '@/hooks/useAdminDarkMode'
 
 export default function AdminLayout({ children }: { children: React.ReactNode }) {
   const pathname = usePathname()
@@ -10,7 +11,10 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   const [newOrders, setNewOrders] = useState(0)
   const [pendingCod, setPendingCod] = useState(0)
   const [notifCount, setNotifCount] = useState(0)
+  const darkMode = useAdminDarkMode()
   const lastCountRef = useRef<number | null>(null)
+
+  const toggleDarkMode = () => setAdminDarkMode(!darkMode)
 
   const NAV = [
     { href: '/admin', icon: LayoutDashboard, label: 'Dashboard', exact: true, badge: 0 },
@@ -113,6 +117,15 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
       ))}
       <div className="flex-1" />
       <button
+        onClick={toggleDarkMode}
+        className="flex items-center gap-3 px-2 py-2.5 rounded text-sm hover:bg-white/10 transition-colors"
+        style={{ color: 'rgba(255,255,255,0.7)' }}
+        title={darkMode ? 'Switch to light mode' : 'Switch to dark mode'}
+      >
+        {darkMode ? <Sun size={16} /> : <Moon size={16} />}
+        {darkMode ? 'Light Mode' : 'Dark Mode'}
+      </button>
+      <button
         onClick={logout}
         className="flex items-center gap-3 px-2 py-2.5 rounded text-sm hover:bg-white/10 transition-colors"
         style={{ color: 'rgba(255,255,255,0.5)' }}
@@ -123,9 +136,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
   )
 
   return (
-    <div className="flex min-h-screen bg-gray-50">
-      {/* Desktop sidebar */}
-      <aside className="hidden md:flex w-56 shrink-0 flex-col py-6 px-4 gap-1" style={{ backgroundColor: '#1C1C1C' }}>
+    <div className={`flex min-h-screen bg-[var(--admin-bg)] ${darkMode ? 'dark' : ''}`}>
+      {/* Desktop sidebar — sticky so it stays in view while main content scrolls */}
+      <aside className="hidden md:flex w-56 shrink-0 flex-col py-6 px-4 gap-1 sticky top-0 h-screen overflow-y-auto" style={{ backgroundColor: '#1C1C1C' }}>
         <h2 className="text-lg px-2 mb-6 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S Admin</h2>
         <NavContent />
       </aside>

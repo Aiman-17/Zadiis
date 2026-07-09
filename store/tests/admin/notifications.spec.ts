@@ -58,8 +58,22 @@ test.describe('Admin notification center', () => {
     test.skip(!hasRecords, 'no notification records to exercise archive on')
 
     const rowCountBefore = await page.locator('button:has(svg.lucide-archive)').count()
-    await archiveBtn.click()
-    await expect(page.locator('button:has(svg.lucide-archive)')).toHaveCount(rowCountBefore - 1, { timeout: 8_000 })
+
+    // Capture the archived record's id from the outgoing PUT so it can be
+    // restored in `finally` regardless of whether the assertion below
+    // passes — this test mutates a real notification row with no isolated
+    // test database (see bug report: admin E2E tests vs. live Supabase).
+    const [request] = await Promise.all([
+      page.waitForRequest(r => r.url().includes('/api/admin/notifications') && r.method() === 'PUT'),
+      archiveBtn.click(),
+    ])
+    const archivedId = (request.postDataJSON() as { id: string }).id
+
+    try {
+      await expect(page.locator('button:has(svg.lucide-archive)')).toHaveCount(rowCountBefore - 1, { timeout: 8_000 })
+    } finally {
+      await page.request.put('/api/admin/notifications', { data: { id: archivedId, action: 'restore' } })
+    }
   })
 
   test('bell/notifications nav badge reflects unread count without crashing the layout', async ({ page }) => {

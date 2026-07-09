@@ -134,7 +134,7 @@ export async function POST(req: NextRequest) {
       await notifyAdmin(
         'exchange_request',
         order.id,
-        `${customer_name || 'A customer'} requested an exchange on order #${normalised} — ${exchange_details.trim()}`,
+        `${customer_name || 'A customer'} (${customer_email}) requested an exchange on order #${normalised} — ${exchange_details.trim()}`,
       )
     } else {
       await Promise.allSettled([
@@ -145,7 +145,7 @@ export async function POST(req: NextRequest) {
       await notifyAdmin(
         'return_request',
         order.id,
-        `${customer_name || 'A customer'} requested a return on order #${normalised} — ${reasonLabel}`,
+        `${customer_name || 'A customer'} (${customer_email}) requested a return on order #${normalised} — ${reasonLabel}`,
       )
     }
 

@@ -5,6 +5,7 @@ import ProductCard from '@/components/products/ProductCard'
 import ProductFilters from '@/components/products/ProductFilters'
 import ShopSearchBar from '@/components/products/ShopSearchBar'
 import ProductSectionTabs from '@/components/products/ProductSectionTabs'
+import PromoPopups from '@/components/store/PromoPopup'
 import { getProducts } from '@/lib/products'
 import { getMerchandisingContext } from '@/lib/merchandising'
 import { supabaseAdmin } from '@/lib/supabase/server'
@@ -70,20 +71,28 @@ export default async function ShopPage({ searchParams }: { searchParams: Promise
   const params = await searchParams
 
   let hasSale = false
+  let saleTitle: string | null = null
+  let freeDeliveryEnabled = true
   try {
-    const { data: sale } = await supabaseAdmin
-      .from('sales')
-      .select('id')
-      .eq('is_active', true)
-      .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
-      .maybeSingle()
+    const [{ data: sale }, { data: deliverySetting }] = await Promise.all([
+      supabaseAdmin
+        .from('sales')
+        .select('id, title')
+        .eq('is_active', true)
+        .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+        .maybeSingle(),
+      supabaseAdmin.from('store_settings').select('value').eq('key', 'free_delivery_enabled').maybeSingle(),
+    ])
     hasSale = !!sale
+    saleTitle = sale?.title ?? null
+    freeDeliveryEnabled = deliverySetting?.value !== 'false'
   } catch (e) {
     console.error('ShopPage data fetch failed:', e)
   }
 
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <PromoPopups saleActive={hasSale} saleTitle={saleTitle} freeDeliveryEnabled={freeDeliveryEnabled} />
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
       <Suspense>
         <ProductSectionTabs hasSale={hasSale} />

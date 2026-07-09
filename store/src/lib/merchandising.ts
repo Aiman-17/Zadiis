@@ -1,4 +1,5 @@
 import { supabase } from './supabase/client'
+import { getEffectiveStock } from './stock'
 import type { Product } from '@/types'
 
 /**
@@ -97,6 +98,45 @@ export function merchandisingIdSets(products: Product[]): { bestSellerIds: Set<s
     bestSellerIds: new Set(rankBestSellers(products).map(p => p.id)),
     trendingIds: new Set(rankTrending(products).map(p => p.id)),
   }
+}
+
+/**
+ * Slow Mover consolidation (spec 006, US9). Previously triplicated in
+ * AdminProductsClient.tsx, sales/new/page.tsx, and sales/[id]/edit/page.tsx
+ * with a genuine disagreement, not just duplicated code: sales/new/page.tsx
+ * excluded is_new_arrival products from the average-sell-through baseline,
+ * while the other two included them — meaning the same product could
+ * already be flagged Slow Mover in one admin surface and not another.
+ *
+ * This consolidation adopts the sales/new/page.tsx behavior (exclude
+ * is_new_arrival from the baseline) as correct: a just-launched product's
+ * necessarily-low sell-through shouldn't drag down the bar every other
+ * product is judged against. See research.md Decision 9 for the full
+ * reasoning — this is a deliberate behavior fix, not a neutral refactor.
+ */
+export function computeStoreAvgSellThrough(products: Product[]): number {
+  const eligibleForAvg = products.filter(p => {
+    if (p.is_new_arrival) return false
+    const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+    return ageDays >= 15 && getEffectiveStock(p) > 0
+  })
+  if (eligibleForAvg.length === 0) return 0
+  return eligibleForAvg.reduce((sum, p) => {
+    const stock = getEffectiveStock(p)
+    return sum + p.total_sold / (p.total_sold + stock)
+  }, 0) / eligibleForAvg.length
+}
+
+/** A product qualifies as Slow Mover if it's at least 15 days old, in stock,
+ * and its sell-through is less than half the store-wide average (computed
+ * via computeStoreAvgSellThrough, above). If nothing has sold store-wide,
+ * nothing is flagged. */
+export function isSlowMover(p: Product, avgSellThrough: number): boolean {
+  const ageDays = (Date.now() - new Date(p.created_at).getTime()) / 86400000
+  if (ageDays < 15) return false
+  const stock = getEffectiveStock(p)
+  if (stock === 0 || avgSellThrough <= 0) return false
+  return (p.total_sold / (p.total_sold + stock)) < avgSellThrough * 0.5
 }
 
 async function fetchActiveProducts(): Promise<Product[]> {

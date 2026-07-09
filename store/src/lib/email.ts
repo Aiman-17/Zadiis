@@ -125,7 +125,7 @@ export async function sendCustomerOrderConfirmed(to: string | null | undefined, 
   }
 }
 
-const PAYMENT_METHOD_LABELS: Record<string, string> = {
+export const PAYMENT_METHOD_LABELS: Record<string, string> = {
   jazzcash:  'JazzCash',
   easypaisa: 'EasyPaisa',
   card:      'Credit / Debit Card',

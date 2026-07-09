@@ -20,6 +20,7 @@ export type Product = {
   price: number
   category_id: string
   images: string[]
+  image_colors?: (string | null)[]
   sizes: string[]
   colors: string[]
   stock_quantity: number

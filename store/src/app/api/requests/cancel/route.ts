@@ -15,6 +15,18 @@ const CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000
 
 export async function POST(req: NextRequest) {
   try {
+    const { data: cancelSetting } = await supabaseAdmin
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'cancellations_enabled')
+      .maybeSingle()
+    if (cancelSetting?.value === 'false') {
+      return NextResponse.json({
+        error: 'Self-service cancellations are currently unavailable. Please reach out to us on WhatsApp and our team will help you right away.',
+        code: 'CANCELLATIONS_DISABLED',
+      }, { status: 403 })
+    }
+
     const { order_number, customer_email, customer_name, reason, notes } = await req.json()
 
     if (!order_number?.trim() || !customer_email?.trim() || !customer_name?.trim() || !reason || !VALID_REASONS.has(reason)) {
@@ -85,7 +97,7 @@ export async function POST(req: NextRequest) {
     await notifyAdmin(
       'cancellation_request',
       order.id,
-      `${customer_name || 'A customer'} requested to cancel order #${normalised} — ${reasonLabel}`,
+      `${customer_name || 'A customer'} (${customer_email}) requested to cancel order #${normalised} — ${reasonLabel}`,
     )
 
     return NextResponse.json({ success: true })

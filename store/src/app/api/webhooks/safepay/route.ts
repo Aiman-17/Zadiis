@@ -1,7 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { createHmac, timingSafeEqual } from 'crypto'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived } from '@/lib/email'
+import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived, PAYMENT_METHOD_LABELS } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
 import { notifyAdmin } from '@/lib/notifications'
 
@@ -119,7 +119,7 @@ export async function POST(req: NextRequest) {
   await notifyAdmin(
     'payment_received',
     order.id,
-    `Payment received from ${order.customer_name} — order #${order.order_number} — PKR ${Number(order.total).toLocaleString()}`,
+    `Payment received from ${order.customer_name} (${order.customer_email}) — order #${order.order_number} — PKR ${Number(order.total).toLocaleString()} via ${PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}`,
   )
 
   console.log(`[webhook/safepay] Order ${order.order_number} marked paid. TXN: ${transactionId}`)
