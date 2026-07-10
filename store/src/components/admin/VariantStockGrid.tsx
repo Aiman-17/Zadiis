@@ -24,7 +24,7 @@ export default function VariantStockGrid({ colors, sizes, value, onChange }: Pro
 
   if (effectiveColors.length === 1 && effectiveColors[0] === '_' && effectiveSizes.length === 1 && effectiveSizes[0] === '_') {
     return (
-      <div className="text-sm text-gray-500">Add colors or sizes above to enable per-variant stock</div>
+      <div className="text-sm" style={{ color: 'var(--admin-subtle)' }}>Add colors or sizes above to enable per-variant stock</div>
     )
   }
 
@@ -36,12 +36,12 @@ export default function VariantStockGrid({ colors, sizes, value, onChange }: Pro
       <table className="text-sm border-collapse w-full">
         <thead>
           <tr>
-            {showColorCol && <th className="text-left pr-3 pb-2 font-medium text-gray-600">Color</th>}
+            {showColorCol && <th className="text-left pr-3 pb-2 font-medium" style={{ color: 'var(--admin-muted)' }}>Color</th>}
             {showSizeRow
               ? effectiveSizes.map(s => (
-                  <th key={s} className="px-2 pb-2 font-medium text-gray-600 text-center min-w-[64px]">{s}</th>
+                  <th key={s} className="px-2 pb-2 font-medium text-center min-w-[64px]" style={{ color: 'var(--admin-muted)' }}>{s}</th>
                 ))
-              : <th className="px-2 pb-2 font-medium text-gray-600 text-center min-w-[64px]">Qty</th>
+              : <th className="px-2 pb-2 font-medium text-center min-w-[64px]" style={{ color: 'var(--admin-muted)' }}>Qty</th>
             }
           </tr>
         </thead>
@@ -49,7 +49,7 @@ export default function VariantStockGrid({ colors, sizes, value, onChange }: Pro
           {effectiveColors.map(c => (
             <tr key={c}>
               {showColorCol && (
-                <td className="pr-3 py-1 font-medium text-gray-700 capitalize">{c}</td>
+                <td className="pr-3 py-1 font-medium capitalize" style={{ color: 'var(--admin-text-secondary)' }}>{c}</td>
               )}
               {effectiveSizes.map(s => (
                 <td key={s} className="px-2 py-1">

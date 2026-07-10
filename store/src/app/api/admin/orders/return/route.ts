@@ -41,7 +41,9 @@ export async function POST(req: NextRequest) {
 
     // Migration-safe timestamps (fail silently before columns exist).
     // Clears cancelled_at in case order was previously cancelled before being returned.
-    void supabaseAdmin.from('orders').update({ cancelled_at: null, returned_at: new Date().toISOString() }).eq('id', id)
+    // Must be awaited — a bare `void query` on a Supabase query builder never
+    // sends the request at all.
+    await supabaseAdmin.from('orders').update({ cancelled_at: null, returned_at: new Date().toISOString() }).eq('id', id)
 
     const items = (order.items || []) as OrderItem[]
     const movements = []

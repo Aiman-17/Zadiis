@@ -1,6 +1,9 @@
+export const dynamic = 'force-dynamic'
+
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import SaleStatusBadge from '@/components/admin/SaleStatusBadge'
 import type { Sale, Order, OrderItem } from '@/types'
 
 function fmtSaleDate(d: string | null) {
@@ -10,10 +13,16 @@ function fmtSaleDate(d: string | null) {
   })
 }
 
-async function getSaleRevenue(saleIds: string[]): Promise<Record<string, { revenue: number; orders: number }>> {
+async function getSaleRevenue(sales: Sale[]): Promise<Record<string, { revenue: number; orders: number }>> {
+  const saleIds = sales.map(s => s.id)
   if (saleIds.length === 0) return {}
 
-  // Fetch all sale_products to know which product_ids belong to each sale
+  // Fetch all sale_products to know which product_ids belong to each sale.
+  // A product can belong to more than one sale over time — don't collapse to
+  // a single product_id -> sale_id map ("last sale wins"), or an old sale's
+  // real historical revenue gets silently reassigned to whichever newer sale
+  // later reuses the same product, hiding the old sale's Analytics link
+  // (only shown when orders > 0) even though it genuinely has orders.
   const { data: saleProducts } = await supabaseAdmin
     .from('sale_products')
     .select('sale_id, product_id')
@@ -22,7 +31,7 @@ async function getSaleRevenue(saleIds: string[]): Promise<Record<string, { reven
   // Fetch all is_sale orders (not cancelled/returned)
   const { data: orders } = await supabaseAdmin
     .from('orders')
-    .select('id, items, total')
+    .select('id, items, total, created_at')
     .eq('is_sale', true)
     .not('order_status', 'in', '("cancelled","returned")')
 
@@ -31,22 +40,39 @@ async function getSaleRevenue(saleIds: string[]): Promise<Record<string, { reven
 
   if (!saleProducts || !orders) return result
 
-  const productToSale: Record<string, string> = {}
-  for (const sp of saleProducts) productToSale[sp.product_id] = sp.sale_id
+  const productsBySale: Record<string, Set<string>> = {}
+  for (const sp of saleProducts) {
+    if (!productsBySale[sp.sale_id]) productsBySale[sp.sale_id] = new Set()
+    productsBySale[sp.sale_id].add(sp.product_id)
+  }
 
-  for (const order of orders as Order[]) {
+  // Same date-window scoping as the per-sale analytics API — an order only
+  // counts toward a sale if it was placed while that specific sale was live.
+  const saleWindows: Record<string, { start: Date; end: Date | null }> = {}
+  for (const s of sales) {
+    saleWindows[s.id] = { start: new Date(s.starts_at || s.created_at), end: s.ends_at ? new Date(s.ends_at) : null }
+  }
+
+  for (const order of orders as (Order & { created_at: string })[]) {
     const items = (order.items || []) as OrderItem[]
-    // Accumulate per-sale revenue from only the items that belong to each sale
-    const saleRevById: Record<string, number> = {}
-    for (const item of items) {
-      const sid = productToSale[item.product_id]
-      if (sid && saleIds.includes(sid)) {
-        saleRevById[sid] = (saleRevById[sid] || 0) + item.price * item.quantity
+    const orderDate = new Date(order.created_at)
+    for (const saleId of saleIds) {
+      const win = saleWindows[saleId]
+      if (orderDate < win.start || (win.end && orderDate > win.end)) continue
+      const productIds = productsBySale[saleId]
+      if (!productIds) continue
+      let matched = false
+      let saleRev = 0
+      for (const item of items) {
+        if (productIds.has(item.product_id)) {
+          saleRev += item.price * item.quantity
+          matched = true
+        }
       }
-    }
-    for (const [sid, rev] of Object.entries(saleRevById)) {
-      result[sid].revenue += rev
-      result[sid].orders++
+      if (matched) {
+        result[saleId].revenue += saleRev
+        result[saleId].orders++
+      }
     }
   }
 
@@ -68,11 +94,13 @@ export default async function AdminSalesPage() {
     .filter(s => s.is_active && s.ends_at && new Date(s.ends_at) < now)
     .map(s => s.id)
   if (expiredIds.length > 0) {
-    void supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
+    // Must be awaited — a bare `void query` on a Supabase query builder never
+    // sends the request, so is_active would stay stale true in the DB forever.
+    await supabaseAdmin.from('sales').update({ is_active: false }).in('id', expiredIds)
     allSales = allSales.map(s => expiredIds.includes(s.id) ? { ...s, is_active: false } : s)
   }
 
-  const revenueMap = await getSaleRevenue(allSales.map(s => s.id))
+  const revenueMap = await getSaleRevenue(allSales)
 
   return (
     <div>
@@ -89,42 +117,38 @@ export default async function AdminSalesPage() {
           const statusLabel = sale.is_active ? 'Running' : isCompleted ? 'Completed' : 'Inactive'
           const statusIcon  = sale.is_active ? '🟢' : isCompleted ? '✅' : '⚫'
           return (
-            <div key={sale.id} className="flex items-center justify-between p-4 bg-white border rounded-lg"
-              style={{ borderColor: sale.is_active ? '#A68B6E' : '#E8DDD4' }}>
+            <div key={sale.id} className="flex items-center justify-between p-4 bg-[var(--admin-surface)] border rounded-lg"
+              style={{ borderColor: sale.is_active ? '#A68B6E' : 'var(--admin-border)' }}>
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-medium">{sale.title}</p>
-                  {sale.is_active && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ backgroundColor: '#DCFCE7', color: '#166534' }}>Active</span>
-                  )}
-                  {isCompleted && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>Completed</span>
-                  )}
+                  <SaleStatusBadge isActive={sale.is_active} isCompleted={isCompleted} />
                 </div>
-                <p className="text-sm" style={{ color: '#6B7280' }}>
+                <p className="text-sm" style={{ color: 'var(--admin-muted)' }}>
                   {statusIcon} {statusLabel}
                   {sale.delivery_charge_override != null && ` · Delivery override: PKR ${sale.delivery_charge_override}`}
                   {rev && rev.orders > 0 && (
-                    <span className="ml-2 font-medium" style={{ color: '#1C1C1C' }}>
+                    <span className="ml-2 font-medium" style={{ color: 'var(--admin-text)' }}>
                       · PKR {rev.revenue.toLocaleString('en-US')} · {rev.orders} order{rev.orders !== 1 ? 's' : ''}
                     </span>
                   )}
                 </p>
                 {(sale.starts_at || sale.ends_at) && (
-                  <p className="text-xs mt-0.5" style={{ color: '#9CA3AF' }}>
+                  <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
                     {fmtSaleDate(sale.starts_at) ?? '—'} → {fmtSaleDate(sale.ends_at) ?? 'No end date'}
                   </p>
                 )}
               </div>
               <div className="flex gap-2 shrink-0">
-                {(rev?.orders ?? 0) > 0 && (
-                  <Button asChild variant="outline" size="sm" className="rounded-none text-xs"
-                    style={{ borderColor: '#A68B6E', color: '#A68B6E' }}>
-                    <Link href={`/admin/sales/${sale.id}/analytics`}>Analytics</Link>
-                  </Button>
-                )}
+                {/* Always reachable — the analytics detail page already
+                    handles "no products yet" and "no orders yet" (margin
+                    preview) gracefully. Gating this on orders > 0 made the
+                    margin-preview mode unreachable for any sale that hasn't
+                    sold yet, which defeats its purpose. */}
+                <Button asChild variant="outline" size="sm" className="rounded-none text-xs"
+                  style={{ borderColor: '#A68B6E', color: '#A68B6E' }}>
+                  <Link href={`/admin/sales/${sale.id}/analytics`}>Analytics</Link>
+                </Button>
                 <Button asChild variant="outline" size="sm" className="rounded-none">
                   <Link href={`/admin/sales/${sale.id}/edit`}>Edit</Link>
                 </Button>
@@ -133,7 +157,7 @@ export default async function AdminSalesPage() {
           )
         })}
         {allSales.length === 0 && (
-          <p className="text-sm" style={{ color: '#9CA3AF' }}>No sales yet. Create one to get started.</p>
+          <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>No sales yet. Create one to get started.</p>
         )}
       </div>
     </div>

@@ -3,14 +3,12 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { notFound } from 'next/navigation'
 import { getProductBySlug } from '@/lib/products'
+import { getMerchandisingContext } from '@/lib/merchandising'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import AddToCartButton from '@/components/products/AddToCartButton'
-import ProductImageGallery from '@/components/products/ProductImageGallery'
+import ProductGallerySection from '@/components/products/ProductGallerySection'
+import PromoPopups from '@/components/store/PromoPopup'
 import ReviewListWrapper from '@/components/products/ReviewListWrapper'
 import ProductSlider from '@/components/products/ProductSlider'
-import ProductSaleUrgency from '@/components/products/ProductSaleUrgency'
-import NotifyMeButton from '@/components/products/NotifyMeButton'
-import { Flame, Hourglass } from 'lucide-react'
 import type { Review, Product } from '@/types'
 import type { Metadata } from 'next'
 
@@ -29,10 +27,10 @@ export async function generateMetadata({ params }: { params: Promise<{ slug: str
 
   return {
     title: product.name,
-    description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADIIS`,
+    description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADII'S`,
     openGraph: {
       title: product.name,
-      description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADIIS`,
+      description: product.description?.slice(0, 155) || `Shop ${product.name} at ZADII'S`,
       images: product.images?.[0] ? [{ url: product.images[0] }] : [],
       type: 'website',
       url: `${BASE_URL}/shop/${product.slug}`,
@@ -53,14 +51,18 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
   let reviews: Review[] = []
   let salePrice: number | null = null
   let saleEndsAt: string | null = null
+  let saleTitle: string | null = null
   let isSaleActive = false
   let relatedProducts: Product[] = []
+  let relatedSalePrices: Record<string, number> = {}
   let soldLast24h = 0
+  let isTrending = false
+  let freeDeliveryEnabled = true
 
   const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000).toISOString()
 
   try {
-    const [reviewsRes, saleRes, relatedRes, recentOrderIdsRes] = await Promise.all([
+    const [reviewsRes, saleRes, relatedRes, recentOrderIdsRes, merchContext, deliverySettingRes] = await Promise.all([
       supabaseAdmin
         .from('reviews')
         .select('*')
@@ -68,7 +70,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .order('created_at', { ascending: false }),
       supabaseAdmin
         .from('sales')
-        .select('id, ends_at')
+        .select('id, title, ends_at')
         .eq('is_active', true)
         .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
         .maybeSingle(),
@@ -85,10 +87,15 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .select('id')
         .in('order_status', ['processing', 'shipped', 'delivered'])
         .gte('created_at', oneDayAgo),
+      // Same qualifying set as every other page (specs/003-merchandising-badges-v2)
+      getMerchandisingContext(),
+      supabaseAdmin.from('store_settings').select('value').eq('key', 'free_delivery_enabled').maybeSingle(),
     ])
+    freeDeliveryEnabled = deliverySettingRes.data?.value !== 'false'
 
     reviews = (reviewsRes.data || []) as Review[]
     relatedProducts = (relatedRes.data || []) as Product[]
+    isTrending = merchContext.trendingIds.has(product!.id)
 
     const recentOrderIds = (recentOrderIdsRes.data || []).map((o: { id: string }) => o.id)
     if (recentOrderIds.length > 0) {
@@ -103,6 +110,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
     if (saleRes.data) {
       isSaleActive = true
       saleEndsAt = saleRes.data.ends_at
+      saleTitle = saleRes.data.title
       const { data: sp } = await supabaseAdmin
         .from('sale_products')
         .select('sale_price')
@@ -110,34 +118,21 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         .eq('product_id', product!.id)
         .maybeSingle()
       if (sp) salePrice = sp.sale_price
+
+      if (relatedProducts.length > 0) {
+        const { data: relatedSp } = await supabaseAdmin
+          .from('sale_products')
+          .select('product_id, sale_price')
+          .eq('sale_id', saleRes.data.id)
+          .in('product_id', relatedProducts.map(p => p.id))
+        relatedSalePrices = Object.fromEntries((relatedSp || []).map(sp => [sp.product_id, sp.sale_price]))
+      }
     }
-  } catch {
-    // fail gracefully
+  } catch (e) {
+    console.error('ProductPage sale/related data fetch failed:', e)
   }
 
-  const isSoldOut = (() => {
-    const vs = product!.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      ) === 0
-    }
-    return product!.stock_quantity === 0
-  })()
-
   const displayPrice = salePrice ?? product!.price
-  const savings = salePrice ? product!.price - salePrice : 0
-
-  const totalStock = (() => {
-    const vs = product!.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return product!.stock_quantity
-  })()
-  const isLastChance = totalStock > 0 && totalStock <= 3
 
   const jsonLd = {
     '@context': 'https://schema.org',
@@ -162,6 +157,7 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <div className="max-w-5xl mx-auto px-4 py-8 md:py-10">
+        <PromoPopups saleActive={isSaleActive} saleTitle={saleTitle} freeDeliveryEnabled={freeDeliveryEnabled} />
         <Link href="/shop" className="text-sm inline-block mb-6 hover:underline" style={{ color: '#A68B6E' }}>
           ← Back to Shop
         </Link>
@@ -174,100 +170,13 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
           </a>
         )}
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-10">
-          <ProductImageGallery images={product!.images} name={product!.name} />
-          <div className="space-y-5 md:space-y-6 pt-2 md:pt-0">
-            <div>
-              {/* Category identity strip — contextual to product flags */}
-              {salePrice ? (
-                <div className="flex items-center gap-2 mb-2">
-                  <span className="text-[10px] font-bold uppercase tracking-widest px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>Sale</span>
-                  <span className="text-xs" style={{ color: '#C62828' }}>Limited time price — ends when timer hits zero</span>
-                </div>
-              ) : isLastChance ? (
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Hourglass size={13} color="#C62828" style={{ animation: 'hourglass-flip 3s ease-in-out infinite', transformOrigin: 'center' }} />
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C62828' }}>Almost Gone — Final Stock</span>
-                </div>
-              ) : product!.is_trending ? (
-                <div className="flex items-center gap-1.5 mb-2">
-                  <Flame size={13} color="#ea580c" style={{ animation: 'fire-flicker 0.65s ease-in-out infinite alternate', transformOrigin: 'bottom center' }} />
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#ea580c' }}>Trending Now — High Demand</span>
-                </div>
-              ) : product!.is_new_arrival ? (
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#059669' }}>✦ Fresh Drop — Just Launched</span>
-                </div>
-              ) : product!.best_seller_score && product!.best_seller_score >= 5 ? (
-                <div className="flex items-center gap-1.5 mb-2">
-                  <span className="text-xs font-bold uppercase tracking-widest" style={{ color: '#C9961A' }}>★ Our Most Loved Piece</span>
-                </div>
-              ) : null}
-
-              <h1 className="text-2xl font-bold" style={{ fontFamily: 'Playfair Display, serif' }}>{product!.name}</h1>
-
-              {/* Price section */}
-              <div className="flex items-center gap-3 mt-2 flex-wrap">
-                {salePrice ? (
-                  <>
-                    <p className="text-2xl font-bold" style={{ color: '#A68B6E' }}>
-                      PKR {salePrice.toLocaleString('en-US')}
-                    </p>
-                    <p className="text-lg line-through" style={{ color: '#9CA3AF' }}>
-                      PKR {product!.price.toLocaleString('en-US')}
-                    </p>
-                    <span className="text-xs font-bold px-2 py-0.5 rounded-sm" style={{ backgroundColor: '#C62828', color: 'white' }}>
-                      -{Math.round((1 - salePrice / product!.price) * 100)}%
-                    </span>
-                    <span className="text-xs" style={{ color: '#10B981' }}>
-                      Save PKR {savings.toLocaleString('en-US')}
-                    </span>
-                  </>
-                ) : (
-                  <p className="text-2xl font-semibold" style={{ color: '#A68B6E' }}>
-                    PKR {product!.price.toLocaleString('en-US')}
-                  </p>
-                )}
-                {product!.stock_quantity === 0 && (
-                  <span className="text-xs px-2 py-1 rounded bg-gray-100 text-gray-500">Out of Stock</span>
-                )}
-              </div>
-
-              {/* Sale urgency banner */}
-              {salePrice && (
-                <div className="mt-3">
-                  <ProductSaleUrgency
-                    endsAt={saleEndsAt}
-                    stockQty={product!.stock_quantity}
-                  />
-                </div>
-              )}
-            </div>
-
-            {product!.description && <p className="text-gray-600 leading-relaxed">{product!.description}</p>}
-
-            {/* Social proof */}
-            {soldLast24h >= 2 && (
-              <p className="text-sm font-medium" style={{ color: '#10B981' }}>
-                🔥 {soldLast24h} sold in the last 24 hours
-              </p>
-            )}
-
-            {/* Stock urgency — only on non-sale products (sale products use ProductSaleUrgency) */}
-            {!salePrice && product!.stock_quantity > 0 && product!.stock_quantity <= 10 && (
-              <p className="text-sm font-semibold" style={{ color: product!.stock_quantity <= 3 ? '#B91C1C' : '#B45309' }}>
-                {product!.stock_quantity <= 3
-                  ? `Hurry! Only ${product!.stock_quantity} left in stock`
-                  : `Only ${product!.stock_quantity} left in stock`}
-              </p>
-            )}
-
-            <AddToCartButton product={product!} salePrice={salePrice ?? undefined} />
-
-            {/* Waitlist — shown when product is completely sold out */}
-            {isSoldOut && <NotifyMeButton productId={product!.id} />}
-          </div>
-        </div>
+        <ProductGallerySection
+          product={product!}
+          salePrice={salePrice}
+          saleEndsAt={saleEndsAt}
+          isTrending={isTrending}
+          soldLast24h={soldLast24h}
+        />
 
         {/* Reviews section */}
         <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
@@ -278,8 +187,8 @@ export default async function ProductPage({ params }: { params: Promise<{ slug: 
         {/* You May Also Like */}
         {relatedProducts.length > 0 && (
           <div className="mt-8 border-t pt-6" style={{ borderColor: '#E8DDD4' }}>
-            <h2 className="text-lg mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>This Is For You</h2>
-            <ProductSlider products={relatedProducts} />
+            <h2 className="text-lg mb-4 text-center" style={{ fontFamily: 'Playfair Display, serif' }}>This Is For You</h2>
+            <ProductSlider products={relatedProducts} salePriceMap={relatedSalePrices} />
           </div>
         )}
       </div>

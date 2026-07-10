@@ -1,7 +1,9 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import Link from 'next/link'
 import { Trash2 } from 'lucide-react'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 type InvoiceRow = {
   id: string
@@ -33,9 +35,20 @@ function isWithinDays(dateStr: string, days: number) {
 }
 
 export default function AdminInvoices() {
+  const C = getAdminStatusColors(useAdminDarkMode())
   const [invoices, setInvoices] = useState<InvoiceRow[]>([])
   const [filter, setFilter] = useState<Filter>('all')
   const [deleting, setDeleting] = useState<string | null>(null)
+  // Mobile long-press reveal (US6)
+  const [revealedRowId, setRevealedRowId] = useState<string | null>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const startLongPress = (id: string) => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    longPressTimer.current = setTimeout(() => setRevealedRowId(r => (r === id ? null : id)), 500)
+  }
+  const cancelLongPress = () => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }
 
   useEffect(() => {
     fetch('/api/admin/invoices')
@@ -76,18 +89,18 @@ export default function AdminInvoices() {
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={filter === f.key
               ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
-              : { borderColor: '#E8DDD4', color: '#6B7280' }}
+              : { borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}
           >
             {f.label}
           </button>
         ))}
-        <span className="text-xs self-center ml-1" style={{ color: '#9CA3AF' }}>
+        <span className="text-xs self-center ml-1" style={{ color: 'var(--admin-subtle)' }}>
           {filtered.length} invoice{filtered.length !== 1 ? 's' : ''}
         </span>
       </div>
 
       {filtered.length === 0 && (
-        <p className="text-sm" style={{ color: '#9CA3AF' }}>
+        <p className="text-sm" style={{ color: 'var(--admin-subtle)' }}>
           {invoices.length === 0
             ? 'No invoices yet. Generated automatically when orders are paid.'
             : 'No invoices in this period.'}
@@ -95,10 +108,10 @@ export default function AdminInvoices() {
       )}
 
       {filtered.length > 0 && (
-        <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+        <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
           <div className="overflow-x-auto">
             <table className="w-full text-sm min-w-[640px]">
-              <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
+              <thead className="border-b bg-[var(--admin-bg)]" style={{ borderColor: 'var(--admin-border)' }}>
                 <tr>
                   <th className="text-left p-4 font-medium">Invoice #</th>
                   <th className="text-left p-4 font-medium">Order</th>
@@ -111,18 +124,25 @@ export default function AdminInvoices() {
               </thead>
               <tbody>
                 {filtered.map(inv => (
-                  <tr key={inv.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                  <tr
+                    key={inv.id}
+                    className="border-b last:border-0"
+                    style={{ borderColor: 'var(--admin-divider)' }}
+                    onTouchStart={() => startLongPress(inv.id)}
+                    onTouchEnd={cancelLongPress}
+                    onTouchMove={cancelLongPress}
+                  >
                     <td className="p-4 font-bold" style={{ color: '#A68B6E' }}>{inv.invoice_number}</td>
                     <td className="p-4 font-medium">
-                      {inv.orders?.order_number ?? <span className="italic text-sm" style={{ color: '#9CA3AF' }}>Order deleted</span>}
+                      {inv.orders?.order_number ?? <span className="italic text-sm" style={{ color: 'var(--admin-subtle)' }}>Order deleted</span>}
                     </td>
                     <td className="p-4">
-                      <p className="font-medium">{inv.orders?.customer_name ?? <span className="italic text-sm" style={{ color: '#9CA3AF' }}>—</span>}</p>
-                      <p className="text-xs" style={{ color: '#6B7280' }}>{inv.orders?.customer_phone}</p>
+                      <p className="font-medium">{inv.orders?.customer_name ?? <span className="italic text-sm" style={{ color: 'var(--admin-subtle)' }}>—</span>}</p>
+                      <p className="text-xs" style={{ color: 'var(--admin-muted)' }}>{inv.orders?.customer_phone}</p>
                     </td>
                     <td className="p-4 font-semibold">PKR {Number(inv.amount).toLocaleString()}</td>
                     <td className="p-4 capitalize">{inv.orders?.payment_method}</td>
-                    <td className="p-4 text-xs" style={{ color: '#6B7280' }}>
+                    <td className="p-4 text-xs" style={{ color: 'var(--admin-muted)' }}>
                       {new Date(inv.generated_at).toLocaleDateString('en-PK', {
                         day: 'numeric', month: 'short', year: 'numeric',
                       })}
@@ -141,9 +161,9 @@ export default function AdminInvoices() {
                         <button
                           onClick={() => deleteInvoice(inv.id)}
                           disabled={deleting === inv.id}
-                          className="transition-colors"
+                          className={`transition-colors ${revealedRowId === inv.id ? '' : 'max-md:hidden'}`}
                           style={{ color: '#FCA5A5' }}
-                          onMouseEnter={e => (e.currentTarget.style.color = '#EF4444')}
+                          onMouseEnter={e => (e.currentTarget.style.color = C.critical)}
                           onMouseLeave={e => (e.currentTarget.style.color = '#FCA5A5')}
                           title="Delete invoice"
                         >

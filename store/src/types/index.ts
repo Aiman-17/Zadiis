@@ -20,6 +20,7 @@ export type Product = {
   price: number
   category_id: string
   images: string[]
+  image_colors?: (string | null)[]
   sizes: string[]
   colors: string[]
   stock_quantity: number
@@ -41,6 +42,9 @@ export type Product = {
   new_arrival_end?: string
   no_restock?: boolean
   discount_percentage?: number | null
+  is_featured?: boolean
+  featured_start?: string | null
+  featured_end?: string | null
 }
 
 export type OrderItem = {
@@ -73,6 +77,7 @@ export type Order = {
   return_reason?: string | null
   cancelled_at?: string | null
   returned_at?: string | null
+  delivered_at?: string | null
   cod_status?: 'pending' | 'received' | 'lost' | null
   cod_collected_at?: string | null
   is_archived: boolean
@@ -128,4 +133,15 @@ export type ProductWaitlist = {
   phone: string | null
   notified_at: string | null
   created_at: string
+}
+
+export type AdminNotification = {
+  id: string
+  type: 'payment_received' | 'cancellation_request' | 'return_request' | 'exchange_request'
+  order_id: string | null
+  order_number: string | null
+  message: string
+  created_at: string
+  read_at: string | null
+  archived_at: string | null
 }

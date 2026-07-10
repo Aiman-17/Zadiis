@@ -90,7 +90,7 @@ export default function ReturnRequestForm() {
 
   const inputStyle  = { borderColor: '#E8DDD4', outline: 'none' } as React.CSSProperties
   const isExchange  = form.request_type === 'exchange'
-  const canSubmit   = form.order_number && form.customer_email &&
+  const canSubmit   = form.order_number && form.customer_email && form.customer_name &&
     (isExchange ? form.exchange_details : form.reason)
 
   return (
@@ -146,9 +146,9 @@ export default function ReturnRequestForm() {
       </div>
 
       <div>
-        <label className="block text-sm font-medium mb-1.5">Your Name</label>
+        <label className="block text-sm font-medium mb-1.5">Your Name *</label>
         <input
-          type="text" placeholder="Full name"
+          type="text" required placeholder="Full name — must match your order"
           value={form.customer_name} onChange={set('customer_name')}
           className="w-full border rounded-md px-3 py-2.5 text-sm"
           style={inputStyle}

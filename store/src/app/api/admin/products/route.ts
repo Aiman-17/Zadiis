@@ -5,7 +5,7 @@ import { sendBackInStockEmail } from '@/lib/email'
 export async function GET() {
   const { data, error } = await supabaseAdmin
     .from('products')
-    .select('id, name, slug, sku, price, cost_price, images, stock_quantity, variant_stock, total_sold, is_new_arrival, is_bestseller, is_trending, best_seller_score, created_at, product_category')
+    .select('id, name, slug, sku, price, cost_price, images, stock_quantity, variant_stock, total_sold, is_new_arrival, best_seller_score, trending_score, is_featured, featured_start, featured_end, created_at, product_category')
     .eq('is_active', true)
     .order('name')
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
@@ -37,6 +37,18 @@ export async function POST(req: NextRequest) {
     .select()
     .single()
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  // A product's first stocking counts as a restock event for Just Dropped
+  // purposes (FR-010) — reuses the 'restock' reason already defined in the
+  // stock_movements schema but never previously written by any code path.
+  if (typeof stockQuantity === 'number' && stockQuantity > 0 && data?.id) {
+    await supabaseAdmin.from('stock_movements').insert({
+      product_id: data.id,
+      delta: stockQuantity,
+      reason: 'restock',
+    })
+  }
+
   return NextResponse.json(data)
 }
 
@@ -47,21 +59,35 @@ export async function PUT(req: NextRequest) {
     body.stock_quantity = calcTotalStock(variantStock)
   }
 
-  // Read old stock before updating (needed to detect 0 → positive transition)
+  // Read old stock before updating — needed both to detect a 0 → positive
+  // transition (back-in-stock emails, unchanged) and, more broadly, any
+  // increase at all (a restock event for Just Dropped purposes, FR-009).
   const newStock = body.stock_quantity as number | undefined
   let restockProduct: { name: string; slug: string; images: string[] } | null = null
-  if (typeof newStock === 'number' && newStock > 0) {
+  let restockDelta = 0
+  if (typeof newStock === 'number') {
     const { data: current } = await supabaseAdmin
       .from('products')
       .select('stock_quantity, name, slug, images')
       .eq('id', id)
       .single()
-    if (current?.stock_quantity === 0) restockProduct = current
+    if (current) {
+      if (newStock > current.stock_quantity) restockDelta = newStock - current.stock_quantity
+      if (current.stock_quantity === 0 && newStock > 0) restockProduct = current
+    }
   }
 
   // Update product FIRST — response is never held hostage by email latency
   const { error } = await supabaseAdmin.from('products').update(body).eq('id', id)
   if (error) return NextResponse.json({ error: error.message }, { status: 500 })
+
+  if (restockDelta > 0) {
+    await supabaseAdmin.from('stock_movements').insert({
+      product_id: id,
+      delta: restockDelta,
+      reason: 'restock',
+    })
+  }
 
   // Send back-in-stock emails after the response is returned (non-blocking)
   if (restockProduct) {

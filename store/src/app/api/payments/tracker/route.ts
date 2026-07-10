@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendOwnerNewOrder } from '@/lib/email'
+import { getEffectiveStock } from '@/lib/stock'
 
 const SAFEPAY_ENV = process.env.NEXT_PUBLIC_SAFEPAY_ENV || 'sandbox'
 const SAFEPAY_API_BASE = SAFEPAY_ENV === 'production'
@@ -47,8 +48,11 @@ export async function POST(req: NextRequest) {
       const { data: product, error } = await supabaseAdmin
         .from('products').select('stock_quantity, name, variant_stock').eq('id', item.product_id).single()
       if (error || !product) return NextResponse.json({ error: `Product not found: ${item.product_name}` }, { status: 400 })
-      if (product.stock_quantity < item.quantity) {
-        return NextResponse.json({ error: `"${item.product_name}" has insufficient stock. Available: ${product.stock_quantity}.`, outOfStock: true }, { status: 400 })
+      // BUG-004: check the true effective stock (variant_stock sum when
+      // tracked), not the raw stock_quantity field, which can drift stale.
+      const effectiveStock = getEffectiveStock(product)
+      if (effectiveStock < item.quantity) {
+        return NextResponse.json({ error: `"${item.product_name}" has insufficient stock. Available: ${effectiveStock}.`, outOfStock: true }, { status: 400 })
       }
       // Per-variant check when tracking is enabled
       const variantStock = product.variant_stock as Record<string, Record<string, number>> | null
@@ -80,7 +84,7 @@ export async function POST(req: NextRequest) {
           amount: Math.round(total * 100),
           currency: 'PKR',
           payload: {
-            purpose: 'ZADIIS Order',
+            purpose: "ZADII'S Order",
             mode: 'payment',
             metadata: { source: 'zadiis' },
           },

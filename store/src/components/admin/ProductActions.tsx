@@ -28,7 +28,8 @@ export default function ProductActions({ id }: { id: string }) {
         onClick={handleDelete}
         disabled={deleting}
         title="Delete product"
-        className="text-gray-400 hover:text-red-500 transition-colors disabled:opacity-50"
+        className="hover:text-red-500 transition-colors disabled:opacity-50"
+        style={{ color: 'var(--admin-subtle)' }}
       >
         <Trash2 size={15} />
       </button>

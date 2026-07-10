@@ -1,7 +1,8 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
-import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived } from '@/lib/email'
+import { sendCustomerPaymentConfirmed, sendOwnerPaymentReceived, PAYMENT_METHOD_LABELS } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
+import { notifyAdmin } from '@/lib/notifications'
 
 const SAFEPAY_ENV = process.env.NEXT_PUBLIC_SAFEPAY_ENV || 'sandbox'
 const SAFEPAY_API_BASE = SAFEPAY_ENV === 'production'
@@ -81,9 +82,17 @@ export async function POST(req: NextRequest) {
     order_number: order.order_number,
     customer_name: order.customer_name,
     customer_phone: order.customer_phone,
+    customer_email: order.customer_email,
     total: order.total,
     payment_method: order.payment_method,
+    safepay_transaction_id: order.safepay_transaction_id,
+    items: order.items,
   })
+  await notifyAdmin(
+    'payment_received',
+    order.id,
+    `Payment received from ${order.customer_name} (${order.customer_email}) — order #${order.order_number} — PKR ${Number(order.total).toLocaleString()} via ${PAYMENT_METHOD_LABELS[order.payment_method] || order.payment_method}`,
+  )
 
   console.log(`[verify] Order ${order.order_number} marked paid via redirect verification`)
   return NextResponse.json({ paid: true })

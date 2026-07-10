@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendOwnerStockConflict } from '@/lib/email'
+import { getEffectiveStock } from '@/lib/stock'
 
 export async function POST(req: NextRequest) {
   try {
@@ -22,7 +23,9 @@ export async function POST(req: NextRequest) {
 
     for (const item of items) {
       const product = productMap.get(item.product_id)
-      if (!product || product.stock_quantity < item.quantity) {
+      // BUG-004: check effective stock (variant_stock sum when tracked),
+      // not the raw stock_quantity field, which can drift stale.
+      if (!product || getEffectiveStock(product) < item.quantity) {
         unavailable.push(item)
         continue
       }

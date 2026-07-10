@@ -1,6 +1,16 @@
-export const metadata = { title: 'Shipping Information | ZADIIS' }
+import { supabaseAdmin } from '@/lib/supabase/server'
 
-export default function ShippingPage() {
+export const metadata = { title: "Shipping Information | ZADII'S" }
+export const dynamic = 'force-dynamic'
+
+export default async function ShippingPage() {
+  const { data: setting } = await supabaseAdmin
+    .from('store_settings')
+    .select('value')
+    .eq('key', 'free_delivery_enabled')
+    .maybeSingle()
+  const freeDeliveryEnabled = setting?.value !== 'false'
+
   return (
     <div className="max-w-3xl mx-auto px-4 py-16">
       <h1 className="text-3xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Shipping Information</h1>
@@ -15,7 +25,7 @@ export default function ShippingPage() {
         </section>
         <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>Delivery Charges</h2>
-          <p>Delivery charges vary by city and are shown at checkout. Free delivery is available on orders over PKR 10,000.</p>
+          <p>Delivery charges vary by city and are shown at checkout.{freeDeliveryEnabled ? ' Free delivery is available on orders of 5 or more items.' : ''}</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>Tracking Your Order</h2>

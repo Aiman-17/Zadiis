@@ -4,7 +4,7 @@ import { ChevronLeft, ChevronRight } from 'lucide-react'
 import ProductCard from './ProductCard'
 import type { Product } from '@/types'
 
-export default function ProductSlider({ products }: { products: Product[] }) {
+export default function ProductSlider({ products, salePriceMap }: { products: Product[]; salePriceMap?: Record<string, number> }) {
   const ref = useRef<HTMLDivElement>(null)
   const [canLeft, setCanLeft] = useState(false)
   const [canRight, setCanRight] = useState(false)
@@ -74,7 +74,7 @@ export default function ProductSlider({ products }: { products: Product[] }) {
               width: 'clamp(160px, 46vw, 220px)',
             }}
           >
-            <ProductCard product={p} />
+            <ProductCard product={p} salePrice={salePriceMap?.[p.id]} />
           </div>
         ))}
       </div>

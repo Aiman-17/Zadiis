@@ -1,4 +1,5 @@
 import { supabaseAdmin } from '@/lib/supabase/server'
+import { getEffectiveStock } from '@/lib/stock'
 import type { OrderItem } from '@/types'
 
 type ProductRow = {
@@ -6,17 +7,6 @@ type ProductRow = {
   total_sold: number
   stock_quantity: number
   variant_stock: Record<string, Record<string, number>> | null
-}
-
-function getTotalStock(p: ProductRow): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes).reduce((s, q) => s + (q as number), 0),
-      0
-    )
-  }
-  return p.stock_quantity
 }
 
 // best_seller_score:
@@ -100,7 +90,7 @@ export async function recalculateScores(productIds?: string[]) {
 
   await Promise.all(
     (products as ProductRow[]).map(p => {
-      const stock = getTotalStock(p)
+      const stock = getEffectiveStock(p)
       const scores = computeScore(
         p.total_sold || 0,
         stock,

@@ -5,25 +5,15 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Product } from '@/types'
-
-function getStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0)
-    return Object.values(vs).reduce((sum, sizes) =>
-      sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
-  return p.stock_quantity
-}
-
-function isSlowMover(p: Product, avgST: number): boolean {
-  const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-  if (age < 15) return false
-  const s = getStock(p)
-  if (s === 0 || avgST === 0) return false
-  return (p.total_sold / (p.total_sold + s)) < avgST * 0.5
-}
+import { getEffectiveStock as getStock } from '@/lib/stock'
+import { computeStoreAvgSellThrough, isSlowMover } from '@/lib/merchandising'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 export default function NewSalePage() {
   const router = useRouter()
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [products, setProducts] = useState<Product[]>([])
@@ -41,13 +31,8 @@ export default function NewSalePage() {
 
   // Exclude new arrivals; sort slow movers first
   const eligible = products.filter(p => !p.is_new_arrival)
-  const eligibleForAvg = eligible.filter(p => {
-    const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
-    return age >= 15 && getStock(p) > 0
-  })
-  const avgST = eligibleForAvg.length > 0
-    ? eligibleForAvg.reduce((sum, p) => { const s = getStock(p); return sum + p.total_sold / (p.total_sold + s) }, 0) / eligibleForAvg.length
-    : 0
+  // Shared with AdminProductsClient and sales/[id]/edit (spec 006, US9 consolidation)
+  const avgST = computeStoreAvgSellThrough(products)
   const sortedProducts = [...eligible].sort((a, b) => {
     const aS = isSlowMover(a, avgST), bS = isSlowMover(b, avgST)
     if (aS && !bS) return -1
@@ -121,7 +106,7 @@ export default function NewSalePage() {
       <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>New Sale</h1>
       <form onSubmit={handleSubmit} className="space-y-6">
 
-        <div className="space-y-4 bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+        <div className="space-y-4 bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
           <h2 className="font-semibold text-sm uppercase tracking-wide" style={{ color: '#A68B6E' }}>Sale Details</h2>
           <div>
             <Label htmlFor="title">Sale Title *</Label>
@@ -130,7 +115,7 @@ export default function NewSalePage() {
           <div>
             <Label htmlFor="desc">Description</Label>
             <textarea id="desc" value={form.description} onChange={e => set('description', e.target.value)} rows={2}
-              className="w-full border rounded px-3 py-2 text-sm mt-1 resize-none" style={{ borderColor: '#E2E8F0' }}
+              className="w-full border rounded px-3 py-2 text-sm mt-1 resize-none" style={{ borderColor: 'var(--admin-input-border)' }}
               placeholder="Up to 40% off on selected items" />
           </div>
           <div>
@@ -150,32 +135,32 @@ export default function NewSalePage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
+            <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 accent-[#A68B6E]" />
             <Label htmlFor="is_active">Activate immediately</Label>
           </div>
         </div>
 
-        <div className="bg-white p-6 rounded-lg border" style={{ borderColor: '#E8DDD4' }}>
+        <div className="bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
           <div className="flex items-center justify-between mb-1">
             <h2 className="font-semibold text-sm uppercase tracking-wide" style={{ color: '#A68B6E' }}>Select Products</h2>
             {selectedCount > 0 && (
-              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#E8DDD4', color: '#A68B6E' }}>
+              <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: 'var(--admin-border)', color: '#A68B6E' }}>
                 {selectedCount} selected
               </span>
             )}
           </div>
 
           {newArrivalCount > 0 && (
-            <p className="text-xs mb-3" style={{ color: '#9CA3AF' }}>
+            <p className="text-xs mb-3" style={{ color: 'var(--admin-subtle)' }}>
               {newArrivalCount} new arrival{newArrivalCount !== 1 ? 's' : ''} hidden — new arrivals should sell at full price
             </p>
           )}
 
-          <div className="flex items-center gap-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
-            <label className="text-xs font-medium shrink-0" style={{ color: '#1C1C1C' }}>Discount %</label>
+          <div className="flex items-center gap-2 mb-3 p-3 rounded-lg" style={{ backgroundColor: 'var(--admin-bg)', border: '1px solid var(--admin-border)' }}>
+            <label className="text-xs font-medium shrink-0" style={{ color: 'var(--admin-text)' }}>Discount %</label>
             <input type="number" min="1" max="99" value={discountPct} onChange={e => setDiscountPct(e.target.value)}
               className="w-16 border rounded px-2 py-1 text-sm text-center" style={{ borderColor: '#A68B6E' }} />
-            <span className="text-xs" style={{ color: '#9CA3AF' }}>off original price</span>
+            <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>off original price</span>
             <button type="button" onClick={applyDiscountToAll} disabled={selectedCount === 0}
               className="ml-auto text-xs px-3 py-1.5 rounded text-white transition-opacity disabled:opacity-40"
               style={{ backgroundColor: '#A68B6E' }}>
@@ -185,7 +170,7 @@ export default function NewSalePage() {
 
           <div className="space-y-1.5 max-h-80 overflow-y-auto pr-1">
             {sortedProducts.length === 0 && (
-              <p className="text-sm py-4 text-center" style={{ color: '#9CA3AF' }}>Loading products…</p>
+              <p className="text-sm py-4 text-center" style={{ color: 'var(--admin-subtle)' }}>Loading products…</p>
             )}
             {sortedProducts.map(p => {
               const slow = isSlowMover(p, avgST)
@@ -193,7 +178,7 @@ export default function NewSalePage() {
               return (
                 <div key={p.id}
                   className="flex items-center gap-3 py-2.5 px-3 rounded border cursor-pointer transition-colors"
-                  style={isSelected ? { borderColor: '#A68B6E', backgroundColor: '#FAF8F5' } : { borderColor: slow ? '#FEE2E2' : '#F3F4F6' }}
+                  style={isSelected ? { borderColor: '#A68B6E', backgroundColor: 'var(--admin-bg)' } : { borderColor: slow ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FEE2E2') : 'var(--admin-divider)' }}
                   onClick={() => toggleProduct(p.id, p.price)}>
                   <input type="checkbox" readOnly checked={isSelected} className="w-4 h-4 shrink-0 accent-[#A68B6E]" />
                   <div className="flex-1 min-w-0">
@@ -201,12 +186,12 @@ export default function NewSalePage() {
                       <p className="text-sm font-medium truncate">{p.name}</p>
                       {slow && (
                         <span className="text-xs px-1.5 py-0.5 rounded-full shrink-0 font-medium"
-                          style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
+                          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>
                           Slow Mover
                         </span>
                       )}
                     </div>
-                    <p className="text-xs" style={{ color: '#9CA3AF' }}>
+                    <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>
                       PKR {p.price.toLocaleString()}
                       {p.cost_price > 0 && ` · Cost PKR ${p.cost_price.toLocaleString()}`}
                       {` · ${getStock(p)} in stock`}
@@ -214,7 +199,7 @@ export default function NewSalePage() {
                   </div>
                   {isSelected && (
                     <div className="flex items-center gap-1.5 shrink-0" onClick={e => e.stopPropagation()}>
-                      <span className="text-xs" style={{ color: '#6B7280' }}>Sale PKR</span>
+                      <span className="text-xs" style={{ color: 'var(--admin-muted)' }}>Sale PKR</span>
                       <input type="number" value={selected[p.id]}
                         onChange={e => setSelected(prev => ({ ...prev, [p.id]: e.target.value }))}
                         className="w-24 border rounded px-2 py-1 text-xs" style={{ borderColor: '#A68B6E' }}
@@ -226,7 +211,7 @@ export default function NewSalePage() {
             })}
           </div>
           {selectedCount === 0 && sortedProducts.length > 0 && (
-            <p className="text-xs mt-3" style={{ color: '#9CA3AF' }}>
+            <p className="text-xs mt-3" style={{ color: 'var(--admin-subtle)' }}>
               Slow movers listed first — discount these to clear stock. Tap a product to add it.
             </p>
           )}

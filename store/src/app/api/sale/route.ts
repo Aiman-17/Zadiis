@@ -6,7 +6,8 @@ export async function GET() {
     .from('sales')
     .select('*, sale_products(product_id, sale_price, products(id, name, slug, price, images, colors, sizes, stock_quantity, variant_stock, is_bestseller, sku, is_active, created_at, category_id, description))')
     .eq('is_active', true)
-    .single()
+    .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+    .maybeSingle()
 
   if (error || !sale) return NextResponse.json({ sale: null }, { status: 200 })
   return NextResponse.json({ sale })

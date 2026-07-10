@@ -1,23 +1,36 @@
 'use client'
-import { useState, useEffect, useMemo } from 'react'
+import { useState, useEffect, useMemo, useRef } from 'react'
 import { Trash2, Archive, ChevronDown, ChevronRight, RotateCcw } from 'lucide-react'
 import type { Order } from '@/types'
-
-const PAYMENT_COLORS: Record<string, React.CSSProperties> = {
-  pending: { backgroundColor: '#FEF9C3', color: '#92400E' },
-  paid:    { backgroundColor: '#DCFCE7', color: '#15803D' },
-  failed:  { backgroundColor: '#FEE2E2', color: '#DC2626' },
-}
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 type Tab = 'all' | 'pending' | 'paid'
 
 export default function AdminPayments() {
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
+  const PAYMENT_COLORS: Record<string, React.CSSProperties> = {
+    pending: { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' },
+    paid:    { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: C.success },
+    failed:  { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong },
+  }
   const [orders, setOrders]           = useState<Order[]>([])
   const [tab, setTab]                 = useState<Tab>('all')
   const [marking, setMarking]         = useState<string | null>(null)
   const [actioning, setActioning]     = useState<string | null>(null)
   const [showArchived, setShowArchived] = useState(false)
   const [actionError, setActionError] = useState<string | null>(null)
+  // Mobile long-press reveal (US6)
+  const [revealedRowId, setRevealedRowId] = useState<string | null>(null)
+  const longPressTimer = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const startLongPress = (id: string) => {
+    if (longPressTimer.current) clearTimeout(longPressTimer.current)
+    longPressTimer.current = setTimeout(() => setRevealedRowId(r => (r === id ? null : id)), 500)
+  }
+  const cancelLongPress = () => {
+    if (longPressTimer.current) { clearTimeout(longPressTimer.current); longPressTimer.current = null }
+  }
 
   useEffect(() => {
     fetch('/api/admin/orders')
@@ -91,11 +104,18 @@ export default function AdminPayments() {
   const TABLE_COLS = ['Order', 'Customer', 'Amount', 'Method', 'Payment', 'Date', 'Action']
 
   const renderRow = (order: Order, isArchivedView = false) => (
-    <tr key={order.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+    <tr
+      key={order.id}
+      className="border-b last:border-0"
+      style={{ borderColor: 'var(--admin-divider)' }}
+      onTouchStart={() => startLongPress(order.id)}
+      onTouchEnd={cancelLongPress}
+      onTouchMove={cancelLongPress}
+    >
       <td className="p-4 font-medium" style={{ color: '#A68B6E' }}>{order.order_number}</td>
       <td className="p-4">
         <p className="font-medium">{order.customer_name}</p>
-        <p className="text-xs" style={{ color: '#6B7280' }}>{order.customer_phone}</p>
+        <p className="text-xs" style={{ color: 'var(--admin-muted)' }}>{order.customer_phone}</p>
       </td>
       <td className="p-4 font-semibold">PKR {Number(order.total).toLocaleString()}</td>
       <td className="p-4 capitalize">{order.payment_method}</td>
@@ -105,17 +125,17 @@ export default function AdminPayments() {
           {order.payment_status}
         </span>
         {order.safepay_transaction_id && (
-          <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>{order.safepay_transaction_id}</p>
+          <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>{order.safepay_transaction_id}</p>
         )}
       </td>
-      <td className="p-4 text-xs" style={{ color: '#6B7280' }}>
+      <td className="p-4 text-xs" style={{ color: 'var(--admin-muted)' }}>
         {new Date(order.created_at).toLocaleDateString()}
       </td>
       <td className="p-4">
         <div className="flex items-center gap-2.5">
           {!isArchivedView && order.payment_status === 'pending' && (
             order.payment_method === 'cod'
-              ? <span className="text-xs" style={{ color: '#9CA3AF' }}>Collect on delivery</span>
+              ? <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Collect on delivery</span>
               : (
                 <button
                   onClick={() => markPaid(order.id)}
@@ -137,10 +157,10 @@ export default function AdminPayments() {
               onClick={() => archivePayment(order.id)}
               disabled={actioning === order.id}
               title="Archive payment"
-              className="transition-colors"
-              style={{ color: '#9CA3AF' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#F59E0B')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#9CA3AF')}
+              className={`transition-colors ${revealedRowId === order.id ? '' : 'max-md:hidden'}`}
+              style={{ color: 'var(--admin-subtle)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = C.warning)}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--admin-subtle)')}
             >
               <Archive size={14} />
             </button>
@@ -152,10 +172,10 @@ export default function AdminPayments() {
               onClick={() => deletePayment(order.id, order.order_number)}
               disabled={actioning === order.id}
               title="Delete order permanently"
-              className="transition-colors"
-              style={{ color: '#9CA3AF' }}
-              onMouseEnter={e => (e.currentTarget.style.color = '#DC2626')}
-              onMouseLeave={e => (e.currentTarget.style.color = '#9CA3AF')}
+              className={`transition-colors ${revealedRowId === order.id ? '' : 'max-md:hidden'}`}
+              style={{ color: 'var(--admin-subtle)' }}
+              onMouseEnter={e => (e.currentTarget.style.color = C.criticalStrong)}
+              onMouseLeave={e => (e.currentTarget.style.color = 'var(--admin-subtle)')}
             >
               <Trash2 size={14} />
             </button>
@@ -167,7 +187,7 @@ export default function AdminPayments() {
               onClick={() => restorePayment(order.id)}
               disabled={actioning === order.id}
               title="Restore to active"
-              className="flex items-center gap-1 text-xs font-medium transition-colors"
+              className={`items-center gap-1 text-xs font-medium transition-colors ${revealedRowId === order.id ? 'flex' : 'hidden md:flex'}`}
               style={{ color: '#A68B6E' }}
             >
               <RotateCcw size={13} />
@@ -180,20 +200,20 @@ export default function AdminPayments() {
   )
 
   const renderTable = (rows: Order[], isArchivedView = false) => (
-    <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+    <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
       <div className="overflow-x-auto">
         <table className="w-full text-sm min-w-[640px]">
-          <thead className="border-b bg-gray-50" style={{ borderColor: '#E8DDD4' }}>
+          <thead className="border-b bg-[var(--admin-bg)]" style={{ borderColor: 'var(--admin-border)' }}>
             <tr>
               {TABLE_COLS.map(h => (
-                <th key={h} className="text-left p-4 font-medium" style={{ color: '#6B7280' }}>{h}</th>
+                <th key={h} className="text-left p-4 font-medium" style={{ color: 'var(--admin-muted)' }}>{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {rows.length === 0 ? (
               <tr>
-                <td colSpan={7} className="p-8 text-center text-sm" style={{ color: '#9CA3AF' }}>
+                <td colSpan={7} className="p-8 text-center text-sm" style={{ color: 'var(--admin-subtle)' }}>
                   No payments in this category.
                 </td>
               </tr>
@@ -211,7 +231,7 @@ export default function AdminPayments() {
       <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Payments</h1>
 
       {actionError && (
-        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: '#DC2626' }}>
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>
           <span>{actionError}</span>
           <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
         </div>
@@ -224,7 +244,7 @@ export default function AdminPayments() {
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={tab === t.key
               ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
-              : { borderColor: '#E8DDD4', color: '#6B7280' }}>
+              : { borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}>
             {t.label}
           </button>
         ))}
@@ -234,21 +254,21 @@ export default function AdminPayments() {
 
       {/* Archived payments — collapsible */}
       {archived.length > 0 && (
-        <div className="mt-6 rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+        <div className="mt-6 rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
           <button
             onClick={() => setShowArchived(v => !v)}
-            className="w-full flex items-center justify-between px-5 py-3 bg-gray-50 text-sm font-medium hover:bg-gray-100 transition-colors"
-            style={{ color: '#6B7280' }}
+            className="w-full flex items-center justify-between px-5 py-3 bg-[var(--admin-bg)] text-sm font-medium hover:bg-[var(--admin-divider)] transition-colors"
+            style={{ color: 'var(--admin-muted)' }}
           >
             <span className="flex items-center gap-2">
               {showArchived ? <ChevronDown size={15} /> : <ChevronRight size={15} />}
               Archived Payments
               <span className="text-xs px-2 py-0.5 rounded-full"
-                style={{ backgroundColor: '#F3F4F6', color: '#9CA3AF' }}>
+                style={{ backgroundColor: 'var(--admin-divider)', color: 'var(--admin-subtle)' }}>
                 {archived.length}
               </span>
             </span>
-            <span className="text-xs" style={{ color: '#9CA3AF' }}>
+            <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>
               Click to {showArchived ? 'hide' : 'show'}
             </span>
           </button>

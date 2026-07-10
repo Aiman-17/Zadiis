@@ -5,22 +5,52 @@ import ProductCard from '@/components/products/ProductCard'
 import ProductFilters from '@/components/products/ProductFilters'
 import ShopSearchBar from '@/components/products/ShopSearchBar'
 import ProductSectionTabs from '@/components/products/ProductSectionTabs'
+import PromoPopups from '@/components/store/PromoPopup'
 import { getProducts } from '@/lib/products'
+import { getMerchandisingContext } from '@/lib/merchandising'
+import { supabaseAdmin } from '@/lib/supabase/server'
 
 async function ProductGrid({ searchParams }: { searchParams: { size?: string; min?: string; max?: string; type?: string; q?: string; cat?: string; tab?: string } }) {
   let products: Awaited<ReturnType<typeof getProducts>> = []
+  let bestSellerIds = new Set<string>()
+  let trendingIds = new Set<string>()
+  let salePriceMap: Record<string, number> = {}
   try {
-    products = await getProducts({
-      size: searchParams.size,
-      minPrice: searchParams.min ? Number(searchParams.min) : undefined,
-      maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
-      type: searchParams.type,
-      q: searchParams.q,
-      category: searchParams.cat,
-      tab: searchParams.tab,
-    })
-  } catch {
-    // Supabase not configured yet
+    const [productsResult, context] = await Promise.all([
+      getProducts({
+        size: searchParams.size,
+        minPrice: searchParams.min ? Number(searchParams.min) : undefined,
+        maxPrice: searchParams.max ? Number(searchParams.max) : undefined,
+        type: searchParams.type,
+        q: searchParams.q,
+        category: searchParams.cat,
+        tab: searchParams.tab,
+      }),
+      getMerchandisingContext(),
+    ])
+    products = productsResult
+    bestSellerIds = context.bestSellerIds
+    trendingIds = context.trendingIds
+
+    // Sale products can surface here via search or the 'sale' tab (they're
+    // excluded from default browsing) — fetch their sale prices so the
+    // discount badge renders, same as everywhere else sale prices are shown.
+    const { data: sale } = await supabaseAdmin
+      .from('sales')
+      .select('id')
+      .eq('is_active', true)
+      .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+      .maybeSingle()
+    if (sale && products.length > 0) {
+      const { data: sps } = await supabaseAdmin
+        .from('sale_products')
+        .select('product_id, sale_price')
+        .eq('sale_id', sale.id)
+        .in('product_id', products.map(p => p.id))
+      salePriceMap = Object.fromEntries((sps || []).map(sp => [sp.product_id, sp.sale_price]))
+    }
+  } catch (e) {
+    console.error('ShopPage data fetch failed:', e)
   }
 
   if (products.length === 0) {
@@ -29,9 +59,10 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
 
   return (
     <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-      {products.map(product => (
-        <ProductCard key={product.id} product={product} />
-      ))}
+      {products.map(product => {
+        const badge = bestSellerIds.has(product.id) ? 'BESTSELLER' : trendingIds.has(product.id) ? 'TRENDING' : undefined
+        return <ProductCard key={product.id} product={product} badge={badge} salePrice={salePriceMap[product.id]} />
+      })}
     </div>
   )
 }
@@ -39,11 +70,32 @@ async function ProductGrid({ searchParams }: { searchParams: { size?: string; mi
 export default async function ShopPage({ searchParams }: { searchParams: Promise<{ size?: string; min?: string; max?: string; type?: string; q?: string; cat?: string; tab?: string }> }) {
   const params = await searchParams
 
+  let hasSale = false
+  let saleTitle: string | null = null
+  let freeDeliveryEnabled = true
+  try {
+    const [{ data: sale }, { data: deliverySetting }] = await Promise.all([
+      supabaseAdmin
+        .from('sales')
+        .select('id, title')
+        .eq('is_active', true)
+        .or(`ends_at.is.null,ends_at.gt.${new Date().toISOString()}`)
+        .maybeSingle(),
+      supabaseAdmin.from('store_settings').select('value').eq('key', 'free_delivery_enabled').maybeSingle(),
+    ])
+    hasSale = !!sale
+    saleTitle = sale?.title ?? null
+    freeDeliveryEnabled = deliverySetting?.value !== 'false'
+  } catch (e) {
+    console.error('ShopPage data fetch failed:', e)
+  }
+
   return (
     <div className="max-w-6xl mx-auto px-4 py-6">
+      <PromoPopups saleActive={hasSale} saleTitle={saleTitle} freeDeliveryEnabled={freeDeliveryEnabled} />
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Women&apos;s Collection</h1>
       <Suspense>
-        <ProductSectionTabs />
+        <ProductSectionTabs hasSale={hasSale} />
       </Suspense>
 
       <div className="mt-4">

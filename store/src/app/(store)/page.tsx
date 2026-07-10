@@ -5,10 +5,11 @@ import Image from 'next/image'
 import { Button } from '@/components/ui/button'
 import ProductCard from '@/components/products/ProductCard'
 
-import { getNewArrivalProducts, getBestsellerProducts, getTrendingProducts, getLastChanceProducts, getJustDroppedProducts } from '@/lib/products'
+import { getNewArrivalProducts, getBestsellerProducts, getTrendingProducts, getLastChanceProducts, getJustDroppedProducts, getFeaturedProducts } from '@/lib/products'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Truck, RefreshCw, Shield, Lock, Star } from 'lucide-react'
 import HomeSaleCountdown from '@/components/store/HomeSaleCountdown'
+import PromoPopups from '@/components/store/PromoPopup'
 import type { Product } from '@/types'
 
 async function getHeroImage(): Promise<string> {
@@ -24,23 +25,40 @@ async function getHeroImage(): Promise<string> {
   }
 }
 
+async function getFreeDeliveryEnabled(): Promise<boolean> {
+  try {
+    const { data } = await supabaseAdmin
+      .from('store_settings')
+      .select('value')
+      .eq('key', 'free_delivery_enabled')
+      .maybeSingle()
+    return data?.value !== 'false'
+  } catch {
+    return true
+  }
+}
+
 export default async function HomePage() {
   let newArrivals: Awaited<ReturnType<typeof getNewArrivalProducts>> = []
   let justDropped: Awaited<ReturnType<typeof getJustDroppedProducts>> = []
   let bestSellers: Awaited<ReturnType<typeof getBestsellerProducts>> = []
   let trending: Awaited<ReturnType<typeof getTrendingProducts>> = []
   let lastChance: Awaited<ReturnType<typeof getLastChanceProducts>> = []
+  let featured: Awaited<ReturnType<typeof getFeaturedProducts>> = []
   let heroImage = ''
+  let freeDeliveryEnabled = true
   let activeSale: { title: string; description: string | null; ends_at: string | null } | null = null
   let salePriceMap: Record<string, number> = {}
   try {
-    const [newArrivalsData, justDroppedData, bestSellersData, trendingData, lastChanceData, heroData, saleData] = await Promise.all([
+    const [newArrivalsData, justDroppedData, bestSellersData, trendingData, lastChanceData, featuredData, heroData, freeDeliveryData, saleData] = await Promise.all([
       getNewArrivalProducts(4),
       getJustDroppedProducts(4),
       getBestsellerProducts(4),
       getTrendingProducts(4),
       getLastChanceProducts(4),
+      getFeaturedProducts(4),
       getHeroImage(),
+      getFreeDeliveryEnabled(),
       supabaseAdmin
         .from('sales')
         .select('id, title, description, ends_at')
@@ -54,7 +72,9 @@ export default async function HomePage() {
     bestSellers = bestSellersData
     trending = trendingData
     lastChance = lastChanceData
+    featured = featuredData
     heroImage = heroData
+    freeDeliveryEnabled = freeDeliveryData
     activeSale = saleData
 
     // Build sale price map so home page cards show discounted prices
@@ -73,12 +93,14 @@ export default async function HomePage() {
 
   return (
     <div>
+      <PromoPopups saleActive={!!activeSale} saleTitle={activeSale?.title} freeDeliveryEnabled={freeDeliveryEnabled} />
+
       {/* Hero */}
       <section className="relative flex items-center justify-center text-center overflow-hidden" style={{ minHeight: '85vh', backgroundColor: '#E8DDD4' }}>
         {heroImage && (
           <Image
             src={heroImage}
-            alt="ZADIIS Hero Banner"
+            alt="ZADII'S Hero Banner"
             fill
             className="object-cover"
             priority
@@ -105,7 +127,9 @@ export default async function HomePage() {
       {/* Trust Bar */}
       <section className="border-y bg-white py-4" style={{ borderColor: '#E8DDD4' }}>
         <div className="max-w-5xl mx-auto px-4 flex flex-col md:flex-row items-center justify-around gap-4 text-sm text-gray-600">
-          <div className="flex items-center gap-2"><Truck size={18} style={{ color: '#A68B6E' }} /> Free delivery over PKR 10,000</div>
+          {freeDeliveryEnabled && (
+            <div className="flex items-center gap-2"><Truck size={18} style={{ color: '#A68B6E' }} /> Free delivery on orders of 5+ items</div>
+          )}
           <div className="flex items-center gap-2"><RefreshCw size={18} style={{ color: '#A68B6E' }} /> Easy 7-day returns</div>
           <div className="flex items-center gap-2"><Shield size={18} style={{ color: '#A68B6E' }} /> Secure payments</div>
           <div className="flex items-center gap-2"><Lock size={18} style={{ color: '#A68B6E' }} /> 100% authentic products</div>
@@ -141,6 +165,7 @@ export default async function HomePage() {
       {/* Product sections — compact stacked rows */}
       {(
         [
+          { key: 'featured',    label: 'Featured',      products: featured,     accent: '#A68B6E', badge: undefined,     href: '/shop' },
           { key: 'trending',    label: 'Trending',     products: trending,     accent: '#A68B6E', badge: 'TRENDING',    href: '/shop' },
           { key: 'lastChance',  label: 'Last Chance',   products: lastChance,   accent: '#A68B6E', badge: undefined,     href: '/shop' },
           { key: 'newArrivals', label: 'New Arrivals',  products: newArrivals,  accent: '#A68B6E', badge: undefined,     href: '/new-arrivals' },

@@ -1,8 +1,9 @@
 import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { generateInvoice } from '@/lib/invoice'
-import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled } from '@/lib/email'
+import { sendCustomerOrderDelivered, sendOwnerPaymentReceived, sendCustomerOrderCancelled, PAYMENT_METHOD_LABELS } from '@/lib/email'
 import { incrementTotalSold } from '@/lib/scoring'
+import { notifyAdmin } from '@/lib/notifications'
 import type { OrderItem } from '@/types'
 
 export async function PATCH(req: NextRequest) {
@@ -88,6 +89,7 @@ export async function PUT(req: NextRequest) {
       total: number
       payment_method: string
       safepay_transaction_id?: string | null
+      items?: OrderItem[]
     } | null = null
 
     const needsOrderData = order_status === 'delivered' || order_status === 'cancelled' || payment_status === 'paid'
@@ -111,10 +113,20 @@ export async function PUT(req: NextRequest) {
 
     // Stamp action timestamps — migration-safe (fails silently before columns exist).
     // Only fires for terminal statuses; switching between them clears the other field.
+    // Must be awaited — supabase-js query builders are thenable and never send
+    // the request at all unless awaited/then'd, so a bare `void query` is a no-op.
     if (order_status === 'cancelled' || order_status === 'returned') {
-      void supabaseAdmin.from('orders').update({
+      await supabaseAdmin.from('orders').update({
         cancelled_at: order_status === 'cancelled' ? new Date().toISOString() : null,
         returned_at:  order_status === 'returned'  ? new Date().toISOString() : null,
+      }).eq('id', id)
+    }
+
+    // Stamp delivered_at — source of truth for the return/exchange policy
+    // window (3 days from actual delivery, not order placement).
+    if (order_status === 'delivered') {
+      await supabaseAdmin.from('orders').update({
+        delivered_at: new Date().toISOString(),
       }).eq('id', id)
     }
 
@@ -145,14 +157,22 @@ export async function PUT(req: NextRequest) {
             order_number: orderData.order_number,
             customer_name: orderData.customer_name,
             customer_phone: orderData.customer_phone,
+            customer_email: orderData.customer_email,
             total: orderData.total,
             payment_method: orderData.payment_method,
+            items: orderData.items,
           })
+          await notifyAdmin(
+            'payment_received',
+            id,
+            `Payment received from ${orderData.customer_name} (${orderData.customer_email}) — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()} via ${PAYMENT_METHOD_LABELS[orderData.payment_method] || orderData.payment_method}`,
+          )
         }
         await sendCustomerOrderDelivered(orderData.customer_email, {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           total: orderData.total,
+          items: orderData.items,
         })
       }
 
@@ -161,10 +181,17 @@ export async function PUT(req: NextRequest) {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           customer_phone: orderData.customer_phone,
+          customer_email: orderData.customer_email,
           total: orderData.total,
           payment_method: orderData.payment_method,
           safepay_transaction_id: orderData.safepay_transaction_id,
+          items: orderData.items,
         })
+        await notifyAdmin(
+          'payment_received',
+          id,
+          `Payment received from ${orderData.customer_name} — order #${orderData.order_number} — PKR ${Number(orderData.total).toLocaleString()}`,
+        )
       }
     }
 

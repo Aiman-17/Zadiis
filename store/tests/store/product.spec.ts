@@ -59,6 +59,14 @@ test.describe('Product detail page', () => {
     const isAddable = await addBtn.isVisible().catch(() => false)
     if (!isAddable) test.skip() // product is sold out
 
+    // Color FIRST — selecting a color resets the chosen size (AddToCartButton),
+    // and adding without a color is rejected with a validation message.
+    const colorGroup = page.locator('div', { has: page.locator('p', { hasText: /^Color$/ }) }).last()
+    const firstColor = colorGroup.locator('button:enabled').first()
+    if (await firstColor.isVisible().catch(() => false)) {
+      await firstColor.click()
+    }
+
     // Pick a size if required
     const sizeButtons = page.getByRole('button').filter({ hasText: /^(XS|S|M|L|XL|XXL|Unstitched)$/i })
     if (await sizeButtons.first().isVisible().catch(() => false)) {
@@ -98,8 +106,11 @@ test.describe('Product detail page', () => {
     const href = await firstCard.getAttribute('href')
     await page.goto(href!)
 
+    // A last-chance product can show both the category-strip badge and the
+    // urgency message simultaneously — assert at least one is visible rather
+    // than assuming exactly one match (Playwright strict mode).
     await expect(
-      page.getByText(/Almost Gone|Final Stock|Only \d+ left/i)
+      page.getByText(/Almost Gone|Final Stock|Only \d+ left/i).first()
     ).toBeVisible()
   })
 
