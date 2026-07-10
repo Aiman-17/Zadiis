@@ -280,7 +280,7 @@ export default function AdminSettings() {
             style={{ backgroundColor: codEnabled ? '#1C1C1C' : '#D1D5DB' }}
           >
             <span
-              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow"
+              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={{ transform: codEnabled ? 'translateX(20px)' : 'translateX(0)' }}
             />
           </button>
@@ -328,7 +328,7 @@ export default function AdminSettings() {
             style={{ backgroundColor: freeDeliveryEnabled ? '#1C1C1C' : '#D1D5DB' }}
           >
             <span
-              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow"
+              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={{ transform: freeDeliveryEnabled ? 'translateX(20px)' : 'translateX(0)' }}
             />
           </button>
@@ -344,7 +344,7 @@ export default function AdminSettings() {
             style={{ backgroundColor: cancellationsEnabled ? '#1C1C1C' : '#D1D5DB' }}
           >
             <span
-              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full transition-transform shadow"
+              className="absolute top-0.5 left-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform duration-200 ease-[cubic-bezier(0.34,1.56,0.64,1)]"
               style={{ transform: cancellationsEnabled ? 'translateX(20px)' : 'translateX(0)' }}
             />
           </button>

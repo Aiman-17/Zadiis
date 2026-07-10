@@ -33,3 +33,28 @@ export type AdminStatusColors = Record<keyof typeof ADMIN_STATUS_LIGHT, string>
 export function getAdminStatusColors(isDark: boolean): AdminStatusColors {
   return isDark ? ADMIN_STATUS_DARK : ADMIN_STATUS_LIGHT
 }
+
+// `color-mix()` as an argument inside `filter: drop-shadow(...)` doesn't
+// reliably parse in every browser — it works fine as a plain background/
+// border color (used throughout this app), but nested inside drop-shadow it
+// can silently fail and fall back to a colorless shadow. This resolves a hex
+// color to a literal rgba() string instead, so the glow never depends on
+// that specific CSS combination.
+function hexToRgb(hex: string): [number, number, number] {
+  const clean = hex.replace('#', '')
+  const full = clean.length === 3 ? clean.split('').map(c => c + c).join('') : clean
+  const num = parseInt(full, 16)
+  return [(num >> 16) & 255, (num >> 8) & 255, num & 255]
+}
+
+/** A `drop-shadow(0 0 <blur>px rgba(...))` string for chart-mark glow. */
+export function glowFilter(hex: string, alpha: number, blur = 5): string {
+  const [r, g, b] = hexToRgb(hex)
+  return `drop-shadow(0 0 ${blur}px rgba(${r},${g},${b},${alpha}))`
+}
+
+/** A `box-shadow`-ready `0 0 <blur>px rgba(...)` string (no drop-shadow wrapper). */
+export function glowShadow(hex: string, alpha: number, blur = 5): string {
+  const [r, g, b] = hexToRgb(hex)
+  return `0 0 ${blur}px rgba(${r},${g},${b},${alpha})`
+}

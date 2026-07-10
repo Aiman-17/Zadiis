@@ -51,7 +51,9 @@ function ProductRow({ p, onDelete, waitlist, isBestSeller, isTrending }: {
 }) {
   const stock = getProductStock(p)
   const { revealed, handlers } = useLongPress()
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
+  const pinkStrong = isDark ? '#F472B6' : '#9D174D'
   return (
     <tr className="border-b last:border-0" style={{ borderColor: 'var(--admin-divider)' }} {...handlers}>
       <td className="p-4">
@@ -59,7 +61,7 @@ function ProductRow({ p, onDelete, waitlist, isBestSeller, isTrending }: {
           <span className="font-medium">{p.name}</span>
           {waitlist > 0 && (
             <span className="text-xs font-semibold px-1.5 py-0.5 rounded-full"
-              style={{ backgroundColor: '#FEF3C7', color: '#92400E' }}
+              style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF3C7', color: isDark ? C.warning : '#92400E' }}
               title={`${waitlist} customer${waitlist !== 1 ? 's' : ''} waiting for restock`}>
               {waitlist} waiting
             </span>
@@ -73,9 +75,9 @@ function ProductRow({ p, onDelete, waitlist, isBestSeller, isTrending }: {
         </div>
         {(isBestSeller || isTrending || p.is_new_arrival) && (
           <div className="flex gap-1 mt-1">
-            {isBestSeller     && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>★ Best Seller</span>}
-            {isTrending       && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FDF2F8', color: '#9D174D' }}>↑ Trending</span>}
-            {p.is_new_arrival && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#F5F3FF', color: C.violetStrong }}>✦ New</span>}
+            {isBestSeller     && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FFFBEB', color: isDark ? C.warning : '#92400E' }}>★ Best Seller</span>}
+            {isTrending       && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${pinkStrong} 25%, var(--admin-surface))` : '#FDF2F8', color: pinkStrong }}>↑ Trending</span>}
+            {p.is_new_arrival && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#F5F3FF', color: C.violetStrong }}>✦ New</span>}
           </div>
         )}
       </td>
@@ -140,7 +142,8 @@ export default function AdminProductsClient({
   waitlistCounts: Record<string, number>
 }) {
   const router = useRouter()
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const searchParams = useSearchParams()
   const filterParam    = searchParams.get('filter')
   const filterLowStock  = filterParam === 'low-stock'
@@ -217,8 +220,8 @@ export default function AdminProductsClient({
       {/* Active filter banner */}
       {(filterLowStock || filterSoldOut || filterSlowMovers) && (
         <div className="flex items-center justify-between px-4 py-2.5 rounded-lg text-sm"
-          style={{ backgroundColor: '#FEF2F2', border: '1px solid #FCA5A5' }}>
-          <span style={{ color: '#B91C1C' }}>
+          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', border: `1px solid ${isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FCA5A5'}` }}>
+          <span style={{ color: C.criticalStrong }}>
             {filterLowStock  && `Showing ${visibleActive.length} product${visibleActive.length !== 1 ? 's' : ''} with low stock (1–3 units)`}
             {filterSoldOut   && `Showing ${visibleActive.length} sold out product${visibleActive.length !== 1 ? 's' : ''}`}
             {filterSlowMovers && `Showing ${visibleActive.length} slow mover${visibleActive.length !== 1 ? 's' : ''} — below 50% of store avg sell-through, 15+ days old`}

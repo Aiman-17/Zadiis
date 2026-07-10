@@ -7,9 +7,13 @@ import { Label } from '@/components/ui/label'
 import type { Product } from '@/types'
 import { getEffectiveStock as getStock } from '@/lib/stock'
 import { computeStoreAvgSellThrough, isSlowMover } from '@/lib/merchandising'
+import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
+import { getAdminStatusColors } from '@/lib/adminColors'
 
 export default function NewSalePage() {
   const router = useRouter()
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [products, setProducts] = useState<Product[]>([])
@@ -131,7 +135,7 @@ export default function NewSalePage() {
             </div>
           </div>
           <div className="flex items-center gap-3">
-            <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
+            <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 accent-[#A68B6E]" />
             <Label htmlFor="is_active">Activate immediately</Label>
           </div>
         </div>
@@ -174,7 +178,7 @@ export default function NewSalePage() {
               return (
                 <div key={p.id}
                   className="flex items-center gap-3 py-2.5 px-3 rounded border cursor-pointer transition-colors"
-                  style={isSelected ? { borderColor: '#A68B6E', backgroundColor: 'var(--admin-bg)' } : { borderColor: slow ? '#FEE2E2' : 'var(--admin-divider)' }}
+                  style={isSelected ? { borderColor: '#A68B6E', backgroundColor: 'var(--admin-bg)' } : { borderColor: slow ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FEE2E2') : 'var(--admin-divider)' }}
                   onClick={() => toggleProduct(p.id, p.price)}>
                   <input type="checkbox" readOnly checked={isSelected} className="w-4 h-4 shrink-0 accent-[#A68B6E]" />
                   <div className="flex-1 min-w-0">
@@ -182,7 +186,7 @@ export default function NewSalePage() {
                       <p className="text-sm font-medium truncate">{p.name}</p>
                       {slow && (
                         <span className="text-xs px-1.5 py-0.5 rounded-full shrink-0 font-medium"
-                          style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>
+                          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>
                           Slow Mover
                         </span>
                       )}

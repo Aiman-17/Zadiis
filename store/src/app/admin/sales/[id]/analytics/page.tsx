@@ -25,7 +25,8 @@ function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
 export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const [sale, setSale] = useState<Sale | null>(null)
   const [analytics, setAnalytics] = useState<SaleAnalytics | null>(null)
   const [loading, setLoading] = useState(true)
@@ -44,8 +45,14 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
 
   if (loading) return <div className="p-4 text-sm" style={{ color: 'var(--admin-subtle)' }}>Loading…</div>
 
+  const maxSaleRevenue = analytics ? Math.max(0, ...analytics.revenueTrend.map(d => d.sale_revenue)) : 0
+
   return (
-    <div className="max-w-3xl space-y-6">
+    // No max-width cap — confirmed against the Orders page baseline, which
+    // fills the available width edge-to-edge at 1920px. The old max-w-3xl
+    // (and an intermediate max-w-5xl) both still left a large unused gap
+    // on wide desktop screens that no other admin data page has.
+    <div className="space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
@@ -89,7 +96,13 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
 
           {/* No orders yet — margin preview notice */}
           {!analytics.has_orders && (
-            <div className="px-4 py-3 rounded-lg text-sm" style={{ backgroundColor: '#FFFBEB', border: '1px solid #FDE68A', color: '#92400E' }}>
+            <div className="px-4 py-3 rounded-lg text-sm"
+              style={{
+                backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 15%, var(--admin-surface))` : '#FFFBEB',
+                borderColor: isDark ? `color-mix(in srgb, ${C.warning} 35%, var(--admin-surface))` : '#FDE68A',
+                borderWidth: 1, borderStyle: 'solid',
+                color: isDark ? C.warning : '#92400E',
+              }}>
               No orders through this sale yet — showing projected margins per unit if the sale goes live.
             </div>
           )}
@@ -124,7 +137,7 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
                     tickFormatter={d => new Date(d + 'T12:00:00').toLocaleDateString('en-US', { month: 'short', day: 'numeric' })} />
                   <YAxis tick={{ fontSize: 9 }} width={46}
                     tickFormatter={v => Number(v) >= 1000 ? `${Math.round(Number(v) / 1000)}k` : String(v)} />
-                  <Tooltip content={({ active, payload, label }) => {
+                  <Tooltip cursor={{ fill: 'var(--admin-divider)' }} content={({ active, payload, label }) => {
                     if (!active || !payload?.length) return null
                     const d = payload[0]?.payload as { sale_revenue: number; full_revenue: number; orders: number }
                     return (
@@ -143,7 +156,10 @@ export default function SaleAnalyticsPage({ params }: { params: Promise<{ id: st
                     {analytics.revenueTrend.map((_, i) => <Cell key={i} fill="#E8DDD4" />)}
                   </Bar>
                   <Bar dataKey="sale_revenue" name="Sale Revenue" radius={[2, 2, 0, 0]}>
-                    {analytics.revenueTrend.map((_, i) => <Cell key={i} fill="#A68B6E" />)}
+                    {analytics.revenueTrend.map((d, i) => (
+                      <Cell key={i} fill="#A68B6E"
+                        style={d.sale_revenue > 0 && d.sale_revenue === maxSaleRevenue ? { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' } : undefined} />
+                    ))}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>

@@ -39,14 +39,15 @@ const STATUSES = ['new', 'processing', 'shipped', 'delivered', 'returned']
 type Tab = 'active' | 'pending_shipment' | 'shipped' | 'completed' | 'returns' | 'cancellations' | 'archived'
 
 export default function AdminOrders() {
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const STATUS_STYLES: Record<string, React.CSSProperties> = {
-    new:        { backgroundColor: '#DBEAFE', color: C.infoStrong },
-    processing: { backgroundColor: '#FEF9C3', color: '#92400E' },
-    shipped:    { backgroundColor: '#EDE9FE', color: '#6D28D9' },
-    delivered:  { backgroundColor: '#DCFCE7', color: '#15803D' },
-    returned:   { backgroundColor: '#FEE2E2', color: C.criticalStrong },
-    cancelled:  { backgroundColor: '#F3F4F6', color: '#6B7280' },
+    new:        { backgroundColor: isDark ? `color-mix(in srgb, ${C.info} 25%, var(--admin-surface))` : '#DBEAFE', color: C.infoStrong },
+    processing: { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' },
+    shipped:    { backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#EDE9FE', color: C.violetStrong },
+    delivered:  { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: C.success },
+    returned:   { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong },
+    cancelled:  { backgroundColor: 'var(--admin-divider)', color: 'var(--admin-muted)' },
   }
   const [orders,          setOrders]          = useState<Order[]>([])
   const [returnRequests,  setReturnRequests]   = useState<RequestRecord[]>([])
@@ -268,7 +269,7 @@ export default function AdminOrders() {
       <h1 className="text-2xl mb-4" style={{ fontFamily: 'Playfair Display, serif' }}>Orders</h1>
 
       {actionError && (
-        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: C.criticalStrong }}>
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>
           <span>{actionError}</span>
           <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
         </div>
@@ -298,7 +299,7 @@ export default function AdminOrders() {
           </p>
           {requestError && (
             <div className="rounded-md px-4 py-2.5 text-sm mb-2"
-              style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', border: '1px solid #FECACA' }}>
+              style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong, border: `1px solid ${isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FECACA'}` }}>
               {requestError}
             </div>
           )}
@@ -312,7 +313,7 @@ export default function AdminOrders() {
             return (
               <div key={req.id} className="bg-[var(--admin-surface)] rounded-lg border p-4"
                 style={{
-                  borderColor: isExchange ? '#DDD6FE' : isReturn ? '#BFDBFE' : '#FDE68A',
+                  borderColor: isDark ? 'var(--admin-border)' : isExchange ? '#DDD6FE' : isReturn ? '#BFDBFE' : '#FDE68A',
                   borderLeftWidth: 4,
                   borderLeftColor,
                 }}>
@@ -321,16 +322,16 @@ export default function AdminOrders() {
                     <div className="flex items-center gap-2 mb-1 flex-wrap">
                       <span className="text-xs font-bold px-2 py-0.5 rounded-full"
                         style={isExchange
-                          ? { backgroundColor: '#EDE9FE', color: '#6D28D9' }
+                          ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#EDE9FE', color: C.violetStrong }
                           : isReturn
-                            ? { backgroundColor: '#DBEAFE', color: C.infoStrong }
-                            : { backgroundColor: '#FEF9C3', color: '#92400E' }}>
+                            ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.info} 25%, var(--admin-surface))` : '#DBEAFE', color: C.infoStrong }
+                            : { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' }}>
                         {isExchange ? 'EXCHANGE REQUEST' : isReturn ? 'RETURN REQUEST' : 'CANCEL REQUEST'}
                       </span>
                       <span className="font-medium text-sm" style={{ color: '#A68B6E' }}>{req.order_number}</span>
                       {isExchange && req.exchange_status === 'shipped' && (
                         <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                          style={{ backgroundColor: '#EDE9FE', color: '#6D28D9' }}>
+                          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#EDE9FE', color: C.violetStrong }}>
                           Shipped
                         </span>
                       )}
@@ -360,7 +361,7 @@ export default function AdminOrders() {
                         <button
                           onClick={() => markExchangeDelivered(req.id)}
                           className="text-xs px-3 py-1.5 rounded-full font-medium"
-                          style={{ backgroundColor: '#DCFCE7', color: '#15803D' }}
+                          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: isDark ? C.success : '#15803D' }}
                         >
                           Mark Delivered
                         </button>
@@ -368,7 +369,7 @@ export default function AdminOrders() {
                         <button
                           onClick={() => markExchangeShipped(req.id)}
                           className="text-xs px-3 py-1.5 rounded-full font-medium"
-                          style={{ backgroundColor: '#EDE9FE', color: '#6D28D9' }}
+                          style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#EDE9FE', color: C.violetStrong }}
                         >
                           Mark Shipped
                         </button>
@@ -380,7 +381,9 @@ export default function AdminOrders() {
                           : handleCancelFromRequest(req.order_number, req.id)
                         }
                         className="text-xs px-3 py-1.5 rounded-full font-medium"
-                        style={{ backgroundColor: isReturn ? '#DBEAFE' : '#FEF9C3', color: isReturn ? C.infoStrong : '#92400E' }}
+                        style={isReturn
+                          ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.info} 25%, var(--admin-surface))` : '#DBEAFE', color: C.infoStrong }
+                          : { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' }}
                       >
                         {isReturn ? 'Process Return' : 'Cancel Order'}
                       </button>
@@ -422,7 +425,7 @@ export default function AdminOrders() {
                   <span style={{ color: '#A68B6E' }}>{order.order_number || `#${order.id.slice(0, 8).toUpperCase()}`}</span>
                   {' — '}{order.customer_name}
                   {order.email_bounced && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: '#FEE2E2', color: C.criticalStrong }}>
+                    <span className="text-xs px-2 py-0.5 rounded-full font-medium" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong }}>
                       ⚠️ Email bounced
                     </span>
                   )}
@@ -445,10 +448,10 @@ export default function AdminOrders() {
                 <span
                   className="text-xs px-2 py-0.5 rounded-full"
                   style={order.payment_status === 'paid'
-                    ? { backgroundColor: '#DCFCE7', color: '#15803D' }
+                    ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: C.success }
                     : order.payment_status === 'failed'
-                    ? { backgroundColor: '#FEE2E2', color: C.criticalStrong }
-                    : { backgroundColor: '#FEF9C3', color: '#92400E' }}
+                    ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong }
+                    : { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' }}
                 >
                   {order.payment_status}
                 </span>

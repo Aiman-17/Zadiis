@@ -57,18 +57,27 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
           body { margin: 0; }
           @page { margin: 1.5cm; }
         }
-        body { font-family: Arial, sans-serif; background: white; }
+        /* This is an invoice document — always renders as paper (white bg,
+           black text) regardless of admin dark mode, same as opening a PDF.
+           Explicit color, not just background: without it, admin dark
+           mode's inherited white text would sit on this forced-white
+           background and disappear. */
+        body { font-family: Arial, sans-serif; background: white; color: #1C1C1C; }
       `}</style>
 
       {/* Print controls — hidden when printing */}
-      <div className="no-print flex items-center gap-4 p-4 border-b" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
+      <div className="no-print flex items-center gap-4 p-4 border-b" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5', color: '#1C1C1C' }}>
         <span className="text-sm font-medium">Invoice {inv.invoice_number}</span>
         <PrintButton />
         <a href="/admin/invoices" className="text-sm" style={{ color: '#6B7280' }}>← Back to Invoices</a>
       </div>
 
-      {/* Invoice document */}
-      <div style={{ maxWidth: 720, margin: '32px auto', padding: '0 24px' }}>
+      {/* Invoice document — explicit white background, not inherited from
+          <body>: this content is nested inside the admin dark-mode wrapper,
+          which wins over body-level CSS by proximity. Every text color
+          below is an explicit dark/muted gray meant for a white page, so
+          the background must be pinned white here too, not assumed. */}
+      <div style={{ maxWidth: 720, margin: '32px auto', padding: '24px', backgroundColor: '#FFFFFF' }}>
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, paddingBottom: 16, borderBottom: '2px solid #A68B6E' }}>
           <div>

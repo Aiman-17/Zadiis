@@ -96,8 +96,16 @@ export default function YoyWidget({ orders, metric, title }: { orders: Order[]; 
           <XAxis dataKey="label" tick={{ fontSize: 11 }} />
           <YAxis tick={{ fontSize: 11 }} width={50}
             tickFormatter={v => metric === 'revenue' ? `${Math.round(Number(v) / 1000)}k` : String(v)} />
-          <Tooltip formatter={(v, name) => [fmt(Number(v), metric), name]} />
-          <Line type="monotone" dataKey="current" stroke="#A68B6E" strokeWidth={2.5} dot={{ fill: '#A68B6E', r: 3 }} name="This year" />
+          <Tooltip formatter={(v, name) => [fmt(Number(v), metric), name]}
+            contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+            itemStyle={{ color: 'var(--admin-text)' }}
+            labelStyle={{ color: 'var(--admin-text-secondary)' }}
+            cursor={{ stroke: 'var(--admin-border)', strokeWidth: 1 }}
+          />
+          <Line type="monotone" dataKey="current" stroke="#A68B6E" strokeWidth={2.5}
+            dot={{ fill: '#A68B6E', r: 3 }} name="This year"
+            style={{ filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' }}
+            activeDot={{ r: 4, fill: '#A68B6E', style: { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.6))' } }} />
           <Line type="monotone" dataKey="prior" stroke="#D1D5DB" strokeWidth={2} strokeDasharray="4 4" dot={{ fill: '#D1D5DB', r: 2.5 }} name="Last year" />
         </LineChart>
       </ResponsiveContainer>

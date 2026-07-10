@@ -15,12 +15,13 @@ const PRESET_CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale'
 
 export default function NewProduct() {
   const router = useRouter()
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   // Best Seller and Trending are computed automatically (specs/003-merchandising-badges-v2)
   // and are no longer manual toggles — Featured is the merchant promotion outlet instead.
   const FLAG_OPTIONS = [
-    { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: '#F5F3FF', activeColor: C.violetStrong },
-    { key: 'is_featured',    label: '☆ Featured',    activeBg: '#FFFBEB', activeColor: '#92400E' },
+    { key: 'is_new_arrival', label: '✦ New Arrival', activeBg: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#F5F3FF', activeColor: C.violetStrong },
+    { key: 'is_featured',    label: '☆ Featured',    activeBg: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FFFBEB', activeColor: isDark ? C.warning : '#92400E' },
   ] as const
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
@@ -211,7 +212,7 @@ export default function NewProduct() {
               value={form.category_id}
               onChange={e => set('category_id', e.target.value)}
               className="w-full border rounded px-3 py-2 text-sm mt-1"
-              style={{ borderColor: 'var(--admin-input-border)' }}
+              style={{ borderColor: 'var(--admin-input-border)', backgroundColor: 'var(--admin-surface)', color: 'var(--admin-text)' }}
             >
               <option value="">No collection (optional)</option>
               {categories.map(c => <option key={c.id} value={c.id}>{c.name}</option>)}
@@ -228,7 +229,7 @@ export default function NewProduct() {
               else { setIsOtherCategory(false); set('product_category', v) }
             }}
             className="w-full border rounded px-3 py-2 text-sm"
-            style={{ borderColor: 'var(--admin-input-border)' }}
+            style={{ borderColor: 'var(--admin-input-border)', backgroundColor: 'var(--admin-surface)', color: 'var(--admin-text)' }}
           >
             <option value="">— Select season / type —</option>
             {PRESET_CATEGORIES.map(c => <option key={c} value={c}>{c}</option>)}
@@ -319,7 +320,7 @@ export default function NewProduct() {
 
           {/* New Arrival detail fields */}
           {form.is_new_arrival && (
-            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: C.violetStrong, backgroundColor: '#FAF5FF' }}>
+            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: C.violetStrong, backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 15%, var(--admin-surface))` : '#FAF5FF' }}>
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: C.violetStrong }}>New Arrival Settings</p>
               <div>
                 <Label className="text-xs">Collection Name</Label>
@@ -346,7 +347,7 @@ export default function NewProduct() {
 
           {/* Featured detail fields */}
           {form.is_featured && (
-            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: '#92400E', backgroundColor: '#FFFBEB' }}>
+            <div className="mt-3 p-4 rounded-lg border-l-4 space-y-3" style={{ borderLeftColor: isDark ? C.warning : '#92400E', backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 15%, var(--admin-surface))` : '#FFFBEB' }}>
               <p className="text-xs font-semibold uppercase tracking-wider" style={{ color: '#92400E' }}>Featured Settings</p>
               <div className="grid grid-cols-2 gap-3">
                 <div>
@@ -364,18 +365,18 @@ export default function NewProduct() {
         </div>
 
         <div className="flex items-center gap-3">
-          <input type="checkbox" id="no_restock" checked={form.no_restock} onChange={e => set('no_restock', e.target.checked)} className="w-4 h-4" />
+          <input type="checkbox" id="no_restock" checked={form.no_restock} onChange={e => set('no_restock', e.target.checked)} className="w-4 h-4 accent-[#A68B6E]" />
           <div>
             <Label htmlFor="no_restock">No restock planned</Label>
             <p className="text-xs" style={{ color: 'var(--admin-subtle)' }}>Enables "Last Chance" badge when stock ≤ 3</p>
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
+          <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 accent-[#A68B6E]" />
           <Label htmlFor="is_active">Active (visible in store)</Label>
         </div>
         {error && (
-          <div className="rounded-md px-4 py-3 text-sm" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C', border: '1px solid #FECACA' }}>
+          <div className="rounded-md px-4 py-3 text-sm" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong, border: `1px solid ${isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FECACA'}` }}>
             {error}
           </div>
         )}

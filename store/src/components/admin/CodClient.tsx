@@ -17,11 +17,12 @@ type CodOrder = {
 }
 
 export default function CodClient({ orders }: { orders: CodOrder[] }) {
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const COD_STYLES: Record<string, React.CSSProperties> = {
-    received: { backgroundColor: '#DCFCE7', color: '#15803D' },
-    lost:     { backgroundColor: '#FEE2E2', color: C.criticalStrong },
-    pending:  { backgroundColor: '#FEF9C3', color: '#92400E' },
+    received: { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: C.success },
+    lost:     { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong },
+    pending:  { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' },
   }
   const [list, setList] = useState(orders)
   const [loading, setLoading] = useState<string | null>(null)
@@ -92,7 +93,7 @@ export default function CodClient({ orders }: { orders: CodOrder[] }) {
                   disabled={loading === order.id}
                   onClick={() => update(order.id, 'received')}
                   className="text-xs px-3 py-1.5 rounded border font-medium transition-colors disabled:opacity-50"
-                  style={{ borderColor: '#86EFAC', color: '#15803D', backgroundColor: '#F0FDF4' }}
+                  style={{ borderColor: isDark ? `color-mix(in srgb, ${C.success} 45%, var(--admin-border))` : '#86EFAC', color: C.success, backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 15%, var(--admin-surface))` : '#F0FDF4' }}
                 >
                   Mark Cash Received
                 </button>
@@ -102,7 +103,7 @@ export default function CodClient({ orders }: { orders: CodOrder[] }) {
                   disabled={loading === order.id}
                   onClick={() => update(order.id, 'lost')}
                   className="text-xs px-3 py-1.5 rounded border font-medium transition-colors disabled:opacity-50"
-                  style={{ borderColor: '#FCA5A5', color: C.criticalStrong, backgroundColor: '#FEF2F2' }}
+                  style={{ borderColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 45%, var(--admin-border))` : '#FCA5A5', color: C.criticalStrong, backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 15%, var(--admin-surface))` : '#FEF2F2' }}
                 >
                   Mark as Lost
                 </button>

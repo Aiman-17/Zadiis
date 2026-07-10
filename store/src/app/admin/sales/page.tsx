@@ -3,6 +3,7 @@ export const dynamic = 'force-dynamic'
 import Link from 'next/link'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { Button } from '@/components/ui/button'
+import SaleStatusBadge from '@/components/admin/SaleStatusBadge'
 import type { Sale, Order, OrderItem } from '@/types'
 
 function fmtSaleDate(d: string | null) {
@@ -121,14 +122,7 @@ export default async function AdminSalesPage() {
               <div>
                 <div className="flex items-center gap-2 mb-0.5">
                   <p className="font-medium">{sale.title}</p>
-                  {sale.is_active && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ backgroundColor: '#DCFCE7', color: '#166534' }}>Active</span>
-                  )}
-                  {isCompleted && (
-                    <span className="text-xs px-2 py-0.5 rounded-full font-medium"
-                      style={{ backgroundColor: '#DBEAFE', color: '#1D4ED8' }}>Completed</span>
-                  )}
+                  <SaleStatusBadge isActive={sale.is_active} isCompleted={isCompleted} />
                 </div>
                 <p className="text-sm" style={{ color: 'var(--admin-muted)' }}>
                   {statusIcon} {statusLabel}

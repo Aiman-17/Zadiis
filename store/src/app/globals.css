@@ -167,6 +167,27 @@ h1, h2, h3 {
   font-family: 'Playfair Display', serif;
 }
 
+/* Global print rule — the admin sidebar/mobile header carry this class so
+   printing ANY admin page (invoices especially) never bleeds nav chrome
+   into the output. Previously only defined locally on the invoice print
+   page, which hid its own controls but not the layout's sidebar/header. */
+@media print {
+  .no-print { display: none !important; }
+}
+
+/* Admin card entrance — staggered fade + rise, applied via animation-delay
+   per card. Respects prefers-reduced-motion (instant, no motion). */
+@keyframes admin-fade-in {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.admin-fade-in {
+  animation: admin-fade-in 320ms ease-out both;
+}
+@media (prefers-reduced-motion: reduce) {
+  .admin-fade-in { animation: none; opacity: 1; transform: none; }
+}
+
 @keyframes fire-flicker {
   0%   { transform: scale(1)    rotate(-1.5deg); opacity: 1; }
   20%  { transform: scale(1.2)  rotate(2.5deg);  opacity: 0.9; }

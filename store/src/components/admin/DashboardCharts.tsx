@@ -1,6 +1,7 @@
 'use client'
+import { useId, useState } from 'react'
 import {
-  BarChart, Bar, PieChart, Pie, Cell,
+  BarChart, Bar, AreaChart, Area, PieChart, Pie, Cell,
   XAxis, YAxis, Tooltip, ResponsiveContainer,
 } from 'recharts'
 import Link from 'next/link'
@@ -8,7 +9,7 @@ import type { Order, OrderItem, Product } from '@/types'
 import { rankTrending } from '@/lib/merchandising'
 import { getEffectiveStock } from '@/lib/stock'
 import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
-import { getAdminStatusColors } from '@/lib/adminColors'
+import { getAdminStatusColors, glowFilter } from '@/lib/adminColors'
 
 function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 
@@ -34,13 +35,22 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
 }) {
   const isDark = useAdminDarkMode()
   const C = getAdminStatusColors(isDark)
+  // Enhancement #5 (gradient fills) — unique id per mounted instance so
+  // multiple charts on the same page never collide on <defs> ids.
+  const revenueTrendGradientId = useId()
+  const salesTrendGradientId = useId()
+  const topProductsGradientId = useId()
+  // Restored dark-mode substitute for the "today" bar (near-black failed
+  // contrast against the dark chart surface, 1.08:1 per dataviz validator).
+  const todayBarFill = isDark ? '#E8DDD4' : '#1C1C1C'
+  // Enhancement #3 (card entrance) — replay control. Remounting the whole
+  // tree via `key` is safe here: this component is purely props-driven,
+  // no internal fetch/mutation state to lose.
+  const [replayKey, setReplayKey] = useState(0)
   const STATUS_COLORS: Record<string, string> = {
     new: C.info, processing: C.warning, shipped: C.violet,
     delivered: C.success, returned: C.critical, cancelled: '#9CA3AF',
   }
-  // #1C1C1C ("today" bar) fails contrast against the dark chart surface
-  // (1.08:1, per dataviz validator) — validated substitute for dark mode.
-  const todayBarFill = isDark ? '#E8DDD4' : '#1C1C1C'
   // Action-card backgrounds were hardcoded light-only pastels — two solid
   // light boxes on the dark surface regardless of theme. Tinted via
   // color-mix over the theme surface/border tokens instead.
@@ -188,6 +198,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
   const statusData = Object.entries(statusCounts)
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
+  const maxStatusValue = statusData.length > 0 ? Math.max(...statusData.map(s => s.value)) : 0
 
   // Same qualification + ranking as every other page (single source of
   // truth — specs/003-merchandising-badges-v2): category-relative,
@@ -296,7 +307,15 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
     : todayTotal > 0 ? 100 : null
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6" key={replayKey}>
+      <button
+        type="button"
+        onClick={() => setReplayKey(k => k + 1)}
+        className="text-xs px-3 py-1.5 rounded border transition-colors hover:bg-[var(--admin-divider)]"
+        style={{ borderColor: 'var(--admin-border)', color: '#A68B6E' }}
+      >
+        ↺ Replay card entrance
+      </button>
 
       {/* Active sale banner */}
       {activeSales.length > 0 && (
@@ -325,8 +344,8 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
 
       {/* Action Cards */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-        <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: newOrdersBg, borderLeftColor: C.info, border: `1px solid ${newOrdersBorder}`, borderLeft: `4px solid ${C.info}` }}>
+        <Link href="/admin/orders" className="admin-fade-in block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
+          style={{ animationDelay: '0ms', backgroundColor: newOrdersBg, borderLeftColor: C.info, border: `1px solid ${newOrdersBorder}`, borderLeft: `4px solid ${C.info}` }}>
           <p className="text-3xl font-bold" style={{ color: C.infoStrong }}>{newOrders}</p>
           <p className="text-sm font-semibold mt-1" style={{ color: C.infoStrong }}>New Orders</p>
           <p className="text-xs mt-0.5" style={{ color: C.info }}>
@@ -338,8 +357,8 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
             </p>
           )}
         </Link>
-        <Link href="/admin/orders" className="block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
-          style={{ backgroundColor: pendingBg, border: `1px solid ${pendingBorder}`, borderLeft: `4px solid ${C.violet}` }}>
+        <Link href="/admin/orders" className="admin-fade-in block rounded-lg p-5 border-l-4 transition-opacity hover:opacity-90"
+          style={{ animationDelay: '20ms', backgroundColor: pendingBg, border: `1px solid ${pendingBorder}`, borderLeft: `4px solid ${C.violet}` }}>
           <p className="text-3xl font-bold" style={{ color: C.violetStrong }}>{pendingShipment}</p>
           <p className="text-sm font-semibold mt-1" style={{ color: C.violetStrong }}>Pending Shipment</p>
           <p className="text-xs mt-0.5" style={{ color: C.violet }}>processing + shipped · tap to manage</p>
@@ -350,7 +369,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       <div>
         <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Revenue</p>
         <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+          <div className="admin-fade-in rounded-lg p-5 border" style={{ animationDelay: '40ms', borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(grossRevenue7d)}</p>
             <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>Net: {pkr(netRevenue7d)}</p>
             {revenue7dChangePct !== null && (
@@ -361,7 +380,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
             <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Gross Revenue (7d)</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+          <div className="admin-fade-in rounded-lg p-5 border" style={{ animationDelay: '60ms', borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(revenueThisMonth)}</p>
             {revenueLastMonth > 0 ? (
               <p className="text-xs mt-0.5 font-medium" style={{ color: revenueThisMonth >= revenueLastMonth ? C.success : C.critical }}>
@@ -373,7 +392,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
             <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Revenue This Month</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+          <div className="admin-fade-in rounded-lg p-5 border" style={{ animationDelay: '80ms', borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(thisYearRevenue)}</p>
             {yoyChangePct !== null && (
               <p className="text-xs mt-0.5 font-medium" style={{ color: yoyChangePct >= 0 ? C.success : C.critical }}>
@@ -383,7 +402,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
             <p className="text-xs mt-1" style={{ color: 'var(--admin-subtle)' }}>Revenue This Year</p>
           </div>
 
-          <div className="rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
+          <div className="admin-fade-in rounded-lg p-5 border" style={{ animationDelay: '100ms', borderColor: 'var(--admin-border)', backgroundColor: 'var(--admin-surface)' }}>
             <p className="text-2xl font-bold">{pkr(aov)}</p>
             {aovLastMonth > 0 && (
               <p className="text-xs mt-0.5" style={{ color: 'var(--admin-subtle)' }}>vs last month: {pkr(aovLastMonth)}</p>
@@ -396,9 +415,9 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
       {/* Operations KPIs */}
       <div>
         <p className="text-xs font-semibold uppercase mb-3" style={{ color: '#B0A090', letterSpacing: '0.08em' }}>Operations</p>
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
-          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-            <p className="text-2xl font-bold">{ordersThisMonth}</p>
+        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
+          <div className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ animationDelay: '120ms', borderColor: 'var(--admin-border)' }}>
+            <p className="text-xl font-bold">{ordersThisMonth}</p>
             <p className="text-xs font-medium mt-0.5" style={{ color: fulfillmentRate >= 50 ? C.success : C.warning }}>
               {fulfillmentRate}% fulfilled
             </p>
@@ -409,25 +428,25 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
           </div>
 
           <Link href="/admin/products?filter=low-stock"
-            className="bg-[var(--admin-surface)] rounded-lg p-5 border block hover:shadow-sm transition-shadow"
-            style={{ borderColor: lowStockItems.length > 0 ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 45%, var(--admin-border))` : '#FCA5A5') : 'var(--admin-border)' }}>
-            <p className="text-2xl font-bold" style={{ color: lowStockItems.length > 0 ? C.criticalStrong : 'var(--admin-text)' }}>
+            className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border block hover:shadow-sm transition-shadow"
+            style={{ animationDelay: '140ms', borderColor: lowStockItems.length > 0 ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 45%, var(--admin-border))` : '#FCA5A5') : 'var(--admin-border)' }}>
+            <p className="text-xl font-bold" style={{ color: lowStockItems.length > 0 ? C.criticalStrong : 'var(--admin-text)' }}>
               {lowStockItems.length}
             </p>
             <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>variants need restocking</p>
             <p className="text-xs mt-1" style={{ color: '#A68B6E' }}>Low Stock Alerts → view</p>
           </Link>
 
-          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-            <p className="text-2xl font-bold">{totalProducts}</p>
+          <div className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ animationDelay: '160ms', borderColor: 'var(--admin-border)' }}>
+            <p className="text-xl font-bold">{totalProducts}</p>
             <p className="text-xs font-medium mt-0.5" style={{ color: C.warning }}>
               {totalStock.toLocaleString('en-US')} units in stock
             </p>
             <p className="text-xs mt-1" style={{ color: 'var(--admin-muted)' }}>Total Products</p>
           </div>
 
-          <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-            <p className="text-2xl font-bold">{repeatCustomerRate}%</p>
+          <div className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ animationDelay: '180ms', borderColor: 'var(--admin-border)' }}>
+            <p className="text-xl font-bold">{repeatCustomerRate}%</p>
             <p className="text-xs font-medium mt-0.5" style={{ color: 'var(--admin-subtle)' }}>
               {repeatCustomerCount} of {uniqueCustomerCount} customers
             </p>
@@ -435,8 +454,8 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
           </div>
 
           {codEnabled && codSuccessRate !== null && (
-            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-              <p className="text-2xl font-bold"
+            <div className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border" style={{ animationDelay: '200ms', borderColor: 'var(--admin-border)' }}>
+              <p className="text-xl font-bold"
                 style={{ color: codSuccessRate >= 65 ? C.success : codSuccessRate >= 50 ? C.warning : C.critical }}>
                 {codSuccessRate}%
               </p>
@@ -477,11 +496,23 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                 <PieChart>
                   <Pie data={statusData} dataKey="value" nameKey="name"
                     cx="50%" cy="50%" innerRadius={50} outerRadius={80}>
-                    {statusData.map((entry, i) => (
-                      <Cell key={i} fill={STATUS_COLORS[entry.name] ?? '#A68B6E'} />
-                    ))}
+                    {statusData.map((entry, i) => {
+                      const fill = STATUS_COLORS[entry.name] ?? '#A68B6E'
+                      // Enhancement #4 (glow) — leading segment only, color-matched
+                      // to its own fill (not a fixed gold) so it never looks muddy
+                      // against a differently-hued arc.
+                      const isLeading = entry.value === maxStatusValue
+                      return (
+                        <Cell key={i} fill={fill}
+                          style={isLeading ? { filter: glowFilter(fill, 0.6) } : undefined} />
+                      )
+                    })}
                   </Pie>
-                  <Tooltip />
+                  <Tooltip
+                    contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                    itemStyle={{ color: 'var(--admin-text)' }}
+                    labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                  />
                 </PieChart>
               </ResponsiveContainer>
               <div className="flex flex-wrap gap-x-4 gap-y-1 mt-2 justify-center">
@@ -499,27 +530,82 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
           )}
         </div>
 
-        {/* Sales Trend — last 7 days */}
+        {/* Revenue Trend — last 7 days. Same salesTrend7d data as before;
+            rendered as a line + gradient area + glow endpoint instead of
+            bars, per the treatment validated in the enhancement preview. */}
         <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-          <h3 className="font-semibold mb-1">Sales Trend</h3>
+          <h3 className="font-semibold mb-1">Revenue Trend</h3>
           <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Revenue per day — last 7 days</p>
           <ResponsiveContainer width="100%" height={200}>
-            <BarChart data={salesTrend7d} margin={{ left: 0, right: 8 }}>
+            <AreaChart data={salesTrend7d} margin={{ left: 0, right: 8, top: 8 }}>
+              <defs>
+                {/* Enhancement #5 (gradient fill) — single hue (gold), scoped to
+                    this one hero chart. Unique id via useId avoids collisions
+                    with other chart instances on the same page. */}
+                <linearGradient id={revenueTrendGradientId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="#A68B6E" stopOpacity={0.35} />
+                  <stop offset="100%" stopColor="#A68B6E" stopOpacity={0} />
+                </linearGradient>
+              </defs>
               <XAxis dataKey="label" tick={{ fontSize: 10 }} />
               <YAxis tick={{ fontSize: 10 }} width={38}
                 tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
               <Tooltip
                 formatter={(v) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']}
                 labelFormatter={(l) => String(l)}
+                contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                itemStyle={{ color: 'var(--admin-text)' }}
+                labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                cursor={{ stroke: 'var(--admin-border)', strokeWidth: 1 }}
               />
-              <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
-                {salesTrend7d.map((entry, i) => (
-                  <Cell key={i} fill={entry.isToday ? todayBarFill : entry.revenue > 0 ? '#A68B6E' : 'var(--admin-divider)'} />
-                ))}
-              </Bar>
-            </BarChart>
+              {/* Enhancement #4 (glow) — the line + its endpoint dot only. */}
+              <Area
+                type="monotone" dataKey="revenue" name="Revenue"
+                stroke="#A68B6E" strokeWidth={2.5}
+                fill={`url(#${revenueTrendGradientId})`}
+                style={{ filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' }}
+                dot={{ r: 3, fill: '#A68B6E', strokeWidth: 0 }}
+                activeDot={{ r: 4, fill: '#A68B6E', style: { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.6))' } }}
+              />
+            </AreaChart>
           </ResponsiveContainer>
         </div>
+      </div>
+
+      {/* Sales Trend — restored as a third panel alongside Order Status
+          Breakdown and Revenue Trend, per the enhancement preview layout.
+          Same salesTrend7d data as Revenue Trend, bar form. */}
+      <div className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ animationDelay: '260ms', borderColor: 'var(--admin-border)' }}>
+        <h3 className="font-semibold mb-1">Sales Trend</h3>
+        <p className="text-xs mb-4" style={{ color: 'var(--admin-subtle)' }}>Revenue per day — last 7 days</p>
+        <ResponsiveContainer width="100%" height={200}>
+          <BarChart data={salesTrend7d} margin={{ left: 0, right: 8 }}>
+            <defs>
+              <linearGradient id={salesTrendGradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor="#A68B6E" stopOpacity={1} />
+                <stop offset="100%" stopColor="#A68B6E" stopOpacity={0.55} />
+              </linearGradient>
+            </defs>
+            <XAxis dataKey="label" tick={{ fontSize: 10 }} />
+            <YAxis tick={{ fontSize: 10 }} width={38}
+              tickFormatter={(v: number) => v >= 1000 ? `${Math.round(v / 1000)}k` : String(v)} />
+            <Tooltip
+              formatter={(v) => [`PKR ${Number(v).toLocaleString()}`, 'Revenue']}
+              labelFormatter={(l) => String(l)}
+              contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+              itemStyle={{ color: 'var(--admin-text)' }}
+              labelStyle={{ color: 'var(--admin-text-secondary)' }}
+              cursor={{ fill: 'var(--admin-divider)' }}
+            />
+            <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
+              {salesTrend7d.map((entry, i) => (
+                <Cell key={i}
+                  fill={entry.isToday ? todayBarFill : entry.revenue > 0 ? `url(#${salesTrendGradientId})` : 'var(--admin-divider)'}
+                  style={entry.isToday ? { filter: 'drop-shadow(0 0 4px rgba(166,139,110,0.4))' } : undefined} />
+              ))}
+            </Bar>
+          </BarChart>
+        </ResponsiveContainer>
       </div>
 
       {/* Inventory Health */}
@@ -532,7 +618,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
             { label: 'Slow Movers',    value: slowMoverCount,  color: slowMoverCount > 0 ? C.criticalStrong : 'var(--admin-text)', href: '/admin/products?filter=slow-movers', sub: slowMoverCount > 0 ? 'below store avg sell-through' : 'All moving well', linkLabel: '→ View products' },
             { label: 'Returns (last 7d)',   value: returned7d,  color: C.criticalStrong, href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
             { label: 'Cancelled (last 7d)', value: cancelled7d, color: 'var(--admin-muted)', href: '/admin/orders',                      sub: null,                                                                        linkLabel: '→ View orders' },
-          ].map(({ label, value, color, href, sub, linkLabel }) => {
+          ].map(({ label, value, color, href, sub, linkLabel }, i) => {
             const inner = (
               <>
                 <p className="text-2xl font-bold" style={{ color }}>{value}</p>
@@ -541,14 +627,15 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                 {href && <p className="text-xs mt-0.5" style={{ color: '#A68B6E' }}>{linkLabel}</p>}
               </>
             )
+            const delay = `${220 + i * 20}ms`
             return href ? (
               <Link key={label} href={href}
-                className="bg-[var(--admin-surface)] rounded-lg p-4 border text-center block hover:shadow-sm transition-shadow"
-                style={{ borderColor: 'var(--admin-border)' }}>
+                className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border text-center block hover:shadow-sm transition-shadow"
+                style={{ animationDelay: delay, borderColor: 'var(--admin-border)' }}>
                 {inner}
               </Link>
             ) : (
-              <div key={label} className="bg-[var(--admin-surface)] rounded-lg p-4 border text-center" style={{ borderColor: 'var(--admin-border)' }}>
+              <div key={label} className="admin-fade-in bg-[var(--admin-surface)] rounded-lg p-4 border text-center" style={{ animationDelay: delay, borderColor: 'var(--admin-border)' }}>
                 {inner}
               </div>
             )
@@ -574,6 +661,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                     <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} tickFormatter={(v: number) => v.toFixed(1)} />
                     <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={100} />
                     <Tooltip
+                      cursor={{ fill: 'var(--admin-divider)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as typeof trendingProducts[0]
@@ -583,7 +671,7 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                             <p style={{ color: 'var(--admin-subtle)' }}>{d.category}</p>
                             <p style={{ color: '#A68B6E' }}>PKR {Number(d.price).toLocaleString()}</p>
                             <p style={{ color: 'var(--admin-muted)' }}>{d.total_sold} units sold · score {d.score.toFixed(1)}</p>
-                            <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                            <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? C.warning : C.success }}>
                               {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                             </p>
                           </div>
@@ -605,11 +693,12 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                   <p className="font-semibold text-sm">Top Products</p>
                   <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>by revenue</span>
                 </div>
-                <ResponsiveContainer width="100%" height={Math.max(160, topProductsBySales.length * 38)}>
-                  <BarChart data={topProductsBySales} layout="vertical" margin={{ left: 8, right: 24 }}>
-                    <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
-                    <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={100} />
+                <ResponsiveContainer width="100%" height={240}>
+                  <BarChart data={topProductsBySales} margin={{ left: 0, right: 8, bottom: 24 }}>
+                    <XAxis dataKey="shortName" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" interval={0} height={50} />
+                    <YAxis tick={{ fontSize: 10 }} width={38} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
                     <Tooltip
+                      cursor={{ fill: 'var(--admin-divider)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as typeof topProductsBySales[0]
@@ -622,7 +711,18 @@ export default function DashboardCharts({ orders, products, activeSales = [], co
                         )
                       }}
                     />
-                    <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill="#A68B6E" name="Revenue" />
+                    <defs>
+                      <linearGradient id={topProductsGradientId} x1="0" y1="0" x2="0" y2="1">
+                        <stop offset="0%" stopColor="#A68B6E" stopOpacity={1} />
+                        <stop offset="100%" stopColor="#A68B6E" stopOpacity={0.55} />
+                      </linearGradient>
+                    </defs>
+                    <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
+                      {topProductsBySales.map((_, i) => (
+                        <Cell key={i} fill={`url(#${topProductsGradientId})`}
+                          style={i === 0 ? { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' } : undefined} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               </div>

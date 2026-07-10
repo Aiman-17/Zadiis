@@ -151,7 +151,7 @@ export default function ImageUploader({ images, onChange, availableColors, image
                   value={imageColors?.[i] ?? ''}
                   onChange={e => setColorAt(i, e.target.value)}
                   className="w-full text-[10px] border rounded px-1 py-0.5"
-                  style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}
+                  style={{ borderColor: 'var(--admin-border)', color: 'var(--admin-muted)', backgroundColor: 'var(--admin-surface)' }}
                 >
                   <option value="">No color tag</option>
                   {availableColors.map(c => (

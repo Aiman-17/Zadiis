@@ -15,7 +15,8 @@ function pkr(n: number) { return `PKR ${Number(n).toLocaleString('en-US')}` }
 export default function EditSalePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params)
   const router = useRouter()
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
   const [sale, setSale] = useState<Sale | null>(null)
@@ -136,7 +137,11 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
   const newArrivalCount = allProducts.filter(p => !addedIds.has(p.id) && p.is_new_arrival).length
 
   return (
-    <div className="max-w-2xl space-y-6">
+    // Widened from max-w-2xl to reduce the jarring width change when
+    // navigating here from Analytics (max-w-5xl) and to give the "Products
+    // in this Sale" row list — which crowds product name + badges + pricing
+    // + Remove button onto one line — more room on wide screens.
+    <div className="max-w-3xl space-y-6">
       <div className="flex items-center justify-between">
         <h1 className="text-2xl" style={{ fontFamily: 'Playfair Display, serif' }}>Edit Sale</h1>
         {sale.is_active && (
@@ -172,7 +177,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
             <Input id="ends" type="datetime-local" value={form.ends_at} onChange={e => set('ends_at', e.target.value)} className="mt-1" /></div>
         </div>
         <div className="flex items-center gap-3">
-          <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4" />
+          <input type="checkbox" id="is_active" checked={form.is_active} onChange={e => set('is_active', e.target.checked)} className="w-4 h-4 accent-[#A68B6E]" />
           <Label htmlFor="is_active">Active</Label>
         </div>
         {error && <p className="text-sm" style={{ color: '#B91C1C' }}>{error}</p>}
@@ -190,7 +195,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
       <div className="bg-[var(--admin-surface)] p-6 rounded-lg border" style={{ borderColor: 'var(--admin-border)' }}>
         <h2 className="font-semibold mb-4">Products in this Sale</h2>
 
-        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg" style={{ backgroundColor: '#FAF8F5', border: '1px solid #E8DDD4' }}>
+        <div className="flex items-center gap-2 mb-4 p-3 rounded-lg" style={{ backgroundColor: 'var(--admin-divider)', border: '1px solid var(--admin-border)' }}>
           <label className="text-xs font-medium shrink-0" style={{ color: 'var(--admin-text)' }}>Discount %</label>
           <input type="number" min="1" max="99" value={discountPct} onChange={e => setDiscountPct(e.target.value)}
             className="w-16 border rounded px-2 py-1 text-sm text-center" style={{ borderColor: '#A68B6E' }} />
@@ -209,7 +214,7 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
               const p = availableProducts.find(pr => pr.id === e.target.value)
               setAddSalePrice(p ? String(Math.floor(p.price * (1 - (Number(discountPct) || 20) / 100))) : '')
             }}
-            className="flex-1 border rounded px-3 py-2 text-sm" style={{ borderColor: 'var(--admin-input-border)' }}>
+            className="flex-1 border rounded px-3 py-2 text-sm" style={{ borderColor: 'var(--admin-input-border)', backgroundColor: 'var(--admin-surface)', color: 'var(--admin-text)' }}>
             <option value="">
               {availableProducts.length > 0
                 ? `Select product to add${newArrivalCount > 0 ? ` (${newArrivalCount} new arrival${newArrivalCount !== 1 ? 's' : ''} hidden)` : ''}…`
@@ -233,13 +238,16 @@ export default function EditSalePage({ params }: { params: Promise<{ id: string 
             const discPct = product ? Math.round((1 - sp.sale_price / product.price) * 100) : 0
             return (
               <div key={sp.id} className="flex items-center justify-between py-2.5 px-3 rounded border"
-                style={{ borderColor: slow ? '#FEE2E2' : 'var(--admin-divider)', backgroundColor: slow ? '#FFF5F5' : 'var(--admin-surface)' }}>
+                style={{
+                  borderColor: slow ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 40%, var(--admin-border))` : '#FEE2E2') : 'var(--admin-divider)',
+                  backgroundColor: slow ? (isDark ? `color-mix(in srgb, ${C.criticalStrong} 12%, var(--admin-surface))` : '#FFF5F5') : 'var(--admin-surface)',
+                }}>
                 <div>
                   <div className="flex items-center gap-1.5">
-                    <p className="text-sm font-medium">{product?.name || sp.product_id}</p>
+                    <p className="text-sm font-medium" style={{ color: 'var(--admin-text)' }}>{product?.name || sp.product_id}</p>
                     {slow && (
                       <span className="text-xs px-1.5 py-0.5 rounded-full font-medium"
-                        style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>Slow Mover</span>
+                        style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>Slow Mover</span>
                     )}
                   </div>
                   <p className="text-xs mt-0.5" style={{ color: 'var(--admin-muted)' }}>

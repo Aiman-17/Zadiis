@@ -9,7 +9,7 @@ import type { Order, OrderItem, Product } from '@/types'
 import { rankBestSellers, rankTrending, merchandisingIdSets, computeStoreAvgSellThrough, isSlowMover } from '@/lib/merchandising'
 import { getEffectiveStock } from '@/lib/stock'
 import { useAdminDarkMode } from '@/hooks/useAdminDarkMode'
-import { getAdminStatusColors } from '@/lib/adminColors'
+import { getAdminStatusColors, glowFilter, glowShadow } from '@/lib/adminColors'
 import YoyWidget from './YoyWidget'
 
 const RANGE_OPTIONS = [
@@ -20,13 +20,14 @@ const RANGE_OPTIONS = [
 ]
 
 // The near-black slot (#1C1C1C) has ~1:1 contrast against the dark chart
-// surface (#232323) — invisible. Swapped to a light neutral for dark mode
-// only; the other three slots stay as-is (pre-existing chroma/lightness
-// softness, unrelated to dark mode — see dataviz validator output in
-// research notes, out of scope to redesign here). Validated via
-// dataviz skill's validate_palette.js against surface #232323.
+// surface (#232323) — invisible. First dark-mode substitute (#E8DDD4, a
+// light cream) had good contrast but read as stark/near-white against the
+// dark card — swapped to a muted warm taupe instead: still clearly
+// distinct from the other three earthy tones, without looking like a
+// blown-out highlight. Other three slots stay as-is (pre-existing
+// chroma/lightness softness, unrelated to dark mode — out of scope here).
 const PAYMENT_COLORS_LIGHT = ['#A68B6E', '#1C1C1C', '#C9956C', '#8B7355']
-const PAYMENT_COLORS_DARK  = ['#A68B6E', '#E8DDD4', '#C9956C', '#8B7355']
+const PAYMENT_COLORS_DARK  = ['#A68B6E', '#9C8A76', '#C9956C', '#8B7355']
 
 const CANCEL_REASON_LABELS: Record<string, string> = {
   changed_mind:       'Changed Mind',
@@ -370,12 +371,13 @@ export default function AnalyticsClient({
     if (!p) return
     const flags: { label: string; color: string; bg: string }[] = []
     const stock = getMerchStock(p)
-    if (flagBestSellerIds.has(p.id)) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
-    if (flagTrendingIds.has(p.id))   flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
-    if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: C.violetStrong, bg: '#F5F3FF' })
-    if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: '#991B1B', bg: '#FEE2E2' })
-    else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: C.criticalStrong, bg: '#FEE2E2' })
-    else if (stock <= 5)   flags.push({ label: '⚠ Low Stock',      color: '#B45309', bg: '#FEF9C3' })
+    const pinkStrong = isDark ? '#F472B6' : '#9D174D'
+    if (flagBestSellerIds.has(p.id)) flags.push({ label: '★ Best Seller', color: isDark ? C.warning : '#92400E', bg: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3' })
+    if (flagTrendingIds.has(p.id))   flags.push({ label: '↑ Trending',    color: pinkStrong, bg: isDark ? `color-mix(in srgb, ${pinkStrong} 25%, var(--admin-surface))` : '#FDF2F8' })
+    if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: C.violetStrong, bg: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#F5F3FF' })
+    if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: C.criticalStrong, bg: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2' })
+    else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: C.criticalStrong, bg: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2' })
+    else if (stock <= 5)   flags.push({ label: '⚠ Low Stock',      color: isDark ? C.warning : '#B45309', bg: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3' })
     productFlagMap[tp.name] = flags
   })
 
@@ -389,6 +391,7 @@ export default function AnalyticsClient({
     })
   })
   const topColors = Object.entries(colorMap).map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
+  const topSizes = Object.entries(sizeMap).map(([name, units]) => ({ name, units })).sort((a, b) => b.units - a.units).slice(0, 8)
 
   // Cities with revenue + AOV
   const cityDataMap: Record<string, { orders: number; revenue: number }> = {}
@@ -705,7 +708,7 @@ export default function AnalyticsClient({
           <button key={r.key} onClick={() => setRange(r.key)}
             className="text-xs px-4 py-1.5 rounded-full border transition-colors"
             style={range === r.key
-              ? { backgroundColor: '#1C1C1C', color: 'white', borderColor: '#1C1C1C' }
+              ? { backgroundColor: isDark ? '#A68B6E' : '#1C1C1C', color: 'white', borderColor: isDark ? '#A68B6E' : '#1C1C1C' }
               : { borderColor: 'var(--admin-border)', color: 'var(--admin-muted)' }}>
             {r.label}
           </button>
@@ -752,17 +755,23 @@ export default function AnalyticsClient({
 
           {profitLostToDiscounts > 0 && (
             <div className="rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm"
-              style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
+              style={{
+                backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 12%, var(--admin-surface))` : '#FFF8F2',
+                border: `1px solid ${isDark ? `color-mix(in srgb, ${C.criticalStrong} 30%, var(--admin-border))` : '#F0E4D4'}`,
+              }}>
               <span style={{ color: 'var(--admin-muted)' }}>Profit reduced by discounts/sales this period:</span>
-              <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(profitLostToDiscounts)}</span>
+              <span className="font-semibold" style={{ color: C.criticalStrong }}>−{pkr(profitLostToDiscounts)}</span>
             </div>
           )}
 
           {totalGatewayFees > 0 && (
             <div className="rounded-lg px-4 py-3 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 text-sm"
-              style={{ backgroundColor: '#FFF8F2', border: '1px solid #F0E4D4' }}>
+              style={{
+                backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 12%, var(--admin-surface))` : '#FFF8F2',
+                border: `1px solid ${isDark ? `color-mix(in srgb, ${C.criticalStrong} 30%, var(--admin-border))` : '#F0E4D4'}`,
+              }}>
               <span style={{ color: 'var(--admin-muted)' }}>Payment gateway fees this period (non-COD orders, already deducted above):</span>
-              <span className="font-semibold" style={{ color: '#C62828' }}>−{pkr(totalGatewayFees)}</span>
+              <span className="font-semibold" style={{ color: C.criticalStrong }}>−{pkr(totalGatewayFees)}</span>
             </div>
           )}
 
@@ -774,8 +783,16 @@ export default function AnalyticsClient({
                 <XAxis dataKey="label" tick={{ fontSize: 11 }}
                   interval={trendData.length > 10 ? Math.ceil(trendData.length / 6) - 1 : 0} />
                 <YAxis tick={{ fontSize: 11 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={50} />
-                <Tooltip formatter={(v) => pkr(Number(v))} />
-                <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5} dot={{ fill: '#A68B6E', r: 3 }} name="Revenue" />
+                <Tooltip formatter={(v) => pkr(Number(v))}
+                  contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                  itemStyle={{ color: 'var(--admin-text)' }}
+                  labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                  cursor={{ stroke: 'var(--admin-border)', strokeWidth: 1 }}
+                />
+                <Line type="monotone" dataKey="revenue" stroke="#A68B6E" strokeWidth={2.5}
+                  dot={{ fill: '#A68B6E', r: 3 }} name="Revenue"
+                  style={{ filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' }}
+                  activeDot={{ r: 4, fill: '#A68B6E', style: { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.6))' } }} />
               </LineChart>
             </ResponsiveContainer>
           </div>
@@ -791,9 +808,20 @@ export default function AnalyticsClient({
                   <ResponsiveContainer width="100%" height={160}>
                     <PieChart>
                       <Pie data={paymentData} dataKey="value" nameKey="name" cx="50%" cy="50%" innerRadius={45} outerRadius={70}>
-                        {paymentData.map((_, i) => <Cell key={i} fill={PAYMENT_COLORS[i % PAYMENT_COLORS.length]} />)}
+                        {paymentData.map((entry, i) => {
+                          const fill = PAYMENT_COLORS[i % PAYMENT_COLORS.length]
+                          const isLeading = entry.value === Math.max(...paymentData.map(p => p.value))
+                          return (
+                            <Cell key={i} fill={fill}
+                              style={isLeading ? { filter: glowFilter(fill, 0.6) } : undefined} />
+                          )
+                        })}
                       </Pie>
-                      <Tooltip />
+                      <Tooltip
+                        contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                        itemStyle={{ color: 'var(--admin-text)' }}
+                        labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                      />
                     </PieChart>
                   </ResponsiveContainer>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 justify-center mt-2">
@@ -821,6 +849,7 @@ export default function AnalyticsClient({
                     interval={repeatRateTrend.length > 10 ? Math.ceil(repeatRateTrend.length / 6) - 1 : 0} />
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${v}%`} width={38} domain={[0, 100]} />
                   <Tooltip
+                    cursor={{ stroke: 'var(--admin-border)', strokeWidth: 1 }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as typeof repeatRateTrend[0]
@@ -834,7 +863,9 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Line type="monotone" dataKey="rate" stroke="#C9956C" strokeWidth={2.5}
-                    dot={{ fill: '#C9956C', r: 3 }} name="Repeat Rate %" />
+                    dot={{ fill: '#C9956C', r: 3 }} name="Repeat Rate %"
+                    style={{ filter: 'drop-shadow(0 0 5px rgba(201,149,108,0.5))' }}
+                    activeDot={{ r: 4, fill: '#C9956C', style: { filter: 'drop-shadow(0 0 5px rgba(201,149,108,0.55))' } }} />
                 </LineChart>
               </ResponsiveContainer>
             </div>
@@ -864,6 +895,7 @@ export default function AnalyticsClient({
                     interval={salesTrendRows.length > 10 ? Math.ceil(salesTrendRows.length / 6) - 1 : 0} />
                   <YAxis tick={{ fontSize: 10 }} width={28} allowDecimals={false} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload, label }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { orders: number; revenue: number; units: number; aov: number }
@@ -878,14 +910,22 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="orders" radius={[4, 4, 0, 0]} name="Orders">
-                    {salesTrendRows.map((entry, i) => (
-                      <Cell key={i} fill={
-                        entry.orders === 0 ? '#E8DDD4'
-                        : entry.orders >= salesMaxOrders * 0.8 ? '#1C1C1C'
+                    {salesTrendRows.map((entry, i) => {
+                      const fill = entry.orders === 0 ? 'var(--admin-divider)'
+                        : entry.orders >= salesMaxOrders * 0.8 ? (isDark ? '#F3F1EE' : '#1C1C1C')
                         : entry.orders >= salesMaxOrders * 0.5 ? '#A68B6E'
                         : '#C9956C'
-                      } />
-                    ))}
+                      const isLeading = entry.orders > 0 && entry.orders === salesMaxOrders
+                      // Leading bar is always the near-white/near-black top
+                      // step here — tinting the glow from its own fill blows
+                      // out into a harsh halo against the dark surface, so
+                      // this always glows warm gold instead, same as the
+                      // "today" bar treatment on the Dashboard.
+                      return (
+                        <Cell key={i} fill={fill}
+                          style={isLeading ? { filter: 'drop-shadow(0 0 4px rgba(166,139,110,0.4))' } : undefined} />
+                      )
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -937,7 +977,7 @@ export default function AnalyticsClient({
                     ))}
                   </tbody>
                   <tfoot className="border-t" style={{ borderColor: 'var(--admin-border)' }}>
-                    <tr style={{ backgroundColor: '#FAF8F5' }}>
+                    <tr style={{ backgroundColor: 'var(--admin-divider)' }}>
                       <td className="px-5 py-3 font-semibold">Total</td>
                       <td className="px-4 py-3 text-right font-semibold">{salesTrendRows.reduce((s, r) => s + r.orders, 0)}</td>
                       <td className="px-4 py-3 text-right font-semibold">{salesTrendRows.reduce((s, r) => s + r.units, 0)}</td>
@@ -976,6 +1016,7 @@ export default function AnalyticsClient({
                     <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
                     <Tooltip
+                      cursor={{ fill: 'var(--admin-divider)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as { name: string; orders: number; revenue: number; aov: number }
@@ -989,15 +1030,19 @@ export default function AnalyticsClient({
                       }}
                     />
                     <Bar dataKey="revenue" radius={[0, 4, 4, 0]} name="Revenue">
-                      {topCities.map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? '#1C1C1C' : i <= 2 ? '#A68B6E' : i <= 4 ? '#C9956C' : '#D4B896'} />
-                      ))}
+                      {topCities.map((_, i) => {
+                        const fill = i === 0 ? (isDark ? '#F3F1EE' : '#1C1C1C') : i <= 2 ? '#A68B6E' : i <= 4 ? '#C9956C' : '#D4B896'
+                        return (
+                          <Cell key={i} fill={fill}
+                            style={i === 0 ? { filter: 'drop-shadow(0 0 4px rgba(166,139,110,0.4))' } : undefined} />
+                        )
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
                 <table className="w-full mt-4 text-xs" style={{ borderCollapse: 'collapse' }}>
                   <thead>
-                    <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                    <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                       <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>City</th>
                       <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Orders</th>
                       <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Revenue</th>
@@ -1006,7 +1051,7 @@ export default function AnalyticsClient({
                   </thead>
                   <tbody>
                     {topCities.map(c => (
-                      <tr key={c.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                      <tr key={c.name} style={{ borderBottom: '1px solid var(--admin-divider)' }}>
                         <td className="py-1.5 font-medium">{c.name}</td>
                         <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{c.orders}</td>
                         <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{pkr(c.revenue)}</td>
@@ -1031,6 +1076,7 @@ export default function AnalyticsClient({
                   <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { name: string; units: number; revenue: number }
@@ -1043,7 +1089,12 @@ export default function AnalyticsClient({
                       )
                     }}
                   />
-                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill="#C9961A" name="Revenue" />
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} name="Revenue">
+                    {featuredSalesData.map((_, i) => (
+                      <Cell key={i} fill="#C9961A"
+                        style={i === 0 ? { filter: 'drop-shadow(0 0 5px rgba(201,150,26,0.6))' } : undefined} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -1060,6 +1111,7 @@ export default function AnalyticsClient({
                   <XAxis type="number" tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} />
                   <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={110} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { name: string; units: number; revenue: number }
@@ -1072,7 +1124,12 @@ export default function AnalyticsClient({
                       )
                     }}
                   />
-                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} fill={newArrivalBarFill} name="Revenue" />
+                  <Bar dataKey="revenue" radius={[0, 4, 4, 0]} name="Revenue">
+                    {newArrivalSalesData.map((_, i) => (
+                      <Cell key={i} fill={newArrivalBarFill}
+                        style={i === 0 ? { filter: glowFilter(newArrivalBarFill, 0.6) } : undefined} />
+                    ))}
+                  </Bar>
                 </BarChart>
               </ResponsiveContainer>
             ) : (
@@ -1090,7 +1147,7 @@ export default function AnalyticsClient({
             {badgeLiftRows.length > 0 ? (
               <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
                 <thead>
-                  <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
                     <th className="text-left py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Badge</th>
                     <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Before (units/day)</th>
@@ -1100,7 +1157,7 @@ export default function AnalyticsClient({
                 </thead>
                 <tbody>
                   {badgeLiftRows.map(r => (
-                    <tr key={`${r.badge}-${r.name}`} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                    <tr key={`${r.badge}-${r.name}`} style={{ borderBottom: '1px solid var(--admin-divider)' }}>
                       <td className="py-1.5 font-medium">{r.name}</td>
                       <td className="py-1.5 px-3" style={{ color: 'var(--admin-muted)' }}>{r.badge}</td>
                       {r.before === null ? (
@@ -1109,7 +1166,7 @@ export default function AnalyticsClient({
                         <>
                           <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{r.before.toFixed(2)}</td>
                           <td className="py-1.5 px-3 text-right" style={{ color: 'var(--admin-muted)' }}>{r.after!.toFixed(2)}</td>
-                          <td className="py-1.5 text-right font-semibold" style={{ color: (r.liftPct ?? 0) >= 0 ? '#15803D' : C.criticalStrong }}>
+                          <td className="py-1.5 text-right font-semibold" style={{ color: (r.liftPct ?? 0) >= 0 ? C.success : C.criticalStrong }}>
                             {(r.liftPct ?? 0) >= 0 ? '+' : ''}{r.liftPct}%
                           </td>
                         </>
@@ -1150,6 +1207,7 @@ export default function AnalyticsClient({
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={120}
                       tickFormatter={(v: string) => v.length > 16 ? v.slice(0, 15) + '…' : v} />
                     <Tooltip
+                      cursor={{ fill: 'var(--admin-divider)' }}
                       content={({ active, payload }) => {
                         if (!active || !payload?.length) return null
                         const d = payload[0]?.payload as { name: string; units: number; revenue: number }
@@ -1161,7 +1219,7 @@ export default function AnalyticsClient({
                             {prod?.product_category && <p style={{ color: 'var(--admin-subtle)' }}>{prod.product_category}</p>}
                             <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)}</p>
                             <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold</p>
-                            <p style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? '#B45309' : '#374151' }}>
+                            <p style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? (isDark ? C.warning : '#B45309') : 'var(--admin-text)' }}>
                               {stock === 0 ? 'OUT OF STOCK' : `${stock} left`}
                             </p>
                           </div>
@@ -1169,9 +1227,13 @@ export default function AnalyticsClient({
                       }}
                     />
                     <Bar dataKey="units" radius={[0, 4, 4, 0]} name="Units">
-                      {allProductsInRange.slice(0, 20).map((_, i) => (
-                        <Cell key={i} fill={i === 0 ? '#1C1C1C' : i <= 2 ? '#A68B6E' : i <= 5 ? '#C9956C' : '#D4B896'} />
-                      ))}
+                      {allProductsInRange.slice(0, 20).map((_, i) => {
+                        const fill = i === 0 ? (isDark ? '#F3F1EE' : '#1C1C1C') : i <= 2 ? '#A68B6E' : i <= 5 ? '#C9956C' : '#D4B896'
+                        return (
+                          <Cell key={i} fill={fill}
+                            style={i === 0 ? { filter: 'drop-shadow(0 0 4px rgba(166,139,110,0.4))' } : undefined} />
+                        )
+                      })}
                     </Bar>
                   </BarChart>
                 </ResponsiveContainer>
@@ -1179,7 +1241,7 @@ export default function AnalyticsClient({
                 <div className="overflow-x-auto mt-6">
                   <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
                     <thead>
-                      <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                      <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                         <th className="text-left py-2 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
                         <th className="text-left py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Collection</th>
                         <th className="text-right py-2 font-medium px-2" style={{ color: 'var(--admin-muted)' }}>Units</th>
@@ -1198,18 +1260,18 @@ export default function AnalyticsClient({
                         const vel   = (p.units / rangeDays).toFixed(1)
                         const flags = productFlagMap[p.name] ?? []
                         return (
-                          <tr key={p.name} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                          <tr key={p.name} style={{ borderBottom: '1px solid var(--admin-divider)' }}>
                             <td className="py-2 pr-2 font-medium truncate max-w-[130px]">{p.name}</td>
                             <td className="py-2 px-2" style={{ color: 'var(--admin-subtle)' }}>{prod?.product_category || '—'}</td>
                             <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{p.units}</td>
                             <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{pkr(p.revenue)}</td>
                             <td className="py-2 px-2 text-right" style={{ color: 'var(--admin-muted)' }}>{vel}/d</td>
                             <td className="py-2 px-2 text-right font-medium"
-                              style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? '#B45309' : '#374151' }}>
+                              style={{ color: stock === 0 ? C.criticalStrong : stock <= 5 ? (isDark ? C.warning : '#B45309') : 'var(--admin-text)' }}>
                               {stock === 0 ? 'OUT' : stock}
                             </td>
                             <td className="py-2 px-2 text-right font-medium"
-                              style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? C.success : rr === 0 ? C.critical : '#374151' }}>
+                              style={{ color: rr == null ? '#9CA3AF' : rr >= 20 ? C.success : rr === 0 ? C.critical : 'var(--admin-text)' }}>
                               {rr == null ? '—' : `${rr}%`}
                             </td>
                             <td className="py-2 px-2">
@@ -1244,6 +1306,7 @@ export default function AnalyticsClient({
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="shortName" tick={{ fontSize: 10 }} width={120} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as typeof bestSellerChartData[0]
@@ -1253,7 +1316,7 @@ export default function AnalyticsClient({
                           <p style={{ color: 'var(--admin-subtle)' }}>{d.category}</p>
                           <p style={{ color: '#A68B6E' }}>{pkr(d.revenue)} this period</p>
                           <p style={{ color: 'var(--admin-muted)' }}>{d.units} units sold · {d.total_sold} all time</p>
-                          <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? '#B45309' : '#166534' }}>
+                          <p style={{ color: d.stock === 0 ? C.criticalStrong : d.stock <= 5 ? C.warning : C.success }}>
                             {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                           </p>
                         </div>
@@ -1261,9 +1324,13 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="total_sold" fill={bestSellerBarFill} radius={[0, 4, 4, 0]} name="Total Sold">
-                    {bestSellerChartData.map((entry, i) => (
-                      <Cell key={i} fill={entry.stock === 0 ? C.criticalStrong : entry.stock <= 5 ? C.warning : '#A68B6E'} />
-                    ))}
+                    {bestSellerChartData.map((entry, i) => {
+                      const fill = entry.stock === 0 ? C.criticalStrong : entry.stock <= 5 ? C.warning : '#A68B6E'
+                      return (
+                        <Cell key={i} fill={fill}
+                          style={i === 0 ? { filter: glowFilter(fill, 0.6) } : undefined} />
+                      )
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -1285,6 +1352,7 @@ export default function AnalyticsClient({
                   <XAxis dataKey="cat" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" interval={0} />
                   <YAxis tick={{ fontSize: 10 }} tickFormatter={v => `${Math.round(Number(v) / 1000)}k`} width={40} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as { cat: string; revenue: number; units: number; orderCount: number }
@@ -1298,9 +1366,13 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="revenue" radius={[4, 4, 0, 0]} name="Revenue">
-                    {categoryPerf.map((_, i) => (
-                      <Cell key={i} fill={i === 0 ? '#A68B6E' : i === 1 ? '#C9956C' : i === 2 ? '#8B7355' : '#D4B896'} />
-                    ))}
+                    {categoryPerf.map((_, i) => {
+                      const fill = i === 0 ? '#A68B6E' : i === 1 ? '#C9956C' : i === 2 ? '#8B7355' : '#D4B896'
+                      return (
+                        <Cell key={i} fill={fill}
+                          style={i === 0 ? { filter: glowFilter(fill, 0.6) } : undefined} />
+                      )
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -1333,7 +1405,7 @@ export default function AnalyticsClient({
                       return (
                         <div key={key} className="flex items-center gap-3">
                           <span className="w-14 text-xs font-medium shrink-0 text-right truncate">{key}</span>
-                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                          <div className="flex-1 h-1.5 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--admin-divider)' }}>
                             <div className="h-full rounded-full"
                               style={{ width: `${pct}%`, backgroundColor: pct >= 70 ? C.success : pct >= 40 ? '#A68B6E' : C.warning }} />
                           </div>
@@ -1348,7 +1420,7 @@ export default function AnalyticsClient({
                       <div className="flex items-center gap-2 mb-3">
                         <span className="text-sm font-semibold">{tp.name}</span>
                         {collection && (
-                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#F3F4F6', color: 'var(--admin-muted)' }}>{collection}</span>
+                          <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: 'var(--admin-divider)', color: 'var(--admin-muted)' }}>{collection}</span>
                         )}
                       </div>
                       <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-2">
@@ -1372,20 +1444,60 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* Top Colors (moved here from the Dashboard, which now shows
+          {/* Top Colors + Top Sizes (moved here from the Dashboard, which now shows
               Top Products by actual sales instead — same underlying data,
               this is the merchandising home for it). */}
-          {topColors.length > 0 && (
-            <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
-              <h3 className="font-semibold mb-4">Top Colors</h3>
-              <ResponsiveContainer width="100%" height={Math.max(160, topColors.length * 38)}>
-                <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 24 }}>
-                  <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
-                  <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
-                  <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']} />
-                  <Bar dataKey="units" fill="#A68B6E" radius={[0, 4, 4, 0]} name="Units" />
-                </BarChart>
-              </ResponsiveContainer>
+          {(topColors.length > 0 || topSizes.length > 0) && (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {topColors.length > 0 && (
+                <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+                  <h3 className="font-semibold mb-4">Top Colors</h3>
+                  <ResponsiveContainer width="100%" height={Math.max(160, topColors.length * 38)}>
+                    <BarChart data={topColors} layout="vertical" margin={{ left: 8, right: 24 }}>
+                      <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                      <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']}
+                        contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                        itemStyle={{ color: 'var(--admin-text)' }}
+                        labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                        cursor={{ fill: 'var(--admin-divider)' }}
+                      />
+                      <Bar dataKey="units" radius={[0, 4, 4, 0]} name="Units">
+                        {topColors.map((_, i) => (
+                          <Cell key={i} fill="#A68B6E"
+                            style={i === 0 ? { filter: 'drop-shadow(0 0 5px rgba(166,139,110,0.55))' } : undefined} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
+              {topSizes.length > 0 && (
+                <div className="bg-[var(--admin-surface)] rounded-lg p-5 border" style={{ borderColor: 'var(--admin-border)' }}>
+                  <h3 className="font-semibold mb-4">Top Sizes</h3>
+                  <ResponsiveContainer width="100%" height={Math.max(160, topSizes.length * 38)}>
+                    <BarChart data={topSizes} layout="vertical" margin={{ left: 8, right: 24 }}>
+                      <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
+                      <YAxis type="category" dataKey="name" tick={{ fontSize: 10 }} width={70} />
+                      <Tooltip formatter={(v) => [`${v} units`, 'Units Sold']}
+                        contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                        itemStyle={{ color: 'var(--admin-text)' }}
+                        labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                        cursor={{ fill: 'var(--admin-divider)' }}
+                      />
+                      {/* Terracotta, not violet — Top Colors (gold) sits right
+                          next to this, and violet read as disconnected from
+                          the warm palette the rest of Merchandising uses. */}
+                      <Bar dataKey="units" radius={[0, 4, 4, 0]} name="Units">
+                        {topSizes.map((_, i) => (
+                          <Cell key={i} fill="#C9956C"
+                            style={i === 0 ? { filter: 'drop-shadow(0 0 5px rgba(201,149,108,0.55))' } : undefined} />
+                        ))}
+                      </Bar>
+                    </BarChart>
+                  </ResponsiveContainer>
+                </div>
+              )}
             </div>
           )}
 
@@ -1434,7 +1546,7 @@ export default function AnalyticsClient({
             <div className="overflow-x-auto max-h-96 overflow-y-auto">
               <table className="w-full text-xs" style={{ borderCollapse: 'collapse' }}>
                 <thead className="sticky top-0 bg-[var(--admin-surface)]">
-                  <tr style={{ borderBottom: '1px solid #F3F4F6' }}>
+                  <tr style={{ borderBottom: '1px solid var(--admin-border)' }}>
                     <th className="text-left py-1.5 font-medium" style={{ color: 'var(--admin-muted)' }}>Product</th>
                     <th className="text-left py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>SKU</th>
                     <th className="text-right py-1.5 font-medium px-3" style={{ color: 'var(--admin-muted)' }}>Stock</th>
@@ -1443,10 +1555,10 @@ export default function AnalyticsClient({
                 </thead>
                 <tbody>
                   {productInventoryRows.map(row => (
-                    <tr key={row.id} style={{ borderBottom: '1px solid #F9FAFB' }}>
+                    <tr key={row.id} style={{ borderBottom: '1px solid var(--admin-divider)' }}>
                       <td className="py-1.5 font-medium">{row.name}</td>
                       <td className="py-1.5 px-3" style={{ color: 'var(--admin-muted)' }}>{row.sku}</td>
-                      <td className="py-1.5 px-3 text-right font-semibold" style={{ color: row.isOutOfStock ? C.criticalStrong : row.isLowStock ? '#B45309' : '#1C1C1C' }}>
+                      <td className="py-1.5 px-3 text-right font-semibold" style={{ color: row.isOutOfStock ? C.criticalStrong : row.isLowStock ? (isDark ? C.warning : '#B45309') : 'var(--admin-text)' }}>
                         {row.isOutOfStock ? 'Sold Out' : row.stock}
                         {row.isLowStock && ' ⚠'}
                       </td>
@@ -1468,6 +1580,7 @@ export default function AnalyticsClient({
                   <XAxis type="number" tick={{ fontSize: 10 }} allowDecimals={false} />
                   <YAxis type="category" dataKey="cat" tick={{ fontSize: 10 }} width={90} />
                   <Tooltip
+                    cursor={{ fill: 'var(--admin-divider)' }}
                     content={({ active, payload }) => {
                       if (!active || !payload?.length) return null
                       const d = payload[0]?.payload as typeof categoryMerged[0]
@@ -1485,9 +1598,13 @@ export default function AnalyticsClient({
                     }}
                   />
                   <Bar dataKey="stock" radius={[0, 4, 4, 0]} name="Stock">
-                    {categoryMerged.map((_, i) => (
-                      <Cell key={i} fill={i === 0 ? '#1C1C1C' : i === 1 ? '#A68B6E' : i === 2 ? '#C9956C' : i === 3 ? '#8B7355' : '#D4B896'} />
-                    ))}
+                    {categoryMerged.map((_, i) => {
+                      const fill = i === 0 ? (isDark ? '#F3F1EE' : '#1C1C1C') : i === 1 ? '#A68B6E' : i === 2 ? '#C9956C' : i === 3 ? '#8B7355' : '#D4B896'
+                      return (
+                        <Cell key={i} fill={fill}
+                          style={i === 0 ? { filter: 'drop-shadow(0 0 4px rgba(166,139,110,0.4))' } : undefined} />
+                      )
+                    })}
                   </Bar>
                 </BarChart>
               </ResponsiveContainer>
@@ -1497,10 +1614,10 @@ export default function AnalyticsClient({
           {/* Low Stock */}
           {lowStockItems.length > 0 && (
             <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
-              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)', backgroundColor: '#FFFBEB' }}>
-                <h3 className="font-semibold text-sm" style={{ color: '#92400E' }}>⚠ Low Stock</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF9C3', color: '#92400E' }}>{lowStockItems.length}</span>
-                <span className="text-xs ml-auto" style={{ color: '#B45309' }}>1–3 units remaining</span>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)', backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 15%, var(--admin-surface))` : '#FFFBEB' }}>
+                <h3 className="font-semibold text-sm" style={{ color: isDark ? C.warning : '#92400E' }}>⚠ Low Stock</h3>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 30%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' }}>{lowStockItems.length}</span>
+                <span className="text-xs ml-auto" style={{ color: isDark ? C.warning : '#B45309' }}>1–3 units remaining</span>
               </div>
               <div className="divide-y" style={{ borderColor: 'var(--admin-divider)' }}>
                 {lowStockItems.map((item, i) => (
@@ -1527,17 +1644,23 @@ export default function AnalyticsClient({
                 <span className="text-xs" style={{ color: 'var(--admin-subtle)' }}>sold ÷ (sold + remaining stock)</span>
               </div>
               <div className="space-y-2.5">
-                {sizeSellThrough.map(s => (
+                {sizeSellThrough.map((s, i) => {
+                  const barColor = s.pct >= 70 ? C.success : s.pct >= 40 ? '#A68B6E' : C.warning
+                  return (
                   <div key={s.sz} className="flex items-center gap-3">
                     <span className="w-10 text-sm font-medium text-right shrink-0">{s.sz}</span>
-                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: '#F3F4F6' }}>
+                    <div className="flex-1 h-2 rounded-full overflow-hidden" style={{ backgroundColor: 'var(--admin-divider)' }}>
                       <div className="h-full rounded-full"
-                        style={{ width: `${s.pct}%`, backgroundColor: s.pct >= 70 ? C.success : s.pct >= 40 ? '#A68B6E' : C.warning }} />
+                        style={{
+                          width: `${s.pct}%`, backgroundColor: barColor,
+                          boxShadow: i === 0 ? glowShadow(barColor, 0.7) : undefined,
+                        }} />
                     </div>
                     <span className="text-xs shrink-0 w-12 text-right font-medium" style={{ color: 'var(--admin-muted)' }}>{s.pct}%</span>
                     <span className="text-xs shrink-0 hidden sm:inline" style={{ color: 'var(--admin-subtle)' }}>{s.sold} sold · {s.remaining} left</span>
                   </div>
-                ))}
+                  )
+                })}
               </div>
             </div>
           )}
@@ -1547,7 +1670,7 @@ export default function AnalyticsClient({
             <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
               <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">Just Dropped</h3>
-                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F3F4F6', color: 'var(--admin-text)' }}>last 7 days</span>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: 'var(--admin-divider)', color: 'var(--admin-text)' }}>last 7 days</span>
               </div>
               <ul className="divide-y" style={{ borderColor: 'var(--admin-divider)' }}>
                 {justDropped.map(p => (
@@ -1561,9 +1684,11 @@ export default function AnalyticsClient({
                         {p.ageDays === 0 ? 'today' : `${p.ageDays}d ago`}
                       </span>
                       <span className="text-xs font-semibold px-1.5 py-0.5 rounded"
-                        style={p.stock === 0 ? { backgroundColor: '#FEE2E2', color: C.criticalStrong }
-                          : p.stock <= 3 ? { backgroundColor: '#FEF9C3', color: '#92400E' }
-                          : { backgroundColor: '#F0FDF4', color: '#166534' }}>
+                        style={p.stock === 0
+                          ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong }
+                          : p.stock <= 3
+                          ? { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' }
+                          : { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#F0FDF4', color: isDark ? C.success : '#166534' }}>
                         {p.stock === 0 ? 'OUT' : `${p.stock} left`}
                       </span>
                     </div>
@@ -1578,7 +1703,7 @@ export default function AnalyticsClient({
             <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
               <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">New Arrivals</h3>
-                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F5F3FF', color: C.violetStrong }}>flagged · live on storefront</span>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.violetStrong} 25%, var(--admin-surface))` : '#F5F3FF', color: C.violetStrong }}>flagged · live on storefront</span>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -1601,7 +1726,7 @@ export default function AnalyticsClient({
                       <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.ageDays}d</td>
                       <td className="px-4 py-3 text-right">{p.total_sold}</td>
                       <td className="px-4 py-3 text-right font-medium"
-                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? (isDark ? C.warning : '#B45309') : 'var(--admin-text)' }}>
                         {p.stock === 0 ? 'OUT' : p.stock}
                       </td>
                       <td className="px-5 py-3 text-right text-xs">
@@ -1644,7 +1769,7 @@ export default function AnalyticsClient({
                       <td className="px-4 py-3 text-right text-xs" style={{ color: 'var(--admin-subtle)' }}>{p.ageDays}d</td>
                       <td className="px-4 py-3 text-right">{p.total_sold}</td>
                       <td className="px-4 py-3 text-right font-medium"
-                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        style={{ color: p.stock === 0 ? C.criticalStrong : p.stock <= 5 ? (isDark ? C.warning : '#B45309') : 'var(--admin-text)' }}>
                         {p.stock === 0 ? 'OUT' : p.stock}
                       </td>
                       <td className="px-5 py-3 text-right text-xs">
@@ -1664,7 +1789,7 @@ export default function AnalyticsClient({
           <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
             <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
               <h3 className="font-semibold text-sm">Slow Movers</h3>
-              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{slowMovers.length}</span>
+              <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEF2F2', color: isDark ? C.criticalStrong : '#B91C1C' }}>{slowMovers.length}</span>
               <span className="text-xs ml-auto" style={{ color: 'var(--admin-subtle)' }}>sell-through &lt; 50% of store avg · 15+ days old</span>
             </div>
             {slowMovers.length === 0 ? (
@@ -1714,7 +1839,7 @@ export default function AnalyticsClient({
             <div className="bg-[var(--admin-surface)] rounded-lg border overflow-hidden" style={{ borderColor: 'var(--admin-border)' }}>
               <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: 'var(--admin-border)' }}>
                 <h3 className="font-semibold text-sm">Dead Inventory</h3>
-                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: '#FEF2F2', color: '#B91C1C' }}>{deadInventory.length}</span>
+                <span className="text-xs px-2 py-0.5 rounded-full" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEF2F2', color: isDark ? C.criticalStrong : '#B91C1C' }}>{deadInventory.length}</span>
                 <span className="text-xs ml-auto" style={{ color: 'var(--admin-subtle)' }}>0 sales · stock ≥ 10 · 15+ days old</span>
               </div>
               <div className="overflow-x-auto">
@@ -1790,8 +1915,18 @@ export default function AnalyticsClient({
                   <BarChart data={reasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
                     <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={110} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#EF4444" radius={[0, 4, 4, 0]} name="Count" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                      itemStyle={{ color: 'var(--admin-text)' }}
+                      labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                      cursor={{ fill: 'var(--admin-divider)' }}
+                    />
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Count">
+                      {reasonData.map((_, i) => (
+                        <Cell key={i} fill={C.critical}
+                          style={i === 0 ? { filter: glowFilter(C.critical, 0.6) } : undefined} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (
@@ -1806,8 +1941,18 @@ export default function AnalyticsClient({
                   <BarChart data={returnReasonData} layout="vertical" margin={{ left: 8, right: 24 }}>
                     <XAxis type="number" tick={{ fontSize: 11 }} allowDecimals={false} />
                     <YAxis type="category" dataKey="name" tick={{ fontSize: 11 }} width={130} />
-                    <Tooltip />
-                    <Bar dataKey="count" fill="#3B82F6" radius={[0, 4, 4, 0]} name="Count" />
+                    <Tooltip
+                      contentStyle={{ backgroundColor: 'var(--admin-surface)', border: '1px solid var(--admin-border)', borderRadius: 8, fontSize: 12 }}
+                      itemStyle={{ color: 'var(--admin-text)' }}
+                      labelStyle={{ color: 'var(--admin-text-secondary)' }}
+                      cursor={{ fill: 'var(--admin-divider)' }}
+                    />
+                    <Bar dataKey="count" radius={[0, 4, 4, 0]} name="Count">
+                      {returnReasonData.map((_, i) => (
+                        <Cell key={i} fill={C.info}
+                          style={i === 0 ? { filter: glowFilter(C.info, 0.6) } : undefined} />
+                      ))}
+                    </Bar>
                   </BarChart>
                 </ResponsiveContainer>
               ) : (

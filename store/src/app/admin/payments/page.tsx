@@ -8,11 +8,12 @@ import { getAdminStatusColors } from '@/lib/adminColors'
 type Tab = 'all' | 'pending' | 'paid'
 
 export default function AdminPayments() {
-  const C = getAdminStatusColors(useAdminDarkMode())
+  const isDark = useAdminDarkMode()
+  const C = getAdminStatusColors(isDark)
   const PAYMENT_COLORS: Record<string, React.CSSProperties> = {
-    pending: { backgroundColor: '#FEF9C3', color: '#92400E' },
-    paid:    { backgroundColor: '#DCFCE7', color: '#15803D' },
-    failed:  { backgroundColor: '#FEE2E2', color: C.criticalStrong },
+    pending: { backgroundColor: isDark ? `color-mix(in srgb, ${C.warning} 25%, var(--admin-surface))` : '#FEF9C3', color: isDark ? C.warning : '#92400E' },
+    paid:    { backgroundColor: isDark ? `color-mix(in srgb, ${C.success} 25%, var(--admin-surface))` : '#DCFCE7', color: C.success },
+    failed:  { backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 25%, var(--admin-surface))` : '#FEE2E2', color: C.criticalStrong },
   }
   const [orders, setOrders]           = useState<Order[]>([])
   const [tab, setTab]                 = useState<Tab>('all')
@@ -230,7 +231,7 @@ export default function AdminPayments() {
       <h1 className="text-2xl mb-6" style={{ fontFamily: 'Playfair Display, serif' }}>Payments</h1>
 
       {actionError && (
-        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: '#FEF2F2', color: C.criticalStrong }}>
+        <div className="text-sm mb-4 px-4 py-2 rounded flex items-center justify-between" style={{ backgroundColor: isDark ? `color-mix(in srgb, ${C.criticalStrong} 20%, var(--admin-surface))` : '#FEF2F2', color: C.criticalStrong }}>
           <span>{actionError}</span>
           <button className="ml-3 underline text-xs" onClick={() => setActionError(null)}>Dismiss</button>
         </div>
