@@ -32,7 +32,21 @@ function PopupCard({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Content
           onOpenAutoFocus={e => e.preventDefault()}
-          className="fixed z-40 bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:w-full sm:max-w-sm rounded-lg border p-5 shadow-xl text-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2"
+          // Radix's default non-modal behavior dismisses on any outside
+          // pointer interaction — meaning a customer's very first natural
+          // action (tapping a product, scrolling, tapping nav) closed this
+          // before they'd registered it existed. The card should only close
+          // via its own ✕ or CTA button; Escape is left alone (keyboard
+          // accessibility).
+          onPointerDownOutside={e => e.preventDefault()}
+          onInteractOutside={e => e.preventDefault()}
+          className="fixed z-40 bottom-4 left-4 right-4 sm:left-auto sm:right-6 sm:bottom-6 sm:w-full sm:max-w-sm rounded-xl border p-5 text-center data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:slide-out-to-bottom-2 data-[state=open]:slide-in-from-bottom-2"
+          // Explicit opaque background here, at the shared wrapper — the sale
+          // variant supplies its own (a full-bleed gradient div), but the
+          // free-delivery variant has no inner wrapper of its own, so without
+          // this it was genuinely transparent, letting page content bleed
+          // through behind the text.
+          style={{ backgroundColor: '#FFFFFF', boxShadow: '0 8px 30px rgba(0,0,0,0.25), 0 0 0 1px rgba(166,139,110,0.15), 0 0 24px rgba(166,139,110,0.35)' }}
         >
           {children}
         </DialogPrimitive.Content>
@@ -85,20 +99,26 @@ export default function PromoPopups({
   return (
     <>
       <PopupCard open={stage === 'sale'} onOpenChange={o => { if (!o) dismissSale() }}>
-        <div style={{ backgroundColor: '#1C1C1C', color: 'white', margin: '-1.25rem', padding: '1.25rem', borderRadius: '0.5rem' }}>
+        <div style={{ background: 'linear-gradient(160deg, #1C1C1C 0%, #3A2F2A 100%)', color: 'white', margin: '-1.25rem', padding: '1.5rem 1.25rem 1.25rem', borderRadius: '0.75rem' }}>
           <DialogPrimitive.Close className="absolute top-3 right-3 opacity-70 hover:opacity-100 transition-opacity" style={{ color: 'white' }}>
             <X size={16} />
             <span className="sr-only">Close</span>
           </DialogPrimitive.Close>
-          <div className="flex justify-center mb-1">
+          <div className="flex justify-center mb-3">
             <span
-              className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full"
-              style={{ backgroundColor: '#C62828', color: 'white' }}
+              className="inline-flex items-center justify-center w-14 h-14 rounded-full"
+              style={{ backgroundColor: '#C62828', boxShadow: '0 0 20px rgba(198,40,40,0.55)' }}
             >
-              <Sparkles size={11} /> Limited Time
+              <Sparkles size={26} color="white" />
             </span>
           </div>
-          <DialogTitle className="text-xl" style={{ fontFamily: 'Playfair Display, serif', color: 'white' }}>
+          <span
+            className="inline-flex text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2"
+            style={{ backgroundColor: 'rgba(198,40,40,0.2)', color: '#FF8A80' }}
+          >
+            Limited Time
+          </span>
+          <DialogTitle className="text-2xl" style={{ fontFamily: 'Playfair Display, serif', color: 'white' }}>
             {saleTitle || 'A Sale Is On Right Now'}
           </DialogTitle>
           <DialogDescription style={{ color: '#D1D5DB' }}>
@@ -107,8 +127,8 @@ export default function PromoPopups({
           <Link
             href="/sale"
             onClick={dismissSale}
-            className="mt-3 inline-block w-full py-2.5 text-sm font-semibold rounded-md transition-opacity hover:opacity-90"
-            style={{ backgroundColor: '#A68B6E', color: '#1C1C1C' }}
+            className="mt-4 inline-block w-full py-3 text-sm font-bold rounded-md transition-opacity hover:opacity-90"
+            style={{ backgroundColor: '#A68B6E', color: '#1C1C1C', boxShadow: '0 0 16px rgba(166,139,110,0.5)' }}
           >
             View Sale →
           </Link>
@@ -120,15 +140,21 @@ export default function PromoPopups({
           <X size={16} />
           <span className="sr-only">Close</span>
         </DialogPrimitive.Close>
-        <div className="flex justify-center mb-1">
+        <div className="flex justify-center mb-3">
           <span
-            className="inline-flex items-center gap-1.5 text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full text-white"
-            style={{ backgroundColor: '#10B981' }}
+            className="inline-flex items-center justify-center w-14 h-14 rounded-full"
+            style={{ backgroundColor: '#10B981', boxShadow: '0 0 20px rgba(16,185,129,0.5)' }}
           >
-            <Truck size={11} /> Free Delivery
+            <Truck size={26} color="white" />
           </span>
         </div>
-        <DialogTitle className="text-xl" style={{ fontFamily: 'Playfair Display, serif', color: '#1C1C1C' }}>
+        <span
+          className="inline-flex text-[10px] font-bold uppercase tracking-widest px-2.5 py-1 rounded-full mb-2"
+          style={{ backgroundColor: 'rgba(16,185,129,0.12)', color: '#0F6B4C' }}
+        >
+          Free Delivery
+        </span>
+        <DialogTitle className="text-2xl" style={{ fontFamily: 'Playfair Display, serif', color: '#1C1C1C' }}>
           Free Delivery on 5+ Items
         </DialogTitle>
         <DialogDescription style={{ color: '#6B7280' }}>
@@ -137,8 +163,8 @@ export default function PromoPopups({
         <Link
           href="/shop"
           onClick={dismissDelivery}
-          className="mt-3 inline-block w-full py-2.5 text-sm font-semibold rounded-md text-white transition-opacity hover:opacity-90"
-          style={{ backgroundColor: '#1C1C1C' }}
+          className="mt-4 inline-block w-full py-3 text-sm font-bold rounded-md text-white transition-opacity hover:opacity-90"
+          style={{ backgroundColor: '#1C1C1C', boxShadow: '0 0 16px rgba(166,139,110,0.35)' }}
         >
           Start Shopping →
         </Link>
