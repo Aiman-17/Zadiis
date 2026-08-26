@@ -72,7 +72,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
         {/* Header */}
         <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', marginBottom: 32, paddingBottom: 16, borderBottom: '2px solid #A68B6E' }}>
           <div>
-            <h1 style={{ margin: 0, fontSize: 28, fontFamily: 'Georgia, serif', color: '#1C1C1C', letterSpacing: 3 }}>ZADIIS</h1>
+            <h1 style={{ margin: 0, fontSize: 28, fontFamily: 'Georgia, serif', color: '#1C1C1C', letterSpacing: 3 }}>ZADII&apos;S</h1>
             <p style={{ margin: '4px 0 0', fontSize: 12, color: '#A68B6E', letterSpacing: 1 }}>AUTHENTIC PAKISTANI FASHION</p>
             <p style={{ margin: '8px 0 0', fontSize: 12, color: '#6B7280' }}>zadiis.com.pk</p>
             <p style={{ margin: '2px 0 0', fontSize: 12, color: '#6B7280' }}>orders@zadiis.com.pk</p>
@@ -151,7 +151,13 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
           <p style={{ margin: 0, fontSize: 11, fontWeight: 'bold', color: '#9CA3AF', textTransform: 'uppercase', letterSpacing: 1, marginBottom: 8 }}>Payment Details</p>
           <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '4px 24px' }}>
             <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Method: <strong style={{ color: '#1C1C1C', textTransform: 'capitalize' }}>{order.payment_method}</strong></p>
-            <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>Status: <strong style={{ color: '#15803D' }}>PAID</strong></p>
+            <p style={{ margin: 0, fontSize: 13, color: '#6B7280' }}>
+              Status: <strong style={{
+                color: order.payment_status === 'paid' ? '#15803D'
+                  : order.payment_status === 'failed' ? '#DC2626'
+                  : '#92400E'
+              }}>{order.payment_status.toUpperCase()}</strong>
+            </p>
             {order.safepay_transaction_id && (
               <p style={{ margin: 0, fontSize: 12, color: '#6B7280', gridColumn: '1 / -1' }}>
                 Transaction ID: {order.safepay_transaction_id}
@@ -162,7 +168,7 @@ export default async function InvoicePrintPage({ params }: { params: Promise<{ i
 
         {/* Footer */}
         <div style={{ borderTop: '1px solid #E8DDD4', paddingTop: 16, textAlign: 'center' }}>
-          <p style={{ margin: 0, fontSize: 12, color: '#9CA3AF' }}>Thank you for shopping with ZADIIS</p>
+          <p style={{ margin: 0, fontSize: 12, color: '#9CA3AF' }}>Thank you for shopping with ZADII&apos;S</p>
           <p style={{ margin: '4px 0 0', fontSize: 11, color: '#D1D5DB' }}>This is a computer-generated invoice and does not require a physical signature.</p>
         </div>
       </div>

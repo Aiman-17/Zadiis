@@ -10,15 +10,61 @@ const VALID_REASONS = new Set([
   'other',
 ])
 
+const CANCEL_WINDOW_MS = 24 * 60 * 60 * 1000
+
 export async function POST(req: NextRequest) {
   try {
     const { order_number, customer_email, customer_name, reason, notes } = await req.json()
 
-    if (!order_number?.trim() || !customer_email?.trim() || !reason || !VALID_REASONS.has(reason)) {
+    if (!order_number?.trim() || !customer_email?.trim() || !customer_name?.trim() || !reason || !VALID_REASONS.has(reason)) {
       return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
     }
 
     const normalised = order_number.trim().toUpperCase()
+
+    const { data: order } = await supabaseAdmin
+      .from('orders')
+      .select('order_status, created_at, customer_email, customer_name')
+      .eq('order_number', normalised)
+      .single()
+
+    if (!order) {
+      return NextResponse.json({
+        error: 'We could not find an order with that order number. Please double-check and try again, or reach out to us on WhatsApp for assistance.',
+        code: 'NOT_FOUND',
+      }, { status: 404 })
+    }
+
+    const emailMatches = order.customer_email?.trim().toLowerCase() === customer_email.trim().toLowerCase()
+    const nameMatches  = order.customer_name?.trim().toLowerCase() === customer_name.trim().toLowerCase()
+    if (!emailMatches || !nameMatches) {
+      return NextResponse.json({
+        error: 'The name and email you entered do not match our records for this order. Please double-check and try again, or reach out to us on WhatsApp for assistance.',
+        code: 'IDENTITY_MISMATCH',
+      }, { status: 422 })
+    }
+
+    if (order.order_status === 'cancelled') {
+      return NextResponse.json({
+        error: 'This order has already been cancelled.',
+        code: 'ALREADY_CANCELLED',
+      }, { status: 422 })
+    }
+
+    if (order.order_status === 'delivered') {
+      return NextResponse.json({
+        error: 'This order has already been delivered and can no longer be cancelled. If there is an issue with your order, please submit a return or exchange request instead.',
+        code: 'ALREADY_DELIVERED',
+      }, { status: 422 })
+    }
+
+    const msSinceOrder = Date.now() - new Date(order.created_at).getTime()
+    if (msSinceOrder > CANCEL_WINDOW_MS) {
+      return NextResponse.json({
+        error: 'Your cancellation window has passed. Our policy only allows cancellations within 24 hours of placing your order. We understand this may be frustrating — please reach out to us on WhatsApp and we\'ll do our best to assist you.',
+        code: 'EXPIRED',
+      }, { status: 422 })
+    }
 
     const { error } = await supabaseAdmin.from('cancellation_requests').insert({
       order_number:   normalised,

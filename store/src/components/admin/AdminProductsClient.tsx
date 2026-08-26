@@ -4,6 +4,8 @@ import Link from 'next/link'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { Trash2, RotateCcw, ChevronDown, ChevronRight } from 'lucide-react'
 import type { Product } from '@/types'
+import { merchandisingIdSets } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 function isLowStock(p: Product): boolean {
   const vs = p.variant_stock
@@ -16,13 +18,7 @@ function isLowStock(p: Product): boolean {
 }
 
 function getProductStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return p.stock_quantity
+  return getEffectiveStock(p)
 }
 
 function productVelocity(p: Product): number {
@@ -61,7 +57,10 @@ function DTSBadge({ p }: { p: Product }) {
   return <span className="text-xs" style={{ color: '#9CA3AF' }}>{dts}d</span>
 }
 
-function ProductRow({ p, onDelete, waitlist }: { p: Product; onDelete: (id: string) => void; waitlist: number }) {
+function ProductRow({ p, onDelete, waitlist, isBestSeller, isTrending }: {
+  p: Product; onDelete: (id: string) => void; waitlist: number
+  isBestSeller: boolean; isTrending: boolean
+}) {
   const stock = getProductStock(p)
   return (
     <tr className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
@@ -82,10 +81,10 @@ function ProductRow({ p, onDelete, waitlist }: { p: Product; onDelete: (id: stri
             </span>
           )}
         </div>
-        {(p.is_bestseller || p.is_trending || p.is_new_arrival) && (
+        {(isBestSeller || isTrending || p.is_new_arrival) && (
           <div className="flex gap-1 mt-1">
-            {p.is_bestseller  && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>★ Best Seller</span>}
-            {p.is_trending    && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FDF2F8', color: '#9D174D' }}>↑ Trending</span>}
+            {isBestSeller     && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FFFBEB', color: '#92400E' }}>★ Best Seller</span>}
+            {isTrending       && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#FDF2F8', color: '#9D174D' }}>↑ Trending</span>}
             {p.is_new_arrival && <span className="text-xs px-1.5 py-0.5 rounded-full" style={{ backgroundColor: '#F5F3FF', color: '#5B21B6' }}>✦ New</span>}
           </div>
         )}
@@ -207,8 +206,11 @@ export default function AdminProductsClient({
 
   const TABLE_HEAD = ['Name', 'SKU', 'Price', 'Stock', 'Days to Sellout', 'Actions']
 
-  const bsCount    = active.filter(p => p.is_bestseller).length
-  const trendCount = active.filter(p => p.is_trending).length
+  // Same qualification as every other page (single source of truth —
+  // specs/003-merchandising-badges-v2) — computed once for the whole table.
+  const { bestSellerIds, trendingIds } = merchandisingIdSets(active)
+  const bsCount    = bestSellerIds.size
+  const trendCount = trendingIds.size
   const newCount   = active.filter(p => p.is_new_arrival).length
   const slowCount  = active.filter(p => isSlowMover(p, avgSellThrough)).length
 
@@ -266,7 +268,14 @@ export default function AdminProductsClient({
                   </td>
                 </tr>
               ) : visibleActive.map(p => (
-                <ProductRow key={p.id} p={p} onDelete={handleDelete} waitlist={waitlistCounts[p.id] || 0} />
+                <ProductRow
+                  key={p.id}
+                  p={p}
+                  onDelete={handleDelete}
+                  waitlist={waitlistCounts[p.id] || 0}
+                  isBestSeller={bestSellerIds.has(p.id)}
+                  isTrending={trendingIds.has(p.id)}
+                />
               ))}
             </tbody>
           </table>

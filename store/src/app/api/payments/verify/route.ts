@@ -81,8 +81,11 @@ export async function POST(req: NextRequest) {
     order_number: order.order_number,
     customer_name: order.customer_name,
     customer_phone: order.customer_phone,
+    customer_email: order.customer_email,
     total: order.total,
     payment_method: order.payment_method,
+    safepay_transaction_id: order.safepay_transaction_id,
+    items: order.items,
   })
 
   console.log(`[verify] Order ${order.order_number} marked paid via redirect verification`)

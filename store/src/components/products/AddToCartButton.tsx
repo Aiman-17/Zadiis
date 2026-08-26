@@ -3,6 +3,7 @@ import { useState, useMemo, useEffect } from 'react'
 import { X } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { addToCart } from '@/lib/cart-store'
+import { getEffectiveStock } from '@/lib/stock'
 import type { Product } from '@/types'
 
 const STITCHED_SIZES = [
@@ -222,7 +223,10 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
     setTimeout(() => setAdded(false), 2000)
   }
 
-  const totalOutOfStock = product.stock_quantity === 0
+  // BUG-004: raw stock_quantity can drift stale relative to variant_stock —
+  // this must agree with ProductCard's own effective-stock check, or a
+  // product can show as available in listings but "Sold Out" on its own page.
+  const totalOutOfStock = getEffectiveStock(product) === 0
 
   return (
     <>
@@ -316,14 +320,15 @@ export default function AddToCartButton({ product, salePrice }: { product: Produ
         </div>
       )}
 
-      {!totalOutOfStock && selectedVariantQty > 0 && selectedVariantQty <= 5 && (
+      {/* Per-variant stock — only once the user has picked a specific
+          color/size combo, so this doesn't just duplicate the page-level
+          overall stock line above with the same fallback number. */}
+      {!totalOutOfStock && hasTracking &&
+        (product.colors.length === 0 || selectedColor) &&
+        (!hasSizes || selectedSize) &&
+        selectedVariantQty > 0 && selectedVariantQty <= 5 && (
         <p className="text-sm font-semibold" style={{ color: '#C62828' }}>
-          {(() => {
-            const parts = [selectedColor, selectedSize].filter(Boolean)
-            return hasTracking && parts.length
-              ? `Only ${selectedVariantQty} left in ${parts.join(' / ')}`
-              : `Only ${selectedVariantQty} left in stock`
-          })()}
+          {`Only ${selectedVariantQty} left in ${[selectedColor, selectedSize].filter(Boolean).join(' / ')}`}
         </p>
       )}
 

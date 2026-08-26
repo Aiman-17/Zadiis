@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabaseAdmin } from '@/lib/supabase/server'
 import { sendOwnerNewOrder, sendCustomerOrderConfirmed } from '@/lib/email'
 import { generateInvoice } from '@/lib/invoice'
+import { getEffectiveStock } from '@/lib/stock'
 
 async function generateOrderNumber(): Promise<string> {
   const { data } = await supabaseAdmin
@@ -56,9 +57,13 @@ export async function POST(req: NextRequest) {
       if (error || !product) {
         return NextResponse.json({ error: `Product not found: ${item.product_name}` }, { status: 400 })
       }
-      if (product.stock_quantity < item.quantity) {
+      // BUG-004: stock_quantity can drift stale relative to variant_stock
+      // (e.g. from orders placed before the BUG-003 decrement_stock fix) —
+      // check against the true effective stock, not the raw aggregate field.
+      const effectiveStock = getEffectiveStock(product)
+      if (effectiveStock < item.quantity) {
         return NextResponse.json({
-          error: `Sorry, "${item.product_name}" is out of stock or has insufficient quantity. Available: ${product.stock_quantity}.`,
+          error: `Sorry, "${item.product_name}" is out of stock or has insufficient quantity. Available: ${effectiveStock}.`,
           outOfStock: true,
         }, { status: 400 })
       }

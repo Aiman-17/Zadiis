@@ -88,6 +88,7 @@ export async function PUT(req: NextRequest) {
       total: number
       payment_method: string
       safepay_transaction_id?: string | null
+      items?: OrderItem[]
     } | null = null
 
     const needsOrderData = order_status === 'delivered' || order_status === 'cancelled' || payment_status === 'paid'
@@ -111,10 +112,20 @@ export async function PUT(req: NextRequest) {
 
     // Stamp action timestamps — migration-safe (fails silently before columns exist).
     // Only fires for terminal statuses; switching between them clears the other field.
+    // Must be awaited — supabase-js query builders are thenable and never send
+    // the request at all unless awaited/then'd, so a bare `void query` is a no-op.
     if (order_status === 'cancelled' || order_status === 'returned') {
-      void supabaseAdmin.from('orders').update({
+      await supabaseAdmin.from('orders').update({
         cancelled_at: order_status === 'cancelled' ? new Date().toISOString() : null,
         returned_at:  order_status === 'returned'  ? new Date().toISOString() : null,
+      }).eq('id', id)
+    }
+
+    // Stamp delivered_at — source of truth for the return/exchange policy
+    // window (3 days from actual delivery, not order placement).
+    if (order_status === 'delivered') {
+      await supabaseAdmin.from('orders').update({
+        delivered_at: new Date().toISOString(),
       }).eq('id', id)
     }
 
@@ -145,14 +156,17 @@ export async function PUT(req: NextRequest) {
             order_number: orderData.order_number,
             customer_name: orderData.customer_name,
             customer_phone: orderData.customer_phone,
+            customer_email: orderData.customer_email,
             total: orderData.total,
             payment_method: orderData.payment_method,
+            items: orderData.items,
           })
         }
         await sendCustomerOrderDelivered(orderData.customer_email, {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           total: orderData.total,
+          items: orderData.items,
         })
       }
 
@@ -161,9 +175,11 @@ export async function PUT(req: NextRequest) {
           order_number: orderData.order_number,
           customer_name: orderData.customer_name,
           customer_phone: orderData.customer_phone,
+          customer_email: orderData.customer_email,
           total: orderData.total,
           payment_method: orderData.payment_method,
           safepay_transaction_id: orderData.safepay_transaction_id,
+          items: orderData.items,
         })
       }
     }

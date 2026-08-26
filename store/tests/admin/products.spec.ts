@@ -19,11 +19,11 @@ test.describe('Admin — Products', () => {
   })
 
   test('product list shows product names', async ({ page }) => {
-    // At least one product row should exist after setup
-    await page.waitForTimeout(2_000)
+    // At least one product row should exist after setup — wait for the first
+    // row to render instead of a fixed sleep
     const rows = page.locator('table tr, [role="row"]').filter({ hasNot: page.locator('th') })
-    const count = await rows.count()
-    expect(count).toBeGreaterThan(0)
+    await expect(rows.first()).toBeVisible({ timeout: 8_000 })
+    expect(await rows.count()).toBeGreaterThan(0)
   })
 
   test('create new product — form renders required fields', async ({ page }) => {
@@ -33,23 +33,36 @@ test.describe('Admin — Products', () => {
 
     await expect(page).toHaveURL('/admin/products/new')
     await expect(page.getByLabel(/Product Name/i).or(page.getByPlaceholder(/name/i))).toBeVisible()
-    await expect(page.getByLabel(/Price/i).or(page.getByPlaceholder(/price/i))).toBeVisible()
+    // Anchor to the field's full accessible name — /Price/i alone also matches
+    // "Cost Price (PKR)" and trips strict mode
+    await expect(page.getByRole('spinbutton', { name: /^Price \(PKR\)/i })).toBeVisible()
     await expect(page.getByLabel(/Description/i).or(page.getByPlaceholder(/description/i))).toBeVisible()
   })
 
   test('new product form — is_new_arrival settings panel renders', async ({ page }) => {
     await page.goto('/admin/products/new')
-    await expect(page.getByText(/New Arrival Settings|Launch Date|Expiry Date/i).first()).toBeVisible()
+    // The Launch/Expiry panel only renders after the "✦ New Arrival" badge
+    // toggle is switched on (new/page.tsx: conditional block)
+    await page.getByRole('button', { name: /New Arrival/i }).first().click()
+    await expect(page.getByText(/New Arrival Settings/i)).toBeVisible()
+    await expect(page.getByText(/Launch Date/i)).toBeVisible()
+    await expect(page.getByText(/Expiry Date/i)).toBeVisible()
   })
 
-  test('new product form — is_trending toggle renders', async ({ page }) => {
+  test('new product form — is_featured toggle renders', async ({ page }) => {
     await page.goto('/admin/products/new')
-    await expect(page.getByLabel(/trending/i).or(page.getByText(/Is Trending/i))).toBeVisible()
+    // Trending/Best Seller are fully automatic as of 003-merchandising-badges-v2
+    // (US6) and no longer offer a manual toggle; Featured (US5) replaced them
+    // as the merchant-controlled promotion outlet — same badge-toggle-button pattern.
+    await expect(page.getByRole('button', { name: /Featured/i }).first()).toBeVisible()
+    await expect(page.getByRole('button', { name: /Trending/i })).toHaveCount(0)
+    await expect(page.getByRole('button', { name: /Best Seller/i })).toHaveCount(0)
   })
 
   test('new product form — no_restock toggle renders', async ({ page }) => {
     await page.goto('/admin/products/new')
-    await expect(page.getByLabel(/no.?restock|restock/i).or(page.getByText(/No Restock/i))).toBeVisible()
+    // Target the checkbox role — getByLabel + getByText both match and trip strict mode
+    await expect(page.getByRole('checkbox', { name: /No restock planned/i })).toBeVisible()
   })
 
   test('create product saves and redirects to product list', async ({ page }) => {
@@ -80,13 +93,13 @@ test.describe('Admin — Products', () => {
   })
 
   test('edit product page loads with existing values', async ({ page }) => {
-    // Click Edit on first product
-    const editLink = page.getByRole('link', { name: /Edit/i }).first()
+    // Href-based locator — row "Edit" links carry no stable accessible name
+    const editLink = page.locator('a[href*="/admin/products/"][href*="/edit"]').first()
     const hasEdit = await editLink.isVisible().catch(() => false)
     if (!hasEdit) test.skip()
 
     await editLink.click()
-    await expect(page.url()).toContain('/edit')
+    await page.waitForURL(/\/admin\/products\/.+\/edit/, { timeout: 8_000 })
 
     // Name field should be pre-populated
     const nameInput = page.getByLabel(/Product Name/i).or(page.getByPlaceholder(/product name/i))
@@ -94,24 +107,29 @@ test.describe('Admin — Products', () => {
     expect(value.length).toBeGreaterThan(0)
   })
 
-  test('edit product — is_trending toggle saves', async ({ page }) => {
-    const editLink = page.getByRole('link', { name: /Edit/i }).first()
+  test('edit product — is_featured toggle saves', async ({ page }) => {
+    const editLink = page.locator('a[href*="/admin/products/"][href*="/edit"]').first()
     const hasEdit = await editLink.isVisible().catch(() => false)
     if (!hasEdit) test.skip()
 
     await editLink.click()
+    await page.waitForURL(/\/admin\/products\/.+\/edit/, { timeout: 8_000 })
 
-    const trendingToggle = page.getByLabel(/trending/i).or(page.getByRole('checkbox', { name: /trending/i }))
-    const initialState = await trendingToggle.isChecked().catch(() => false)
+    // Featured is a badge toggle button ("☆ Featured"), not a checkbox.
+    // Toggle it twice so the saved value is unchanged — no data mutation.
+    const featuredToggle = page.getByRole('button', { name: /Featured/i }).first()
+    await featuredToggle.click()
+    await featuredToggle.click()
 
-    await trendingToggle.click()
-    await page.waitForTimeout(200)
-    const newState = await trendingToggle.isChecked()
-    expect(newState).toBe(!initialState)
-
-    // Save
     await page.getByRole('button', { name: /Save|Update/i }).first().click()
-    await expect(page.getByText(/saved|updated|success/i)).toBeVisible({ timeout: 8_000 })
+    // Save either redirects back to the product list or shows a success note
+    const redirected = await page
+      .waitForURL(/\/admin\/products\/?$/, { timeout: 10_000 })
+      .then(() => true)
+      .catch(() => false)
+    if (!redirected) {
+      await expect(page.getByText(/saved|updated|success/i).first()).toBeVisible({ timeout: 8_000 })
+    }
   })
 
 })

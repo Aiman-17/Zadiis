@@ -5,6 +5,8 @@ import {
 } from 'recharts'
 import Link from 'next/link'
 import type { Order, OrderItem, Product } from '@/types'
+import { rankTrending } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 const STATUS_COLORS: Record<string, string> = {
   new:        '#3B82F6',
@@ -34,8 +36,8 @@ type ActiveSaleSummary = {
   todayRevenue: number; yesterdayRevenue: number
 }
 
-export default function DashboardCharts({ orders, products, activeSales = [] }: {
-  orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]
+export default function DashboardCharts({ orders, products, activeSales = [], codEnabled = false }: {
+  orders: Order[]; products: Product[]; activeSales?: ActiveSaleSummary[]; codEnabled?: boolean
 }) {
   const thisMonth = orders.filter(o => isThisMonth(o.created_at))
   const last7days = orders.filter(o => isWithinDays(o.created_at, 7))
@@ -150,13 +152,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     : 0
 
   // Slow movers — relative: below 50% of store average sell-through, 15+ days old
-  function dashStock(p: Product): number {
-    const vs = p.variant_stock
-    return vs && Object.keys(vs).length > 0
-      ? Object.values(vs).reduce((sum, sizes) =>
-          sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
-      : p.stock_quantity
-  }
+  const dashStock = getEffectiveStock
   const eligibleProds = products.filter(p => {
     const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000
     return age >= 15 && dashStock(p) > 0
@@ -173,26 +169,28 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
     return (p.total_sold / (p.total_sold + s)) < dashAvgSellThrough * 0.5
   }).length
 
-  // Order status donut — ALL non-archived orders
+  // Order status donut — non-archived orders from the last 30 days
   const statusCounts: Record<string, number> = {
     new: 0, processing: 0, shipped: 0, delivered: 0, returned: 0, cancelled: 0,
   }
-  orders.filter(o => !o.is_archived).forEach(o => {
+  orders.filter(o => !o.is_archived && isWithinDays(o.created_at, 30)).forEach(o => {
     if (statusCounts[o.order_status] !== undefined) statusCounts[o.order_status]++
   })
   const statusData = Object.entries(statusCounts)
     .map(([name, value]) => ({ name, value }))
     .filter(s => s.value > 0)
 
-  // Trending products (from product scores)
-  const trendingProducts = products
-    .filter(p => p.trending_score > 0)
-    .sort((a, b) => b.trending_score - a.trending_score)
-    .slice(0, 8)
+  // Same qualification + ranking as every other page (single source of
+  // truth — specs/003-merchandising-badges-v2): category-relative,
+  // fully automatic — the manual is_trending flag is retired (US6) and no
+  // longer read here.
+  const trendingProducts = rankTrending(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
       score: p.trending_score,
+      chartScore: p.trending_score,
+      price: p.price,
       category: p.product_category || 'Uncategorized',
       stock: dashStock(p),
       total_sold: p.total_sold,
@@ -214,14 +212,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
 
   // Product stock helpers
   const totalProducts = products.length
-  const totalStock = products.reduce((sum, p) => {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return sum + Object.values(vs).reduce((s, sizes) =>
-        s + Object.values(sizes as Record<string, number>).reduce((si, q) => si + q, 0), 0)
-    }
-    return sum + p.stock_quantity
-  }, 0)
+  const totalStock = products.reduce((sum, p) => sum + getEffectiveStock(p), 0)
 
   // 7-day sales trend
   const salesTrend7d = Array.from({ length: 7 }, (_, i) => {
@@ -262,16 +253,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
   lowStockItems.sort((a, b) => a.qty - b.qty)
 
   // Inventory health
-  function getProductStock(p: Product): number {
-    const vs = p.variant_stock
-    if (vs && Object.keys(vs).length > 0) {
-      return Object.values(vs).reduce(
-        (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-      )
-    }
-    return p.stock_quantity
-  }
-  const soldOutCount    = products.filter(p => getProductStock(p) === 0).length
+  const soldOutCount    = products.filter(p => getEffectiveStock(p) === 0).length
   // Match the products page filter: any variant with ≤3 units (or total stock ≤3 for non-variant products)
   const lastChanceCount = products.filter(p => {
     const vs = p.variant_stock
@@ -280,10 +262,10 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
         Object.values(sizes as Record<string, number>).some(q => q > 0 && q <= 3)
       )
     }
-    const s = getProductStock(p)
+    const s = getEffectiveStock(p)
     return s > 0 && s <= 3
   }).length
-  const inStockCount    = products.filter(p => getProductStock(p) > 0).length
+  const inStockCount    = products.filter(p => getEffectiveStock(p) > 0).length
 
 
   // Sale banner logic
@@ -434,7 +416,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
             <p className="text-xs text-gray-500 mt-1">Repeat Rate</p>
           </div>
 
-          {codSuccessRate !== null && (
+          {codEnabled && codSuccessRate !== null && (
             <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
               <p className="text-2xl font-bold"
                 style={{ color: codSuccessRate >= 65 ? '#10B981' : codSuccessRate >= 50 ? '#F59E0B' : '#EF4444' }}>
@@ -450,7 +432,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
       </div>
 
       {/* Cash Position (MTD) */}
-      {(cashCollectedMTD > 0 || inTransitMTD > 0) && (
+      {codEnabled && (cashCollectedMTD > 0 || inTransitMTD > 0) && (
         <div className="flex gap-4 px-5 py-3 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAFAFA' }}>
           <div className="flex-1">
             <p className="text-xs font-medium" style={{ color: '#6B7280' }}>Cash Collected (MTD)</p>
@@ -470,7 +452,7 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Order Status Donut */}
         <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-          <h3 className="font-semibold mb-4">Order Status Breakdown</h3>
+          <h3 className="font-semibold mb-4">Order Status Breakdown <span className="font-normal text-xs" style={{ color: '#9CA3AF' }}>(Last 30 Days)</span></h3>
           {statusData.length > 0 ? (
             <>
               <ResponsiveContainer width="100%" height={180}>
@@ -580,15 +562,16 @@ export default function DashboardCharts({ orders, products, activeSales = [] }: 
                           <div className="rounded-lg px-3 py-2.5 shadow-md text-xs border bg-white space-y-0.5" style={{ borderColor: '#E8DDD4' }}>
                             <p className="font-semibold mb-1">{d.name}</p>
                             <p style={{ color: '#9CA3AF' }}>{d.category}</p>
-                            <p style={{ color: '#6B7280' }}>{d.total_sold} total sold · score {d.score.toFixed(1)}</p>
+                            <p style={{ color: '#A68B6E' }}>PKR {Number(d.price).toLocaleString()}</p>
+                            <p style={{ color: '#6B7280' }}>{d.total_sold} units sold · score {d.score.toFixed(1)}</p>
                             <p style={{ color: d.stock === 0 ? '#DC2626' : d.stock <= 5 ? '#B45309' : '#166534' }}>
-                              {d.stock === 0 ? '⚠ OUT OF STOCK' : d.stock <= 5 ? `⚠ Only ${d.stock} left` : `${d.stock} in stock`}
+                              {d.stock === 0 ? '⚠ OUT OF STOCK — restock urgently' : d.stock <= 5 ? `⚠ Only ${d.stock} left — restock soon` : `${d.stock} in stock`}
                             </p>
                           </div>
                         )
                       }}
                     />
-                    <Bar dataKey="score" radius={[0, 4, 4, 0]} name="Trend Score">
+                    <Bar dataKey="chartScore" radius={[0, 4, 4, 0]} name="Trend Score">
                       {trendingProducts.map((entry, i) => (
                         <Cell key={i} fill={entry.stock === 0 ? '#DC2626' : entry.stock <= 5 ? '#F59E0B' : '#BE185D'} />
                       ))}

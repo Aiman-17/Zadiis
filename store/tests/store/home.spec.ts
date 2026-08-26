@@ -17,7 +17,7 @@ test.describe('Home page', () => {
   })
 
   test('trust bar renders all 5 items', async ({ page }) => {
-    await expect(page.getByText(/Free delivery over PKR/i)).toBeVisible()
+    await expect(page.getByText(/Free delivery on orders of 5\+ items/i)).toBeVisible()
     await expect(page.getByText(/Easy 7-day returns/i)).toBeVisible()
     await expect(page.getByText(/Secure payments/i)).toBeVisible()
     await expect(page.getByText(/100% authentic/i)).toBeVisible()
@@ -55,7 +55,8 @@ test.describe('Home page', () => {
 
   test('footer renders brand name', async ({ page }) => {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight))
-    await expect(page.getByRole('contentinfo')).toContainText('ZADIIS')
+    // Brand renders with an apostrophe in the UI: ZADII'S (Footer.tsx)
+    await expect(page.getByRole('contentinfo')).toContainText(/ZADII.?S/)
   })
 
 })

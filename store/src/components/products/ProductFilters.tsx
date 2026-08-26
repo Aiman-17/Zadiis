@@ -3,7 +3,7 @@ import { useState } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { SlidersHorizontal, X } from 'lucide-react'
 
-const CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid', 'Sale']
+const BASE_CATEGORIES = ['Summer', 'Winter', 'Formal', 'Casual', 'Eid']
 const SIZES = ['XS', 'S', 'M', 'L', 'XL', 'XXL']
 const TYPES = [
   { label: 'Stitched', value: 'stitched' },
@@ -23,6 +23,7 @@ export default function ProductFilters() {
   const [drawerOpen, setDrawerOpen] = useState(false)
   const router = useRouter()
   const params = useSearchParams()
+  const CATEGORIES = BASE_CATEGORIES
 
   const updateParam = (key: string, value: string) => {
     const p = new URLSearchParams(params.toString())

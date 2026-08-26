@@ -1,6 +1,6 @@
 import ReturnRequestForm from '@/components/store/ReturnRequestForm'
 
-export const metadata = { title: 'Returns & Exchanges | ZADIIS' }
+export const metadata = { title: "Returns & Exchanges | ZADII'S" }
 
 export default function ReturnsPage() {
   return (
@@ -8,8 +8,8 @@ export default function ReturnsPage() {
       <h1 className="text-3xl mb-8" style={{ fontFamily: 'Playfair Display, serif' }}>Returns & Exchanges</h1>
       <div className="prose prose-sm max-w-none space-y-6 text-gray-700">
         <section>
-          <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>7-Day Return Policy</h2>
-          <p>We accept returns within 7 days of your order date. Items must be unworn, unwashed, and in original packaging with all tags attached.</p>
+          <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>3-Day Return Policy</h2>
+          <p>We accept returns and exchanges within 3 days of your order being delivered. The name and email you submit must match your order. Items must be unworn, unwashed, and in original packaging with all tags attached.</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>How to Return</h2>

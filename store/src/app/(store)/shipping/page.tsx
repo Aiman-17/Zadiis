@@ -1,4 +1,4 @@
-export const metadata = { title: 'Shipping Information | ZADIIS' }
+export const metadata = { title: "Shipping Information | ZADII'S" }
 
 export default function ShippingPage() {
   return (
@@ -15,7 +15,7 @@ export default function ShippingPage() {
         </section>
         <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>Delivery Charges</h2>
-          <p>Delivery charges vary by city and are shown at checkout. Free delivery is available on orders over PKR 10,000.</p>
+          <p>Delivery charges vary by city and are shown at checkout. Free delivery is available on orders of 5 or more items.</p>
         </section>
         <section>
           <h2 className="text-lg font-semibold mb-2" style={{ color: '#1C1C1C' }}>Tracking Your Order</h2>

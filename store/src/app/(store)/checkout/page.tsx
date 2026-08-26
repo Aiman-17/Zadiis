@@ -37,7 +37,10 @@ export default function CheckoutPage() {
   const [otpCode, setOtpCode] = useState('')
   const [otpError, setOtpError] = useState<string | null>(null)
   const [verifiedEmail, setVerifiedEmail] = useState('')
+  const [sentToEmail, setSentToEmail] = useState('')
   const [resendCooldown, setResendCooldown] = useState(0)
+
+  const RESEND_COOLDOWN_SECONDS = 80
 
   useEffect(() => {
     if (resendCooldown <= 0) return
@@ -59,6 +62,7 @@ export default function CheckoutPage() {
   }
 
   const sendOtp = async (email: string) => {
+    if (otpState === 'sending') return // guard against duplicate near-simultaneous sends
     setOtpState('sending')
     setOtpError(null)
     setOtpCode('')
@@ -74,15 +78,23 @@ export default function CheckoutPage() {
       return
     }
     setOtpState('sent')
-    setResendCooldown(60)
+    setSentToEmail(email)
+    setResendCooldown(RESEND_COOLDOWN_SECONDS)
   }
 
-  const handleEmailBlur = async (email: string) => {
+  // Validation-only on blur — sending is now a deliberate customer action
+  // (the send button), not an automatic side effect of leaving the field.
+  const handleEmailBlur = (email: string) => {
     const err = validateEmail(email)
+    setFieldErrors(prev => ({ ...prev, email: err || undefined }))
+  }
+
+  const handleSendClick = async () => {
+    if (otpState === 'sending') return
+    const err = validateEmail(form.email)
     if (err) { setFieldErrors(prev => ({ ...prev, email: err })); return }
     setFieldErrors(prev => ({ ...prev, email: undefined }))
-    if (email === verifiedEmail) return
-    await sendOtp(email)
+    await sendOtp(form.email)
   }
 
   const handleOtpChange = async (value: string) => {
@@ -168,11 +180,16 @@ export default function CheckoutPage() {
 
   const set = (k: string, v: string) => setForm(f => ({ ...f, [k]: v }))
 
+  const FREE_DELIVERY_MIN_QUANTITY = 5
+  const totalQuantity = items.reduce((sum, i) => sum + i.quantity, 0)
+  const qualifiesForFreeDelivery = totalQuantity >= FREE_DELIVERY_MIN_QUANTITY
+
   const handleCityChange = (city: string) => {
     set('city', city)
     const zone = zones.find(z => z.city === city)
     const baseCharge = zone?.delivery_charge ?? 0
-    setDeliveryCharge(saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge)
+    const charge = saleDeliveryOverride !== null ? saleDeliveryOverride : baseCharge
+    setDeliveryCharge(qualifiesForFreeDelivery ? 0 : charge)
   }
 
   const subtotal = items.reduce((sum, i) => sum + i.price * i.quantity, 0)
@@ -390,12 +407,16 @@ export default function CheckoutPage() {
               onChange={e => {
                 set('email', e.target.value)
                 setFieldErrors(prev => ({ ...prev, email: undefined }))
-                // Reset OTP if email changed after verifying
-                if (otpState === 'verified' && e.target.value !== verifiedEmail) {
+                // Reset OTP if the email changes after a code was sent for a
+                // different address — that code is no longer valid here.
+                const otpInFlightOrDone = otpState === 'verified' || otpState === 'sent' || otpState === 'verifying'
+                if (otpInFlightOrDone && e.target.value !== (otpState === 'verified' ? verifiedEmail : sentToEmail)) {
                   setOtpState('idle')
                   setVerifiedEmail('')
+                  setSentToEmail('')
                   setOtpCode('')
                   setOtpError(null)
+                  setResendCooldown(0)
                 }
               }}
               onBlur={e => handleEmailBlur(e.target.value)}
@@ -406,18 +427,46 @@ export default function CheckoutPage() {
                 : {}
               }
             />
-            <span className="absolute right-3 top-1/2 -translate-y-1/2 text-xs pointer-events-none">
-              {otpState === 'sending' && <span style={{ color: '#9CA3AF' }}>Sending…</span>}
-              {otpState === 'verified' && <span style={{ color: '#10B981', fontWeight: 600 }}>✓ Verified</span>}
+            <span className="absolute right-2 top-1/2 -translate-y-1/2 flex items-center">
+              {otpState === 'sending' && <span className="text-xs pr-1" style={{ color: '#9CA3AF' }}>Sending…</span>}
+              {otpState === 'verified' && <span className="text-xs pr-1 pointer-events-none" style={{ color: '#10B981', fontWeight: 600 }}>✓ Verified</span>}
+              {otpState !== 'verified' && (
+                <button
+                  type="button"
+                  aria-label="Send verification code"
+                  onClick={handleSendClick}
+                  disabled={otpState === 'sending'}
+                  className="p-1.5 rounded-full transition-colors"
+                  style={{
+                    color: otpState === 'sending' ? '#D1D5DB' : '#A68B6E',
+                    cursor: otpState === 'sending' ? 'not-allowed' : 'pointer',
+                  }}
+                >
+                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+                    <line x1="22" y1="2" x2="11" y2="13" />
+                    <polygon points="22 2 15 22 11 13 2 9 22 2" />
+                  </svg>
+                </button>
+              )}
             </span>
           </div>
           {fieldErrors.email && <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{fieldErrors.email}</p>}
+
+          {/* BUG-001: send failures (rate limit, mail service down) reset otpState
+              to 'idle', unmounting the OTP box below — render the error here so
+              the customer is never left without feedback */}
+          {otpError && otpState !== 'sent' && otpState !== 'verifying' && (
+            <p className="text-xs mt-1" style={{ color: '#EF4444' }}>{otpError}</p>
+          )}
 
           {/* OTP input — shown once code is sent */}
           {(otpState === 'sent' || otpState === 'verifying') && (
             <div className="mt-3 p-4 rounded-lg border" style={{ borderColor: '#E8DDD4', backgroundColor: '#FAF8F5' }}>
               <p className="text-xs mb-2" style={{ color: '#6B7280' }}>
                 Enter the 6-digit code sent to <strong>{form.email}</strong>
+              </p>
+              <p className="text-xs mb-2" style={{ color: '#9CA3AF' }}>
+                Don&apos;t see it? Check your spam or junk folder.
               </p>
               <input
                 type="text"
@@ -460,7 +509,16 @@ export default function CheckoutPage() {
             <option value="">Select city</option>
             {zones.map(z => <option key={z.id} value={z.city}>{z.city}</option>)}
           </select>
-          {form.city && <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>Delivery charge: PKR {deliveryCharge.toLocaleString()}</p>}
+          {form.city && (
+            <p className="text-sm mt-1" style={{ color: '#A68B6E' }}>
+              {qualifiesForFreeDelivery ? 'Free delivery — your order qualifies!' : `Delivery charge: PKR ${deliveryCharge.toLocaleString()}`}
+            </p>
+          )}
+          {!qualifiesForFreeDelivery && (
+            <p className="text-xs mt-1" style={{ color: '#9CA3AF' }}>
+              Add {FREE_DELIVERY_MIN_QUANTITY - totalQuantity} more item{FREE_DELIVERY_MIN_QUANTITY - totalQuantity === 1 ? '' : 's'} to your cart for free delivery
+            </p>
+          )}
         </div>
         <div>
           <Label className="block mb-2">Payment Method *</Label>
@@ -488,7 +546,7 @@ export default function CheckoutPage() {
           </div>
           <div className="border-t pt-3 space-y-1" style={{ borderColor: '#E8DDD4' }}>
             <div className="flex justify-between text-sm"><span>Subtotal</span><span>PKR {subtotal.toLocaleString()}</span></div>
-            <div className="flex justify-between text-sm"><span>Delivery</span><span>{form.city ? `PKR ${deliveryCharge.toLocaleString()}` : '—'}</span></div>
+            <div className="flex justify-between text-sm"><span>Delivery</span><span>{form.city ? (qualifiesForFreeDelivery ? 'Free' : `PKR ${deliveryCharge.toLocaleString()}`) : '—'}</span></div>
             <div className="flex justify-between font-semibold pt-1 border-t" style={{ borderColor: '#E8DDD4' }}>
               <span>Total</span><span>PKR {total.toLocaleString()}</span>
             </div>

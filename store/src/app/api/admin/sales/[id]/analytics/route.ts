@@ -35,8 +35,15 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     .not('order_status', 'in', '("cancelled","returned")')
     .order('created_at', { ascending: true })
 
-  // Match orders that contain at least one product from this sale
+  // Match orders that contain at least one product from this sale AND were
+  // placed while this specific sale was live — product-id membership alone
+  // isn't enough, since a product can be reused across sales and its old
+  // orders from a previous sale would otherwise get misattributed here.
+  const windowStart = new Date(sale.starts_at || sale.created_at)
+  const windowEnd = sale.ends_at ? new Date(sale.ends_at) : null
   const relevantOrders = (orders || []).filter(o => {
+    const orderDate = new Date(o.created_at)
+    if (orderDate < windowStart || (windowEnd && orderDate > windowEnd)) return false
     const items = (o.items || []) as OrderItem[]
     return items.some(item => saleProductIds.includes(item.product_id))
   })
@@ -109,9 +116,13 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
     { total_orders: relevantOrders.length, sale_revenue: 0, full_price_revenue: 0, cost_total: 0, profit_at_sale: 0, profit_at_full: 0, sacrifice: 0 }
   )
 
+  // Don't trust the raw is_active column alone — the lazy-deactivation write
+  // elsewhere can lag, so re-derive from ends_at here too.
+  const isActuallyActive = sale.is_active && (!sale.ends_at || new Date(sale.ends_at) > new Date())
+
   return NextResponse.json({
     sale_id: id,
-    is_active: sale.is_active,
+    is_active: isActuallyActive,
     has_orders: relevantOrders.length > 0,
     saleProductData,
     revenueTrend,

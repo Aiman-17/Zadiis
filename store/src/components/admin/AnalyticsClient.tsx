@@ -6,6 +6,8 @@ import {
   XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid,
 } from 'recharts'
 import type { Order, OrderItem, Product } from '@/types'
+import { rankBestSellers, rankTrending, merchandisingIdSets } from '@/lib/merchandising'
+import { getEffectiveStock } from '@/lib/stock'
 
 const RANGE_OPTIONS = [
   { key: '7d',  label: '7 Days' },
@@ -53,13 +55,7 @@ function toWeeklySundayKey(d: Date): string {
 }
 
 function getMerchStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return p.stock_quantity
+  return getEffectiveStock(p)
 }
 
 function buildAllBuckets(range: string, longMonthLabel = false) {
@@ -330,15 +326,17 @@ export default function AnalyticsClient({
   const thirtyDaysAgo = new Date(Date.now() - 30 * 86400000)
   const sevenDaysAgo  = new Date(Date.now() -  7 * 86400000)
 
-  // Auto flags per top product
+  // Auto flags per top product — same qualifying sets as every other page
+  // (single source of truth — specs/003-merchandising-badges-v2)
+  const { bestSellerIds: flagBestSellerIds, trendingIds: flagTrendingIds } = merchandisingIdSets(products)
   const productFlagMap: Record<string, { label: string; color: string; bg: string }[]> = {}
   allProductsInRange.forEach(tp => {
     const p = productByName[tp.name]
     if (!p) return
     const flags: { label: string; color: string; bg: string }[] = []
     const stock = getMerchStock(p)
-    if (p.is_bestseller || p.best_seller_score > 0) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
-    if (p.is_trending || p.trending_score > 0)       flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
+    if (flagBestSellerIds.has(p.id)) flags.push({ label: '★ Best Seller', color: '#92400E', bg: '#FEF9C3' })
+    if (flagTrendingIds.has(p.id))   flags.push({ label: '↑ Trending',    color: '#9D174D', bg: '#FDF2F8' })
     if (new Date(p.created_at) >= thirtyDaysAgo)     flags.push({ label: '✦ New',         color: '#5B21B6', bg: '#F5F3FF' })
     if (stock === 0)       flags.push({ label: 'OUT OF STOCK',     color: '#991B1B', bg: '#FEE2E2' })
     else if (stock <= 2)   flags.push({ label: '🔥 Almost Gone',   color: '#DC2626', bg: '#FEE2E2' })
@@ -511,8 +509,26 @@ export default function AnalyticsClient({
     })
     .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
 
-  const newArrivals = products
+  // Age-based — every product added to the catalog in the last 30 days,
+  // regardless of the curated "New Arrival" flag below. Used to track the
+  // whole recent inventory, not just what's curated for the storefront.
+  const recentlyAdded = products
     .filter(p => new Date(p.created_at) >= thirtyDaysAgo)
+    .map(p => {
+      const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
+      return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
+    })
+    .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+
+  // Curated — the manual is_new_arrival flag + optional start/end window
+  // (same lifecycle the storefront's /new-arrivals page and homepage section
+  // use, see lib/products.ts 'new-arrivals' tab query). Independent of
+  // product age — an admin decides what counts as "new," not created_at.
+  const todayStr = new Date(Date.now() + 5 * 60 * 60 * 1000).toISOString().split('T')[0]
+  const curatedNewArrivals = products
+    .filter(p => p.is_new_arrival)
+    .filter(p => !p.new_arrival_start || p.new_arrival_start <= todayStr)
+    .filter(p => !p.new_arrival_end || p.new_arrival_end >= todayStr)
     .map(p => {
       const ageDays = Math.max(1, (Date.now() - new Date(p.created_at).getTime()) / 86400000)
       return { ...p, ageDays: Math.floor(ageDays), velocity: p.total_sold / ageDays, stock: getMerchStock(p) }
@@ -529,10 +545,10 @@ export default function AnalyticsClient({
   })
   const categoryStockData = Object.entries(categoryStockMap).map(([cat, d]) => ({ cat, ...d })).sort((a, b) => b.stock - a.stock)
 
-  const bestSellerChartData = products
-    .filter(p => p.is_bestseller || p.best_seller_score > 0)
-    .sort((a, b) => b.best_seller_score - a.best_seller_score)
-    .slice(0, 10)
+  // Same qualification + ranking as every other page (single source of
+  // truth — specs/003-merchandising-badges-v2): category-relative,
+  // minimum-sales-gated, capped identically to Shop/Homepage (SC-001).
+  const bestSellerChartData = rankBestSellers(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
@@ -544,10 +560,7 @@ export default function AnalyticsClient({
       units: productMap[p.name]?.units || 0,
     }))
 
-  const trendingChartData = products
-    .filter(p => p.trending_score > 0)
-    .sort((a, b) => b.trending_score - a.trending_score)
-    .slice(0, 10)
+  const trendingChartData = rankTrending(products)
     .map(p => ({
       name: p.name,
       shortName: p.name.length > 16 ? p.name.slice(0, 15) + '…' : p.name,
@@ -1141,21 +1154,6 @@ export default function AnalyticsClient({
             )}
           </div>
 
-          {/* 6 · Price Range Performance */}
-          <div className="bg-white rounded-lg p-5 border" style={{ borderColor: '#E8DDD4' }}>
-            <h3 className="font-semibold mb-4">Price Range Performance</h3>
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-              {priceRangeStats.map(r => (
-                <div key={r.label} className="rounded-lg p-3 border text-center" style={{ borderColor: '#E8DDD4' }}>
-                  <p className="text-sm font-semibold" style={{ color: '#A68B6E' }}>{r.label}</p>
-                  <p className="text-lg font-bold mt-1">{r.units}</p>
-                  <p className="text-xs" style={{ color: '#9CA3AF' }}>units sold</p>
-                  <p className="text-xs mt-0.5 font-medium" style={{ color: '#374151' }}>PKR {Math.round(r.revenue / 1000)}k</p>
-                </div>
-              ))}
-            </div>
-          </div>
-
         </div>
       )}
 
@@ -1309,11 +1307,12 @@ export default function AnalyticsClient({
             </div>
           )}
 
-          {/* New Arrivals */}
-          {newArrivals.length > 0 && (
+          {/* New Arrivals — curated (is_new_arrival flag + window) */}
+          {curatedNewArrivals.length > 0 && (
             <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
-              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
-                <h3 className="font-semibold text-sm">New Arrivals — last 30 days</h3>
+              <div className="px-5 py-3 border-b flex items-center gap-2" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">New Arrivals</h3>
+                <span className="text-xs px-1.5 py-0.5 rounded font-medium" style={{ backgroundColor: '#F5F3FF', color: '#5B21B6' }}>flagged · live on storefront</span>
               </div>
               <div className="overflow-x-auto">
               <table className="w-full text-sm">
@@ -1327,7 +1326,50 @@ export default function AnalyticsClient({
                   </tr>
                 </thead>
                 <tbody>
-                  {newArrivals.map(p => (
+                  {curatedNewArrivals.map(p => (
+                    <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
+                      <td className="px-5 py-3">
+                        <p className="font-medium">{p.name}</p>
+                        {p.product_category && <p className="text-xs" style={{ color: '#9CA3AF' }}>{p.product_category}</p>}
+                      </td>
+                      <td className="px-4 py-3 text-right text-xs" style={{ color: '#9CA3AF' }}>{p.ageDays}d</td>
+                      <td className="px-4 py-3 text-right">{p.total_sold}</td>
+                      <td className="px-4 py-3 text-right font-medium"
+                        style={{ color: p.stock === 0 ? '#DC2626' : p.stock <= 5 ? '#B45309' : '#374151' }}>
+                        {p.stock === 0 ? 'OUT' : p.stock}
+                      </td>
+                      <td className="px-5 py-3 text-right text-xs">
+                        {p.velocity >= 1 ? <span style={{ color: '#10B981' }}>{p.velocity.toFixed(1)}/d</span>
+                          : p.velocity > 0 ? <span style={{ color: '#F59E0B' }}>{p.velocity.toFixed(2)}/d</span>
+                          : <span style={{ color: '#D1D5DB' }}>no sales</span>}
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+              </div>
+            </div>
+          )}
+
+          {/* Recently Added to Inventory — age-based, all products (not just curated new arrivals) */}
+          {recentlyAdded.length > 0 && (
+            <div className="bg-white rounded-lg border overflow-hidden" style={{ borderColor: '#E8DDD4' }}>
+              <div className="px-5 py-3 border-b" style={{ borderColor: '#E8DDD4' }}>
+                <h3 className="font-semibold text-sm">Recently Added to Inventory — last 30 days</h3>
+              </div>
+              <div className="overflow-x-auto">
+              <table className="w-full text-sm">
+                <thead className="bg-gray-50 border-b" style={{ borderColor: '#E8DDD4' }}>
+                  <tr>
+                    <th className="text-left px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Product</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Days Live</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Sold</th>
+                    <th className="text-right px-4 py-2.5 font-medium" style={{ color: '#6B7280' }}>Stock Left</th>
+                    <th className="text-right px-5 py-2.5 font-medium" style={{ color: '#6B7280' }}>Velocity</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {recentlyAdded.map(p => (
                     <tr key={p.id} className="border-b last:border-0" style={{ borderColor: '#F3F4F6' }}>
                       <td className="px-5 py-3">
                         <p className="font-medium">{p.name}</p>

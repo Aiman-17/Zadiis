@@ -3,7 +3,7 @@ import { supabaseAdmin } from '@/lib/supabase/server'
 import { Resend } from 'resend'
 
 const resend = new Resend(process.env.RESEND_API_KEY)
-const FROM = process.env.RESEND_FROM || 'ZADIIS <orders@zadiis.com.pk>'
+const FROM = process.env.RESEND_FROM || "ZADII'S <orders@zadiis.com.pk>"
 
 export async function POST(req: NextRequest) {
   const secret = req.nextUrl.searchParams.get('secret')

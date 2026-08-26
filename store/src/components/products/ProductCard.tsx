@@ -3,16 +3,7 @@ import Link from 'next/link'
 import Image from 'next/image'
 import { Flame, Hourglass } from 'lucide-react'
 import type { Product } from '@/types'
-
-function getEffectiveStock(product: Product): number {
-  const vs = product.variant_stock
-  if (vs && Object.keys(vs).length > 0) {
-    return Object.values(vs).reduce(
-      (sum, sizes) => sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0
-    )
-  }
-  return product.stock_quantity
-}
+import { getEffectiveStock } from '@/lib/stock'
 
 interface ProductCardProps {
   product: Product
@@ -29,11 +20,15 @@ export default function ProductCard({ product, salePrice, badge }: ProductCardPr
     ? Math.round((1 - salePrice / product.price) * 100)
     : 0
 
-  // Independent signal checks — all can show simultaneously
-  const showFire       = !!(product.is_trending || badge === 'TRENDING')
+  // Independent signal checks — all can show simultaneously.
+  // Best Seller / Trending qualification is decided once per page by the
+  // shared merchandising computation (specs/003-merchandising-badges-v2) —
+  // this component never re-derives its own threshold; it only reflects
+  // whatever the parent tells it via `badge`.
+  const showFire       = badge === 'TRENDING'
   const showHourglass  = stock > 0 && stock <= 3
   const showNewArrival = !!product.is_new_arrival
-  const showBestseller = !!((product.best_seller_score && product.best_seller_score >= 5) || badge === 'BESTSELLER')
+  const showBestseller = badge === 'BESTSELLER'
   const hasBadgeRow    = showFire || showHourglass || showBestseller
 
   return (

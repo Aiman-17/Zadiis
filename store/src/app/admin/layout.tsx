@@ -111,7 +111,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
     <div className="flex min-h-screen bg-gray-50">
       {/* Desktop sidebar */}
       <aside className="hidden md:flex w-56 shrink-0 flex-col py-6 px-4 gap-1" style={{ backgroundColor: '#1C1C1C' }}>
-        <h2 className="text-lg px-2 mb-6 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS Admin</h2>
+        <h2 className="text-lg px-2 mb-6 text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S Admin</h2>
         <NavContent />
       </aside>
 
@@ -125,7 +125,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
             onClick={e => e.stopPropagation()}
           >
             <div className="flex items-center justify-between mb-6 px-2">
-              <h2 className="text-lg text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS Admin</h2>
+              <h2 className="text-lg text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S Admin</h2>
               <button onClick={() => setOpen(false)} className="text-white/50 hover:text-white">
                 <X size={20} />
               </button>
@@ -141,7 +141,7 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           className="md:hidden flex items-center justify-between px-4 py-3 sticky top-0 z-30"
           style={{ backgroundColor: '#1C1C1C' }}
         >
-          <h2 className="text-base text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADIIS Admin</h2>
+          <h2 className="text-base text-white" style={{ fontFamily: 'Playfair Display, serif' }}>ZADII&apos;S Admin</h2>
           <div className="flex items-center gap-3">
             {newOrders > 0 && (
               <span className="text-xs rounded-full px-2 py-0.5 font-bold" style={{ backgroundColor: '#EF4444', color: 'white' }}>

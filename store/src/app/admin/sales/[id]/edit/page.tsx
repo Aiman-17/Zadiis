@@ -6,14 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import { Label } from '@/components/ui/label'
 import type { Sale, SaleProduct, Product } from '@/types'
-
-function getStock(p: Product): number {
-  const vs = p.variant_stock
-  if (vs && Object.keys(vs).length > 0)
-    return Object.values(vs).reduce((sum, sizes) =>
-      sum + Object.values(sizes as Record<string, number>).reduce((s, q) => s + q, 0), 0)
-  return p.stock_quantity
-}
+import { getEffectiveStock as getStock } from '@/lib/stock'
 
 function isSlowMover(p: Product, avgST: number): boolean {
   const age = (Date.now() - new Date(p.created_at).getTime()) / 86400000

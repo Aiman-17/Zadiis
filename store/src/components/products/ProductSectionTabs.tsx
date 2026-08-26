@@ -8,12 +8,14 @@ const TABS = [
   { key: 'just-dropped', label: 'Just Dropped', sub: 'New In',        accent: '#1C1C1C' },
   { key: 'best-sellers', label: 'Best Sellers', sub: undefined,       accent: '#A68B6E' },
   { key: 'last-chance',  label: 'Last Chance',  sub: 'Almost Gone',   accent: '#C62828' },
+  { key: 'sale',         label: 'Sale',         sub: undefined,       accent: '#C62828' },
 ] as const
 
-export default function ProductSectionTabs() {
+export default function ProductSectionTabs({ hasSale = false }: { hasSale?: boolean }) {
   const router = useRouter()
   const searchParams = useSearchParams()
   const activeTab = searchParams.get('tab')
+  const tabs = hasSale ? TABS : TABS.filter(t => t.key !== 'sale')
 
   const handleTab = useCallback((key: string) => {
     const params = new URLSearchParams(searchParams.toString())
@@ -29,7 +31,7 @@ export default function ProductSectionTabs() {
   return (
     <div className="relative">
       <div className="flex gap-0 border-b overflow-x-auto scrollbar-none" style={{ borderColor: '#E8DDD4' }}>
-        {TABS.map(tab => {
+        {tabs.map(tab => {
           const isActive = activeTab === tab.key
           return (
             <button
